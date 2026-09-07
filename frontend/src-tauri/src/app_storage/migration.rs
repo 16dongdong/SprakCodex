@@ -463,7 +463,9 @@ mod tests {
         let _ = std::fs::remove_dir_all(&root);
     }
 
+    // 用备份字节及可读账户记录验证不覆盖；文件修改时间的变化本身不证明数据库内容被改写。
     #[test]
+    #[allow(non_snake_case)]
     fn pre_migration_backup_is_versioned_and_never_overwritten() {
         let root = unique_temp_dir();
         std::fs::create_dir_all(&root).expect("create test dir");
@@ -479,21 +481,15 @@ mod tests {
             Some("codexmanager.db.pre-0.5.1.bak")
         );
 
-        let backup_modified = std::fs::metadata(&backup_path)
-            .expect("backup metadata")
-            .modified()
-            .expect("backup modified time");
+        let backupContents = std::fs::read(&backup_path).expect("读取备份字节");
         std::fs::write(&db_path, b"replaced after backup").expect("replace source db");
         let second_path = create_pre_migration_backup(&db_path, "0.5.1")
             .expect("reuse backup")
             .expect("backup path");
         assert_eq!(second_path, backup_path);
         assert_eq!(
-            std::fs::metadata(&backup_path)
-                .expect("backup metadata")
-                .modified()
-                .expect("backup modified time"),
-            backup_modified
+            std::fs::read(&backup_path).expect("读取复用后的备份字节"),
+            backupContents
         );
 
         let backup_storage = Storage::open(&backup_path).expect("open backup");

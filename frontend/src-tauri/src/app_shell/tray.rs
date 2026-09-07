@@ -150,13 +150,14 @@ pub(crate) fn refresh_tray_menu_after_usage_update(app: &tauri::AppHandle) {
     }
 }
 
+// 沿用摘要与调用方的主/次窗口顺序；交叉读取会把 5 小时和 7 天的重置日期互换，缺失值仍各自显示暂无。
 fn tray_usage_reset_labels(
     primary_resets_at: Option<i64>,
     secondary_resets_at: Option<i64>,
 ) -> (String, String) {
     (
-        format!("5小时重置：{}", format_tray_reset_time(secondary_resets_at)),
-        format!("7天重置：{}", format_tray_reset_time(primary_resets_at)),
+        format!("5小时重置：{}", format_tray_reset_time(primary_resets_at)),
+        format!("7天重置：{}", format_tray_reset_time(secondary_resets_at)),
     )
 }
 

@@ -508,3 +508,50 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 
 本节验证续签机制、TLS 有效期边界、连接连续性及官方真实请求，并非声称已经实际等待运行 7 天。
 无持久化事件的生产接入、完整宿主重启恢复和实际安装更新仍待完成。
+
+## Windows 启动环境与完整宿主进程重启（2026-09-08）
+
+`codex_projects.rs::launch_codex_terminal` 的 Windows 分支仍调用旧 `configureChild`，
+将临时观测监听地址写入终端的代理环境，导致宿主退出后终端可能持续连接旧端口。
+删除此调用；Windows 由常驻扫描器接入，保留其原代理、CA、provider 和登录环境。
+非 Windows 的显式代理入口保留在平台条件编译下，不将本机原生功能推广到未实现的平台。
+
+`directObservation/mod.rs` 提取内部 `RuntimeScope`，只替换进程候选与事件文件范围；
+首次启用、DPAPI 身份加载、数据库初始化、监听发布、启用持久化、退出回收仍使用生产实现。
+正式入口使用完整范围，不读取测试过滤环境变量。恢复设置读取失败现在明确报错，不当作关闭。
+
+`hostRestartProbe.rs` 执行真实生命周期：
+
+1. 独立官方 app-server 创建 thread 并完成基线生成，随后保持该 PID、创建时间与 thread。
+2. 宿主 A 调用生产启动事务；原会话继续生成，逐响应核对用量和费用快照。
+3. A 调用 `shutdownRuntime` 正常退出操作系统进程，检查两个地址族的旧监听端口已释放。
+4. 全新宿主 B 读取同一测试数据库中的启用设置自动恢复，不重新启用、不复制登录材料。
+   其公开 SPKI 指纹与 A 一致，原会话再次生成并通过用量与费用核对。
+5. B 主动停用并退出；宿主 C 读取同一设置后保持关闭。原 CLI 仍能生成，记录数不增加。
+
+结果证据：`backend/target/observationHostRestartFinala8f70f5f67914f89ad7f40b277226d79/restartEvidence.json`。
+三个宿主分别记录真实 PID 和创建时间，两个被观察到的响应输入为 31667、31695，缓存输入均为 31488，
+输出均为 8，费用快照共 2 条、钱包扣费 0。来源为客户端完成事件，HTTP 状态、URL、时长保持未知，
+不把客户端事件冒充重启后网络解密结果。测试结束已回收客户端与宿主，删除独占 DLL、DPAPI 密文和空观察目录。
+
+```powershell
+# 指定官方 CLI、生产 DLL、原 CODEX_HOME、模型和全新独占目录；不改 auth.json。
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::hostRestartProbe::existingSessionSurvivesHostRestart -- --exact --ignored --nocapture --test-threads=1
+```
+
+前端 225 项运行期回归、静态桌面构建通过；Tauri 76 项测试通过。
+全量 Tauri 测试发现旧托盘将主/次窗口重置时间交叉显示，已修正参数对应关系；
+备份不覆盖测试改用实际文件字节与账户可读性验证，保留源文件被替换后的不覆盖断言，不再以文件时间戳代替内容证据。
+
+本节证明正常退出、完整新宿主恢复与后续轮次；宿主异常终止时的在途请求、离线事件补采、
+无持久化事件生产接入和实际安装更新仍需继续验收。
+
+### 工作区全测未通过项
+
+执行 `cargo test --manifest-path backend/Cargo.toml --workspace -- --test-threads=1`，
+服务库结果为 1574 项通过、11 项失败、16 项跳过；工作区命令因此退出 101，不能报告全工作区通过。
+完整输出保存在 `backend/target/observationWorkspaceTests.log`。
+失败集中于 `http::proxy_runtime::tests` 的 WebSocket 重连、连接限制、发送失败、重放边界、心跳和压缩协商。
+单独复跑 `official_responses_websocket_reconnects_upstream_without_closing_client` 仍在
+`proxy_runtime_tests.rs:4302` 报 `upstream reconnect frame timeout: Elapsed(())`，不是仅在全套运行时出现。
+压缩用例另报告 `Handshake not finished`。这些失败尚未定因或修复，列入后续回归处理，不归因于本次修改或环境猜测。

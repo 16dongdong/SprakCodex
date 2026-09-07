@@ -5,6 +5,17 @@ import test from "node:test";
 
 const appsRoot = path.resolve(import.meta.dirname, "..");
 
+// Windows 子进程由原生扫描器接入；禁止重新把宿主临时端口固化进终端代理环境。
+test("Windows 项目启动不再覆盖原代理或 CA 环境", async () => {
+  const source = await fs.readFile(path.join(appsRoot, "src-tauri/src/commands/codex_projects.rs"), "utf8");
+  const start = source.indexOf("fn launch_codex_terminal(");
+  const end = source.indexOf("fn macos_terminal_script(", start);
+  assert.ok(start >= 0 && end > start);
+  const launcher = source.slice(start, end);
+  assert.doesNotMatch(launcher, /configureChild|HTTP_PROXY|HTTPS_PROXY|ALL_PROXY|CODEX_CA_CERTIFICATE|SSL_CERT_FILE/);
+  assert.match(launcher, /spawn_and_reap/);
+});
+
 async function readDashboardSource() {
   return fs.readFile(path.join(appsRoot, "src/app/page.tsx"), "utf8");
 }

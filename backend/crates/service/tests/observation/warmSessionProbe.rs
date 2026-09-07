@@ -142,7 +142,7 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
 }
 
 // 只等待已加载模块的事件，不调用注入；原生加载动作必须来自正在运行的生产扫描器。
-fn waitReady(pid: u32, module: &Path) {
+pub(super) fn waitReady(pid: u32, module: &Path) {
     let name = HSTRING::from(cpcommon::hook_ready::event_name(pid, module));
     let started = Instant::now();
     loop {

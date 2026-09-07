@@ -937,6 +937,7 @@ fn resolve_codex_executable(
     Ok(resolved)
 }
 
+// 为已验证的项目目录启动 Windows 终端；action 选择启动方式，可选 home 只限定配置目录，解析或启动失败返回错误。
 #[cfg(target_os = "windows")]
 fn launch_codex_terminal(
     project_dir: &Path,
@@ -959,7 +960,7 @@ fn launch_codex_terminal(
     if let Some(codex_home) = codex_home {
         command.env("CODEX_HOME", codex_home);
     }
-    codexmanager_service::directObservation::configureChild(&mut command)?;
+    // Windows 由常驻扫描器接入，保持原代理/CA 环境；把临时监听端口写进终端会导致宿主重启后持续连接旧端口。
     spawn_and_reap(command, "打开 Codex 终端失败")
 }
 

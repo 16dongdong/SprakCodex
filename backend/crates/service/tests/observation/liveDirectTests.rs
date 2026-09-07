@@ -12,6 +12,9 @@ mod sessionRpcPeer;
 #[cfg(windows)]
 #[path = "warmSessionProbe.rs"]
 mod warmSessionProbe;
+#[cfg(windows)]
+#[path = "hostRestartProbe.rs"]
+mod hostRestartProbe;
 use std::{
     fs::File,
     process::{Command, Stdio},

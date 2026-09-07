@@ -3,19 +3,19 @@
 #[cfg(windows)]
 mod authorityStore;
 mod certificateAuthority;
-mod clientEvents;
 mod clientEventMonitor;
+mod clientEvents;
 mod loopbackListeners;
 #[cfg(windows)]
-mod processCatalog;
-#[cfg(windows)]
 mod nativeInjection;
+#[cfg(windows)]
+mod processCatalog;
 #[allow(non_snake_case)]
 mod processInjector;
 mod processMonitor;
 mod recordSink;
-mod responseIdentity;
 mod relayIngress;
+mod responseIdentity;
 mod runtimePaths;
 mod streamObserver;
 mod transport;
@@ -34,6 +34,28 @@ use tokio_util::sync::CancellationToken;
 const observationHosts: &[&str] = &["chatgpt.com", "api.openai.com"];
 pub const enabledSettingKey: &str = "directObservation.enabled";
 static runningEngine: OnceLock<Mutex<Option<Running>>> = OnceLock::new();
+
+// 进程发现和文件读取范围统一注入运行期；正常启动使用完整范围，生命周期验收限定其自建实例。
+struct RuntimeScope {
+    select: Arc<dyn Fn() -> Result<Vec<processInjector::ProcessCandidate>, String> + Send + Sync>,
+    allowEvents: Arc<dyn Fn(&std::path::Path) -> bool + Send + Sync>,
+}
+impl Default for RuntimeScope {
+    // 不读取环境中的测试过滤条件，正式启动始终使用生产目录选择器。
+    fn default() -> Self {
+        Self {
+            select: Arc::new(processInjector::findCandidates),
+            allowEvents: Arc::new(|_| true),
+        }
+    }
+}
+
+// 初始化时固定文件边界，与观测范围分开传递，避免重启时混用旧模块或配置路径。
+struct RuntimeFiles {
+    certificate: PathBuf,
+    injectionDll: Option<PathBuf>,
+    relayConfig: Option<PathBuf>,
+}
 
 struct Running {
     address: String,
@@ -78,6 +100,11 @@ fn statusOf(current: Option<&Running>) -> ObservationStatus {
 // 管理员显式启动后才签发公开证书；先确认数据库、绑定端口，再发布可用状态。
 // 出口继承现有全局网络代理配置，但不访问账号池或改写任何认证请求。
 pub fn start() -> Result<ObservationStatus, String> {
+    startScoped(RuntimeScope::default())
+}
+
+// 启动流程共用持久化、身份恢复和监听发布，仅候选来源可替换，验收不会扫描或读取用户其他会话。
+fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
     let mut guard = runningEngine
         .get_or_init(|| Mutex::new(None))
         .lock()
@@ -99,7 +126,15 @@ pub fn start() -> Result<ObservationStatus, String> {
     let authority = certificateAuthority::Authority::forRuntime(observationHosts, &folder)?;
     let certificate = folder.join("observationAuthority.pem");
     runtimePaths::writeAtomically(&certificate, authority.pem.as_bytes())?;
-    let result = startRuntime(authority, certificate.clone(), injectionDll, relayConfig);
+    let result = startRuntime(
+        authority,
+        RuntimeFiles {
+            certificate: certificate.clone(),
+            injectionDll,
+            relayConfig,
+        },
+        scope,
+    );
     match result {
         Ok(current) => {
             // 运行时已绑定端口后才写入开关；持久化失败必须回收已启动线程和证书，避免出现“界面关闭但端口仍监听”。
@@ -138,10 +173,14 @@ pub fn start() -> Result<ObservationStatus, String> {
 // 专用 Tokio 线程避免嵌套运行时；ready 只在实际绑定成功后返回地址，线程退出释放所有网络资源。
 fn startRuntime(
     authority: certificateAuthority::Authority,
-    certificate: PathBuf,
-    injectionDll: Option<PathBuf>,
-    relayConfig: Option<PathBuf>,
+    files: RuntimeFiles,
+    scope: RuntimeScope,
 ) -> Result<Running, String> {
+    let RuntimeFiles {
+        certificate,
+        injectionDll,
+        relayConfig,
+    } = files;
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
         .enable_all()
@@ -152,9 +191,15 @@ fn startRuntime(
     let proxy = crate::gateway::current_upstream_proxy_url();
     let (sink, databaseThread) =
         recordSink::RecordSink::start(crate::process_env::ensure_default_db_path())?;
-    let clientEvents = clientEventMonitor::EventMonitor::start(clientEventMonitor::Settings {
-        home: clientEventMonitor::defaultHome()?, since: chrono::Utc::now().timestamp_millis(), allow: Arc::new(|_| true),
-    }, sink.clone(), cancel.clone())?;
+    let clientEvents = clientEventMonitor::EventMonitor::start(
+        clientEventMonitor::Settings {
+            home: clientEventMonitor::defaultHome()?,
+            since: chrono::Utc::now().timestamp_millis(),
+            allow: scope.allowEvents,
+        },
+        sink.clone(),
+        cancel.clone(),
+    )?;
     let homes = clientEvents.registration();
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
@@ -172,18 +217,19 @@ fn startRuntime(
                             return;
                         }
                     };
-                let listener =
-                    match loopbackListeners::LoopbackListeners::bind().await {
-                        Ok(listener) => listener,
-                        Err(_) => {
-                            let _ = ready.send(Err("绑定观测端口失败".into()));
-                            return;
-                        }
-                    };
+                let listener = match loopbackListeners::LoopbackListeners::bind().await {
+                    Ok(listener) => listener,
+                    Err(_) => {
+                        let _ = ready.send(Err("绑定观测端口失败".into()));
+                        return;
+                    }
+                };
                 let port = listener.port();
                 let address = format!("http://127.0.0.1:{port}");
                 if let Some(configPath) = workerConfig.as_deref() {
-                    if let Err(error) = runtimePaths::writeRelayConfig(configPath, port, Some(&workerCertificate)) {
+                    if let Err(error) =
+                        runtimePaths::writeRelayConfig(configPath, port, Some(&workerCertificate))
+                    {
                         let _ = ready.send(Err(error));
                         return;
                     }
@@ -197,9 +243,15 @@ fn startRuntime(
                         log::error!("无法确定观测注入 DLL 路径");
                         return;
                     };
-                    processMonitor::run(dll, monitorEngine, processInjector::findCandidates, move |candidate, module| {
-                        homes.register(processInjector::runtimeHome(candidate, module)?)
-                    }).await;
+                    processMonitor::run(
+                        dll,
+                        monitorEngine,
+                        move || (scope.select)(),
+                        move |candidate, module| {
+                            homes.register(processInjector::runtimeHome(candidate, module)?)
+                        },
+                    )
+                    .await;
                 });
                 transport::serve(listener, Arc::new(engine)).await;
                 // 扫描器可能仍有已派发的原生加载；先等待其交接/回收，再销毁目录消费者和运行时。
@@ -302,18 +354,27 @@ fn stopInternal(disable: bool) -> Result<ObservationStatus, String> {
 
 // 服务初始化读取持久化开关；默认关闭，旧版本不会意外改变网络路径。
 pub fn restoreIfEnabled() {
-    let enabled = crate::storage_helpers::open_storage()
-        .and_then(|storage| storage.get_app_setting(enabledSettingKey).ok().flatten())
+    if let Err(error) = restoreUsing(start) {
+        log::error!("恢复直连观测失败：{error}");
+    }
+}
+
+// 恢复与首次启用共用启动事务；读取设置错误显式返回，不把数据库失败解释为用户关闭。
+fn restoreUsing(start: impl FnOnce() -> Result<ObservationStatus, String>) -> Result<(), String> {
+    let storage = crate::storage_helpers::open_storage().ok_or("读取观测恢复设置失败")?;
+    let enabled = storage
+        .get_app_setting(enabledSettingKey)
+        .map_err(|_| "读取观测开关失败")?
         .is_some_and(|value| value.eq_ignore_ascii_case("true"));
     if enabled {
-        if let Err(error) = start() {
-            log::error!("恢复直连观测失败：{error}");
-        }
+        start()?;
     }
+    Ok(())
 }
 
 // 仅作用于用户新启动的终端子进程；保留登录与系统环境，停止后新子进程不再接入。
 // 显式清空 NO_PROXY 是为了防止既有通配绕过观测；其它主机由隧道原样转发，不解密。
+#[cfg(not(windows))]
 pub fn configureChild(command: &mut std::process::Command) -> Result<(), String> {
     let state = status()?;
     if !state.running {
