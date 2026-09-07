@@ -419,3 +419,47 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 
 后续生产接入还需有界元数据传输、报告错误与生命周期管理、来源标记、数据库合并和费用验证；
 本测试 DLL 的同步文件输出不是生产实现，也不随正式应用部署。
+
+## 慢加载隔离与并发官方流量（2026-09-08）
+
+原 `processMonitor.rs` 在候选循环内逐个等待 `spawn_blocking(inject)`，任一目标的加载或就绪等待
+会阻塞后续目录扫描。现将加载改为独立任务集合，最多同时执行 4 项；50 ms 目录扫描不再等待这些任务。
+完整进程身份对应 `Loading`、`Ready` 或失败后 1 秒冷却状态，重复目录项和重复扫描不重复派发。
+加载中的实例即使退出目录也保留状态直到事务完成；线程异常同样解除加载状态，不永久卡住该实例。
+
+停用后停止派发和目录注册，等待已经启动的本地工作完成或向原生延迟清理器交接。
+`mod.rs` 显式等待扫描器退出，再销毁目录消费者和 Tokio 运行时，避免遗漏后台加载的生命周期依赖。
+原生超时事务仍沿用原有远程分配所有权，不提前释放目标线程正在使用的参数。
+
+验证结果：
+
+- 调度单元覆盖：预先取消、首轮扫描、慢加载期间发现新实例、停止排空、4 项上限、重复目录去重、
+  后续实例最终接入、线程异常后限速重试、同 PID 不同创建时间独立处理。
+- 两个真实独立进程使用生产扫描器和原生加载器；第一个 DLL 延迟 3 秒，第二个先就绪。
+  测试确认完成顺序与预留释放，不使用替身加载器代替此项证据。
+- 新增 `OBSERVATION_TEST_CAPTURE_MODE=concurrent`：先启动生产目录扫描，再启动两个官方 CLI，
+  断言它们存在重叠存活窗口；提示词直接随命令提交，不等待 stdin 标记或模块就绪。
+  两份 stdout 独立写入、退出后合并，避免并发写造成 JSON 行交错；必须有两份完整终态。
+- 每个响应 ID、模型和实际 Token 对应独立客户端用量，官方 provider、原登录及账号池边界不变。
+
+| 协议 | 生成 / 预热 / 失败握手 | 输入 | 缓存 | 输出 | 费用快照 / 钱包扣费 |
+| --- | --- | ---: | ---: | ---: | --- |
+| WebSocket | 2 / 2 / 0 | 41272 | 22784 | 16 | 2 / 0 |
+| SSE | 2 / 0 / 14 | 40632 | 22784 | 16 | 2 / 0 |
+
+证据目录分别为 `backend/target/observationConcurrent552621c3c5434b0ebed81e707a7d47d6` 和
+`backend/target/observationConcurrentSsed82aad74aa094aa1a23c70351de9f1af`。
+SSE 的失败握手由探针主动触发协议回退，不作为生成或用量计算。
+40 项观测回归通过，11 项需显式环境的测试默认跳过；Tauri 独立工作区检查通过。
+另外显式执行并发加载、重复加载、缺少就绪、错误进程身份、超时后延迟回收五项原生测试，全部通过。
+两次真实流量结束后，独占 DLL 目录、公开证书和拆分 stdout 均已清理；进程目录中没有这些探针的子进程。
+
+```powershell
+$env:OBSERVATION_TEST_CAPTURE_MODE='concurrent'
+# 使用本次构建的生产 DLL、官方 CLI、模型、上游与全新独占目录。
+$env:OBSERVATION_TEST_PROTOCOL='websocket' # SSE 用另一个全新目录单独执行
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
+```
+
+并发加载和两路官方流量已取得上述证据；无持久化完成事件的生产接入、完整宿主重启恢复、
+证书续期及已安装应用更新仍需继续，不能由本节结果替代。

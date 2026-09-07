@@ -105,7 +105,7 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     let identity = nativeInjection::candidate(target.child.as_ref().unwrap().id()).unwrap();
     target.monitor = Some(injectedClientProbe::startMonitor(
         target.moduleDirectory.join("cphook.dll"),
-        Arc::new(Mutex::new(Some(identity.clone()))),
+        Arc::new(Mutex::new(vec![identity.clone()])),
         Some(eventMonitor.registration()),
     ));
     waitReady(identity.pid, &target.moduleDirectory.join("cphook.dll"));

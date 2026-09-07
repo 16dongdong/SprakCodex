@@ -93,6 +93,55 @@ fn readyModuleAndRepeatedLoad() {
     assert!(target.child.id() > 0);
 }
 
+// 两个独立真实进程共用生产调度器；第一个故意延迟 DLL 加载，第二个必须先就绪，停止后无加载预留遗留。
+#[test]
+#[ignore = "需要 OBSERVATION_TEST_READY_DLL，运行约三秒"]
+fn concurrentMonitorDoesNotSerializeNativeLoads() {
+    let slow = Target::start(true, 3000);
+    let fast = Target::start(true, 0);
+    let candidates = vec![slow.identity(), fast.identity()];
+    let selected = candidates.clone();
+    let completions = std::sync::Arc::new(Mutex::new(Vec::new()));
+    let observed = completions.clone();
+    let cancel = tokio_util::sync::CancellationToken::new();
+    let stop = cancel.clone();
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(2)
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        tokio::time::timeout(
+            Duration::from_secs(20),
+            super::super::processMonitor::run(
+                fixtureDll(),
+                cancel,
+                move || Ok(selected.clone()),
+                move |candidate, _| {
+                    let mut completed = observed.lock().unwrap();
+                    completed.push(candidate.pid);
+                    if completed.len() == 2 {
+                        stop.cancel();
+                    }
+                    Ok(())
+                },
+            ),
+        )
+        .await
+        .expect("并发原生加载验收超时")
+    });
+    assert_eq!(
+        *completions.lock().unwrap(),
+        vec![fast.child.id(), slow.child.id()]
+    );
+    let reserved = pendingLoads.lock().unwrap();
+    assert!(candidates.iter().all(|candidate| !reserved
+        .as_ref()
+        .unwrap()
+        .contains(&(candidate.pid, candidate.createdAt))));
+    println!("真实进程并发加载通过：快目标先就绪，慢目标随后完成，预留已释放");
+}
+
 // 已加载但没有就绪事件的模块不能被算为接管成功，也不通过重试反复增加 LoadLibrary 引用。
 #[test]
 #[ignore = "需要 OBSERVATION_TEST_READY_DLL"]

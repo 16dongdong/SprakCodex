@@ -192,7 +192,7 @@ fn startRuntime(
                     return;
                 }
                 let monitorEngine = engine.cancel.clone();
-                tokio::spawn(async move {
+                let monitor = tokio::spawn(async move {
                     let Some(dll) = injectionDll else {
                         log::error!("无法确定观测注入 DLL 路径");
                         return;
@@ -202,6 +202,10 @@ fn startRuntime(
                     }).await;
                 });
                 transport::serve(listener, Arc::new(engine)).await;
+                // 扫描器可能仍有已派发的原生加载；先等待其交接/回收，再销毁目录消费者和运行时。
+                if let Err(error) = monitor.await {
+                    log::error!("观测进程扫描器退出失败：{error}");
+                }
             });
             // 网络任务先析构关闭发送端，数据库线程再排空队列，避免停止时漏掉已经完成的费用快照。
             drop(clientEvents);

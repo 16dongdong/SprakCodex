@@ -11,9 +11,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-// 回收顺序是目标进程、模块文件；保留外层脱敏请求证据，不遗留注入模块或 hook 配置。
+// 回收顺序是停止扫描并排空加载、目标进程、模块文件；保留外层脱敏请求证据，不遗留模块或配置。
 pub(super) struct InjectedTarget {
     pub(super) child: Option<Child>,
+    concurrentChildren: Vec<Child>,
     pub(super) moduleDirectory: PathBuf,
     pub(super) monitor: Option<(
         tokio_util::sync::CancellationToken,
@@ -27,7 +28,11 @@ impl Drop for InjectedTarget {
             cancel.cancel();
             monitor.join().unwrap();
         }
-        if let Some(child) = self.child.as_mut() {
+        for child in self
+            .child
+            .iter_mut()
+            .chain(self.concurrentChildren.iter_mut())
+        {
             if child.try_wait().unwrap().is_none() {
                 child.kill().unwrap();
             }
@@ -42,7 +47,7 @@ impl Drop for InjectedTarget {
     }
 }
 
-// 独占 DLL 与已绑定 Relay 共用隔离目录；monitored 先开启生产扫描再启动 CLI，其余模式等待 stdin 边界再注入。
+// 独占 DLL 与已绑定 Relay 共用隔离目录；顺序/并发模式先扫描后启动，injected 模式单独等待 stdin 边界。
 pub(super) fn run(
     command: &mut Command,
     directory: &Path,
@@ -51,16 +56,20 @@ pub(super) fn run(
 ) -> bool {
     let mut target = prepare(directory, certificate, relayPort);
     let module = target.moduleDirectory.join("cphook.dll");
-    let monitored = std::env::var("OBSERVATION_TEST_CAPTURE_MODE").as_deref() == Ok("monitored");
+    let mode = std::env::var("OBSERVATION_TEST_CAPTURE_MODE").unwrap();
+    let monitored = matches!(mode.as_str(), "monitored" | "concurrent");
     // 隔离选择绑定创建时间和可执行文件，避免测试子进程退出后 PID 复用误选用户其他会话。
-    let selectedProcess = std::sync::Arc::new(std::sync::Mutex::new(None));
+    let selectedProcess = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
     if monitored {
         target.monitor = Some(startMonitor(module.clone(), selectedProcess.clone(), None));
+    }
+    if mode == "concurrent" {
+        return runConcurrent(command, &mut target, selectedProcess, directory);
     }
     target.child = Some(command.spawn().expect("启动独立测试 CLI"));
     let client = target.child.as_mut().unwrap();
     if monitored {
-        *selectedProcess.lock().unwrap() = Some(nativeInjection::candidate(client.id()).unwrap());
+        *selectedProcess.lock().unwrap() = vec![nativeInjection::candidate(client.id()).unwrap()];
     } else {
         waitForPrompt(client, &directory.join("clientDiagnostics.log"));
         let identity = nativeInjection::candidate(client.id()).unwrap();
@@ -77,9 +86,57 @@ pub(super) fn run(
         // 复用同一个常驻任务，前一进程退出后再启动另一实例；stdio 句柄保留文件位置以追加独立客户端事件。
         target.child = Some(command.spawn().expect("启动后续独立测试 CLI"));
         let client = target.child.as_mut().unwrap();
-        *selectedProcess.lock().unwrap() = Some(nativeInjection::candidate(client.id()).unwrap());
+        *selectedProcess.lock().unwrap() = vec![nativeInjection::candidate(client.id()).unwrap()];
         success = waitClient(client);
     }
+    verifyTrustCleanup(directory);
+    success
+}
+
+// 同时运行两次官方生成，分别保存 stdout 避免并发管道行交错；候选只包含本探针拥有的两个真实实例。
+fn runConcurrent(
+    command: &mut Command,
+    target: &mut InjectedTarget,
+    selected: std::sync::Arc<std::sync::Mutex<Vec<processInjector::ProcessCandidate>>>,
+    directory: &Path,
+) -> bool {
+    let mut outputs = Vec::new();
+    for ordinal in 0..2 {
+        let output = directory.join(format!("concurrentClient{ordinal}.jsonl"));
+        command.stdout(std::fs::File::create(&output).unwrap());
+        target
+            .concurrentChildren
+            .push(command.spawn().expect("启动并发官方 CLI"));
+        let child = target.concurrentChildren.last().unwrap();
+        selected
+            .lock()
+            .unwrap()
+            .push(nativeInjection::candidate(child.id()).unwrap());
+        outputs.push(output);
+    }
+    assert!(
+        target
+            .concurrentChildren
+            .iter_mut()
+            .all(|child| child.try_wait().unwrap().is_none()),
+        "两个 CLI 必须存在重叠运行窗口"
+    );
+    // 两个请求已并发提交；等待必须遍历所有子进程，某一失败也不能跳过另一进程的回收。
+    let mut success = true;
+    for child in &mut target.concurrentChildren {
+        success &= waitClient(child);
+    }
+    let mut combined = std::fs::File::create(directory.join("clientEvents.jsonl")).unwrap();
+    for output in outputs {
+        std::io::copy(&mut std::fs::File::open(&output).unwrap(), &mut combined).unwrap();
+        std::fs::remove_file(output).unwrap();
+    }
+    verifyTrustCleanup(directory);
+    success
+}
+
+// 客户端退出后其公开证书由内核释放，不允许探针以成功返回掩盖生命周期残留。
+fn verifyTrustCleanup(directory: &Path) {
     let remainingBundles = std::fs::read_dir(directory)
         .unwrap()
         .map(|entry| entry.expect("枚举进程公开证书文件"))
@@ -94,7 +151,6 @@ pub(super) fn run(
         remainingBundles, 0,
         "测试 CLI 退出后公开证书文件应由内核回收"
     );
-    success
 }
 
 // 只识别静态启动标记，不输出诊断正文；超时或提前退出使探针失败并由 RAII 回收子进程。
@@ -127,6 +183,7 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
     std::fs::create_dir(&moduleDirectory).unwrap();
     let target = InjectedTarget {
         child: None,
+        concurrentChildren: Vec::new(),
         moduleDirectory,
         monitor: None,
     };
@@ -149,7 +206,7 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
 // 候选按完整进程实例限定；首轮目录扫描完成后返回，加载就绪由各场景独立等待。
 pub(super) fn startMonitor(
     module: PathBuf,
-    selectedProcess: std::sync::Arc<std::sync::Mutex<Option<processInjector::ProcessCandidate>>>,
+    selectedProcess: std::sync::Arc<std::sync::Mutex<Vec<processInjector::ProcessCandidate>>>,
     homes: Option<super::super::clientEventMonitor::HomeRegistration>,
 ) -> (
     tokio_util::sync::CancellationToken,
@@ -172,7 +229,7 @@ pub(super) fn startMonitor(
                 let expected = selection.lock().unwrap().clone();
                 let candidates = processInjector::findCandidates()?
                     .into_iter()
-                    .filter(|candidate| expected.as_ref() == Some(candidate))
+                    .filter(|candidate| expected.contains(candidate))
                     .collect();
                 // 第一次目录扫描已发生后再让父测试启动 CLI，构造真实的跨扫描周期首请求边界。
                 if let Some(ready) = startup.lock().unwrap().take() {

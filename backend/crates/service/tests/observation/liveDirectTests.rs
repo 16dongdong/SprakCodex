@@ -50,9 +50,9 @@ fn officialTransportRecordsUsage() {
     assert!(
         matches!(
             captureMode.as_str(),
-            "explicit" | "injected" | "monitored" | "warm" | "runtime"
+            "explicit" | "injected" | "monitored" | "concurrent" | "warm" | "runtime"
         ),
-        "抓取方式必须为 explicit、injected、monitored、warm 或 runtime"
+        "抓取方式必须为 explicit、injected、monitored、concurrent、warm 或 runtime"
     );
     let injected = captureMode == "injected";
     let native = captureMode != "explicit";
@@ -221,6 +221,13 @@ fn verifyCapturedRecords(stdout: &str, storage: &Storage, websocket: bool) {
         .filter(|event| event["type"] == "turn.completed")
         .collect();
     assert!(!completions.is_empty(), "缺少 CLI 完整终态");
+    // 多进程验收必须保留两份终态，防止两条证据同时缺失时仅靠相互一致错误地判定成功。
+    if matches!(
+        std::env::var("OBSERVATION_TEST_CAPTURE_MODE").as_deref(),
+        Ok("monitored" | "concurrent")
+    ) {
+        assert_eq!(completions.len(), 2, "多进程验收缺少独立 CLI 终态");
+    }
     let threadIds: std::collections::HashSet<_> = stdout
         .lines()
         .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
