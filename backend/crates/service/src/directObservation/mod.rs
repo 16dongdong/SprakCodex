@@ -6,6 +6,8 @@ mod streamObserver;
 mod transport;
 mod usageParser;
 mod websocketRelay;
+#[allow(non_snake_case)]
+mod processInjector;
 
 use recordSink::Counters;
 use serde::Serialize;
