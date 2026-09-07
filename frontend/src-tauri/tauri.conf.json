@@ -28,9 +28,9 @@
   },
   "bundle": {
     "active": true,
-    "resources": [
-      "../../../CProxy/target/release/cphook.dll"
-    ],
+    "resources": {
+      "../../../CProxy/target/release/cphook.dll": "cphook.dll"
+    },
     "targets": "all",
     "icon": [
       "icons/icon.ico",
