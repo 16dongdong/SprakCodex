@@ -36,13 +36,13 @@
 
 ## Скриншоты
 
-![Панель](../../assets/images/dashboard.png)
-![Аккаунты](../../assets/images/accounts.png)
-![Platform Key](../../assets/images/platform-key.png)
-![Aggregate API](../../assets/images/aggregate-api.png)
-![Центр плагинов](../../assets/images/plug.png)
-![Логи](../../assets/images/log.png)
-![Настройки](../../assets/images/themes.png)
+![Панель](../assets/images/dashboard.png)
+![Аккаунты](../assets/images/accounts.png)
+![Platform Key](../assets/images/platform-key.png)
+![Aggregate API](../assets/images/aggregate-api.png)
+![Центр плагинов](../assets/images/plug.png)
+![Логи](../assets/images/log.png)
+![Настройки](../assets/images/themes.png)
 
 ## Быстрый старт
 
@@ -113,17 +113,17 @@
 
 ```text
 .
-├─ apps/                # Frontend и Tauri desktop
+├─ frontend/                # Frontend и Tauri desktop
 │  ├─ src/
 │  ├─ src-tauri/
 │  └─ out/
-├─ crates/              # Rust core/service
+├─ backend/crates/              # Rust core/service
 │  ├─ core
 │  ├─ service
 │  ├─ start              # Запуск service + web
 │  └─ web                # Service Web UI и /api/rpc proxy
 ├─ docs/                # Официальная документация
-├─ scripts/             # Скрипты сборки и выпуска
+├─ backend/scripts/             # Скрипты сборки и выпуска
 └─ README.md
 ```
 

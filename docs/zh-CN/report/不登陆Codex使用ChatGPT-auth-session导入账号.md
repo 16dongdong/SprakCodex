@@ -22,13 +22,13 @@
 
 2. 页面会显示一整段 JSON。按 `Ctrl+A` 全选，再按 `Ctrl+C` 复制全部内容，不要只复制其中一小段 token。
 
-   ![ChatGPT auth session 页面复制示意](../../../assets/images/session.png)
+   ![ChatGPT auth session 页面复制示意](../../assets/images/session.png)
 
 3. 打开 CodexManager，进入“账号管理”，点击“新增账号”。
 
 4. 切换到“批量导入”，把刚复制的整段 JSON 粘贴到“账号数据”输入框。
 
-   ![CodexManager 批量导入账号示意](../../../assets/images/import.png)
+   ![CodexManager 批量导入账号示意](../../assets/images/import.png)
 
 5. 点击“开始导入”。导入完成后，在账号列表刷新用量，确认账号状态可用。
 

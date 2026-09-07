@@ -1,29 +1,32 @@
 # Repository Engineering Standards
 
-This file applies to the whole CodexManager repository. For work under `apps/`,
-also read `apps/AGENTS.md`; that file contains the more specific frontend and
+This file applies to the whole CodexManager repository. For work under `frontend/`,
+also read `frontend/AGENTS.md`; that file contains the more specific frontend and
 Tauri rules.
 
 ## 1. Project Shape
-- `apps/`: Next.js frontend plus the Tauri desktop shell.
-- `apps/src/`: App Router UI, components, hooks, API clients, runtime helpers,
+- `backend/Cargo.toml`：独立 Rust 工作区；桌面壳使用
+  `frontend/src-tauri/Cargo.toml`，必须单独验证。
+- `docs/projectLayout.md`：当前目录职责、开发启动和打包命令。
+- `frontend/`: Next.js frontend plus the Tauri desktop shell.
+- `frontend/src/`: App Router UI, components, hooks, API clients, runtime helpers,
   i18n, and Zustand state.
-- `apps/src-tauri/`: Tauri v2 application shell, desktop lifecycle, tray/window
+- `frontend/src-tauri/`: Tauri v2 application shell, desktop lifecycle, tray/window
   behavior, native commands, and desktop RPC client code.
-- `crates/core/`: SQLite migrations, storage primitives, auth helpers, and core
+- `backend/crates/core/`: SQLite migrations, storage primitives, auth helpers, and core
   usage/account data structures.
-- `crates/service/`: local HTTP/RPC service, gateway routing, protocol adapters,
+- `backend/crates/service/`: local HTTP/RPC service, gateway routing, protocol adapters,
   account/API key/usage domains, plugins, app settings, and runtime sync.
-- `crates/web/`: service-mode Web UI shell, embedded static UI serving, and
+- `backend/crates/web/`: service-mode Web UI shell, embedded static UI serving, and
   `/api/runtime` / `/api/rpc` proxy behavior.
-- `crates/start/`: service-mode launcher that starts service + web together.
-- `scripts/`, `docker/`, `.github/`: build, release, probe, container, and CI
+- `backend/crates/start/`: service-mode launcher that starts service + web together.
+- `backend/scripts/`, `backend/docker/`, `.github/`: build, release, probe, container, and CI
   automation.
 
 ## 2. Ownership Boundaries
-- Keep UI behavior in `apps/src/`, desktop shell behavior in `apps/src-tauri/`,
-  and service/gateway behavior in `crates/service/`.
-- Put schema and persistence foundation changes in `crates/core/`, especially
+- Keep UI behavior in `frontend/src/`, desktop shell behavior in `frontend/src-tauri/`,
+  and service/gateway behavior in `backend/crates/service/`.
+- Put schema and persistence foundation changes in `backend/crates/core/`, especially
   SQLite migrations and reusable storage helpers.
 - Avoid expanding central entrypoints with unrelated orchestration. Large files
   should be treated as legacy surfaces; new substantial logic should move into
@@ -33,7 +36,7 @@ Tauri rules.
 
 ## 3. API, RPC, and Command Sync
 - Frontend code must call backend capabilities through typed wrappers in
-  `apps/src/lib/api/`.
+  `frontend/src/lib/api/`.
 - Desktop IPC should use the centralized `invoke` / `invokeFirst` helpers from
   `@/lib/api/transport`; do not use raw `fetch()` for desktop commands.
 - Service commands that require a service address should pass parameters through
@@ -56,11 +59,11 @@ Tauri rules.
 - New `CODEXMANAGER_*` environment variables require documentation updates and
   should not bypass existing app settings unless startup-time behavior requires
   an environment-level setting.
-- SQLite schema changes belong in `crates/core/migrations/` and should include
+- SQLite schema changes belong in `backend/crates/core/migrations/` and should include
   storage-level tests when behavior is non-trivial.
 
 ## 5. Frontend and Desktop Rules
-- Follow `apps/AGENTS.md` for Next.js, Tailwind, shadcn/Base UI, React Query,
+- Follow `frontend/AGENTS.md` for Next.js, Tailwind, shadcn/Base UI, React Query,
   Zustand, glass theme, static export, and Tauri-specific rules.
 - The frontend is statically exported for the desktop shell. Keep routing and
   asset paths compatible with `output: "export"` and `trailingSlash: true`.
@@ -68,8 +71,8 @@ Tauri rules.
   page or ordinary Next dev server is not the complete service-mode runtime.
 
 ## 6. Rust Service Rules
-- Keep gateway/protocol changes localized under `crates/service/src/gateway/`
-  and `crates/service/src/http/` unless shared service state is genuinely needed.
+- Keep gateway/protocol changes localized under `backend/crates/service/src/gateway/`
+  and `backend/crates/service/src/http/` unless shared service state is genuinely needed.
 - Protocol adapter changes must consider `/v1/responses`, `/v1/chat/completions`,
   streaming SSE, non-streaming JSON, tools, and `tool_calls`.
 - Prefer typed request/response structs and existing storage helpers over ad hoc
@@ -78,12 +81,12 @@ Tauri rules.
   boundaries; do not weaken checks for UI convenience.
 
 ## 7. Validation
-- Frontend-only changes: run at least `pnpm -C apps run build` and, when runtime
-  behavior is touched, `pnpm -C apps run test:runtime`.
-- Desktop/static-export changes: run `pnpm -C apps run build:desktop`.
-- Rust/service changes: run `cargo test --workspace`, or the narrowest relevant
+- Frontend-only changes: run at least `pnpm -C frontend run build` and, when runtime
+  behavior is touched, `pnpm -C frontend run test:runtime`.
+- Desktop/static-export changes: run `pnpm -C frontend run build:desktop`.
+- Rust/service changes: run `cargo test --manifest-path backend/Cargo.toml --workspace`, or the narrowest relevant
   package test only when the change is clearly isolated.
-- Web shell/transport changes: add `cargo test -p codexmanager-web` and the
+- Web shell/transport changes: add `cargo test --manifest-path backend/Cargo.toml -p codexmanager-web` and the
   relevant runtime probe scripts when available.
 - Gateway/protocol changes require targeted regression coverage for streaming,
   non-streaming, tools, and both supported OpenAI-style endpoints.
@@ -95,7 +98,7 @@ Tauri rules.
   with user-visible behavior, deployment modes, environment variables, and
   release/build commands.
 - Root governance docs describe repository-level boundaries. App-specific
-  frontend rules belong in `apps/AGENTS.md`.
+  frontend rules belong in `frontend/AGENTS.md`.
 
 # 编码规范
 

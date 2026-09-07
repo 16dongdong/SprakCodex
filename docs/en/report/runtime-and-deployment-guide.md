@@ -76,15 +76,15 @@ supports_websockets = true
 For source-based local runs, use:
 
 ```bash
-./scripts/run-service-app.sh
+./backend/scripts/run-service-app.sh
 ```
 
-The script builds the frontend with `pnpm -C apps run build:desktop`, then compiles `codexmanager-service`, `codexmanager-web`, and `codexmanager-start`. `codexmanager-web` embeds `apps/out` by default, so you no longer need to pass `CODEXMANAGER_WEB_ROOT` for normal local runs.
+The script builds the frontend with `pnpm -C frontend run build:desktop`, then compiles `codexmanager-service`, `codexmanager-web`, and `codexmanager-start`. `codexmanager-web` embeds `frontend/out` by default, so you no longer need to pass `CODEXMANAGER_WEB_ROOT` for normal local runs.
 
 Useful flags:
 
 - `--debug`: use a debug Rust build for faster local iteration.
-- `--clean-dist`: remove `apps/out` before building.
+- `--clean-dist`: remove `frontend/out` before building.
 - `--no-open`: do not open the browser automatically.
 
 You can still set `CODEXMANAGER_WEB_ROOT=/path/to/out` when you intentionally want to override the embedded UI with an external static directory.
@@ -97,13 +97,13 @@ Docker images default to `TZ=Asia/Shanghai`, and compose examples use `TZ=${TZ:-
 - After a Release is published, both `codexmanager-service` and `codexmanager-web` images are pushed to GitHub Packages (GHCR).
 - Stable releases update the versioned, `stable`, and `latest` tags. Prereleases only publish their versioned tag and never replace the floating tags.
 - Use `stable` for automatic updates, or pin a release such as `docker pull ghcr.io/qxcnm/codexmanager-service:v0.5.2`.
-- [`docker/docker-compose.release.yml`](../../../docker/docker-compose.release.yml) defaults to `stable`. Set `CODEXMANAGER_RELEASE_TAG` only when pinning a version.
-- Example: `CODEXMANAGER_RELEASE_TAG=v0.1.15 docker compose -f docker/docker-compose.release.yml up -d`
+- [`backend/docker/docker-compose.release.yml`](../../../backend/docker/docker-compose.release.yml) defaults to `stable`. Set `CODEXMANAGER_RELEASE_TAG` only when pinning a version.
+- Example: `CODEXMANAGER_RELEASE_TAG=v0.1.15 docker compose -f backend/docker/docker-compose.release.yml up -d`
 - `registry.cn-hangzhou.aliyuncs.com/kilimiao/codex-manager` is not part of the current official release workflow and may be outdated. The GHCR `service` and `web` images above are the maintained prebuilt images.
 
 ### Method 1: `docker compose`
 ```bash
-docker compose -f docker/docker-compose.yml up --build
+docker compose -f backend/docker/docker-compose.yml up --build
 ```
 
 Then open: `http://localhost:48761/`
@@ -111,7 +111,7 @@ Then open: `http://localhost:48761/`
 ### Method 2: build and run separately
 ```bash
 # service
-docker build -f docker/Dockerfile.service -t codexmanager-service .
+docker build -f backend/docker/Dockerfile.service -t codexmanager-service .
 docker network create codexmanager-net
 
 docker run --rm --name codexmanager-service \
@@ -124,7 +124,7 @@ docker run --rm --name codexmanager-service \
   codexmanager-service
 
 # web (containers should talk over the Docker network, not the host-mapped port)
-docker build -f docker/Dockerfile.web -t codexmanager-web .
+docker build -f backend/docker/Dockerfile.web -t codexmanager-web .
 docker run --rm --name codexmanager-web \
   --network codexmanager-net \
   -p 48761:48761 \

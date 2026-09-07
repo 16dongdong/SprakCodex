@@ -20,7 +20,7 @@
 - [ ] `pnpm -C apps run test`
 - [ ] `pnpm -C apps run build`
 - [ ] `pnpm -C apps run test:ui`
-- [ ] `cargo test --workspace`
+- [ ] `cargo test --manifest-path backend/Cargo.toml --workspace`
 - [ ] 其他本地验证已说明
 
 已执行的实际验证：

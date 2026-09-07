@@ -39,13 +39,13 @@
 - 图片生成：默认按官方 Codex 行为为 `/v1/responses` 自动注入 `image_generation` tool，并支持显式 tool 透传、`/v1/images/generations` 与 `/v1/images/edits` 兼容入口，默认图片工具模型为 `gpt-image-2`
 
 ## 截图
-![仪表盘](assets/images/dashboard.png)
-![账号管理](assets/images/accounts.png)
-![平台 Key](assets/images/platform-key.png)
-![聚合 API](assets/images/aggregate-api.png)
-![插件中心](assets/images/plug.png)
-![日志视图](assets/images/log.png)
-![设置页](assets/images/themes.png)
+![仪表盘](docs/assets/images/dashboard.png)
+![账号管理](docs/assets/images/accounts.png)
+![平台 Key](docs/assets/images/platform-key.png)
+![聚合 API](docs/assets/images/aggregate-api.png)
+![插件中心](docs/assets/images/plug.png)
+![日志视图](docs/assets/images/log.png)
+![设置页](docs/assets/images/themes.png)
 
 ## 快速开始
 1. 启动桌面端，点击“启动服务”。
@@ -106,21 +106,15 @@
 | [CHANGELOG.md](docs/zh-CN/CHANGELOG.md) | 最新发版内容、未发版更新与完整版本历史 |
 
 ## 目录结构
+
 ```text
-.
-├─ apps/                # 前端与 Tauri 桌面端
-│  ├─ src/
-│  ├─ src-tauri/
-│  └─ out/
-├─ crates/              # Rust core/service
-│  ├─ core
-│  ├─ service
-│  ├─ start              # Service 版本一键启动器（拉起 service + web）
-│  └─ web                # Service 版本 Web UI（可内嵌静态资源 + /api/rpc 代理）
-├─ docs/                # 正式文档目录
-├─ scripts/             # 构建与发布脚本
-└─ README.md
+CodexManager/
+├─ frontend/             # Next.js 前端与 Tauri 桌面壳
+├─ backend/              # Rust 工作区、服务脚本和部署配置
+└─ docs/                 # 文档、图片、示例与设计记录
 ```
+
+开发启动、接口边界、验证与打包命令见 [前后端项目布局](docs/projectLayout.md)。
 
 ## 鸣谢与参考项目
 

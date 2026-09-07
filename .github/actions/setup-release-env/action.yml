@@ -13,7 +13,7 @@ inputs:
   pnpm-lock-path:
     description: Lockfile path used for pnpm cache.
     required: false
-    default: apps/pnpm-lock.yaml
+    default: frontend/pnpm-lock.yaml
   enable-pnpm-cache:
     description: Enable pnpm store cache through actions/cache.
     required: false
@@ -41,7 +41,7 @@ inputs:
   cargo-workspaces:
     description: Cargo workspaces and their relative target directories.
     required: false
-    default: . -> target-shared
+    default: backend -> ../target-shared
 runs:
   using: composite
   steps:

@@ -4,36 +4,36 @@
 
 ### Frontend
 ```bash
-pnpm -C apps install
-pnpm -C apps run dev
-pnpm -C apps run test
-pnpm -C apps run test:ui
-pnpm -C apps run build
+pnpm -C frontend install
+pnpm -C frontend run dev
+pnpm -C frontend run test
+pnpm -C frontend run test:ui
+pnpm -C frontend run build
 ```
 
 ### Rust
 ```bash
-cargo test --workspace
-cargo build -p codexmanager-service --release
-cargo build -p codexmanager-web --release
-cargo build -p codexmanager-start --release
+cargo test --manifest-path backend/Cargo.toml --workspace
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release
 
 # Bundle frontend static assets into codexmanager-web (single-binary mode)
-pnpm -C apps run build
-cargo build -p codexmanager-web --release --features embedded-ui
+pnpm -C frontend run build
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release --features embedded-ui
 ```
 
 ## Tauri packaging
 
 ### Windows
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
 ```
 
 ### Linux / macOS
 ```bash
-./scripts/rebuild-linux.sh --bundles "appimage,deb" --clean-dist
-./scripts/rebuild-macos.sh --bundles "dmg" --clean-dist
+./backend/scripts/rebuild-linux.sh --bundles "appimage,deb" --clean-dist
+./backend/scripts/rebuild-macos.sh --bundles "dmg" --clean-dist
 ```
 
 ## GitHub Actions
@@ -44,7 +44,7 @@ The unified release workflow is `.github/workflows/release-all.yml`. Pushing a `
 - Build targets: `Windows`, `macOS (dmg)`, `Linux`
 - The frontend `dist` is built once, then reused by the packaging jobs for each platform
 - Desktop and Service builds run concurrently for all five platform targets. Service jobs also stage the Web packages and Linux x86_64 Docker archive; publishing waits for both build groups.
-- Desktop caches use the `apps/src-tauri` workspace and Service caches use the root workspace, with separate keys to prevent cleanup across different dependency graphs.
+- Desktop caches use the `frontend/src-tauri` workspace and Service caches use the root workspace, with separate keys to prevent cleanup across different dependency graphs.
 - Inputs:
   - `mode`: defaults to `build-and-publish`, options: `build-and-publish | build-artifacts | publish-artifacts`
   - `tag`: required
@@ -83,30 +83,30 @@ Do not also push the same release tag: publishing creates the tag and Release af
 - Rerunning the same `tag` updates the Release metadata using the current input values.
 - GitHub still attaches `Source code (zip/tar.gz)` automatically.
 
-## `scripts/rebuild.ps1`
+## `backend/scripts/rebuild.ps1`
 By default, this script packages Windows builds locally. In `-AllPlatforms` mode, it triggers the GitHub release workflow.
 
 ### Common examples
 ```powershell
 # Local Windows build
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
 
 # Trigger the release workflow (and download artifacts)
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 `
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 `
   -AllPlatforms `
   -GitRef main `
   -ReleaseTag v0.1.9 `
   -GithubToken <token>
 
 # Force a pre-release
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 `
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 `
   -AllPlatforms -GitRef main -ReleaseTag v0.1.9-beta.1 -GithubToken <token> -Prerelease true
 ```
 
 ### Main parameters
 - `-Bundle nsis|msi`: defaults to `nsis`
 - `-NoBundle`: compile only, do not create an installer
-- `-CleanDist`: clean `apps/out` before building
+- `-CleanDist`: clean `frontend/out` before building
 - `-Portable`: also output a portable build
 - `-PortableDir <path>`: portable build output directory, default `portable/`
 - `-AllPlatforms`: trigger the release workflow
@@ -121,19 +121,19 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 `
 - `-TimeoutMin <n>`: timeout in minutes, default `60`
 - `-DryRun`: print the execution plan only
 
-## `scripts/bump-version.ps1`
+## `backend/scripts/bump-version.ps1`
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/bump-version.ps1 -Version 0.1.9
+pwsh -NoLogo -NoProfile -File backend/scripts/bump-version.ps1 -Version 0.1.9
 ```
 
 This updates:
-- the workspace version in the root `Cargo.toml`
-- `apps/src-tauri/Cargo.toml`
-- `apps/src-tauri/tauri.conf.json`
+- the workspace version in the root `backend/Cargo.toml`
+- `frontend/src-tauri/Cargo.toml`
+- `frontend/src-tauri/tauri.conf.json`
 
 ## Protocol regression probe
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/tests/gateway_regression_suite.ps1 `
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/gateway_regression_suite.ps1 `
   -Base http://localhost:48760 -ApiKey <key> -Model gpt-5.3-codex
 ```
 

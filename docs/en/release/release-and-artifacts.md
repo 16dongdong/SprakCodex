@@ -62,12 +62,12 @@ GitHub Releases also attach:
 
 Windows helper script:
 
-- `scripts/rebuild.ps1`
+- `backend/scripts/rebuild.ps1`
 
 Common example:
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 `
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 `
   -AllPlatforms `
   -GitRef main `
   -ReleaseTag v0.1.9 `
@@ -96,11 +96,11 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 `
 
 ## Recommended checks before release
 
-1. Synchronize the project version in the root `Cargo.toml`, `apps/package.json`, Tauri `Cargo.toml` / `tauri.conf.json`, and both `Cargo.lock` files
+1. Synchronize the project version in the root `backend/Cargo.toml`, `frontend/package.json`, Tauri `backend/Cargo.toml` / `tauri.conf.json`, and both `Cargo.lock` files
 2. Make sure `CHANGELOG.md` has been updated
-3. Make sure the desktop frontend build passes: `pnpm -C apps run build`
-4. Make sure core tests pass: `pnpm -C apps run test`, `cargo test --workspace`
-5. If the gateway protocol changed, also run `scripts/tests/gateway_regression_suite.ps1`
+3. Make sure the desktop frontend build passes: `pnpm -C frontend run build`
+4. Make sure core tests pass: `pnpm -C frontend run test`, `cargo test --manifest-path backend/Cargo.toml --workspace`
+5. If the gateway protocol changed, also run `backend/scripts/tests/gateway_regression_suite.ps1`
 
 ## Common failure cases
 
@@ -108,7 +108,7 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 `
 
 Check:
 
-- whether `apps/out/` builds successfully
+- whether `frontend/out/` builds successfully
 - whether the frontend build step succeeded in the workflow
 
 ### Incorrect Release metadata

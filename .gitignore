@@ -1,22 +1,19 @@
 # Rust
-/target/
 **/target/
 **/*.rs.bk
 
 # Tauri
-/apps/src-tauri/target/
-/apps/src-tauri/gen/
-/apps/src-tauri/bin/*.exe
-/apps/src-tauri/bin/*.dll
-/apps/src-tauri/bin/*.pdb
+/frontend/src-tauri/gen/
+/frontend/src-tauri/bin/*.exe
+/frontend/src-tauri/bin/*.dll
+/frontend/src-tauri/bin/*.pdb
 
 # Node/Vite
-/node_modules/
-/apps/node_modules/
+**/node_modules/
 /.pnpm-store/
-/apps/dist/
-/apps/.vite/
-/apps/.turbo/
+/frontend/dist/
+/frontend/.vite/
+/frontend/.turbo/
 # Build outputs
 /portable/
 /artifacts/
@@ -26,10 +23,6 @@
 /.tmp-antigravity-manager*/
 
 # Docs/specs
-/docs/
-!/docs/
-!/docs/**/
-!/docs/**/*.md
 /docs/**/*.tmp.md
 /docs/**/*.local.md
 /specs/
@@ -44,12 +37,12 @@ codex resume*.txt
 .tmp_stage_ps/
 .tmp_stage_sh/
 .codex-manager-run/
-scripts/release/build-tauri-with-retry.ps1
-scripts/release/build-tauri-with-retry.sh
-scripts/release/publish-github-release.sh
-scripts/release/stage-service-package.ps1
-scripts/release/stage-service-package.sh
-scripts/tests/release_version.test.ps1
+backend/scripts/release/build-tauri-with-retry.ps1
+backend/scripts/release/build-tauri-with-retry.sh
+backend/scripts/release/publish-github-release.sh
+backend/scripts/release/stage-service-package.ps1
+backend/scripts/release/stage-service-package.sh
+backend/scripts/tests/release_version.test.ps1
 
 # IDE/editor files
 .idea/
@@ -61,3 +54,7 @@ codex resume 019cbbf9-0037-73b1-b353-1cd0946a1acd
 # claude
 .claude
 codexmanager-server.key
+
+# 前后端分层后的本地构建与发行产物
+/backend/portable/
+/backend/artifacts/

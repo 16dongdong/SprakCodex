@@ -19,57 +19,53 @@ CodexManager 由两类运行模式组成：
 
 ```text
 .
-├─ apps/                  # 前端与 Tauri 桌面端
-│  ├─ src/                # Next.js App Router + TypeScript 前端
-│  ├─ src-tauri/          # Tauri 桌面壳与原生命令桥接
-│  ├─ tests/              # 前端 UI/结构测试
-│  └─ out/                # Next.js 静态导出产物
-├─ crates/
-│  ├─ core/               # 数据库迁移、存储基础、认证/用量底层能力
-│  ├─ service/            # 本地 HTTP/RPC 服务、网关、协议适配、设置持久化
-│  ├─ web/                # Web UI 服务壳，可嵌入前端静态资源
-│  └─ start/              # Service 一键启动器（拉起 service + web）
-├─ scripts/               # 本地构建、统一版本、测试探针、发布辅助脚本
-├─ docker/                # Dockerfile 与 compose 配置
-├─ assets/                # README 图片、Logo 等静态资源
-└─ .github/workflows/     # CI / release workflow
+├─ frontend/              # Next.js 前端与 Tauri 桌面壳
+│  ├─ src/                # 页面、组件、状态与 API 客户端
+│  ├─ src-tauri/          # 桌面原生命令和打包配置
+│  └─ tests/              # 前端回归
+├─ backend/               # 独立 Rust 工作区
+│  ├─ crates/             # core、rusqlite、service、web、start
+│  ├─ scripts/            # 构建和发行脚本
+│  └─ docker/             # 容器部署与代理配置
+├─ docs/                  # 文档、assets 图片与 skills 示例
+└─ .github/               # CI 与发布流程
 ```
 
 ## 3. 核心复杂域入口索引
 
 ### 3.1 前端总控入口
 
-- `apps/src/app/layout.tsx`：App Router 根布局与全局 Provider 装配
-- `apps/src/components/providers.tsx`：React Query、next-themes、i18n、Tooltip 与 Toaster 装配
-- `apps/src/components/layout/app-bootstrap.tsx`：桌面/Web 运行时初始化与 service 连接编排
-- `apps/src/components/layout/page-keep-alive-viewport.tsx`：顶层页面懒加载与 keep-alive 缓存
-- `apps/src/lib/api/transport.ts`：Tauri invoke 与 Web RPC fallback 的统一传输层
-- `apps/src/lib/app-shell/top-level-routes.ts`：顶层路由、角色可见性与导航分组配置
+- `frontend/src/app/layout.tsx`：App Router 根布局与全局 Provider 装配
+- `frontend/src/components/providers.tsx`：React Query、next-themes、i18n、Tooltip 与 Toaster 装配
+- `frontend/src/components/layout/app-bootstrap.tsx`：桌面/Web 运行时初始化与 service 连接编排
+- `frontend/src/components/layout/page-keep-alive-viewport.tsx`：顶层页面懒加载与 keep-alive 缓存
+- `frontend/src/lib/api/transport.ts`：Tauri invoke 与 Web RPC fallback 的统一传输层
+- `frontend/src/lib/app-shell/top-level-routes.ts`：顶层路由、角色可见性与导航分组配置
 
 ### 3.2 桌面端壳层入口
 
-- `apps/src-tauri/src/lib.rs`：Tauri 应用装配入口
-- `apps/src-tauri/src/commands/registry.rs`：Tauri command 注册入口
-- `apps/src-tauri/src/service_runtime.rs`：桌面内嵌 service 生命周期
-- `apps/src-tauri/src/rpc_client/`：桌面端 RPC 调用基础设施
+- `frontend/src-tauri/src/lib.rs`：Tauri 应用装配入口
+- `frontend/src-tauri/src/commands/registry.rs`：Tauri command 注册入口
+- `frontend/src-tauri/src/service_runtime.rs`：桌面内嵌 service 生命周期
+- `frontend/src-tauri/src/rpc_client/`：桌面端 RPC 调用基础设施
 
 ### 3.3 service 网关与协议入口
 
-- `crates/service/src/lib.rs`：service 总入口与运行时装配
-- `crates/service/src/http/`：HTTP 路由入口
-- `crates/service/src/rpc_dispatch/`：RPC 分发入口
-- `crates/service/src/gateway/mod.rs`：网关聚合入口
-- `crates/service/src/gateway/observability/http_bridge.rs`：请求追踪、协议桥接、日志写入
-- `crates/service/src/gateway/protocol_adapter/request_mapping.rs`：OpenAI/Codex 输入映射
-- `crates/service/src/gateway/protocol_adapter/response_conversion.rs`：非流式结果总转换入口
-- `crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion.rs`：流式 SSE 转换入口
-- `crates/service/src/gateway/protocol_adapter/response_conversion/openai_chat.rs`：OpenAI Chat 结果适配
-- `crates/service/src/gateway/protocol_adapter/response_conversion/tool_mapping.rs`：工具名缩短与还原
+- `backend/crates/service/src/lib.rs`：service 总入口与运行时装配
+- `backend/crates/service/src/http/`：HTTP 路由入口
+- `backend/crates/service/src/rpc_dispatch/`：RPC 分发入口
+- `backend/crates/service/src/gateway/mod.rs`：网关聚合入口
+- `backend/crates/service/src/gateway/observability/http_bridge.rs`：请求追踪、协议桥接、日志写入
+- `backend/crates/service/src/gateway/protocol_adapter/request_mapping.rs`：OpenAI/Codex 输入映射
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion.rs`：非流式结果总转换入口
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion.rs`：流式 SSE 转换入口
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion/openai_chat.rs`：OpenAI Chat 结果适配
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion/tool_mapping.rs`：工具名缩短与还原
 
 ### 3.4 设置与运行配置入口
 
-- `crates/service/src/app_settings/`：设置持久化、环境变量覆盖、运行时同步
-- `crates/service/src/web_access.rs`：Web 访问密码与会话令牌
+- `backend/crates/service/src/app_settings/`：设置持久化、环境变量覆盖、运行时同步
+- `backend/crates/service/src/web_access.rs`：Web 访问密码与会话令牌
 
 ## 4. 运行关系
 
@@ -77,9 +73,9 @@ CodexManager 由两类运行模式组成：
 
 桌面模式由以下部分组成：
 
-- `apps/src/`：前端 UI
-- `apps/src-tauri/`：桌面壳
-- `crates/service/`：本地 service
+- `frontend/src/`：前端 UI
+- `frontend/src-tauri/`：桌面壳
+- `backend/crates/service/`：本地 service
 
 运行方式：
 
@@ -104,7 +100,7 @@ Service 模式由以下二进制组成：
 
 ## 5. 模块职责
 
-### 5.1 `apps/src/`
+### 5.1 `frontend/src/`
 
 主要负责：
 
@@ -114,7 +110,7 @@ Service 模式由以下二进制组成：
 - 调用本地 API / Tauri command
 - 设置页与账号页的前端逻辑
 
-### 5.2 `apps/src-tauri/`
+### 5.2 `frontend/src-tauri/`
 
 主要负责：
 
@@ -124,7 +120,7 @@ Service 模式由以下二进制组成：
 - 桌面更新与安装器行为
 - 将前端操作桥接到 service / 本地运行时
 
-### 5.3 `crates/core/`
+### 5.3 `backend/crates/core/`
 
 主要负责：
 
@@ -133,7 +129,7 @@ Service 模式由以下二进制组成：
 - 认证 / usage 等核心基础逻辑
 - 可被 service 复用的数据访问能力
 
-### 5.4 `crates/service/`
+### 5.4 `backend/crates/service/`
 
 主要负责：
 
@@ -151,15 +147,15 @@ Service 模式由以下二进制组成：
 - `src/rpc_dispatch/`：RPC 分发
 - `src/account/`、`src/apikey/`、`src/requestlog/`、`src/usage/`：领域逻辑
 
-### 5.5 `crates/web/`
+### 5.5 `backend/crates/web/`
 
 主要负责：
 
 - 提供 Web UI 静态资源
 - 挂载或代理到 service
-- 可选把 `apps/out` 内嵌到二进制，形成单文件发布物
+- 可选把 `frontend/out` 内嵌到二进制，形成单文件发布物
 
-### 5.6 `crates/start/`
+### 5.6 `backend/crates/start/`
 
 主要负责：
 
@@ -173,7 +169,7 @@ Service 模式由以下二进制组成：
 当前项目使用 SQLite。
 数据库迁移位于：
 
-- `crates/core/migrations/`
+- `backend/crates/core/migrations/`
 
 数据库里不只存账号，也已经承担：
 
@@ -202,7 +198,7 @@ Service 模式由以下二进制组成：
 典型请求链路如下：
 
 1. 客户端或 UI 发起请求。
-2. 请求进入 `crates/service` 的 HTTP / RPC 层。
+2. 请求进入 `backend/crates/service` 的 HTTP / RPC 层。
 3. 网关模块决定转发策略、账号、头部策略、上游代理等。
 4. 协议适配层负责处理：
    - `/v1/chat/completions`
@@ -218,38 +214,38 @@ Service 模式由以下二进制组成：
 
 前端：
 
-- `pnpm -C apps run dev`
-- `pnpm -C apps run build`
-- `pnpm -C apps run build:desktop`
-- `pnpm -C apps run test:runtime`
+- `pnpm -C frontend run dev`
+- `pnpm -C frontend run build`
+- `pnpm -C frontend run build:desktop`
+- `pnpm -C frontend run test:runtime`
 
 Rust：
 
-- `cargo test --workspace`
-- `cargo build -p codexmanager-service --release`
-- `cargo build -p codexmanager-web --release`
-- `cargo build -p codexmanager-start --release`
+- `cargo test --manifest-path backend/Cargo.toml --workspace`
+- `cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release`
+- `cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release`
+- `cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release`
 
 桌面端：
 
-- `scripts/rebuild.ps1`
-- `scripts/rebuild-linux.sh`
-- `scripts/rebuild-macos.sh`
+- `backend/scripts/rebuild.ps1`
+- `backend/scripts/rebuild-linux.sh`
+- `backend/scripts/rebuild-macos.sh`
 
 ### 8.2 版本管理
 
 版本目前由根工作区统一维护：
 
-- 根 `Cargo.toml` 的 `[workspace.package].version`
+- 根 `backend/Cargo.toml` 的 `[workspace.package].version`
 
 桌面端额外同步：
 
-- `apps/src-tauri/Cargo.toml`
-- `apps/src-tauri/tauri.conf.json`
+- `frontend/src-tauri/Cargo.toml`
+- `frontend/src-tauri/tauri.conf.json`
 
 统一修改入口：
 
-- `scripts/bump-version.ps1`
+- `backend/scripts/bump-version.ps1`
 
 ### 8.3 GitHub Release
 
@@ -268,18 +264,18 @@ Rust：
 
 当前仓库需要重点关注以下问题：
 
-1. `apps/src/app/settings/page.tsx`、`apps/src/app/logs/page.tsx`、`apps/src/app/aggregate-api/page.tsx` 等页面仍偏厚，新增逻辑应优先下沉到 hooks、feature components 或 `src/lib/` helper。
-2. `apps/src-tauri/src/lib.rs` 仍是桌面壳层装配入口，新增桌面能力应优先落在 `app_shell/`、`commands/`、`rpc_client/` 等子模块。
-3. `crates/service/src/lib.rs` 是 service 总出口，新增业务实现应优先落在领域模块，避免继续扩大导出和副作用边界。
-4. `crates/service/src/gateway/` 协议兼容分支较多，回归风险高。
+1. `frontend/src/app/settings/page.tsx`、`frontend/src/app/logs/page.tsx`、`frontend/src/app/aggregate-api/page.tsx` 等页面仍偏厚，新增逻辑应优先下沉到 hooks、feature components 或 `src/lib/` helper。
+2. `frontend/src-tauri/src/lib.rs` 仍是桌面壳层装配入口，新增桌面能力应优先落在 `app_shell/`、`commands/`、`rpc_client/` 等子模块。
+3. `backend/crates/service/src/lib.rs` 是 service 总出口，新增业务实现应优先落在领域模块，避免继续扩大导出和副作用边界。
+4. `backend/crates/service/src/gateway/` 协议兼容分支较多，回归风险高。
 5. `.github/workflows/release-all.yml` 仍然较长，多平台逻辑需要持续约束。
 
 ## 10. 建议的改动落点
 
 为了减少结构污染，新增需求尽量按以下原则落点：
 
-- 新页面或前端交互：优先落在 `apps/src/app/`、`apps/src/components/`、`apps/src/hooks/`、`apps/src/lib/`
-- 新桌面能力：优先落在 `apps/src-tauri/src/` 的独立模块，而不是全部继续塞进 `lib.rs`
+- 新页面或前端交互：优先落在 `frontend/src/app/`、`frontend/src/components/`、`frontend/src/hooks/`、`frontend/src/lib/`
+- 新桌面能力：优先落在 `frontend/src-tauri/src/` 的独立模块，而不是全部继续塞进 `lib.rs`
 - 新设置项：先判断属于环境变量、持久化配置还是运行时状态
 - 新协议兼容：优先落在 gateway / protocol adapter 子模块，不要把条件分支继续无序堆叠
 - 新发布逻辑：优先抽成脚本或复用步骤，不要三平台重复改三份

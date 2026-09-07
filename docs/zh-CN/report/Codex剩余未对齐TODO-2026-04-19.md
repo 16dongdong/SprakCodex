@@ -35,8 +35,8 @@
   - 结果：运行时前端调用已基本收口到原生 `/v1/responses`，这轮再次全仓复核后，剩余 `/v1/chat/completions` / `/v1/completions` 主要只存在于协议兼容入口、验证逻辑、观测统计和测试覆盖中
   - 保留原因：这些剩余路径属于我们对外兼容能力的一部分，不是主功能内部调用
   - 关键代码：
-    - `crates/service/src/gateway/protocol_adapter/request_mapping/openai.rs`
-    - `crates/service/src/gateway/protocol_adapter/codex_adapter.rs`
+    - `backend/crates/service/src/gateway/protocol_adapter/request_mapping/openai.rs`
+    - `backend/crates/service/src/gateway/protocol_adapter/codex_adapter.rs`
 
 - [x] 统一 `response.incomplete` / `idle timeout` / body error 的归因和终态文案
   - 结果：
@@ -44,19 +44,19 @@
     - `stream_timeout` / `stream idle timeout` 统一为“上游流式空闲超时”
     - `request or response body error` / `stream read failed` 统一为“上游中途断开，未返回具体错误信息”
   - 同步范围：
-    - `crates/service/src/gateway/observability/http_bridge/stream_readers/common.rs`
-    - `crates/service/src/gateway/observability/http_bridge/stream_readers/openai_responses.rs`
-    - `crates/service/src/errors/mod.rs`
-    - `apps/src/lib/api/transport-errors.ts`
+    - `backend/crates/service/src/gateway/observability/http_bridge/stream_readers/common.rs`
+    - `backend/crates/service/src/gateway/observability/http_bridge/stream_readers/openai_responses.rs`
+    - `backend/crates/service/src/errors/mod.rs`
+    - `frontend/src/lib/api/transport-errors.ts`
 
 ### P1
 
 - [x] 把 `/v1/responses` 观测链路从 SSE frame inspector 继续收成 typed `ResponseEvent`
   - 结果：`responses` 终态、usage、error hint 已抽成专用 typed event 模块，不再把这部分逻辑继续堆在 `sse_frame.rs` 里
   - 关键代码：
-    - `crates/service/src/gateway/observability/http_bridge/aggregate/openai_responses_event.rs`
-    - `crates/service/src/gateway/observability/http_bridge/aggregate/sse_frame.rs`
-    - `crates/service/src/gateway/observability/http_bridge/stream_readers/openai_responses.rs`
+    - `backend/crates/service/src/gateway/observability/http_bridge/aggregate/openai_responses_event.rs`
+    - `backend/crates/service/src/gateway/observability/http_bridge/aggregate/sse_frame.rs`
+    - `backend/crates/service/src/gateway/observability/http_bridge/stream_readers/openai_responses.rs`
 
 - [x] 继续收窄 OpenAI compat 映射默认值和官方原生 `responses` 的差异
   - 结果：
@@ -66,8 +66,8 @@
     - 没有 reasoning 时不再补 `include`
     - 官方 `/v1/responses` allowlist 不再把 `stream_passthrough` 当成官方字段
   - 关键代码：
-    - `crates/service/src/gateway/protocol_adapter/request_mapping/openai.rs`
-    - `crates/service/src/gateway/request/request_rewrite_responses.rs`
+    - `backend/crates/service/src/gateway/protocol_adapter/request_mapping/openai.rs`
+    - `backend/crates/service/src/gateway/request/request_rewrite_responses.rs`
 
 ### P2
 

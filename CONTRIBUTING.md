@@ -14,12 +14,12 @@
 
 CodexManager 不是单一前端项目，也不是单一 Rust 服务项目。当前仓库同时包含：
 
-- 桌面端：`apps/` + `apps/src-tauri/`
-- 本地服务：`crates/service`
-- Web 壳：`crates/web`
-- Service 启动器：`crates/start`
-- 数据与存储底座：`crates/core`
-- 构建 / 发版脚本：`scripts/`
+- 桌面端：`frontend/` + `frontend/src-tauri/`
+- 本地服务：`backend/crates/service`
+- Web 壳：`backend/crates/web`
+- Service 启动器：`backend/crates/start`
+- 数据与存储底座：`backend/crates/core`
+- 构建 / 发版脚本：`backend/scripts/`
 - GitHub Actions 发布链路：`.github/workflows/`
 
 因此提交前必须先判断你改动属于哪个边界，避免把多个职责直接堆进同一个文件。
@@ -45,8 +45,8 @@ CodexManager 不是单一前端项目，也不是单一 Rust 服务项目。当�
 ### 2.2 安装依赖
 
 ```bash
-pnpm -C apps install
-cargo test --workspace
+pnpm -C frontend install
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 ### 2.3 常用本地命令
@@ -54,26 +54,26 @@ cargo test --workspace
 前端：
 
 ```bash
-pnpm -C apps run dev
-pnpm -C apps run build
-pnpm -C apps run build:desktop
-pnpm -C apps run test:runtime
-pnpm -C apps run test:navigation
+pnpm -C frontend run dev
+pnpm -C frontend run build
+pnpm -C frontend run build:desktop
+pnpm -C frontend run test:runtime
+pnpm -C frontend run test:navigation
 ```
 
 Rust：
 
 ```bash
-cargo test --workspace
-cargo build -p codexmanager-service --release
-cargo build -p codexmanager-web --release
-cargo build -p codexmanager-start --release
+cargo test --manifest-path backend/Cargo.toml --workspace
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release
 ```
 
 桌面端打包：
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
 ```
 
 ## 3. 提交边界
@@ -82,23 +82,23 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Porta
 
 优先遵守以下边界：
 
-- 前端页面、交互、状态：`apps/src/`
-- 桌面壳、托盘、窗口、Tauri command：`apps/src-tauri/src/`
-- 服务端 HTTP / RPC / Gateway / 协议适配：`crates/service/src/`
-- 数据库迁移、存储基础设施：`crates/core/`
-- 发布与构建脚本：`scripts/`、`.github/workflows/`
+- 前端页面、交互、状态：`frontend/src/`
+- 桌面壳、托盘、窗口、Tauri command：`frontend/src-tauri/src/`
+- 服务端 HTTP / RPC / Gateway / 协议适配：`backend/crates/service/src/`
+- 数据库迁移、存储基础设施：`backend/crates/core/`
+- 发布与构建脚本：`backend/scripts/`、`.github/workflows/`
 
 ### 3.2 当前高风险文件
 
 以下文件已明显偏大，修改时必须克制追加总控逻辑：
 
-- `apps/src/app/settings/page.tsx`
-- `apps/src/app/logs/page.tsx`
-- `apps/src/app/aggregate-api/page.tsx`
-- `apps/src/app/page.tsx`
-- `apps/src-tauri/src/lib.rs`
-- `crates/service/src/lib.rs`
-- `crates/service/src/gateway/`
+- `frontend/src/app/settings/page.tsx`
+- `frontend/src/app/logs/page.tsx`
+- `frontend/src/app/aggregate-api/page.tsx`
+- `frontend/src/app/page.tsx`
+- `frontend/src-tauri/src/lib.rs`
+- `backend/crates/service/src/lib.rs`
+- `backend/crates/service/src/gateway/`
 - `.github/workflows/release-all.yml`
 
 ### 3.3 大文件预警阈值
@@ -122,7 +122,7 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Porta
 - 不要把 README 当 changelog 长期维护。
 - 不要在没有验证的情况下顺手改脚本、workflow、版本号。
 - 不要回退自己未创建的用户改动。
-- 不要把 release workflow 里的内联脚本再次复制展开，优先复用 `scripts/release/`。
+- 不要把 release workflow 里的内联脚本再次复制展开，优先复用 `backend/scripts/release/`。
 
 ## 4. 提交前检查
 
@@ -133,30 +133,30 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Porta
 前端改动：
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-pnpm -C apps run test:navigation
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+pnpm -C frontend run test:navigation
 ```
 
 Rust / 服务端改动：
 
 ```bash
-cargo test --workspace
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 桌面端 / 打包链路改动：
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -DryRun
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -DryRun
 ```
 
 ### 4.2 协议适配相关改动
 
 如果改了以下路径，必须补最小回归验证：
 
-- `crates/service/src/gateway/`
-- `crates/service/src/http/`
-- `crates/service/src/lib.rs`
+- `backend/crates/service/src/gateway/`
+- `backend/crates/service/src/http/`
+- `backend/crates/service/src/lib.rs`
 
 最低要覆盖：
 
@@ -201,7 +201,7 @@ PR 至少写清：
 
 1. `CHANGELOG.md` 已更新。
 2. `README.md` 与 `docs/en/README.md` 当前版本入口一致。
-3. 根 `Cargo.toml`、`apps/src-tauri/Cargo.toml`、`apps/src-tauri/tauri.conf.json` 版本一致。
+3. 根 `backend/Cargo.toml`、`frontend/src-tauri/Cargo.toml`、`frontend/src-tauri/tauri.conf.json` 版本一致。
 4. release workflow 输入说明、脚本参数说明、实际 workflow 保持一致。
 5. 高风险兼容路径至少完成一轮本地验证。
 6. 若改动了产物命名或发布类型逻辑，必须验证 `prerelease` 与 tag 行为。

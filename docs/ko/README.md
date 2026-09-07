@@ -36,13 +36,13 @@
 
 ## 스크린샷
 
-![대시보드](../../assets/images/dashboard.png)
-![계정 관리](../../assets/images/accounts.png)
-![플랫폼 Key](../../assets/images/platform-key.png)
-![집계 API](../../assets/images/aggregate-api.png)
-![플러그인 센터](../../assets/images/plug.png)
-![로그](../../assets/images/log.png)
-![설정](../../assets/images/themes.png)
+![대시보드](../assets/images/dashboard.png)
+![계정 관리](../assets/images/accounts.png)
+![플랫폼 Key](../assets/images/platform-key.png)
+![집계 API](../assets/images/aggregate-api.png)
+![플러그인 센터](../assets/images/plug.png)
+![로그](../assets/images/log.png)
+![설정](../assets/images/themes.png)
 
 ## 빠른 시작
 
@@ -113,17 +113,17 @@
 
 ```text
 .
-├─ apps/                # 프런트엔드와 Tauri 데스크톱
+├─ frontend/                # 프런트엔드와 Tauri 데스크톱
 │  ├─ src/
 │  ├─ src-tauri/
 │  └─ out/
-├─ crates/              # Rust core/service
+├─ backend/crates/              # Rust core/service
 │  ├─ core
 │  ├─ service
 │  ├─ start              # service + web 시작
 │  └─ web                # Service Web UI와 /api/rpc 프록시
 ├─ docs/                # 공식 문서
-├─ scripts/             # 빌드·릴리스 스크립트
+├─ backend/scripts/             # 빌드·릴리스 스크립트
 └─ README.md
 ```
 

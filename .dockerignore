@@ -1,10 +1,10 @@
 **/target
 **/node_modules
 **/.next
-apps/dist
-apps/out
-apps/.vite
-apps/.turbo
+frontend/dist
+frontend/out
+frontend/.vite
+frontend/.turbo
 *.tsbuildinfo
 .git
 .github

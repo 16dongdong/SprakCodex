@@ -3,10 +3,10 @@
 本文档把当前系统里可对接的内部接口一次性列出来，方便桌面端、Web 端、自动化脚本和第三方集成统一查看。  
 这份表不再只列页面上“常用”的那部分，而是按代码真实入口补齐：
 
-- Tauri 命令：以 [apps/src-tauri/src/commands/registry.rs](../../../apps/src-tauri/src/commands/registry.rs) 为准
-- 前端命令映射：以 [apps/src/lib/api/transport.ts](../../../apps/src/lib/api/transport.ts) 为准
-- JSON-RPC 方法：以 [crates/service/src/rpc_dispatch](../../../crates/service/src/rpc_dispatch) 和 [crates/service/src/plugin/mod.rs](../../../crates/service/src/plugin/mod.rs) 为准
-- Service / Web HTTP 路由：以 [crates/service/src/http/backend_router.rs](../../../crates/service/src/http/backend_router.rs)、[crates/service/src/http/proxy_runtime.rs](../../../crates/service/src/http/proxy_runtime.rs)、[crates/web/src/main.rs](../../../crates/web/src/main.rs) 为准
+- Tauri 命令：以 [frontend/src-tauri/src/commands/registry.rs](../../../frontend/src-tauri/src/commands/registry.rs) 为准
+- 前端命令映射：以 [frontend/src/lib/api/transport.ts](../../../frontend/src/lib/api/transport.ts) 为准
+- JSON-RPC 方法：以 [backend/crates/service/src/rpc_dispatch](../../../backend/crates/service/src/rpc_dispatch) 和 [backend/crates/service/src/plugin/mod.rs](../../../backend/crates/service/src/plugin/mod.rs) 为准
+- Service / Web HTTP 路由：以 [backend/crates/service/src/http/backend_router.rs](../../../backend/crates/service/src/http/backend_router.rs)、[backend/crates/service/src/http/proxy_runtime.rs](../../../backend/crates/service/src/http/proxy_runtime.rs)、[backend/crates/web/src/main.rs](../../../backend/crates/web/src/main.rs) 为准
 
 ## 1. 接口分层
 

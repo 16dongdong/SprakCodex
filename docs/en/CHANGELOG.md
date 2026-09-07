@@ -457,7 +457,7 @@ It follows Keep a Changelog with a lightweight adaptation for this repository.
 - Gateway failure diagnostics and disk logging continue to converge, with compact false success bodies, HTML/challenge pages, `401 refresh` subclasses, and exhausted candidate links all outputting clearer summaries.
 - Unifiedly upgrade the release version to `0.1.9`, and simultaneously update the workspace, Tauri desktop, `tauri.conf.json` and front-end package versions.
 - The fixed Tauri CLI versions in the GitHub Release workflow have been aligned to the actual version currently used on the Rust side, reducing the risk of CLI / crate drift in the packaging phase.
-- The release documentation and README have been updated to `v0.1.9`, and the front-end static export directory description has been corrected to `apps/out`.
+- The release documentation and README have been updated to `v0.1.9`, and the front-end static export directory description has been corrected to `frontend/out`.
 
 ## [0.1.8] - 2026-03-11
 

@@ -1,5 +1,5 @@
 name: prepare-frontend-dist
-description: Restore the shared frontend dist artifact into apps/out.
+description: Restore the shared frontend dist artifact into frontend/out.
 
 inputs:
   artifact-name:
@@ -9,7 +9,7 @@ inputs:
   apps-dir:
     description: Frontend application directory.
     required: false
-    default: apps
+    default: frontend
   frontend-dist-dir:
     description: Built frontend directory relative to apps-dir.
     required: false

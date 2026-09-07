@@ -36,13 +36,13 @@
 
 ## Screenshots
 
-![Dashboard](../../assets/images/dashboard.png)
-![Account Management](../../assets/images/accounts.png)
-![Platform Key](../../assets/images/platform-key.png)
-![Aggregate API](../../assets/images/aggregate-api.png)
-![Plugin Center](../../assets/images/plug.png)
-![Log View](../../assets/images/log.png)
-![Settings](../../assets/images/themes.png)
+![Dashboard](../assets/images/dashboard.png)
+![Account Management](../assets/images/accounts.png)
+![Platform Key](../assets/images/platform-key.png)
+![Aggregate API](../assets/images/aggregate-api.png)
+![Plugin Center](../assets/images/plug.png)
+![Log View](../assets/images/log.png)
+![Settings](../assets/images/themes.png)
 
 ## Quick Start
 
@@ -113,17 +113,17 @@
 
 ```text
 .
-├─ apps/                # Frontend and Tauri desktop app
+├─ frontend/                # Frontend and Tauri desktop app
 │  ├─ src/
 │  ├─ src-tauri/
 │  └─ out/
-├─ crates/              # Rust core/service
+├─ backend/crates/              # Rust core/service
 │  ├─ core
 │  ├─ service
 │  ├─ start              # Starts service + web
 │  └─ web                # Service Web UI and /api/rpc proxy
 ├─ docs/                # Official documentation
-├─ scripts/             # Build and release scripts
+├─ backend/scripts/             # Build and release scripts
 └─ README.md
 ```
 

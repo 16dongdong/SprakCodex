@@ -19,41 +19,41 @@
 
 适用范围：
 
-- `apps/src/app/`
-- `apps/src/components/`
-- `apps/src/lib/`
-- `apps/src/hooks/`
+- `frontend/src/app/`
+- `frontend/src/components/`
+- `frontend/src/lib/`
+- `frontend/src/hooks/`
 
 最小验证：
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
 ```
 
 说明：
 
-- `pnpm -C apps run build`：确认 Next.js 静态导出链路仍正常
-- `pnpm -C apps run test:runtime`：确认运行时能力判定和桌面 / Web 能力降级逻辑未回归
+- `pnpm -C frontend run build`：确认 Next.js 静态导出链路仍正常
+- `pnpm -C frontend run test:runtime`：确认运行时能力判定和桌面 / Web 能力降级逻辑未回归
 - 若改动涉及运行时识别、Web RPC、桌面 / Web 差异处理，补跑第 4 节
 
 ## 3. 桌面端 / Tauri 改动
 
 适用范围：
 
-- `apps/src-tauri/`
+- `frontend/src-tauri/`
 - 桌面端更新、托盘、窗口、命令桥接相关改动
 
 最小验证：
 
 ```bash
-cargo test --workspace
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 补充建议：
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -Bundle nsis -CleanDist
 ```
 
 说明：
@@ -64,35 +64,35 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist
 
 适用范围：
 
-- `crates/web/`
-- `apps/src/lib/api/transport.ts`
-- `apps/src/components/layout/app-bootstrap.tsx`
-- `apps/src/components/layout/header.tsx`
-- `apps/src/components/layout/sidebar.tsx`
+- `backend/crates/web/`
+- `frontend/src/lib/api/transport.ts`
+- `frontend/src/components/layout/app-bootstrap.tsx`
+- `frontend/src/components/layout/header.tsx`
+- `frontend/src/components/layout/sidebar.tsx`
 - Web 代理、`/api/runtime`、`/api/rpc`、部署方式相关改动
 
 最小验证：
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-cargo test -p codexmanager-web
-pwsh -NoLogo -NoProfile -File scripts/tests/web_runtime_probe.test.ps1
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-web
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_runtime_probe.test.ps1
 ```
 
 建议补充：
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/tests/web_runtime_probe.ps1 `
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_runtime_probe.ps1 `
   -Base http://localhost:48761
-pwsh -NoLogo -NoProfile -File scripts/tests/web_ui_smoke.ps1 -SkipBuild
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_ui_smoke.ps1 -SkipBuild
 ```
 
 说明：
 
-- `pnpm -C apps run build`：确认前端静态导出仍可生成
-- `pnpm -C apps run test:runtime`：确认前端运行时契约和能力判定保持一致
-- `cargo test -p codexmanager-web`：确认 Web 壳路由与运行时探针契约
+- `pnpm -C frontend run build`：确认前端静态导出仍可生成
+- `pnpm -C frontend run test:runtime`：确认前端运行时契约和能力判定保持一致
+- `cargo test --manifest-path backend/Cargo.toml -p codexmanager-web`：确认 Web 壳路由与运行时探针契约
 - `web_runtime_probe.test.ps1`：确认 Web 运行壳最小 smoke 链路的脚本行为
 - `web_ui_smoke.ps1`：确认 Web 页面在 supported / unsupported 运行壳下的关键 UI 行为
 
@@ -100,32 +100,32 @@ pwsh -NoLogo -NoProfile -File scripts/tests/web_ui_smoke.ps1 -SkipBuild
 
 适用范围：
 
-- `crates/core/`
-- `crates/service/`
-- `crates/start/`
-- `crates/web/`
+- `backend/crates/core/`
+- `backend/crates/service/`
+- `backend/crates/start/`
+- `backend/crates/web/`
 
 最小验证：
 
 ```bash
-cargo test --workspace
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 补充建议：
 
 ```bash
-cargo build -p codexmanager-service --release
-cargo build -p codexmanager-web --release
-cargo build -p codexmanager-start --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release
 ```
 
 ## 6. 协议适配 / 网关改动
 
 适用范围：
 
-- `crates/service/src/gateway/`
-- `crates/service/src/http/`
-- `crates/service/src/lib.rs`
+- `backend/crates/service/src/gateway/`
+- `backend/crates/service/src/http/`
+- `backend/crates/service/src/lib.rs`
 
 必须覆盖：
 
@@ -139,10 +139,10 @@ cargo build -p codexmanager-start --release
 最小验证：
 
 ```bash
-cargo test --workspace
-pwsh -NoLogo -NoProfile -File scripts/tests/gateway_regression_suite.ps1
-pwsh -NoLogo -NoProfile -File scripts/tests/codex_stream_probe.ps1
-pwsh -NoLogo -NoProfile -File scripts/tests/chat_tools_hit_probe.ps1
+cargo test --manifest-path backend/Cargo.toml --workspace
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/gateway_regression_suite.ps1
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/codex_stream_probe.ps1
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/chat_tools_hit_probe.ps1
 ```
 
 说明：
@@ -154,16 +154,16 @@ pwsh -NoLogo -NoProfile -File scripts/tests/chat_tools_hit_probe.ps1
 
 适用范围：
 
-- `apps/src/settings/`
-- `crates/service/src/app_settings/`
-- `crates/core/src/storage/settings.rs`
+- `frontend/src/settings/`
+- `backend/crates/service/src/app_settings/`
+- `backend/crates/core/src/storage/settings.rs`
 - 新增 `CODEXMANAGER_*` 配置项
 
 最小验证：
 
 ```bash
-pnpm -C apps run build
-cargo test --workspace
+pnpm -C frontend run build
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 必须人工确认：
@@ -179,16 +179,16 @@ cargo test --workspace
 
 - `.github/workflows/`
 - `.github/actions/`
-- `scripts/release/`
-- `scripts/rebuild*`
+- `backend/scripts/release/`
+- `backend/scripts/rebuild*`
 
 最小验证：
 
 ```bash
-pnpm -C apps run build
-cargo test --workspace
-pwsh -NoLogo -NoProfile -File scripts/tests/assert-release-version.test.ps1
-pwsh -NoLogo -NoProfile -File scripts/tests/rebuild.test.ps1
+pnpm -C frontend run build
+cargo test --manifest-path backend/Cargo.toml --workspace
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/assert-release-version.test.ps1
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/rebuild.test.ps1
 ```
 
 必须人工确认：
@@ -218,32 +218,32 @@ pwsh -NoLogo -NoProfile -File scripts/tests/rebuild.test.ps1
 ### 常规改动
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-cargo test -p codexmanager-web
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-web
 ```
 
 ### 前端页面改动
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
 ```
 
 ### Web 兼容 / 部署改动
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-cargo test -p codexmanager-web
-pwsh -NoLogo -NoProfile -File scripts/tests/web_runtime_probe.test.ps1
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-web
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_runtime_probe.test.ps1
 ```
 
 ### 协议适配改动
 
 ```bash
-cargo test --workspace
-pwsh -NoLogo -NoProfile -File scripts/tests/gateway_regression_suite.ps1
+cargo test --manifest-path backend/Cargo.toml --workspace
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/gateway_regression_suite.ps1
 ```
 
 ## 11. 结果记录约定

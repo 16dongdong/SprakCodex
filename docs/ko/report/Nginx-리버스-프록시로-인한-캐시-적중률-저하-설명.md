@@ -29,11 +29,11 @@ ignore_invalid_headers off;
 
 이는 다음 경로에 직접 영향을 줍니다.
 
-1. `crates/service/src/gateway/request/incoming_headers.rs`
+1. `backend/crates/service/src/gateway/request/incoming_headers.rs`
    `conversation_id`, `session_id`, `x-codex-turn-state` 등을 추출합니다.
-2. `crates/service/src/gateway/request/session_affinity.rs`
+2. `backend/crates/service/src/gateway/request/session_affinity.rs`
    실제 스레드 앵커를 계산합니다.
-3. `crates/service/src/gateway/request/request_rewrite_responses.rs`
+3. `backend/crates/service/src/gateway/request/request_rewrite_responses.rs`
    안정적인 `prompt_cache_key` 를 요청 본문에 다시 씁니다.
 
 프록시가 이 헤더를 제거하면 백엔드는 약한 fallback 세션 앵커로 퇴화하고, 프롬프트 캐시 재사용도 불안정해집니다.
@@ -112,13 +112,13 @@ proxy_send_timeout 3600s;
 send_timeout 3600s;
 ```
 
-현재 저장소의 `docker/nginx/nginx.conf`는 direct service와 Web proxy server 블록 모두에 `location ^~ /v1/images/`를 포함하므로 두 공개 진입점 모두 이미지 생성 배포 기준으로 사용할 수 있습니다. Web 진입점은 비스트리밍 `image_generation` 도구 호출을 위해 정확한 `/v1/responses` 경로에도 동일한 3600초 제한 시간을 적용합니다.
+현재 저장소의 `backend/docker/nginx/nginx.conf`는 direct service와 Web proxy server 블록 모두에 `location ^~ /v1/images/`를 포함하므로 두 공개 진입점 모두 이미지 생성 배포 기준으로 사용할 수 있습니다. Web 진입점은 비스트리밍 `image_generation` 도구 호출을 위해 정확한 `/v1/responses` 경로에도 동일한 3600초 제한 시간을 적용합니다.
 
 ## 권장 예시 설정
 
 다음 파일을 참고하세요.
 
-- [`docker/nginx/nginx.conf`](../../../docker/nginx/nginx.conf)
+- [`backend/docker/nginx/nginx.conf`](../../../backend/docker/nginx/nginx.conf)
 
 이 예시는 다음을 함께 포함합니다.
 
@@ -170,8 +170,8 @@ Cloudflare 가 경로를 복잡하게 만들 수는 있지만, 가장 흔한 직
 
 ## 소스 근거
 
-- [`crates/service/src/gateway/request/incoming_headers.rs`](../../../crates/service/src/gateway/request/incoming_headers.rs)
-- [`crates/service/src/gateway/request/session_affinity.rs`](../../../crates/service/src/gateway/request/session_affinity.rs)
-- [`crates/service/src/gateway/request/request_rewrite_responses.rs`](../../../crates/service/src/gateway/request/request_rewrite_responses.rs)
-- [`crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs`](../../../crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs)
-- [`crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs`](../../../crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs)
+- [`backend/crates/service/src/gateway/request/incoming_headers.rs`](../../../backend/crates/service/src/gateway/request/incoming_headers.rs)
+- [`backend/crates/service/src/gateway/request/session_affinity.rs`](../../../backend/crates/service/src/gateway/request/session_affinity.rs)
+- [`backend/crates/service/src/gateway/request/request_rewrite_responses.rs`](../../../backend/crates/service/src/gateway/request/request_rewrite_responses.rs)
+- [`backend/crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs`](../../../backend/crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs)
+- [`backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs`](../../../backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs)

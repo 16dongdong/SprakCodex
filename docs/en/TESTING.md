@@ -19,41 +19,41 @@ Target:
 
 Scope of application:
 
-- `apps/src/app/`
-- `apps/src/components/`
-- `apps/src/lib/`
-- `apps/src/hooks/`
+- `frontend/src/app/`
+- `frontend/src/components/`
+- `frontend/src/lib/`
+- `frontend/src/hooks/`
 
 Minimal verification:
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
 ```
 
 illustrate:
 
-- `pnpm -C apps run build`: Confirm that the Next.js static export link is still normal
-- `pnpm -C apps run test:runtime`: Confirm runtime capability determination and desktop / Web Capability degradation logic has not returned
+- `pnpm -C frontend run build`: Confirm that the Next.js static export link is still normal
+- `pnpm -C frontend run test:runtime`: Confirm runtime capability determination and desktop / Web Capability degradation logic has not returned
 - If the changes involve runtime identification, Web RPC, desktop/Web difference processing, make up Section 4
 
 ## 3. Desktop / Tauri Changes
 
 Scope of application:
 
-- `apps/src-tauri/`
+- `frontend/src-tauri/`
 - Desktop updates, tray, window, command bridge related changes
 
 Minimal verification:
 
 ```bash
-cargo test --workspace
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 Additional suggestions:
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -Bundle nsis -CleanDist
 ```
 
 illustrate:
@@ -64,35 +64,35 @@ illustrate:
 
 Scope of application:
 
-- `crates/web/`
-- `apps/src/lib/api/transport.ts`
-- `apps/src/components/layout/app-bootstrap.tsx`
-- `apps/src/components/layout/header.tsx`
-- `apps/src/components/layout/sidebar.tsx`
+- `backend/crates/web/`
+- `frontend/src/lib/api/transport.ts`
+- `frontend/src/components/layout/app-bootstrap.tsx`
+- `frontend/src/components/layout/header.tsx`
+- `frontend/src/components/layout/sidebar.tsx`
 - Web Agent, `/api/runtime`, `/api/rpc`, and related changes in deployment methods
 
 Minimal verification:
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-cargo test -p codexmanager-web
-pwsh -NoLogo -NoProfile -File scripts/tests/web_runtime_probe.test.ps1
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-web
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_runtime_probe.test.ps1
 ```
 
 Suggested additions:
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/tests/web_runtime_probe.ps1 `
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_runtime_probe.ps1 `
   -Base http://localhost:48761
-pwsh -NoLogo -NoProfile -File scripts/tests/web_ui_smoke.ps1 -SkipBuild
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_ui_smoke.ps1 -SkipBuild
 ```
 
 illustrate:
 
-- `pnpm -C apps run build`: Confirm that front-end static export can still be generated
-- `pnpm -C apps run test:runtime`: Confirm that the front-end runtime contract and capability determination are consistent
-- `cargo test -p codexmanager-web`: Confirm Web Shell Routing and Runtime Probe Contract
+- `pnpm -C frontend run build`: Confirm that front-end static export can still be generated
+- `pnpm -C frontend run test:runtime`: Confirm that the front-end runtime contract and capability determination are consistent
+- `cargo test --manifest-path backend/Cargo.toml -p codexmanager-web`: Confirm Web Shell Routing and Runtime Probe Contract
 - `web_runtime_probe.test.ps1`: Confirm Web script behavior of running shell minimal smoke link
 - `web_ui_smoke.ps1`: Confirm key UI behavior of Web page under supported / unsupported running shell
 
@@ -100,32 +100,32 @@ illustrate:
 
 Scope of application:
 
-- `crates/core/`
-- `crates/service/`
-- `crates/start/`
-- `crates/web/`
+- `backend/crates/core/`
+- `backend/crates/service/`
+- `backend/crates/start/`
+- `backend/crates/web/`
 
 Minimal verification:
 
 ```bash
-cargo test --workspace
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 Additional suggestions:
 
 ```bash
-cargo build -p codexmanager-service --release
-cargo build -p codexmanager-web --release
-cargo build -p codexmanager-start --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release
 ```
 
 ## 6. Protocol adaptation/gateway modification
 
 Scope of application:
 
-- `crates/service/src/gateway/`
-- `crates/service/src/http/`
-- `crates/service/src/lib.rs`
+- `backend/crates/service/src/gateway/`
+- `backend/crates/service/src/http/`
+- `backend/crates/service/src/lib.rs`
 
 Must cover:
 
@@ -139,10 +139,10 @@ Must cover:
 Minimal verification:
 
 ```bash
-cargo test --workspace
-pwsh -NoLogo -NoProfile -File scripts/tests/gateway_regression_suite.ps1
-pwsh -NoLogo -NoProfile -File scripts/tests/codex_stream_probe.ps1
-pwsh -NoLogo -NoProfile -File scripts/tests/chat_tools_hit_probe.ps1
+cargo test --manifest-path backend/Cargo.toml --workspace
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/gateway_regression_suite.ps1
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/codex_stream_probe.ps1
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/chat_tools_hit_probe.ps1
 ```
 
 illustrate:
@@ -154,16 +154,16 @@ illustrate:
 
 Scope of application:
 
-- `apps/src/settings/`
-- `crates/service/src/app_settings/`
-- `crates/core/src/storage/settings.rs`
+- `frontend/src/settings/`
+- `backend/crates/service/src/app_settings/`
+- `backend/crates/core/src/storage/settings.rs`
 - Added `CODEXMANAGER_*` configuration items
 
 Minimal verification:
 
 ```bash
-pnpm -C apps run build
-cargo test --workspace
+pnpm -C frontend run build
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 Must be manually confirmed:
@@ -179,16 +179,16 @@ Scope of application:
 
 - `.github/workflows/`
 - `.github/actions/`
-- `scripts/release/`
-- `scripts/rebuild*`
+- `backend/scripts/release/`
+- `backend/scripts/rebuild*`
 
 Minimal verification:
 
 ```bash
-pnpm -C apps run build
-cargo test --workspace
-pwsh -NoLogo -NoProfile -File scripts/tests/assert-release-version.test.ps1
-pwsh -NoLogo -NoProfile -File scripts/tests/rebuild.test.ps1
+pnpm -C frontend run build
+cargo test --manifest-path backend/Cargo.toml --workspace
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/assert-release-version.test.ps1
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/rebuild.test.ps1
 ```
 
 Must be manually confirmed:
@@ -218,32 +218,32 @@ Minimal verification:
 ### General changes
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-cargo test -p codexmanager-web
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-web
 ```
 
 ### Front-end page changes
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
 ```
 
 ### Web Compatibility/Deployment Changes
 
 ```bash
-pnpm -C apps run build
-pnpm -C apps run test:runtime
-cargo test -p codexmanager-web
-pwsh -NoLogo -NoProfile -File scripts/tests/web_runtime_probe.test.ps1
+pnpm -C frontend run build
+pnpm -C frontend run test:runtime
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-web
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/web_runtime_probe.test.ps1
 ```
 
 ### Protocol adaptation changes
 
 ```bash
-cargo test --workspace
-pwsh -NoLogo -NoProfile -File scripts/tests/gateway_regression_suite.ps1
+cargo test --manifest-path backend/Cargo.toml --workspace
+pwsh -NoLogo -NoProfile -File backend/scripts/tests/gateway_regression_suite.ps1
 ```
 
 ## 11. Result recording convention

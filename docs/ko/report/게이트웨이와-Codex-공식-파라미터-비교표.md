@@ -26,6 +26,6 @@
   - `D:\MyComputer\own\GPTTeam相关\CodexManager\codex\codex-rs\codex-api\src\requests\headers.rs`
   - `D:\MyComputer\own\GPTTeam相关\CodexManager\codex\codex-rs\core\src\default_client.rs`
 - 현재 게이트웨이
-  - [transport.rs](../../../crates/service/src/gateway/upstream/attempt_flow/transport.rs)
-  - [codex_headers.rs](../../../crates/service/src/gateway/upstream/headers/codex_headers.rs)
-  - [runtime_config.rs](../../../crates/service/src/gateway/core/runtime_config.rs)
+  - [transport.rs](../../../backend/crates/service/src/gateway/upstream/attempt_flow/transport.rs)
+  - [codex_headers.rs](../../../backend/crates/service/src/gateway/upstream/headers/codex_headers.rs)
+  - [runtime_config.rs](../../../backend/crates/service/src/gateway/core/runtime_config.rs)

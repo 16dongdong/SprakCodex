@@ -83,16 +83,16 @@ jobs:
           enable-rust: "false"
 
       - name: Install frontend dependencies
-        working-directory: apps
+        working-directory: frontend
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend dist
-        working-directory: apps
+        working-directory: frontend
         run: pnpm run build:desktop
 
       - name: Pack frontend dist artifact
         shell: bash
-        run: bash scripts/release/pack-frontend-dist.sh apps frontend-dist.tar.gz
+        run: bash backend/scripts/release/pack-frontend-dist.sh frontend frontend-dist.tar.gz
 
       - name: Upload frontend dist artifact
         uses: actions/upload-artifact@v6
@@ -118,7 +118,7 @@ jobs:
         with:
           enable-pnpm-cache: "false"
           cargo-cache-key: release-desktop
-          cargo-workspaces: apps/src-tauri -> ../../target-shared
+          cargo-workspaces: frontend/src-tauri -> ../../target-shared
 
       - name: Prepare frontend dist
         uses: ./.github/actions/prepare-frontend-dist
@@ -126,14 +126,14 @@ jobs:
       - name: Build Tauri bundle (with retry)
         uses: ./.github/actions/build-tauri-with-retry
         with:
-          working-directory: apps
+          working-directory: frontend
           tauri-cli-version: ${{ env.TAURI_CLI_VERSION }}
           bundles: nsis
           shell-type: pwsh
 
       - name: Stage desktop release assets
         shell: pwsh
-        run: ./scripts/release/stage-windows-desktop-assets.ps1 -ReleaseDir "${{ env.CARGO_TARGET_DIR }}/release" -RunnerArch "${{ runner.arch }}"
+        run: ./backend/scripts/release/stage-windows-desktop-assets.ps1 -ReleaseDir "${{ env.CARGO_TARGET_DIR }}/release" -RunnerArch "${{ runner.arch }}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -168,7 +168,7 @@ jobs:
           rust-target: ${{ matrix.rust_target }}
           enable-pnpm-cache: "false"
           cargo-cache-key: release-desktop
-          cargo-workspaces: apps/src-tauri -> ../../target-shared
+          cargo-workspaces: frontend/src-tauri -> ../../target-shared
 
       - name: Prepare frontend dist
         uses: ./.github/actions/prepare-frontend-dist
@@ -176,7 +176,7 @@ jobs:
       - name: Build macOS app bundle
         uses: ./.github/actions/build-tauri-with-retry
         with:
-          working-directory: apps
+          working-directory: frontend
           tauri-cli-version: ${{ env.TAURI_CLI_VERSION }}
           bundles: app
           target: ${{ matrix.rust_target }}
@@ -184,12 +184,12 @@ jobs:
 
       - name: Rebuild macOS dmg with first-launch helper
         shell: bash
-        run: bash scripts/release/rebuild-macos-dmg.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.rust_target }}/release" "${{ matrix.arch }}"
+        run: bash backend/scripts/release/rebuild-macos-dmg.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.rust_target }}/release" "${{ matrix.arch }}"
 
       - name: Stage legacy macOS portable package
         if: ${{ matrix.arch == 'x64' }}
         shell: bash
-        run: bash scripts/release/stage-macos-portable.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.rust_target }}/release"
+        run: bash backend/scripts/release/stage-macos-portable.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.rust_target }}/release"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -228,7 +228,7 @@ jobs:
           rust-target: ${{ matrix.rust_target }}
           enable-pnpm-cache: "false"
           cargo-cache-key: release-desktop
-          cargo-workspaces: apps/src-tauri -> ../../target-shared
+          cargo-workspaces: frontend/src-tauri -> ../../target-shared
 
       - name: Install Linux dependencies
         run: |
@@ -241,7 +241,7 @@ jobs:
       - name: Build Tauri bundle (with retry)
         uses: ./.github/actions/build-tauri-with-retry
         with:
-          working-directory: apps
+          working-directory: frontend
           tauri-cli-version: ${{ env.TAURI_CLI_VERSION }}
           bundles: appimage,deb
           target: ${{ matrix.rust_target }}
@@ -249,7 +249,7 @@ jobs:
 
       - name: Stage portable package
         shell: bash
-        run: bash scripts/release/stage-linux-portable.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.rust_target }}/release" "${{ matrix.arch }}"
+        run: bash backend/scripts/release/stage-linux-portable.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.rust_target }}/release" "${{ matrix.arch }}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -332,12 +332,12 @@ jobs:
       - name: Build service binaries (Windows)
         if: ${{ matrix.platform == 'windows' }}
         shell: pwsh
-        run: ./scripts/release/build-service-binaries.ps1
+        run: ./backend/scripts/release/build-service-binaries.ps1
 
       - name: Build service binaries (Unix)
         if: ${{ matrix.platform != 'windows' }}
         shell: bash
-        run: bash scripts/release/build-service-binaries.sh "${{ matrix.rust_target }}"
+        run: bash backend/scripts/release/build-service-binaries.sh "${{ matrix.rust_target }}"
 
       - name: Stage service package
         uses: ./.github/actions/stage-service-package
@@ -360,7 +360,7 @@ jobs:
       - name: Stage web package
         if: ${{ matrix.platform == 'linux' }}
         shell: bash
-        run: bash scripts/release/stage-linux-web.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.release_subdir }}" "${{ matrix.arch }}"
+        run: bash backend/scripts/release/stage-linux-web.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.release_subdir }}" "${{ matrix.arch }}"
 
       - name: Upload web artifacts
         if: ${{ matrix.platform == 'linux' }}
@@ -374,7 +374,7 @@ jobs:
       - name: Stage docker release package
         if: ${{ matrix.platform == 'linux' && matrix.arch == 'x86_64' }}
         shell: bash
-        run: bash scripts/release/stage-linux-docker.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.release_subdir }}"
+        run: bash backend/scripts/release/stage-linux-docker.sh "${{ env.CARGO_TARGET_DIR }}/${{ matrix.release_subdir }}"
 
       - name: Upload docker artifacts
         if: ${{ matrix.platform == 'linux' && matrix.arch == 'x86_64' }}
@@ -434,7 +434,7 @@ jobs:
       - name: Publish docker images to GHCR
         if: ${{ env.RELEASE_PUBLISH_CONTAINERS != 'false' }}
         shell: bash
-        run: bash scripts/release/publish-ghcr-images.sh release-assets "${{ github.repository_owner }}" "${{ env.RELEASE_TAG }}" "${{ env.RELEASE_PRERELEASE }}"
+        run: bash backend/scripts/release/publish-ghcr-images.sh release-assets "${{ github.repository_owner }}" "${{ env.RELEASE_TAG }}" "${{ env.RELEASE_PRERELEASE }}"
 
       - name: List release assets
         run: find release-assets -type f | sort

@@ -19,55 +19,51 @@ Unified goal:
 
 ```text
 .
-├─ apps/                  # 前端与 Tauri 桌面端
-│  ├─ src/                # Vite + 原生 JavaScript 前端
-│  ├─ src-tauri/          # Tauri 桌面壳与原生命令桥接
-│  ├─ tests/              # 前端 UI/结构测试
-│  └─ dist/               # 前端构建产物
-├─ crates/
-│  ├─ core/               # 数据库迁移、存储基础、认证/用量底层能力
-│  ├─ service/            # 本地 HTTP/RPC 服务、网关、协议适配、设置持久化
-│  ├─ web/                # Web UI 服务壳，可嵌入前端静态资源
-│  └─ start/              # Service 一键启动器（拉起 service + web）
-├─ scripts/               # 本地构建、统一版本、测试探针、发布辅助脚本
-├─ docker/                # Dockerfile 与 compose 配置
-├─ assets/                # README 图片、Logo 等静态资源
-└─ .github/workflows/     # CI / release workflow
+├─ frontend/              # Next.js 前端与 Tauri 桌面壳
+│  ├─ src/                # 页面、组件、状态与 API 客户端
+│  ├─ src-tauri/          # 桌面原生命令和打包配置
+│  └─ tests/              # 前端回归
+├─ backend/               # 独立 Rust 工作区
+│  ├─ crates/             # core、rusqlite、service、web、start
+│  ├─ scripts/            # 构建和发行脚本
+│  └─ docker/             # 容器部署与代理配置
+├─ docs/                  # 文档、assets 图片与 skills 示例
+└─ .github/               # CI 与发布流程
 ```
 
 ## 3. Core complex domain entry index
 
 ### 3.1 Front-end master control entrance
 
-- `apps/src/main.js`: Front-end startup assembly entrance
-- `apps/src/runtime/app-bootstrap.js`: Interface initialization arrangement
-- `apps/src/runtime/app-runtime.js`: Coordination of refresh process and runtime
-- `apps/src/settings/controller.js`: Set up domain facade and continue distribution to submodules
+- `frontend/src/main.js`: Front-end startup assembly entrance
+- `frontend/src/runtime/app-bootstrap.js`: Interface initialization arrangement
+- `frontend/src/runtime/app-runtime.js`: Coordination of refresh process and runtime
+- `frontend/src/settings/controller.js`: Set up domain facade and continue distribution to submodules
 
 ### 3.2 Desktop shell entrance
 
-- `apps/src-tauri/src/lib.rs`: Tauri Application assembly entry
-- `apps/src-tauri/src/settings_commands.rs`: Desktop setting bridge command
-- `apps/src-tauri/src/service_runtime.rs`: Desktop embedded service life cycle
-- `apps/src-tauri/src/rpc_client.rs`: Desktop RPC Call infrastructure
+- `frontend/src-tauri/src/lib.rs`: Tauri Application assembly entry
+- `frontend/src-tauri/src/settings_commands.rs`: Desktop setting bridge command
+- `frontend/src-tauri/src/service_runtime.rs`: Desktop embedded service life cycle
+- `frontend/src-tauri/src/rpc_client.rs`: Desktop RPC Call infrastructure
 
 ### 3.3 service gateway and protocol entry
 
-- `crates/service/src/lib.rs`: Service main entrance and runtime assembly
-- `crates/service/src/http/`: HTTP routing entry
-- `crates/service/src/rpc_dispatch/`: RPC Distribution entrance
-- `crates/service/src/gateway/mod.rs`: Gateway aggregation entry
-- `crates/service/src/gateway/observability/http_bridge.rs`: Request tracking, protocol bridging, log writing
-- `crates/service/src/gateway/protocol_adapter/request_mapping.rs`: OpenAI/Codex input mapping
-- `crates/service/src/gateway/protocol_adapter/response_conversion.rs`: Non-streaming result total conversion entry
-- `crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion.rs`: Streaming SSE Conversion Entry
-- `crates/service/src/gateway/protocol_adapter/response_conversion/openai_chat.rs`: OpenAI Chat result adaptation
-- `crates/service/src/gateway/protocol_adapter/response_conversion/tool_mapping.rs`: Tool name shortening and restoration
+- `backend/crates/service/src/lib.rs`: Service main entrance and runtime assembly
+- `backend/crates/service/src/http/`: HTTP routing entry
+- `backend/crates/service/src/rpc_dispatch/`: RPC Distribution entrance
+- `backend/crates/service/src/gateway/mod.rs`: Gateway aggregation entry
+- `backend/crates/service/src/gateway/observability/http_bridge.rs`: Request tracking, protocol bridging, log writing
+- `backend/crates/service/src/gateway/protocol_adapter/request_mapping.rs`: OpenAI/Codex input mapping
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion.rs`: Non-streaming result total conversion entry
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion.rs`: Streaming SSE Conversion Entry
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion/openai_chat.rs`: OpenAI Chat result adaptation
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion/tool_mapping.rs`: Tool name shortening and restoration
 
 ### 3.4 Setup and run configuration entry
 
-- `crates/service/src/app_settings/`: Set up persistence, environment variable coverage, runtime synchronization
-- `crates/service/src/web_access.rs`: Web Access password and session token
+- `backend/crates/service/src/app_settings/`: Set up persistence, environment variable coverage, runtime synchronization
+- `backend/crates/service/src/web_access.rs`: Web Access password and session token
 
 ## 4. Running relationship
 
@@ -75,9 +71,9 @@ Unified goal:
 
 Desktop mode consists of the following parts:
 
-- `apps/src/`: Front-end UI
-- `apps/src-tauri/`: Desktop shell
-- `crates/service/`: local service
+- `frontend/src/`: Front-end UI
+- `frontend/src-tauri/`: Desktop shell
+- `backend/crates/service/`: local service
 
 How to run:
 
@@ -102,7 +98,7 @@ Responsibilities:
 
 ## 5. Module responsibilities
 
-### 5.1 `apps/src/`
+### 5.1 `frontend/src/`
 
 Mainly responsible for:
 
@@ -112,7 +108,7 @@ Mainly responsible for:
 - Call local API / Tauri command
 - Front-end logic of settings page and account page
 
-### 5.2 `apps/src-tauri/`
+### 5.2 `frontend/src-tauri/`
 
 Mainly responsible for:
 
@@ -122,7 +118,7 @@ Mainly responsible for:
 - Desktop updates and installer behavior
 - Bridge front-end operations to service/local runtime
 
-### 5.3 `crates/core/`
+### 5.3 `backend/crates/core/`
 
 Mainly responsible for:
 
@@ -131,7 +127,7 @@ Mainly responsible for:
 - Core basic logic such as authentication/usage
 - Data access capabilities that can be reused by services
 
-### 5.4 `crates/service/`
+### 5.4 `backend/crates/service/`
 
 Mainly responsible for:
 
@@ -149,15 +145,15 @@ Key subdirectories:
 - `src/rpc_dispatch/`: RPC Distribution
 - `src/account/`, `src/apikey/`, `src/requestlog/`, `src/usage/`: Domain logic
 
-### 5.5 `crates/web/`
+### 5.5 `backend/crates/web/`
 
 Mainly responsible for:
 
 - Provide Web UI static resources
 - Mount or proxy to service
-- Optionally embed `apps/dist` into the binary to form a single-file distribution
+- Optionally embed `frontend/dist` into the binary to form a single-file distribution
 
-### 5.6 `crates/start/`
+### 5.6 `backend/crates/start/`
 
 Mainly responsible for:
 
@@ -171,7 +167,7 @@ Mainly responsible for:
 The current project uses SQLite.
 Database migration is located at:
 
-- `crates/core/migrations/`
+- `backend/crates/core/migrations/`
 
 The database not only stores accounts, but also assumes:
 
@@ -200,7 +196,7 @@ Current agreement:
 Typical request links are as follows:
 
 1. The client or UI initiates the request.
-2. Requests enter the HTTP/RPC layer of `crates/service`.
+2. Requests enter the HTTP/RPC layer of `backend/crates/service`.
 3. The gateway module determines the forwarding strategy, account number, header strategy, upstream proxy, etc.
 4. The protocol adaptation layer is responsible for processing:
    - `/v1/chat/completions`
@@ -216,37 +212,37 @@ Typical request links are as follows:
 
 front end:
 
-- `pnpm -C apps run dev`
-- `pnpm -C apps run build`
-- `pnpm -C apps run check`
+- `pnpm -C frontend run dev`
+- `pnpm -C frontend run build`
+- `pnpm -C frontend run check`
 
 Rust:
 
-- `cargo test --workspace`
-- `cargo build -p codexmanager-service --release`
-- `cargo build -p codexmanager-web --release`
-- `cargo build -p codexmanager-start --release`
+- `cargo test --manifest-path backend/Cargo.toml --workspace`
+- `cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release`
+- `cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release`
+- `cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release`
 
 Desktop:
 
-- `scripts/rebuild.ps1`
-- `scripts/rebuild-linux.sh`
-- `scripts/rebuild-macos.sh`
+- `backend/scripts/rebuild.ps1`
+- `backend/scripts/rebuild-linux.sh`
+- `backend/scripts/rebuild-macos.sh`
 
 ### 8.2 Version Management
 
 The version is currently maintained uniformly by the root workspace:
 
-- Root `Cargo.toml` of `[workspace.package].version`
+- Root `backend/Cargo.toml` of `[workspace.package].version`
 
 Additional synchronization on desktop:
 
-- `apps/src-tauri/Cargo.toml`
-- `apps/src-tauri/tauri.conf.json`
+- `frontend/src-tauri/Cargo.toml`
+- `frontend/src-tauri/tauri.conf.json`
 
 Unified modification entry:
 
-- `scripts/bump-version.ps1`
+- `backend/scripts/bump-version.ps1`
 
 ### 8.3 GitHub Release
 
@@ -265,17 +261,17 @@ Responsibilities:
 
 The current repository needs to focus on the following issues:
 
-1. `apps/src-tauri/src/lib.rs` It is still thick, and the desktop shell assembly and command implementation still need to be disassembled.
-2. `crates/service/src/lib.rs` Configuration, runtime synchronization, and side effect boundaries are not clear enough.
-3. `crates/service/src/gateway/protocol_adapter/response_conversion.rs` There are many compatible branches and the risk of regression is high.
+1. `frontend/src-tauri/src/lib.rs` It is still thick, and the desktop shell assembly and command implementation still need to be disassembled.
+2. `backend/crates/service/src/lib.rs` Configuration, runtime synchronization, and side effect boundaries are not clear enough.
+3. `backend/crates/service/src/gateway/protocol_adapter/response_conversion.rs` There are many compatible branches and the risk of regression is high.
 4. `.github/workflows/release-all.yml` Still long, multi-platform logic requires persistence constraints.
 
 ## 10. Suggested changes
 
 In order to reduce structural pollution, new demands should be targeted according to the following principles:
 
-- New pages or front-end interactions: Priority falls in `apps/src/views/`, `apps/src/services/`, `apps/src/ui/`
-- New Desktop Capabilities: Prioritize standalone modules that fall into `apps/src-tauri/src/`, rather than continuing to cram them all into `lib.rs`
+- New pages or front-end interactions: Priority falls in `frontend/src/views/`, `frontend/src/services/`, `frontend/src/ui/`
+- New Desktop Capabilities: Prioritize standalone modules that fall into `frontend/src-tauri/src/`, rather than continuing to cram them all into `lib.rs`
 - New setting item: first determine whether it belongs to environment variables, persistent configuration or runtime state
 - Compatible with new protocols: priority should be placed in the gateway / protocol adapter submodule, and do not continue to stack conditional branches out of order.
 - New release logic: Give priority to drawing scripts or reusing steps, and do not repeat modifications three times on three platforms.

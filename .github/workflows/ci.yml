@@ -34,20 +34,22 @@ jobs:
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
 
       - name: Check WebSocket dependency pins
-        run: bash scripts/ci/check-websocket-pins.sh
+        run: bash backend/scripts/ci/check-websocket-pins.sh
 
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: cargo fmt --manifest-path backend/Cargo.toml --all -- --check
 
       - name: Check workspace targets
-        run: cargo check --workspace --all-targets
+        run: cargo check --manifest-path backend/Cargo.toml --workspace --all-targets
 
       - name: Test Responses WebSocket regressions
         run: |
-          cargo test -p codexmanager-service --lib official_responses_websocket_ --no-fail-fast
-          cargo test -p codexmanager-service --lib send_websocket_upstream_request_ --no-fail-fast
+          cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib official_responses_websocket_ --no-fail-fast
+          cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib send_websocket_upstream_request_ --no-fail-fast
 
   frontend_and_web:
     name: Frontend build and Web service tests
@@ -61,13 +63,15 @@ jobs:
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
 
       - name: Fetch Rust dependencies
         shell: bash
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
-            if cargo fetch --locked; then
+            if cargo fetch --manifest-path backend/Cargo.toml --locked; then
               exit 0
             fi
             if [ "$attempt" -eq 3 ]; then
@@ -77,15 +81,15 @@ jobs:
           done
 
       - name: Install frontend dependencies
-        working-directory: apps
+        working-directory: frontend
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend static output
-        working-directory: apps
+        working-directory: frontend
         run: pnpm run build:desktop
 
       - name: Test Web service
-        run: cargo test -p codexmanager-web --no-fail-fast
+        run: cargo test --manifest-path backend/Cargo.toml -p codexmanager-web --no-fail-fast
 
   tauri_macos:
     name: Tauri macOS arm64 bundle
@@ -101,17 +105,17 @@ jobs:
           enable-pnpm-cache: "false"
 
       - name: Install frontend dependencies
-        working-directory: apps
+        working-directory: frontend
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend static output
-        working-directory: apps
+        working-directory: frontend
         run: pnpm run build:desktop
 
       - name: Build Tauri app bundle
         uses: ./.github/actions/build-tauri-with-retry
         with:
-          working-directory: apps
+          working-directory: frontend
           tauri-cli-version: 2.10.1
           bundles: app
           target: aarch64-apple-darwin

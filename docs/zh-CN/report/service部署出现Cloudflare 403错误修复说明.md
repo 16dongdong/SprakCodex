@@ -19,7 +19,7 @@
 如果你就是遇到 Oracle / 其他云服务器部署 service 后，直连 `chatgpt.com` 被 Cloudflare `403` 或 `challenge` 拦截的那类场景，仓库现在提供了一个一键准备脚本：
 
 ```bash
-scripts/setup-cloudflare-warp-proxy.sh --port 40000
+backend/scripts/setup-cloudflare-warp-proxy.sh --port 40000
 ```
 
 这个脚本会：
@@ -39,7 +39,7 @@ scripts/setup-cloudflare-warp-proxy.sh --port 40000
 如果你已经自己装好了 WARP，也可以跳过安装：
 
 ```bash
-scripts/setup-cloudflare-warp-proxy.sh --skip-install --port 40000
+backend/scripts/setup-cloudflare-warp-proxy.sh --skip-install --port 40000
 ```
 
 ---
@@ -67,7 +67,7 @@ python3 -m pip install --upgrade curl_cffi
 仓库也提供了一个更短的启动脚本：
 
 ```bash
-scripts/run-curl-cffi-chatgpt-proxy.sh \
+backend/scripts/run-curl-cffi-chatgpt-proxy.sh \
   --proxy socks5h://127.0.0.1:40000 \
   --install-deps \
   --verbose
@@ -84,7 +84,7 @@ scripts/run-curl-cffi-chatgpt-proxy.sh \
 仓库内已提供脚本：
 
 ```bash
-python3 scripts/curl_cffi_chatgpt_proxy.py \
+python3 backend/scripts/curl_cffi_chatgpt_proxy.py \
   --listen 127.0.0.1:8787 \
   --proxy socks5h://127.0.0.1:40000
 ```
@@ -213,7 +213,7 @@ curl http://127.0.0.1:5010/v1/responses \
 直接使用：
 
 ```bash
-python3 scripts/curl_cffi_chatgpt_proxy.py \
+python3 backend/scripts/curl_cffi_chatgpt_proxy.py \
   --listen 127.0.0.1:8787 \
   --proxy socks5h://127.0.0.1:40000
 ```
@@ -221,7 +221,7 @@ python3 scripts/curl_cffi_chatgpt_proxy.py \
 如果你使用的是 HTTP 代理，也可以写：
 
 ```bash
-python3 scripts/curl_cffi_chatgpt_proxy.py \
+python3 backend/scripts/curl_cffi_chatgpt_proxy.py \
   --listen 127.0.0.1:8787 \
   --proxy http://127.0.0.1:7890
 ```
@@ -264,4 +264,4 @@ sqlite3 ./data/codexmanager.db "delete from app_settings where key='gateway.upst
 - WebSocket 特殊处理
 - 单独的重试/日志脱敏
 
-可以继续在 `scripts/curl_cffi_chatgpt_proxy.py` 基础上扩展。
+可以继续在 `backend/scripts/curl_cffi_chatgpt_proxy.py` 基础上扩展。

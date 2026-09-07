@@ -4,11 +4,11 @@
 
 ## 1. 매개변수 전송 링크
 
-1. 인바운드 HTTP 요청은 먼저 `crates/service/src/gateway/request/incoming_headers.rs`에 진입합니다. 여기서는 헤더 스냅샷만 찍히고 요청은 직접 다시 작성되지 않습니다.
-2. 세션 선호도는 `crates/service/src/gateway/request/session_affinity.rs`에 의해 균일하게 계산되어 `incoming_session_id`, `incoming_client_request_id` 및 `fallback_session_id`을 산출합니다.
-3. 요청 본문은 `crates/service/src/gateway/request/request_rewrite.rs`에서 재작성 프로세스에 들어간 후 `request_rewrite_responses.rs`에서 응답 호환성 필드가 처리됩니다.
-4. 최종 아웃바운드 헤더는 `crates/service/src/gateway/upstream/headers/codex_headers.rs`에 의해 구성됩니다.
-5. 실제로 업스트림으로 보내기 전에 `crates/service/src/gateway/upstream/attempt_flow/transport.rs`에 따라 헤더 + 본문이 reqwest에 전달됩니다.
+1. 인바운드 HTTP 요청은 먼저 `backend/crates/service/src/gateway/request/incoming_headers.rs`에 진입합니다. 여기서는 헤더 스냅샷만 찍히고 요청은 직접 다시 작성되지 않습니다.
+2. 세션 선호도는 `backend/crates/service/src/gateway/request/session_affinity.rs`에 의해 균일하게 계산되어 `incoming_session_id`, `incoming_client_request_id` 및 `fallback_session_id`을 산출합니다.
+3. 요청 본문은 `backend/crates/service/src/gateway/request/request_rewrite.rs`에서 재작성 프로세스에 들어간 후 `request_rewrite_responses.rs`에서 응답 호환성 필드가 처리됩니다.
+4. 최종 아웃바운드 헤더는 `backend/crates/service/src/gateway/upstream/headers/codex_headers.rs`에 의해 구성됩니다.
+5. 실제로 업스트림으로 보내기 전에 `backend/crates/service/src/gateway/upstream/attempt_flow/transport.rs`에 따라 헤더 + 본문이 reqwest에 전달됩니다.
 
 ## 2. 요청 헤더 비교
 
@@ -54,13 +54,13 @@
 
 ## 5. 소스코드 기반
 
-- `crates/service/src/gateway/request/incoming_headers.rs`
-- `crates/service/src/gateway/request/session_affinity.rs`
-- `crates/service/src/gateway/request/request_rewrite.rs`
-- `crates/service/src/gateway/request/request_rewrite_responses.rs`
-- `crates/service/src/gateway/upstream/headers/codex_headers.rs`
-- `crates/service/src/gateway/upstream/attempt_flow/transport.rs`
-- `crates/service/src/gateway/core/runtime_config.rs`
+- `backend/crates/service/src/gateway/request/incoming_headers.rs`
+- `backend/crates/service/src/gateway/request/session_affinity.rs`
+- `backend/crates/service/src/gateway/request/request_rewrite.rs`
+- `backend/crates/service/src/gateway/request/request_rewrite_responses.rs`
+- `backend/crates/service/src/gateway/upstream/headers/codex_headers.rs`
+- `backend/crates/service/src/gateway/upstream/attempt_flow/transport.rs`
+- `backend/crates/service/src/gateway/core/runtime_config.rs`
 - `D:\MyComputer\own\GPTTeam相关\codex\codex\codex-rs\core\src\client.rs`
 - `D:\MyComputer\own\GPTTeam相关\codex\codex\codex-rs\codex-api\src\common.rs`
 - `D:\MyComputer\own\GPTTeam相关\codex\codex\codex-rs\codex-api\src\endpoint\responses.rs`

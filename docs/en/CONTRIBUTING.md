@@ -7,12 +7,12 @@ This document is used to constrain the daily collaboration method of CodexManage
 CodexManager Not a single front-end project, nor a single Rust service project.
 The current repository also contains:
 
-- Desktop: `apps/` + `apps/src-tauri/`
-- Local service: `crates/service`
-- Web Shell: `crates/web`
-- Service Launcher: `crates/start`
-- Data and storage base: `crates/core`
-- Build/release script: `scripts/`
+- Desktop: `frontend/` + `frontend/src-tauri/`
+- Local service: `backend/crates/service`
+- Web Shell: `backend/crates/web`
+- Service Launcher: `backend/crates/start`
+- Data and storage base: `backend/crates/core`
+- Build/release script: `backend/scripts/`
 - GitHub Actions publishing link: `.github/workflows/`
 
 Therefore, before submitting, you must first determine which boundary your changes belong to, and avoid stacking multiple responsibilities directly into the same file.
@@ -38,8 +38,8 @@ Governance document entry:
 ### 2.2 Install dependencies
 
 ```bash
-pnpm -C apps install
-cargo test --workspace
+pnpm -C frontend install
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 ### 2.3 Commonly used local commands
@@ -47,26 +47,26 @@ cargo test --workspace
 front end:
 
 ```bash
-pnpm -C apps run dev
-pnpm -C apps run test
-pnpm -C apps run test:ui
-pnpm -C apps run build
-pnpm -C apps run check
+pnpm -C frontend run dev
+pnpm -C frontend run test
+pnpm -C frontend run test:ui
+pnpm -C frontend run build
+pnpm -C frontend run check
 ```
 
 Rust:
 
 ```bash
-cargo test --workspace
-cargo build -p codexmanager-service --release
-cargo build -p codexmanager-web --release
-cargo build -p codexmanager-start --release
+cargo test --manifest-path backend/Cargo.toml --workspace
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-web --release
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-start --release
 ```
 
 Desktop packaging:
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -Bundle nsis -CleanDist -Portable
 ```
 
 ## 3. Commit boundaries
@@ -75,20 +75,20 @@ pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -Bundle nsis -CleanDist -Porta
 
 Prioritize the following boundaries:
 
-- Front-end page, interaction, status: `apps/src/`
-- Desktop shell, tray, window, Tauri command: `apps/src-tauri/src/`
-- Server HTTP / RPC / Gateway / Protocol Adaptation: `crates/service/src/`
-- Database migration, storage infrastructure: `crates/core/`
-- Release and build scripts: `scripts/`, `.github/workflows/`
+- Front-end page, interaction, status: `frontend/src/`
+- Desktop shell, tray, window, Tauri command: `frontend/src-tauri/src/`
+- Server HTTP / RPC / Gateway / Protocol Adaptation: `backend/crates/service/src/`
+- Database migration, storage infrastructure: `backend/crates/core/`
+- Release and build scripts: `backend/scripts/`, `.github/workflows/`
 
 ### 3.2 Current high-risk files
 
 The following files are obviously too large, so you must refrain from adding general control logic when modifying them:
 
-- `apps/src/main.js`
-- `apps/src-tauri/src/lib.rs`
-- `crates/service/src/lib.rs`
-- `crates/service/src/gateway/protocol_adapter/response_conversion.rs`
+- `frontend/src/main.js`
+- `frontend/src-tauri/src/lib.rs`
+- `backend/crates/service/src/lib.rs`
+- `backend/crates/service/src/gateway/protocol_adapter/response_conversion.rs`
 - `.github/workflows/release-all.yml`
 
 ### 3.3 Large file warning threshold
@@ -112,7 +112,7 @@ illustrate:
 - Do not treat README as a changelog for long-term maintenance.
 - Do not change scripts, workflows, or version numbers without verification.
 - Don't roll back user changes you didn't create.
-- Do not copy and expand the inline script in the release workflow again, reuse `scripts/release/` first.
+- Do not copy and expand the inline script in the release workflow again, reuse `backend/scripts/release/` first.
 
 ## 4. Check before submission
 
@@ -123,30 +123,30 @@ Perform at least the following content according to the scope of changes:
 Front-end changes:
 
 ```bash
-pnpm -C apps run test
-pnpm -C apps run build
-pnpm -C apps run test:ui
+pnpm -C frontend run test
+pnpm -C frontend run build
+pnpm -C frontend run test:ui
 ```
 
 Rust/server-side changes:
 
 ```bash
-cargo test --workspace
+cargo test --manifest-path backend/Cargo.toml --workspace
 ```
 
 Desktop/packaging link changes:
 
 ```powershell
-pwsh -NoLogo -NoProfile -File scripts/rebuild.ps1 -DryRun
+pwsh -NoLogo -NoProfile -File backend/scripts/rebuild.ps1 -DryRun
 ```
 
 ### 4.2 Changes related to protocol adaptation
 
 If the following paths are changed, minimum regression verification must be performed:
 
-- `crates/service/src/gateway/`
-- `crates/service/src/http/`
-- `crates/service/src/lib.rs`
+- `backend/crates/service/src/gateway/`
+- `backend/crates/service/src/http/`
+- `backend/crates/service/src/lib.rs`
 
 Minimum coverage:
 
@@ -191,7 +191,7 @@ Before each release, you must confirm:
 
 1. `CHANGELOG.md` Updated.
 2. `README.md` is consistent with the current version entry of `docs/en/README.md`.
-3. Consistent with versions `Cargo.toml`, `apps/src-tauri/Cargo.toml`, and `apps/src-tauri/tauri.conf.json`.
+3. Consistent with versions `backend/Cargo.toml`, `frontend/src-tauri/Cargo.toml`, and `frontend/src-tauri/tauri.conf.json`.
 4. The release workflow input description, script parameter description, and actual workflow are consistent.
 5. High-risk compatibility paths complete at least one round of local verification.
 6. If you change product naming or release type logic, you must verify `prerelease` and tag behavior.

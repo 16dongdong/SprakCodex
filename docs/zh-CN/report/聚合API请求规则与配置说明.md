@@ -729,7 +729,7 @@ Codex/compatible 连通性 probe 仍会按 Codex 请求规则生成独立的 `se
 前端 API 封装在：
 
 ```text
-apps/src/lib/api/account-client.ts
+frontend/src/lib/api/account-client.ts
 ```
 
 桌面端调用必须走 `invoke` / `invokeFirst` 和 `withAddr()`，不要直接 `fetch()` service。

@@ -40,11 +40,11 @@ ignore_invalid_headers off;
 
 对于 CodexManager 来说，这会影响两条关键链路：
 
-1. `crates/service/src/gateway/request/incoming_headers.rs`
+1. `backend/crates/service/src/gateway/request/incoming_headers.rs`
    这里负责从入站请求中提取 `conversation_id`、`session_id`、`x-codex-turn-state` 等头。
-2. `crates/service/src/gateway/request/session_affinity.rs`
+2. `backend/crates/service/src/gateway/request/session_affinity.rs`
    这里会基于这些头计算稳定的会话锚点。
-3. `crates/service/src/gateway/request/request_rewrite_responses.rs`
+3. `backend/crates/service/src/gateway/request/request_rewrite_responses.rs`
    这里会把线程锚点写回 `prompt_cache_key`。
 
 一旦代理层把头吞掉，后端就只能退化为“不稳定的 fallback 会话”，自然很难拿到和桌面端相同的缓存命中。
@@ -134,7 +134,7 @@ proxy_send_timeout 600s;
 send_timeout 600s;
 ```
 
-当前仓库里的 `docker/nginx/nginx.conf` 已经内置了这一条专用配置，可直接作为部署基线。
+当前仓库里的 `backend/docker/nginx/nginx.conf` 已经内置了这一条专用配置，可直接作为部署基线。
 
 ### 5. 给 `/v1/images/` 图片生成入口单独保守配置
 
@@ -157,13 +157,13 @@ proxy_send_timeout 3600s;
 send_timeout 3600s;
 ```
 
-当前仓库里的 `docker/nginx/nginx.conf` 已在直连 service 与 Web 代理两个 server 块中都包含 `location ^~ /v1/images/`，两个公网入口都可直接作为图片生成部署基线。Web 入口还为精确 `/v1/responses` 配置了同样的 3600 秒超时，用于覆盖非流式 `image_generation` 工具调用。
+当前仓库里的 `backend/docker/nginx/nginx.conf` 已在直连 service 与 Web 代理两个 server 块中都包含 `location ^~ /v1/images/`，两个公网入口都可直接作为图片生成部署基线。Web 入口还为精确 `/v1/responses` 配置了同样的 3600 秒超时，用于覆盖非流式 `image_generation` 工具调用。
 
 ## 推荐示例配置
 
 可直接参考：
 
-- [`docker/nginx/nginx.conf`](../../../docker/nginx/nginx.conf)
+- [`backend/docker/nginx/nginx.conf`](../../../backend/docker/nginx/nginx.conf)
 
 这份示例同时覆盖了：
 
@@ -216,8 +216,8 @@ Cloudflare 会增加代理链路复杂度，但这类问题最常见的直接原
 
 ## 源码依据
 
-- [`crates/service/src/gateway/request/incoming_headers.rs`](../../../crates/service/src/gateway/request/incoming_headers.rs)
-- [`crates/service/src/gateway/request/session_affinity.rs`](../../../crates/service/src/gateway/request/session_affinity.rs)
-- [`crates/service/src/gateway/request/request_rewrite_responses.rs`](../../../crates/service/src/gateway/request/request_rewrite_responses.rs)
-- [`crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs`](../../../crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs)
-- [`crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs`](../../../crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs)
+- [`backend/crates/service/src/gateway/request/incoming_headers.rs`](../../../backend/crates/service/src/gateway/request/incoming_headers.rs)
+- [`backend/crates/service/src/gateway/request/session_affinity.rs`](../../../backend/crates/service/src/gateway/request/session_affinity.rs)
+- [`backend/crates/service/src/gateway/request/request_rewrite_responses.rs`](../../../backend/crates/service/src/gateway/request/request_rewrite_responses.rs)
+- [`backend/crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs`](../../../backend/crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs)
+- [`backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs`](../../../backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs)

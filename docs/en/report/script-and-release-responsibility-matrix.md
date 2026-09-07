@@ -1,12 +1,12 @@
 # Comparison of scripts and publishing responsibilities
 
-## Comparison table between `.github/actions/` and `scripts/release/`
+## Comparison table between `.github/actions/` and `backend/scripts/release/`
 
 | Scenario | GitHub Action | Corresponding script/responsibility |
 |---|---|---|
-| Tauri Build retry | `build-tauri-with-retry` | `scripts/release/build-tauri-with-retry.ps1` / `.sh` |
-| Service Packaging | `stage-service-package` | `scripts/release/stage-service-package.ps1` / `.sh` |
-| GitHub Release | `publish-github-release` | `scripts/release/publish-github-release.sh` |
+| Tauri Build retry | `build-tauri-with-retry` | `backend/scripts/release/build-tauri-with-retry.ps1` / `.sh` |
+| Service Packaging | `stage-service-package` | `backend/scripts/release/stage-service-package.ps1` / `.sh` |
+| GitHub Release | `publish-github-release` | `backend/scripts/release/publish-github-release.sh` |
 | Release environment preparation | `setup-release-env` | Workflow internal environment assembly, currently there is no completely equivalent independent top-level script |
 | Front-end dist preparation | `prepare-frontend-dist` | Build/download front-end product endpoint within workflow, currently there is no separate top-level script |
 
@@ -20,7 +20,7 @@ Responsible for:
 - Unify input and output across jobs
 - CI/Release environment encapsulation
 
-### `scripts/release/`
+### `backend/scripts/release/`
 
 Responsible for:
 
@@ -28,7 +28,7 @@ Responsible for:
 - Script implementation called locally or by workflow
 - Try to keep it independently executable
 
-### `scripts/*.ps1|*.sh`
+### `backend/scripts/*.ps1|*.sh`
 
 Responsible for:
 
@@ -56,7 +56,7 @@ Reason:
 
 The more appropriate strategy at this stage is not deletion, but:
 
-1. Use `scripts/README.md` to indicate entrance stratification
+1. Use `backend/scripts/README.md` to indicate entrance stratification
 2. Describe CI-specific scripts and local entries separately
 3. If a script is not referenced in multiple versions in a row, consider archiving or merging it.
 

@@ -5,7 +5,7 @@ inputs:
   working-directory:
     description: Working directory that contains the Tauri app
     required: false
-    default: apps
+    default: frontend
   tauri-cli-version:
     description: Tauri CLI version
     required: true

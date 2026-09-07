@@ -29,11 +29,11 @@ headers such as `conversation_id` and `session_id` may be treated as invalid and
 
 That directly affects these paths:
 
-1. `crates/service/src/gateway/request/incoming_headers.rs`
+1. `backend/crates/service/src/gateway/request/incoming_headers.rs`
    extracts `conversation_id`, `session_id`, `x-codex-turn-state`, and related headers.
-2. `crates/service/src/gateway/request/session_affinity.rs`
+2. `backend/crates/service/src/gateway/request/session_affinity.rs`
    computes the effective thread anchor.
-3. `crates/service/src/gateway/request/request_rewrite_responses.rs`
+3. `backend/crates/service/src/gateway/request/request_rewrite_responses.rs`
    rewrites the request body with a stable `prompt_cache_key`.
 
 If the proxy strips those headers, the backend falls back to a weaker session anchor and prompt cache reuse becomes unstable.
@@ -114,7 +114,7 @@ proxy_send_timeout 600s;
 send_timeout 600s;
 ```
 
-The repository's `docker/nginx/nginx.conf` now includes this dedicated compact block and can be used as the deployment baseline.
+The repository's `backend/docker/nginx/nginx.conf` now includes this dedicated compact block and can be used as the deployment baseline.
 
 ### 5. Give `/v1/images/` its own conservative proxy block
 
@@ -137,13 +137,13 @@ proxy_send_timeout 3600s;
 send_timeout 3600s;
 ```
 
-The repository's `docker/nginx/nginx.conf` now includes `location ^~ /v1/images/` in both the direct service and Web proxy server blocks, so either public entry point can be used as the image-generation deployment baseline. The Web entry point also gives the exact `/v1/responses` route the same 3600-second timeout for non-streaming `image_generation` tool calls.
+The repository's `backend/docker/nginx/nginx.conf` now includes `location ^~ /v1/images/` in both the direct service and Web proxy server blocks, so either public entry point can be used as the image-generation deployment baseline. The Web entry point also gives the exact `/v1/responses` route the same 3600-second timeout for non-streaming `image_generation` tool calls.
 
 ## Recommended example config
 
 See:
 
-- [`docker/nginx/nginx.conf`](../../../docker/nginx/nginx.conf)
+- [`backend/docker/nginx/nginx.conf`](../../../backend/docker/nginx/nginx.conf)
 
 The sample covers:
 
@@ -195,8 +195,8 @@ Not necessarily. CodexManager logs what the upstream usage reports. If the threa
 
 ## Source references
 
-- [`crates/service/src/gateway/request/incoming_headers.rs`](../../../crates/service/src/gateway/request/incoming_headers.rs)
-- [`crates/service/src/gateway/request/session_affinity.rs`](../../../crates/service/src/gateway/request/session_affinity.rs)
-- [`crates/service/src/gateway/request/request_rewrite_responses.rs`](../../../crates/service/src/gateway/request/request_rewrite_responses.rs)
-- [`crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs`](../../../crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs)
-- [`crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs`](../../../crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs)
+- [`backend/crates/service/src/gateway/request/incoming_headers.rs`](../../../backend/crates/service/src/gateway/request/incoming_headers.rs)
+- [`backend/crates/service/src/gateway/request/session_affinity.rs`](../../../backend/crates/service/src/gateway/request/session_affinity.rs)
+- [`backend/crates/service/src/gateway/request/request_rewrite_responses.rs`](../../../backend/crates/service/src/gateway/request/request_rewrite_responses.rs)
+- [`backend/crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs`](../../../backend/crates/service/src/gateway/observability/http_bridge/aggregate/output_text.rs)
+- [`backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs`](../../../backend/crates/service/src/gateway/protocol_adapter/response_conversion/sse_conversion/openai_sse_anthropic_bridge.rs)
