@@ -28,10 +28,24 @@ test("账号直连模式说明观测口径并保持用量分析可见", async ()
   assert.doesNotMatch(source, /智能推荐/);
 });
 
-test("日志页 direct 模式只提示日志口径不遮罩历史日志", async () => {
+// 用户要求彻底移除直连提示与跳转入口；连同只服务于提示条的轮询和 props 一并检查。
+test("日志页不保留直连提示条、跳转网关按钮或模式轮询", async () => {
   const source = await readSource("src/app/logs/page.tsx");
-  assert.match(source, /useCodexProfileModeStatus/);
+  const sections = await readSource("src/app/logs/page-sections.tsx");
+  assert.doesNotMatch(source, /useCodexProfileModeStatus|isDirectAccountMode/);
+  assert.doesNotMatch(sections, /isDirectAccountMode|去切换为本地网关|账号直连模式不会产生/);
   assert.doesNotMatch(source, /DirectModeUnavailable/);
+});
+
+// 删除的提示不应藏在其他语言资源中，避免后续引用旧 key 又把引导条或遮罩带回页面。
+test("所有语言移除直连限制提示的弃用文案", async () => {
+  const obsoleteCopy = /账号直连模式不会产生新的 CodexManager 请求日志|这里仅展示历史网关请求|去切换为本地网关|仅网关流量|账号直连模式下不会产生请求日志|账号直连模式下不可用|切换到本地网关后可统计请求日志、Token 和费用|CodexManager 无法统计 CLI 请求日志和用量。/;
+  for (const language of ["en", "ko", "ru"]) {
+    const common = await readSource(`src/lib/i18n/messages/${language}.ts`);
+    const dashboard = await readSource(`src/lib/i18n/messages/sections/${language}-dashboard.ts`);
+    assert.doesNotMatch(common, obsoleteCopy);
+    assert.doesNotMatch(dashboard, obsoleteCopy);
+  }
 });
 
 test("启动快照只预取轻量日志样本", async () => {

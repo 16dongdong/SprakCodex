@@ -3,8 +3,6 @@
 import type { MessageCatalog } from "../types";
 
 export const EN_DASHBOARD_MESSAGES: MessageCatalog = {
-  "CodexManager 无法统计 CLI 请求日志和用量。":
-    "CodexManager cannot collect CLI request logs or usage.",
   "OpenAI 账号今日消耗": "OpenAI account usage today",
   "OpenAI 账号区间消耗": "OpenAI account usage in range",
   "Top Key": "Top key",
@@ -17,8 +15,6 @@ export const EN_DASHBOARD_MESSAGES: MessageCatalog = {
   "今日/缓存/推理 用量": "Today / cached / reasoning usage",
   今日用量: "Usage today",
   今日请求: "Requests today",
-  "切换到本地网关后可统计请求日志、Token 和费用":
-    "Switch to local gateway mode to collect request logs, tokens, and costs",
   "创建 Key": "Create key",
   "区间缓存 / 推理": "Range cached / reasoning",
   区间请求: "Range requests",
@@ -97,7 +93,6 @@ export const EN_DASHBOARD_MESSAGES: MessageCatalog = {
   "请稍后重试或检查核心服务状态。":
     "Try again later or check the core service status.",
   "请稍后重试或检查登录状态。": "Try again later or check your login status.",
-  账号直连模式下不可用: "Unavailable in direct account mode",
   费用: "Cost",
   "输入 / 输出": "Input / output",
   近期请求: "Recent requests",

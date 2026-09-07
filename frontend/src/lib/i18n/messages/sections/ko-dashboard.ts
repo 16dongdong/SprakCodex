@@ -3,8 +3,6 @@
 import type { MessageCatalog } from "../types";
 
 export const KO_DASHBOARD_MESSAGES: MessageCatalog = {
-  "CodexManager 无法统计 CLI 请求日志和用量。":
-    "CodexManager는 CLI 요청 로그와 사용량을 집계할 수 없습니다.",
   "OpenAI 账号今日消耗": "오늘 OpenAI 계정 사용량",
   "OpenAI 账号区间消耗": "기간 내 OpenAI 계정 사용량",
   "Top Key": "상위 Key",
@@ -17,8 +15,6 @@ export const KO_DASHBOARD_MESSAGES: MessageCatalog = {
   "今日/缓存/推理 用量": "오늘 / 캐시 / 추론 사용량",
   今日用量: "오늘 사용량",
   今日请求: "오늘 요청",
-  "切换到本地网关后可统计请求日志、Token 和费用":
-    "로컬 게이트웨이로 전환하면 요청 로그, 토큰, 비용을 집계할 수 있습니다",
   "创建 Key": "Key 생성",
   "区间缓存 / 推理": "기간 캐시 / 추론",
   区间请求: "기간 요청",
@@ -95,7 +91,6 @@ export const KO_DASHBOARD_MESSAGES: MessageCatalog = {
   "请稍后重试或检查核心服务状态。":
     "잠시 후 다시 시도하거나 코어 서비스 상태를 확인하세요.",
   "请稍后重试或检查登录状态。": "잠시 후 다시 시도하거나 로그인 상태를 확인하세요.",
-  账号直连模式下不可用: "계정 직결 모드에서는 사용할 수 없음",
   费用: "비용",
   "输入 / 输出": "입력 / 출력",
   近期请求: "최근 요청",

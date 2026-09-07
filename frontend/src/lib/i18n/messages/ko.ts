@@ -300,8 +300,6 @@ export const KO_MESSAGES: MessageCatalog = {
   "已唤起 ccswitch，请在确认窗口完成导入":
     "ccswitch를 열었습니다. 확인 창에서 가져오기를 완료하세요.",
   "唤起 ccswitch 失败": "ccswitch 열기 실패",
-  "当前为账号直连，Codex CLI 直连 OpenAI，CodexManager 无法统计 CLI 请求日志和用量。":
-    "현재 계정 직결 모드입니다. Codex CLI가 OpenAI에 직접 연결되므로 CodexManager는 CLI 요청 로그나 사용량을 집계할 수 없습니다.",
   "当前为本地网关，Codex CLI 经过 CodexManager 转发，请求日志、Token 和费用统计可用。":
     "현재 로컬 게이트웨이 모드입니다. Codex CLI 요청이 CodexManager를 통해 전달되므로 요청 로그, 토큰, 비용 통계를 사용할 수 있습니다.",
   "选择账号直连或本地网关后，CodexManager 会接管该 Codex profile 的 auth.json / config.toml。":
@@ -1535,14 +1533,6 @@ export const KO_MESSAGES: MessageCatalog = {
   转发路径: "전달 경로",
   上游模型: "업스트림 모델",
   实际来源: "실제 소스",
-  "账号直连模式不会产生新的 CodexManager 请求日志":
-    "계정 직결 모드에서는 새로운 CodexManager 요청 로그가 생성되지 않습니다",
-  "这里仅展示历史网关请求；如需记录请求，请切换到本地网关模式。":
-    "여기에는 과거 게이트웨이 요청만 표시됩니다. 요청 로그가 필요하면 로컬 게이트웨이 모드로 전환하세요.",
-  去切换为本地网关: "로컬 게이트웨이로 전환",
-  仅网关流量: "게이트웨이 트래픽만",
-  "账号直连模式下不会产生请求日志，如需记录请求请切换到本地网关模式。":
-    "계정 직결 모드에서는 요청 로그가 생성되지 않습니다. 로그가 필요하면 로컬 게이트웨이 모드로 전환하세요.",
   未分配: "미할당",
   按我的平台密钥累计: "내 플랫폼 키 기준 누적",
   归属成员: "소유 멤버",

@@ -23,7 +23,6 @@ import {
   useAppSession,
 } from "@/hooks/useAppSession";
 import { useLocalDayRange } from "@/hooks/useLocalDayRange";
-import { useCodexProfileModeStatus } from "@/hooks/useCodexProfileModeStatus";
 import { usePageTransitionReady } from "@/hooks/usePageTransitionReady";
 import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
 import { useI18n } from "@/lib/i18n/provider";
@@ -56,6 +55,7 @@ function getLogRefreshIntervalMs(
   return hasActiveFilter ? LOG_REFRESH_FILTERED_MS : LOG_REFRESH_ACTIVE_MS;
 }
 
+// 日志按当前服务和筛选条件展示，不根据 Codex 接入模式弹出提示或遮罩；请求失败仍由查询状态反馈。
 function LogsPageContent() {
   const { t } = useI18n();
   const localDayRange = useLocalDayRange();
@@ -67,10 +67,6 @@ function LogsPageContent() {
   const role = resolveSessionRole(session, isSessionLoading, isDesktopRuntime);
   const isAdminMode = isAdminRole(role);
   const isPageActive = useDesktopPageActive("/logs/");
-  const { isDirectAccountMode } = useCodexProfileModeStatus({
-    enabled: isAdminMode && isPageActive,
-    refetchIntervalMs: 10_000,
-  });
   const queryClient = useQueryClient();
   const areLogQueriesEnabled = useDeferredDesktopActivation(serviceStatus.connected);
   const routeQuery = searchParams.get("query") || "";
@@ -416,7 +412,6 @@ function LogsPageContent() {
       <RequestLogsTabContent
         t={t}
         isAdminMode={isAdminMode}
-        isDirectAccountMode={isDirectAccountMode}
         serviceConnected={serviceStatus.connected}
         search={searchInput}
         filter={filter}

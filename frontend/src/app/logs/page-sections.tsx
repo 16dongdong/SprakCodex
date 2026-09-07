@@ -55,8 +55,8 @@ import {
 } from "./page-helpers";
 import type { AggregateApi, ApiKey, RequestLog, RequestLogFilterSummary } from "@/types";
 
+// 展示已有请求与统计，不接收接入模式参数；移除旧提示后也移除无用的模式依赖，避免后台重复查询。
 export function RequestLogsTabContent({
-  isDirectAccountMode: _isDirectAccountMode,
   t,
   isAdminMode,
   serviceConnected,
@@ -92,7 +92,6 @@ export function RequestLogsTabContent({
   onNextPage,
   onJumpPage,
 }: {
-  isDirectAccountMode: boolean;
   t: TranslateFn;
   isAdminMode: boolean;
   serviceConnected: boolean;
@@ -146,8 +145,6 @@ export function RequestLogsTabContent({
 
   return (
     <div className="space-y-4">
-
-
       <Card className="glass-card mission-panel overflow-hidden gap-0 py-0 shadow-sm">
         <CardContent className="p-0">
           <div className={cn("grid", filtersExpanded ? "xl:grid-cols-[minmax(0,1fr)_390px]" : "")}>
