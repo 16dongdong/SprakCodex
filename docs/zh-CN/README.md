@@ -12,45 +12,6 @@
 - `release/*`：构建、发版、产物和发布流程说明。
 - `docs/plan/*` / `docs/decision/*`：长期治理、实施计划与决策记录。
 
-## 赞助商
-
-感谢以下赞助商对 CodexManager 的支持。
-
-<table>
-  <tr>
-    <td align="center" valign="middle" width="180">
-      <a href="https://www.aixiamo.com/?utm_source=github&utm_medium=sponsor&utm_campaign=codex_manager">
-        <img src="../../assets/images/sponsors/aixiamo.jpg" alt="AI夏末 AIXiamo" width="120" />
-      </a>
-    </td>
-    <td valign="top">
-      <strong><a href="https://www.aixiamo.com/?utm_source=github&utm_medium=sponsor&utm_campaign=codex_manager&utm_content=sponsor_text">AIXiamo（独立 AI 订阅服务）</a></strong>：提供 <a href="https://www.aixiamo.com/articles/codex-quota-not-enough-plus-pro-api-2026?utm_source=github&utm_medium=sponsor&utm_campaign=codex_manager&utm_content=developer_codex_quota">ChatGPT Plus / Pro 国内充值与 Codex 额度选择</a>，也覆盖 Claude Max 5x / 20x、Google AI Pro（Gemini）和 SuperGrok；支持支付宝，无需海外银行卡，订单状态可查询。
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="middle" width="180">
-      <a href="https://apikey.fun/register?aff=Codex-Manager">
-        <img src="../../assets/images/sponsors/APIKey.Fun.png" alt="APIKEY.FUN" width="120" />
-      </a>
-    </td>
-    <td valign="top">
-      感谢 <strong>APIKEY.FUN</strong> 赞助本项目！APIKEY.FUN 是一家专业的企业级 AI 中转站，致力于为企业和个人开发者提供稳定、高效、低成本的 AI 模型 API 接入服务。平台支持 Claude、OpenAI、Gemini 等主流热门模型，价格低至官方原价的 7%。通过本项目<a href="https://apikey.fun/register?aff=Codex-Manager">专属链接</a>注册，还可享受最高 <strong>充值永久 95 折</strong> 专属优惠。
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="middle" width="180">
-      <a href="https://gzxsy.vip/register?aff=eapz">
-        <img src="../../assets/images/sponsors/xingsiyan.jpg" alt="星思研中转站" width="120" />
-      </a>
-    </td>
-    <td valign="top">
-      <strong>星思研中转站</strong> 为 Claude Code、Codex、Gemini 等模型调用场景提供稳定中转与配套服务，适合需要高可用接口、便捷接入和持续交付支持的开发者与团队。可前往<a href="https://gzxsy.vip/register?aff=eapz">官网</a>了解最新方案。
-    </td>
-  </tr>
-</table>
-
-其他支持者：[Wonderdch](https://github.com/Wonderdch)、[suxinwl](https://github.com/suxinwl)、[Hermit](https://github.com/HermitChen)、[Suifeng023](https://github.com/Suifeng023)、[HK-hub](https://github.com/HK-hub)
-
 ## 文档首页
 | 如果你现在要做什么 | 建议先看 |
 | --- | --- |
@@ -144,6 +105,3 @@
 - 架构总览继续维护在 `ARCHITECTURE.md`。
 - 协作规范继续维护在 `CONTRIBUTING.md`。
 - 不要把未发版更新同时写进多个长文档；需要对外说明时，优先补 `CHANGELOG.md`，README 只保留摘要和入口。
-
-## 联系方式
-- Telegram 群聊：[CodexManager TG 群](https://t.me/+OdpFa9GvjxhjMDhl)

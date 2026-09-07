@@ -5,10 +5,6 @@ use chrono::Local;
 use serde_json::Value;
 use std::collections::{BTreeMap, HashMap};
 
-use super::author_links::{
-    default_author_server_recommendations, default_author_sponsors, load_author_link_items,
-    serialize_author_link_items,
-};
 use super::{
     current_background_tasks_snapshot_value, current_env_overrides,
     current_gateway_account_max_inflight, current_gateway_compact_model_forward_rules,
@@ -25,7 +21,6 @@ use super::{
     normalize_ui_theme, normalize_ui_zoom_factor, parse_bool_with_default,
     residency_requirement_options, save_env_overrides_value, save_persisted_app_setting,
     save_persisted_bool_setting, sync_runtime_settings_from_storage,
-    APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY, APP_SETTING_AUTHOR_SPONSORS_KEY,
     APP_SETTING_AUTO_START_ENABLED_KEY, APP_SETTING_CLOSE_TO_TRAY_ON_CLOSE_KEY,
     APP_SETTING_ENV_OVERRIDES_KEY, APP_SETTING_GATEWAY_ACCOUNT_MAX_INFLIGHT_KEY,
     APP_SETTING_GATEWAY_BACKGROUND_TASKS_KEY, APP_SETTING_GATEWAY_COMPACT_MODEL_FORWARD_RULES_KEY,
@@ -150,6 +145,7 @@ pub(super) fn current_app_settings_value_persisted(
         true,
     )
 }
+// 读取产品设置并按 persist_snapshot 决定是否持久化快照；不再加载推广配置，存储初始化错误继续向调用方返回。
 fn current_app_settings_value_inner(
     close_to_tray_on_close: Option<bool>,
     close_to_tray_supported: Option<bool>,
@@ -239,16 +235,6 @@ fn current_app_settings_value_inner(
         .get(APP_SETTING_PLUGIN_MARKET_SOURCE_URL_KEY)
         .cloned()
         .unwrap_or_default();
-    let author_sponsors = load_author_link_items(
-        &settings,
-        APP_SETTING_AUTHOR_SPONSORS_KEY,
-        &default_author_sponsors(),
-    );
-    let author_server_recommendations = load_author_link_items(
-        &settings,
-        APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY,
-        &default_author_server_recommendations(),
-    );
     let plugin_market_mode = settings
         .get(APP_SETTING_PLUGIN_MARKET_MODE_KEY)
         .map(|value| normalize_market_mode(value))
@@ -264,9 +250,6 @@ fn current_app_settings_value_inner(
         .map_err(|err| format!("serialize background tasks failed: {err}"))?;
     let quota_guard_raw = serde_json::to_string(&quota_guard)
         .map_err(|err| format!("serialize quota guard settings failed: {err}"))?;
-    let author_sponsors_raw = serialize_author_link_items(&author_sponsors)?;
-    let author_server_recommendations_raw =
-        serialize_author_link_items(&author_server_recommendations)?;
     let env_overrides = current_env_overrides();
     let auth_status = crate::app_auth_status_value().unwrap_or_else(|_| {
         serde_json::json!({
@@ -304,8 +287,6 @@ fn current_app_settings_value_inner(
             &quota_guard_raw,
             &plugin_market_mode,
             &plugin_market_source_url,
-            &author_sponsors_raw,
-            &author_server_recommendations_raw,
             upstream_proxy_url.as_deref(),
             &upstream_proxy_bypass_hosts,
             upstream_stream_timeout_ms,
@@ -376,8 +357,6 @@ fn current_app_settings_value_inner(
         "gatewayResidencyRequirement": gateway_residency_requirement,
         "pluginMarketMode": plugin_market_mode,
         "pluginMarketSourceUrl": plugin_market_source_url,
-        "authorSponsors": author_sponsors,
-        "authorServerRecommendations": author_server_recommendations,
         "gatewayResidencyRequirementOptions": residency_requirement_options(),
         "upstreamProxyUrl": upstream_proxy_url.unwrap_or_default(),
         "upstreamStreamTimeoutMs": upstream_stream_timeout_ms,
@@ -462,26 +441,6 @@ fn current_app_settings_value_inner(
         );
     }
     Ok(result)
-}
-
-pub(super) fn current_author_content_value() -> Result<Value, String> {
-    initialize_storage_if_needed()?;
-    sync_runtime_settings_from_storage();
-    let settings = list_app_settings_map();
-    let author_sponsors = load_author_link_items(
-        &settings,
-        APP_SETTING_AUTHOR_SPONSORS_KEY,
-        &default_author_sponsors(),
-    );
-    let author_server_recommendations = load_author_link_items(
-        &settings,
-        APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY,
-        &default_author_server_recommendations(),
-    );
-    Ok(serde_json::json!({
-        "authorSponsors": author_sponsors,
-        "authorServerRecommendations": author_server_recommendations,
-    }))
 }
 
 /// 函数 `load_free_account_max_model_options`
@@ -576,40 +535,7 @@ fn is_free_account_max_model_option(slug: &str) -> bool {
     !normalized.is_empty() && normalized.starts_with("gpt-") && normalized != "gpt-5.4-pro"
 }
 
-/// 函数 `persist_current_snapshot`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - update_auto_check: 参数 update_auto_check
-/// - persisted_close_to_tray: 参数 persisted_close_to_tray
-/// - lightweight_mode_on_close_to_tray: 参数 lightweight_mode_on_close_to_tray
-/// - low_transparency: 参数 low_transparency
-/// - theme: 参数 theme
-/// - appearance_preset: 参数 appearance_preset
-/// - service_addr: 参数 service_addr
-/// - service_listen_mode: 参数 service_listen_mode
-/// - route_strategy: 参数 route_strategy
-/// - free_account_max_model: 参数 free_account_max_model
-/// - account_max_inflight: 参数 account_max_inflight
-/// - gateway_originator: 参数 gateway_originator
-/// - gateway_user_agent_version: 参数 gateway_user_agent_version
-/// - gateway_residency_requirement: 参数 gateway_residency_requirement
-/// - plugin_market_mode: 参数 plugin_market_mode
-/// - plugin_market_source_url: 参数 plugin_market_source_url
-/// - author_sponsors_raw: 参数 author_sponsors_raw
-/// - author_server_recommendations_raw: 参数 author_server_recommendations_raw
-/// - upstream_proxy_url: 参数 upstream_proxy_url
-/// - upstream_stream_timeout_ms: 参数 upstream_stream_timeout_ms
-/// - upstream_total_timeout_ms: 参数 upstream_total_timeout_ms
-/// - sse_keepalive_interval_ms: 参数 sse_keepalive_interval_ms
-/// - background_tasks_raw: 参数 background_tasks_raw
-/// - env_overrides: 参数 env_overrides
-///
-/// # 返回
-/// 无
+// 在服务设置读取路径保存当前产品配置；参数为已归一化快照，不再写入推广键，其他设置的持久化语义保持不变。
 fn persist_current_snapshot(
     settings: &HashMap<String, String>,
     update_auto_check: bool,
@@ -637,8 +563,6 @@ fn persist_current_snapshot(
     quota_guard_raw: &str,
     plugin_market_mode: &str,
     plugin_market_source_url: &str,
-    author_sponsors_raw: &str,
-    author_server_recommendations_raw: &str,
     upstream_proxy_url: Option<&str>,
     upstream_proxy_bypass_hosts: &str,
     upstream_stream_timeout_ms: u64,
@@ -739,11 +663,6 @@ fn persist_current_snapshot(
         } else {
             Some(plugin_market_mode)
         },
-    );
-    let _ = save_persisted_app_setting(APP_SETTING_AUTHOR_SPONSORS_KEY, Some(author_sponsors_raw));
-    let _ = save_persisted_app_setting(
-        APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY,
-        Some(author_server_recommendations_raw),
     );
     let _ = save_persisted_app_setting(
         APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY,

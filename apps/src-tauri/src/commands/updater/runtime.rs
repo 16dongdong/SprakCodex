@@ -4,7 +4,8 @@ use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-pub(super) const DEFAULT_UPDATE_REPO: &str = "qxcnm/Codex-Manager";
+// 独立发行版只检查当前仓库，避免自动更新重新引入上游的推广页面。
+pub(super) const DEFAULT_UPDATE_REPO: &str = "16dongdong/CodexManager";
 pub(super) const PORTABLE_MARKER_FILE: &str = ".codexmanager-portable";
 pub(super) const USER_AGENT: &str = "CodexManager-Updater";
 static UPDATE_HTTP_CLIENT: OnceLock<Mutex<Option<Client>>> = OnceLock::new();

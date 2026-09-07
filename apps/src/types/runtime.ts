@@ -5,7 +5,6 @@ export type RuntimeMode = "desktop-tauri" | "web-gateway" | "unsupported-web";
 export interface RuntimeCapabilities {
   mode: RuntimeMode;
   rpcBaseUrl: string;
-  authorContentUrl?: string | null;
   canManageService: boolean;
   canSelfUpdate: boolean;
   canAutoStart: boolean;

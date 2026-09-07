@@ -71,7 +71,6 @@ It follows Keep a Changelog with a lightweight adaptation for this repository.
 - Bumped the release version to `0.5.4` and synchronized the workspace, frontend package, Tauri desktop metadata, and lockfiles.
 - Aligned Responses WebSocket behavior with the official semantics: bounded heartbeats and recovery, connection-limit continuation, large image frames, compression-negotiation fallback, safe first-frame/preamble replay, and account reselection while preserving HTTP fallback after the recovery budget is exhausted.
 - Improved CI reliability for Cargo Git dependencies with CLI fetches, network retries, locked dependency prefetching, and caching without retrying real build or test failures.
-- Updated AIXiamo sponsor entry points, tutorial links, and related copy.
 
 ### Fixed
 
@@ -160,7 +159,6 @@ It follows Keep a Changelog with a lightweight adaptation for this repository.
 
 ### Changed
 
-- Shortened the AIXiamo sponsor copy to highlight ChatGPT, Claude, and Codex top-up assistance for users in China without an international bank card, together with after-sales support.
 - Tightened Codex gateway detection and now prefer the current provider gateway URL, avoiding false Codex classification for ordinary OpenAI-compatible endpoints while preserving compact, Gemini, and multi-candidate fallback behavior (#346).
 - Improved protocol compatibility for native Web Search, Image Generation, `/v1/models`, and Responses WebSocket traffic, including bounded decoding of zstd-encoded content (#363).
 - Bumped the release version to `0.4.3` and synchronized workspace, frontend package, Tauri desktop metadata, and lockfiles.

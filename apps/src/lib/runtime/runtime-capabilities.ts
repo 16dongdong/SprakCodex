@@ -1,19 +1,8 @@
 import type { RuntimeCapabilities, RuntimeMode } from "@/types";
 
 export const DEFAULT_WEB_RPC_BASE_URL = "/api/rpc";
-export const DEFAULT_AUTHOR_CONTENT_URL =
-  "https://author.qxnm.top/api/public/author-content";
-export const DEFAULT_WEB_AUTHOR_CONTENT_URL = DEFAULT_AUTHOR_CONTENT_URL;
 export const DEFAULT_UNSUPPORTED_WEB_REASON =
   "当前页面缺少 CodexManager Web 运行壳，无法访问管理 RPC。请通过 codexmanager-web 打开，或在反向代理中转发 /api/rpc。";
-const CONFIGURED_AUTHOR_CONTENT_URL =
-  normalizeAuthorContentUrl(
-    process.env.NEXT_PUBLIC_CODEXMANAGER_AUTHOR_CONTENT_URL
-  ) || DEFAULT_AUTHOR_CONTENT_URL;
-const CONFIGURED_WEB_AUTHOR_CONTENT_URL = normalizeAuthorContentUrl(
-  process.env.NEXT_PUBLIC_CODEXMANAGER_AUTHOR_CONTENT_URL
-);
-
 export type RuntimeCapabilityView = {
   runtimeCapabilities: RuntimeCapabilities | null;
   mode: RuntimeMode;
@@ -27,7 +16,6 @@ export type RuntimeCapabilityView = {
   canOpenLocalDir: boolean;
   canUseBrowserFileImport: boolean;
   canUseBrowserDownloadExport: boolean;
-  authorContentUrl: string | null;
 };
 
 /**
@@ -84,21 +72,6 @@ function asBoolean(value: unknown, fallback = false): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
 
-export function normalizeAuthorContentUrl(
-  value: string | null | undefined
-): string {
-  const normalized = asString(value);
-  if (!normalized) {
-    return "";
-  }
-  if (/^https?:\/\//i.test(normalized)) {
-    return normalized;
-  }
-  return normalized.startsWith("/") && !normalized.startsWith("//")
-    ? normalized
-    : "";
-}
-
 /**
  * 函数 `normalizeRpcBaseUrl`
  *
@@ -143,24 +116,11 @@ export function isRuntimeMode(value: string): value is RuntimeMode {
   );
 }
 
-/**
- * 函数 `buildDesktopRuntimeCapabilities`
- *
- * 作者: gaohongshun
- *
- * 时间: 2026-04-02
- *
- * # 参数
- * 无
- *
- * # 返回
- * 返回函数执行结果
- */
+// 为桌面启动生成本地能力快照，不附带远程推广地址；返回值仅描述管理功能，无网络副作用。
 export function buildDesktopRuntimeCapabilities(): RuntimeCapabilities {
   return {
     mode: "desktop-tauri",
     rpcBaseUrl: DEFAULT_WEB_RPC_BASE_URL,
-    authorContentUrl: CONFIGURED_AUTHOR_CONTENT_URL,
     canManageService: true,
     canSelfUpdate: true,
     canAutoStart: true,
@@ -172,27 +132,13 @@ export function buildDesktopRuntimeCapabilities(): RuntimeCapabilities {
   };
 }
 
-/**
- * 函数 `buildWebGatewayRuntimeCapabilities`
- *
- * 作者: gaohongshun
- *
- * 时间: 2026-04-02
- *
- * # 参数
- * - rpcBaseUrl: 参数 rpcBaseUrl
- *
- * # 返回
- * 返回函数执行结果
- */
+// 根据 RPC 地址构建 Web 能力；空地址采用同源入口，不包含推广内容发现字段。
 export function buildWebGatewayRuntimeCapabilities(
   rpcBaseUrl = DEFAULT_WEB_RPC_BASE_URL
 ): RuntimeCapabilities {
   return {
     mode: "web-gateway",
     rpcBaseUrl: normalizeRpcBaseUrl(rpcBaseUrl) || DEFAULT_WEB_RPC_BASE_URL,
-    authorContentUrl:
-      CONFIGURED_WEB_AUTHOR_CONTENT_URL || DEFAULT_WEB_AUTHOR_CONTENT_URL,
     canManageService: false,
     canSelfUpdate: false,
     canAutoStart: false,
@@ -204,20 +150,7 @@ export function buildWebGatewayRuntimeCapabilities(
   };
 }
 
-/**
- * 函数 `buildUnsupportedWebCapabilities`
- *
- * 作者: gaohongshun
- *
- * 时间: 2026-04-02
- *
- * # 参数
- * - reason: 参数 reason
- * - rpcBaseUrl: 参数 rpcBaseUrl
- *
- * # 返回
- * 返回函数执行结果
- */
+// 为缺少运行壳的页面生成不可访问管理接口的状态，保留传入原因和 RPC 地址，不发起外部请求。
 export function buildUnsupportedWebCapabilities(
   reason = DEFAULT_UNSUPPORTED_WEB_REASON,
   rpcBaseUrl = DEFAULT_WEB_RPC_BASE_URL
@@ -225,7 +158,6 @@ export function buildUnsupportedWebCapabilities(
   return {
     mode: "unsupported-web",
     rpcBaseUrl: normalizeRpcBaseUrl(rpcBaseUrl) || DEFAULT_WEB_RPC_BASE_URL,
-    authorContentUrl: CONFIGURED_AUTHOR_CONTENT_URL,
     canManageService: false,
     canSelfUpdate: false,
     canAutoStart: false,
@@ -237,20 +169,7 @@ export function buildUnsupportedWebCapabilities(
   };
 }
 
-/**
- * 函数 `normalizeRuntimeCapabilities`
- *
- * 作者: gaohongshun
- *
- * 时间: 2026-04-02
- *
- * # 参数
- * - payload: 参数 payload
- * - fallbackRpcBaseUrl: 参数 fallbackRpcBaseUrl
- *
- * # 返回
- * 返回函数执行结果
- */
+// 将运行壳响应收敛到管理能力白名单；旧响应中的推广字段不再透传，缺失字段沿用对应运行模式默认值。
 export function normalizeRuntimeCapabilities(
   payload: unknown,
   fallbackRpcBaseUrl = DEFAULT_WEB_RPC_BASE_URL
@@ -270,10 +189,6 @@ export function normalizeRuntimeCapabilities(
     rpcBaseUrl:
       normalizeRpcBaseUrl(asString(source.rpcBaseUrl)) ||
       defaultCapabilities.rpcBaseUrl,
-    authorContentUrl:
-      normalizeAuthorContentUrl(asString(source.authorContentUrl)) ||
-      defaultCapabilities.authorContentUrl ||
-      null,
     canManageService: asBoolean(
       source.canManageService,
       defaultCapabilities.canManageService
@@ -307,20 +222,7 @@ export function normalizeRuntimeCapabilities(
   };
 }
 
-/**
- * 函数 `resolveRuntimeCapabilityView`
- *
- * 作者: gaohongshun
- *
- * 时间: 2026-04-02
- *
- * # 参数
- * - runtimeCapabilities: 参数 runtimeCapabilities
- * - desktopFallback: 参数 desktopFallback
- *
- * # 返回
- * 返回函数执行结果
- */
+// 将运行时快照映射为组件能力视图；快照为空时按桌面标志选择默认状态，不再向组件暴露推广地址。
 export function resolveRuntimeCapabilityView(
   runtimeCapabilities: RuntimeCapabilities | null,
   desktopFallback: boolean
@@ -345,6 +247,5 @@ export function resolveRuntimeCapabilityView(
     canOpenLocalDir: resolvedCapabilities.canOpenLocalDir,
     canUseBrowserFileImport: resolvedCapabilities.canUseBrowserFileImport,
     canUseBrowserDownloadExport: resolvedCapabilities.canUseBrowserDownloadExport,
-    authorContentUrl: resolvedCapabilities.authorContentUrl || null,
   };
 }

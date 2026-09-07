@@ -1,4 +1,3 @@
-mod author_links;
 mod current;
 mod patch;
 
@@ -47,7 +46,6 @@ pub(super) use super::ui::{
 };
 pub(super) use super::{normalize_optional_text, parse_bool_with_default};
 pub(super) use super::{
-    APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY, APP_SETTING_AUTHOR_SPONSORS_KEY,
     APP_SETTING_AUTO_START_ENABLED_KEY, APP_SETTING_CLOSE_TO_TRAY_ON_CLOSE_KEY,
     APP_SETTING_ENV_OVERRIDES_KEY, APP_SETTING_GATEWAY_ACCOUNT_MAX_INFLIGHT_KEY,
     APP_SETTING_GATEWAY_BACKGROUND_TASKS_KEY, APP_SETTING_GATEWAY_COMPACT_MODEL_FORWARD_RULES_KEY,
@@ -100,10 +98,6 @@ pub fn app_settings_get_with_overrides(
     close_to_tray_supported: Option<bool>,
 ) -> Result<Value, String> {
     current::current_app_settings_value(close_to_tray_on_close, close_to_tray_supported, None)
-}
-
-pub fn author_content_get() -> Result<Value, String> {
-    current::current_author_content_value()
 }
 
 /// 函数 `app_settings_set`

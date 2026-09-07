@@ -24,7 +24,6 @@ use rand::RngCore;
 use tokio::sync::{watch, Mutex};
 use tower_http::services::{ServeDir, ServeFile};
 
-const DEFAULT_AUTHOR_CONTENT_URL: &str = "https://author.qxnm.top/api/public/author-content";
 const WEB_AUTH_COOKIE_NAME: &str = "codexmanager_web_auth";
 
 #[derive(Clone)]
@@ -359,24 +358,11 @@ fn escape_html(text: &str) -> String {
         .replace('\'', "&#39;")
 }
 
-/// 函数 `runtime_info`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// 无
-///
-/// # 返回
-/// 返回函数执行结果
+// 为同源前端返回管理能力，不提供远程广告地址；无输入和外部请求，返回 JSON 能力描述。
 async fn runtime_info() -> impl IntoResponse {
-    let author_content_url = read_env_trim("CODEXMANAGER_AUTHOR_CONTENT_URL")
-        .unwrap_or_else(|| DEFAULT_AUTHOR_CONTENT_URL.to_string());
     Json(serde_json::json!({
         "mode": "web-gateway",
         "rpcBaseUrl": "/api/rpc",
-        "authorContentUrl": author_content_url,
         "canManageService": false,
         "canSelfUpdate": false,
         "canCloseToTray": false,
@@ -586,7 +572,6 @@ async fn async_main() {
             any(service_gateway::gateway_proxy),
         )
         .route("/api/runtime", get(runtime_info))
-        .route("/api/author-content", get(service_gateway::author_content))
         .route("/__auth_status", get(auth::auth_status))
         .route("/__login", get(auth::login_page).post(auth::login_submit))
         .route("/__logout", get(auth::logout).post(auth::logout))

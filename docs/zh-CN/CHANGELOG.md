@@ -71,7 +71,6 @@
 - 发布版本提升到 `0.5.4`，同步更新 workspace、前端包、Tauri 桌面端与锁文件。
 - 对齐 Responses WebSocket 官方语义：增加有界心跳与恢复、连接上限续接、大图像帧支持、压缩协商回退、首帧/前导事件安全重放和账号重新选择，并在恢复耗尽后保留 HTTP fallback。
 - 提高 CI 的 Cargo Git 依赖获取稳定性：使用 CLI fetch、网络重试、锁定依赖预取和缓存，但不重试实际构建或测试失败。
-- 更新 AIXiamo 赞助入口、教程链接和相关说明。
 
 ### Fixed
 
@@ -160,7 +159,6 @@
 
 ### Changed
 
-- 精简 AIXiamo 赞助说明，突出国内无海外银行卡用户的 ChatGPT、Claude、Codex 充值与售后保障信息。
 - 收紧 Codex 网关识别规则并优先使用当前供应商网关地址，避免将普通 OpenAI 兼容端点误判为 Codex；同时保留 compact、Gemini 及多候选回退行为（#346）。
 - 完善原生 Web Search、Image Generation、`/v1/models` 和 Responses WebSocket 的协议兼容，并支持有界解压 zstd 编码内容（#363）。
 - 发布版本提升到 `0.4.3`，同步更新 workspace、前端包、Tauri 桌面端与锁文件。
@@ -411,7 +409,6 @@
 - 修复平台密钥列表中密钥 ID 默认被截断的问题；现在会直接完整显示，便于核对与排查。
 
 ### Changed
-- README 新增赞助支持入口与赞助区跳转，方便从文档顶部直接定位到赞助说明。
 - 发布版本提升到 `0.1.12`，同步更新 workspace、前端包、Tauri 桌面端、版本一致性校验脚本与 README 最新版本说明。
 
 ## [0.1.11] - 2026-03-20

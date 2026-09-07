@@ -51,11 +51,6 @@ import {
   DEFAULT_CODEX_USER_AGENT_VERSION,
 } from "@/lib/constants/codex";
 import {
-  DEFAULT_AUTHOR_SERVER_RECOMMENDATIONS,
-  DEFAULT_AUTHOR_SPONSORS,
-  normalizeSponsorLinkItems,
-} from "@/lib/sponsor-links";
-import {
   calcAvailability,
   getUsageDisplayBuckets,
   isLowQuotaUsage,
@@ -1787,19 +1782,7 @@ export function normalizeEnvOverrideCatalog(payload: unknown): EnvOverrideCatalo
   }, []);
 }
 
-/**
- * 函数 `normalizeAppSettings`
- *
- * 作者: gaohongshun
- *
- * 时间: 2026-04-02
- *
- * # 参数
- * - payload: 参数 payload
- *
- * # 返回
- * 返回函数执行结果
- */
+// 归一化服务端设置供界面使用；只接收产品设置，旧数据库的赞助字段不再进入客户端状态。
 export function normalizeAppSettings(payload: unknown): AppSettings {
   const source = asObject(payload);
   const legacyLightweightMode = asBoolean(
@@ -1884,14 +1867,6 @@ export function normalizeAppSettings(payload: unknown): AppSettings {
     ).map((item) => asString(item)),
     pluginMarketMode: asString(source.pluginMarketMode ?? source.plugin_market_mode) || "builtin",
     pluginMarketSourceUrl: asString(source.pluginMarketSourceUrl ?? source.plugin_market_source_url),
-    authorSponsors: normalizeSponsorLinkItems(
-      source.authorSponsors,
-      DEFAULT_AUTHOR_SPONSORS
-    ),
-    authorServerRecommendations: normalizeSponsorLinkItems(
-      source.authorServerRecommendations,
-      DEFAULT_AUTHOR_SERVER_RECOMMENDATIONS
-    ),
     upstreamProxyUrl: asString(source.upstreamProxyUrl),
     upstreamProxyBypassHosts: asString(source.upstreamProxyBypassHosts),
     ...normalizeGatewayTransportValues(source),

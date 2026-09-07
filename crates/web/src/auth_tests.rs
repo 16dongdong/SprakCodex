@@ -53,7 +53,7 @@ fn web_auth_allows_static_assets_without_session() {
         "/_next/static/chunks/app/page.js",
         "/_next/static/css/app.css",
         "/favicon.ico",
-        "/author-alipay.jpg",
+        "/logo.png",
         "/manifest.json",
     ] {
         assert!(is_public_static_asset_path(path), "path={path}");

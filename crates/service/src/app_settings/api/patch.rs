@@ -2,9 +2,6 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
-use super::author_links::{
-    normalize_author_link_items, serialize_author_link_items, AuthorLinkItem,
-};
 use super::{
     save_persisted_app_setting, set_auto_start_enabled_setting, set_close_to_tray_on_close_setting,
     set_codex_cli_guide_dismissed, set_env_overrides, set_gateway_account_max_inflight,
@@ -19,12 +16,12 @@ use super::{
     set_saved_service_addr, set_service_bind_mode, set_show_main_window_on_startup_setting,
     set_ui_appearance_preset, set_ui_locale, set_ui_low_transparency_enabled, set_ui_theme,
     set_ui_zoom_factor, set_update_auto_check_enabled, BackgroundTasksInput, QuotaGuardInput,
-    APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY, APP_SETTING_AUTHOR_SPONSORS_KEY,
     APP_SETTING_PLUGIN_MARKET_MODE_KEY, APP_SETTING_PLUGIN_MARKET_SOURCE_URL_KEY,
 };
 
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
+// RPC 设置输入只描述产品能力，推广字段不再反序列化或持久化；现有客户端的其他字段保持兼容。
 pub(super) struct AppSettingsPatch {
     update_auto_check: Option<bool>,
     auto_start_enabled: Option<bool>,
@@ -52,8 +49,6 @@ pub(super) struct AppSettingsPatch {
     gateway_residency_requirement: Option<String>,
     plugin_market_mode: Option<String>,
     plugin_market_source_url: Option<String>,
-    author_sponsors: Option<Vec<AuthorLinkItem>>,
-    author_server_recommendations: Option<Vec<AuthorLinkItem>>,
     upstream_proxy_url: Option<String>,
     upstream_proxy_bypass_hosts: Option<String>,
     upstream_stream_timeout_ms: Option<u64>,
@@ -87,17 +82,7 @@ pub(super) fn parse_app_settings_patch(params: Option<&Value>) -> Result<AppSett
     }
 }
 
-/// 函数 `apply_app_settings_patch`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - super: 参数 super
-///
-/// # 返回
-/// 返回函数执行结果
+// 将已解析的设置逐项应用到存储和运行时；移除推广配置写入，任一有效配置写入失败仍返回原错误。
 pub(super) fn apply_app_settings_patch(patch: AppSettingsPatch) -> Result<(), String> {
     if let Some(enabled) = patch.update_auto_check {
         set_update_auto_check_enabled(enabled)?;
@@ -190,17 +175,6 @@ pub(super) fn apply_app_settings_patch(patch: AppSettingsPatch) -> Result<(), St
                 Some(&plugin_market_source_url)
             },
         )?;
-    }
-    if let Some(author_sponsors) = patch.author_sponsors {
-        let normalized = normalize_author_link_items(author_sponsors);
-        let raw = serialize_author_link_items(&normalized)?;
-        let _ = save_persisted_app_setting(APP_SETTING_AUTHOR_SPONSORS_KEY, Some(&raw))?;
-    }
-    if let Some(author_server_recommendations) = patch.author_server_recommendations {
-        let normalized = normalize_author_link_items(author_server_recommendations);
-        let raw = serialize_author_link_items(&normalized)?;
-        let _ =
-            save_persisted_app_setting(APP_SETTING_AUTHOR_SERVER_RECOMMENDATIONS_KEY, Some(&raw))?;
     }
     if let Some(proxy_url) = patch.upstream_proxy_url {
         let _ = set_gateway_upstream_proxy_url(Some(&proxy_url))?;

@@ -862,7 +862,6 @@ mod tests {
     use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
     use base64::engine::general_purpose::{STANDARD as BASE64_STANDARD, URL_SAFE_NO_PAD};
-    use base64::Engine as _;
     use codexmanager_core::storage::{now_ts, Account};
     use ed25519_dalek::pkcs8::EncodePrivateKey;
     use ed25519_dalek::{Signature, SigningKey, Verifier as _};

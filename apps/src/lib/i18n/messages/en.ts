@@ -98,7 +98,6 @@ export const EN_MESSAGES: MessageCatalog = {
   应用设置: "Settings",
   系统设置: "System settings",
   设置: "Settings",
-  赞助与推荐: "Sponsors & Recommendations",
   访问控制: "Access Control",
   退出登录: "Log out",
   账号系统: "Account system",
@@ -1576,24 +1575,6 @@ export const EN_MESSAGES: MessageCatalog = {
   已达上限: "Limit reached",
   已花费: "Spent",
   "Token / 金额": "Token / Cost",
-  赞助: "Sponsors",
-  "赞助 / 推荐": "Sponsors / Recommendations",
-  联系作者: "Contact author",
-  "这里集中展示 README 里的赞助信息、推荐服务，以及作者联系入口。":
-    "This page brings together sponsor information from the README, recommended services, and author contact options.",
-  赞助商: "Sponsors",
-  赞助商列表: "Sponsor list",
-  暂无内容: "No content yet",
-  "沿用 README 的展示内容，并同步星思研邀请链接。":
-    "Reuse the sponsor content from the README and sync the Xing Si Yan referral link.",
-  "这里维护 /author 页的赞助商内容。部署在服务器上的 codexmanager-web 会从服务器数据库读取这些内容，无需重新发版本。":
-    "Manage the sponsor content used on the /author page. Server-hosted codexmanager-web reads it from the server database, so no new release is needed.",
-  新增赞助商: "Add sponsor",
-  恢复默认赞助内容: "Restore default sponsor content",
-  保存赞助商列表: "Save sponsor list",
-  "当前没有赞助商条目，可点击上方按钮新增。":
-    "There are no sponsor entries yet. Use the button above to add one.",
-  赞助商条目: "Sponsor entry",
   "名称、链接和按钮文案为必填项。":
     "Name, link, and button label are required.",
   删除条目: "Delete entry",
@@ -1602,43 +1583,8 @@ export const EN_MESSAGES: MessageCatalog = {
   描述: "Description",
   图片地址: "Image URL",
   图片说明: "Image alt text",
-  服务器推荐: "Server recommendations",
-  服务器推荐列表: "Server recommendation list",
-  "补充一个常用服务器选择，便于直接部署或长期运行服务。":
-    "Add a common server option for direct deployment or long-running services.",
-  "这里维护 /author 页的服务器推荐内容。保存后，走同一台服务器的页面会直接读取最新内容。":
-    "Manage the server recommendation content used on the /author page. After saving, pages served by the same server will read the latest content immediately.",
-  新增服务器推荐: "Add server recommendation",
-  恢复默认服务器推荐: "Restore default server recommendations",
-  保存服务器推荐列表: "Save server recommendation list",
-  "当前没有服务器推荐条目，可点击上方按钮新增。":
-    "There are no server recommendation entries yet. Use the button above to add one.",
-  服务器推荐条目: "Server recommendation entry",
   请填写完整的条目后再保存: "Please complete each entry before saving.",
-  赞助配置已保存: "Sponsor configuration saved.",
-  已恢复默认赞助内容: "Default sponsor content restored.",
-  赞助支持: "Sponsor support",
-  联系方式: "Contact channels",
-  持续维护中: "Actively maintained",
-  "需要反馈问题或进一步沟通时，可以通过微信或 TG 群联系作者。":
-    "For issue reports or further discussion, contact the author through WeChat or the Telegram group.",
-  微信: "WeChat",
-  "扫码可直接添加作者微信，也可以手动搜索上面的微信号。":
-    "Scan the QR code to add the author's WeChat, or search the ID above manually.",
-  "加入 TG 群聊": "Join Telegram group",
-  "README 里维护的官方群链接，打开后即可加入讨论。":
-    "This is the official group link maintained in the README. Open it to join the discussion.",
-  "打开链接失败：{message}": "Failed to open link: {message}",
   未知错误: "Unknown error",
-  支付宝赞助码: "Alipay sponsor QR",
-  "如果这个项目帮你省了时间，可以请作者喝杯咖啡。":
-    "If this project saved you time, you can buy the author a coffee.",
-  微信赞助码: "WeChat sponsor QR",
-  "项目持续维护、修问题和做适配，欢迎随缘支持。":
-    "The project is actively maintained with ongoing fixes and compatibility work. Support is welcome if you feel like it.",
-  "AI夏末 AIXiamo": "AI夏末 AIXiamo",
-  "AIXiamo 面向 Codex CLI、Claude Code、Gemini CLI 等开发者场景，提供 ChatGPT Pro 5x / 20x、ChatGPT Plus、Claude Max、Gemini Pro、Grok 等 AI 会员开通与售后协助服务。支持支付宝 / 微信支付、自动充值、订单可查、教程说明与售后协助，适合需要稳定使用 AI 编程、代码生成、文档处理和高频对话的开发者用户。":
-    "AIXiamo serves developer workflows such as Codex CLI, Claude Code, and Gemini CLI, providing AI membership activation and after-sales assistance for ChatGPT Pro 5x / 20x, ChatGPT Plus, Claude Max, Gemini Pro, Grok, and more. It supports Alipay and WeChat Pay, automatic top-ups, order lookup, tutorials, and after-sales support, making it suitable for developers who need stable access for AI programming, code generation, document processing, and frequent conversations.",
   查看服务: "View services",
   "VisionCoder 是一款高颜值、可灵活切换模型的桌面 AI 编程工具。它支持 Claude、Gemini、GPT，并集成 Claude Code、Gemini CLI、Codex、OpenCode 等多种 CLI 能力。":
     "VisionCoder is a polished desktop AI coding tool with flexible model switching. It supports Claude, Gemini, GPT, and integrates multiple CLI capabilities such as Claude Code, Gemini CLI, Codex, and OpenCode.",

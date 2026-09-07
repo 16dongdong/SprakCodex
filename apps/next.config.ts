@@ -79,10 +79,6 @@ const configureDevWebRuntimeRewrites: NonNullable<NextConfig["rewrites"]> =
       destination: `${devWebOrigin}/api/events/:path*`,
     },
     {
-      source: "/api/author-content",
-      destination: `${devWebOrigin}/api/author-content`,
-    },
-    {
       source: "/__auth_status",
       destination: `${devWebOrigin}/__auth_status`,
     },

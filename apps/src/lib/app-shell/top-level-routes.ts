@@ -50,6 +50,7 @@ const ROUTE_SECTION_LABELS: Record<TopLevelRouteSectionId, string> = {
   "member-settings": "账号设置",
 };
 
+// 导航与页面缓存共享产品路由白名单，推广页不再注册，避免残留可访问入口。
 export const TOP_LEVEL_ROUTE_CONFIG = [
   {
     path: "/",
@@ -145,12 +146,6 @@ export const TOP_LEVEL_ROUTE_CONFIG = [
   {
     path: "/skills",
     label: "Skills 与插件",
-    section: "system",
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/author",
-    label: "赞助与推荐",
     section: "system",
     roles: ["system_admin", "admin"],
   },

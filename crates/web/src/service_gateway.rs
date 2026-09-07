@@ -341,69 +341,6 @@ pub(super) async fn rpc_proxy(
     out
 }
 
-pub(super) async fn author_content(State(state): State<Arc<AppState>>) -> Response {
-    let body = serde_json::json!({
-        "jsonrpc": "2.0",
-        "id": 1,
-        "method": "authorContent/get",
-        "params": {}
-    })
-    .to_string();
-
-    let resp = state
-        .client
-        .post(&state.service_rpc_url)
-        .header("content-type", "application/json")
-        .header("x-codexmanager-rpc-token", &state.rpc_token)
-        .body(body)
-        .send()
-        .await;
-    let resp = match resp {
-        Ok(value) => value,
-        Err(err) => {
-            let msg = format_upstream_error_message(state.service_addr.as_str(), &err);
-            return (StatusCode::BAD_GATEWAY, msg).into_response();
-        }
-    };
-
-    let status = resp.status();
-    let payload = match resp.json::<serde_json::Value>().await {
-        Ok(value) => value,
-        Err(err) => {
-            return (
-                StatusCode::BAD_GATEWAY,
-                format!("author content response parse failed: {err}"),
-            )
-                .into_response();
-        }
-    };
-
-    if !status.is_success() {
-        return (
-            StatusCode::BAD_GATEWAY,
-            payload
-                .get("error")
-                .and_then(|value| value.get("message"))
-                .and_then(|value| value.as_str())
-                .unwrap_or("author content upstream request failed")
-                .to_string(),
-        )
-            .into_response();
-    }
-
-    let result = payload
-        .get("result")
-        .cloned()
-        .unwrap_or_else(|| serde_json::json!({}));
-    let mut out = Response::new(axum::body::Body::from(result.to_string()));
-    *out.status_mut() = StatusCode::OK;
-    out.headers_mut().insert(
-        "content-type",
-        axum::http::HeaderValue::from_static("application/json"),
-    );
-    out
-}
-
 pub(super) async fn usage_refresh_events(State(state): State<Arc<AppState>>) -> Response {
     let target_url = format!("http://{}/events/usage-refresh", state.service_addr.trim());
     let resp = state

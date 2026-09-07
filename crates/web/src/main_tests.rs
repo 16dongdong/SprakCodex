@@ -135,10 +135,7 @@ async fn runtime_info_reports_web_gateway_capabilities() {
 
     assert_eq!(payload["mode"], "web-gateway");
     assert_eq!(payload["rpcBaseUrl"], "/api/rpc");
-    assert_eq!(
-        payload["authorContentUrl"],
-        "https://author.qxnm.top/api/public/author-content"
-    );
+    assert!(payload.get("authorContentUrl").is_none());
     assert_eq!(payload["canManageService"], false);
     assert_eq!(payload["canSelfUpdate"], false);
     assert_eq!(payload["canCloseToTray"], false);

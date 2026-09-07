@@ -389,11 +389,11 @@ mod tests {
     #[test]
     fn parse_release_assets_filters_repo_and_deduplicates() {
         let html = r#"
-<a href="/qxcnm/Codex-Manager/releases/download/v0.1.8/CodexManager.exe">ok</a>
-<a href="https://github.com/qxcnm/Codex-Manager/releases/download/v0.1.8/CodexManager.exe?download=1">dup</a>
+<a href="/16dongdong/CodexManager/releases/download/v0.1.8/CodexManager.exe">ok</a>
+<a href="https://github.com/16dongdong/CodexManager/releases/download/v0.1.8/CodexManager.exe?download=1">dup</a>
 <a href="/someone/else/releases/download/v0.1.8/not-ours.zip">skip</a>
 "#;
-        let assets = parse_release_assets_from_html(html, "qxcnm/Codex-Manager");
+        let assets = parse_release_assets_from_html(html, "16dongdong/CodexManager");
 
         assert_eq!(assets.len(), 1);
         assert_eq!(assets[0].name, "CodexManager.exe");
@@ -413,13 +413,13 @@ mod tests {
     #[test]
     fn release_asset_url_requires_target_repo() {
         assert!(normalize_release_asset_url(
-            "/qxcnm/Codex-Manager/releases/download/v0.1.8/file.zip",
-            "qxcnm/Codex-Manager"
+            "/16dongdong/CodexManager/releases/download/v0.1.8/file.zip",
+            "16dongdong/CodexManager"
         )
         .is_some());
         assert!(normalize_release_asset_url(
             "/other/repo/releases/download/v0.1.8/file.zip",
-            "qxcnm/Codex-Manager"
+            "16dongdong/CodexManager"
         )
         .is_none());
     }

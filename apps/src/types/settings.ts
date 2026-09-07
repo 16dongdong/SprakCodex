@@ -1,4 +1,3 @@
-import type { SponsorLinkItem } from "../lib/sponsor-links";
 
 export interface EnvOverrideCatalogItem {
   key: string;
@@ -92,8 +91,6 @@ export interface AppSettings extends GatewayTransportValues {
   gatewayResidencyRequirementOptions: string[];
   pluginMarketMode: string;
   pluginMarketSourceUrl: string;
-  authorSponsors: SponsorLinkItem[];
-  authorServerRecommendations: SponsorLinkItem[];
   upstreamProxyUrl: string;
   upstreamProxyBypassHosts: string;
   backgroundTasks: BackgroundTaskSettings;

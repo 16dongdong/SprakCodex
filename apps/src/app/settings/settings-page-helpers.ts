@@ -346,9 +346,10 @@ export type CheckUpdateRequest = {
   silent?: boolean;
 };
 
+// 根据更新结果生成发行页；未提供仓库时使用独立仓库，避免用户被引导安装上游版本，无网络副作用。
 export function buildReleaseUrl(summary: UpdateCheckResult | null): string {
   if (!summary?.repo) {
-    return "https://github.com/qxcnm/Codex-Manager/releases";
+    return "https://github.com/16dongdong/CodexManager/releases";
   }
   const normalizedTag =
     summary.releaseTag ||

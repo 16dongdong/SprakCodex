@@ -59,10 +59,7 @@ test("normalizeRuntimeCapabilities 为 Web 网关补齐默认能力", () => {
 
   assert.equal(capabilities.mode, "web-gateway");
   assert.equal(capabilities.rpcBaseUrl, "/gateway/rpc");
-  assert.equal(
-    capabilities.authorContentUrl,
-    "https://author.qxnm.top/api/public/author-content"
-  );
+  assert.equal("authorContentUrl" in capabilities, false);
   assert.equal(capabilities.canManageService, false);
   assert.equal(capabilities.canAutoStart, false);
   assert.equal(capabilities.canUseBrowserFileImport, true);
@@ -78,7 +75,7 @@ test("normalizeRuntimeCapabilities 接受 Web 网关下发的同源作者内容�
     "/api/rpc"
   );
 
-  assert.equal(capabilities.authorContentUrl, "/api/author-content");
+  assert.equal("authorContentUrl" in capabilities, false);
 });
 
 test("normalizeRuntimeCapabilities 在 unsupported-web 下保持保守默认值", () => {

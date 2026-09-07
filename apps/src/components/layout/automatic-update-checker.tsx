@@ -72,9 +72,10 @@ function checkForUpdate(): Promise<UpdateCheckResult> {
   return automaticCheckInFlight;
 }
 
+// 自动更新提示只跳转本次检查对应的仓库；缺失仓库时固定到独立发行入口，返回 URL 而不执行下载。
 function buildReleaseUrl(summary: UpdateCheckResult): string {
   if (!summary.repo) {
-    return "https://github.com/qxcnm/Codex-Manager/releases";
+    return "https://github.com/16dongdong/CodexManager/releases";
   }
   const tag =
     summary.releaseTag ||

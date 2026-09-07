@@ -106,7 +106,7 @@ pub(crate) use usage::token_refresh as usage_token_refresh;
 
 pub use account_test::{set_account_test_event_handler, AccountTestEvent};
 pub use app_settings::{
-    app_settings_get, app_settings_get_with_overrides, app_settings_set, author_content_get,
+    app_settings_get, app_settings_get_with_overrides, app_settings_set,
     bind_all_interfaces_enabled, bind_all_interfaces_enabled_for_mode,
     current_auto_start_enabled_setting, current_close_to_tray_on_close_setting,
     current_codex_cli_guide_dismissed, current_gateway_account_max_inflight,
