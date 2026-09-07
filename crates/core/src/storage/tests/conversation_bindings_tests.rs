@@ -1,0 +1,285 @@
+use super::super::{ConversationBinding, Storage};
+use super::{
+    conversation_binding_lookup_sql, delete_conversation_bindings_for_account_sql,
+    delete_stale_conversation_bindings_sql,
+};
+
+/// 函数 `sample_binding`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// 无
+///
+/// # 返回
+/// 返回函数执行结果
+fn sample_binding() -> ConversationBinding {
+    ConversationBinding {
+        platform_key_hash: "key-hash-1".to_string(),
+        conversation_id: "conv-1".to_string(),
+        account_id: "acc-1".to_string(),
+        thread_epoch: 1,
+        thread_anchor: "thread-anchor-1".to_string(),
+        status: "active".to_string(),
+        last_model: Some("gpt-5.4".to_string()),
+        last_switch_reason: None,
+        created_at: 100,
+        updated_at: 100,
+        last_used_at: 100,
+    }
+}
+
+/// 函数 `conversation_binding_roundtrip_and_touch`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// 无
+///
+/// # 返回
+/// 无
+#[test]
+fn conversation_binding_roundtrip_and_touch() {
+    let storage = Storage::open_in_memory().expect("open in memory");
+    storage.init().expect("init schema");
+
+    let binding = sample_binding();
+    storage
+        .upsert_conversation_binding(&binding)
+        .expect("insert binding");
+
+    let loaded = storage
+        .get_conversation_binding("key-hash-1", "conv-1")
+        .expect("load binding")
+        .expect("binding exists");
+    assert_eq!(loaded.account_id, "acc-1");
+    assert_eq!(loaded.thread_anchor, "thread-anchor-1");
+    assert_eq!(loaded.last_model.as_deref(), Some("gpt-5.4"));
+
+    let touched = storage
+        .touch_conversation_binding("key-hash-1", "conv-1", "acc-1", Some("gpt-5.5"), 200)
+        .expect("touch binding");
+    assert!(touched);
+
+    let touched_loaded = storage
+        .get_conversation_binding("key-hash-1", "conv-1")
+        .expect("reload binding")
+        .expect("binding exists");
+    assert_eq!(touched_loaded.last_model.as_deref(), Some("gpt-5.5"));
+    assert_eq!(touched_loaded.last_used_at, 200);
+    assert_eq!(touched_loaded.updated_at, 200);
+}
+
+/// 函数 `conversation_binding_upsert_rebinds_existing_pair`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// 无
+///
+/// # 返回
+/// 无
+#[test]
+fn conversation_binding_upsert_rebinds_existing_pair() {
+    let storage = Storage::open_in_memory().expect("open in memory");
+    storage.init().expect("init schema");
+
+    let mut binding = sample_binding();
+    storage
+        .upsert_conversation_binding(&binding)
+        .expect("insert binding");
+
+    binding.account_id = "acc-2".to_string();
+    binding.thread_epoch = 2;
+    binding.thread_anchor = "thread-anchor-2".to_string();
+    binding.last_switch_reason = Some("automatic_failover".to_string());
+    binding.updated_at = 300;
+    binding.last_used_at = 300;
+    storage
+        .upsert_conversation_binding(&binding)
+        .expect("rebind binding");
+
+    let loaded = storage
+        .get_conversation_binding("key-hash-1", "conv-1")
+        .expect("load rebound binding")
+        .expect("binding exists");
+    assert_eq!(loaded.account_id, "acc-2");
+    assert_eq!(loaded.thread_epoch, 2);
+    assert_eq!(loaded.thread_anchor, "thread-anchor-2");
+    assert_eq!(
+        loaded.last_switch_reason.as_deref(),
+        Some("automatic_failover")
+    );
+    assert_eq!(loaded.created_at, 100);
+    assert_eq!(loaded.updated_at, 300);
+}
+
+#[test]
+fn conversation_binding_claim_is_first_writer_wins() {
+    let storage = Storage::open_in_memory().expect("open in memory");
+    storage.init().expect("init schema");
+
+    let first = sample_binding();
+    let (claimed, inserted) = storage
+        .claim_conversation_binding(&first)
+        .expect("claim first binding");
+    assert!(inserted);
+    assert_eq!(claimed.account_id, "acc-1");
+
+    let mut contender = first.clone();
+    contender.account_id = "acc-2".to_string();
+    contender.updated_at = 200;
+    contender.last_used_at = 200;
+    let (winner, inserted) = storage
+        .claim_conversation_binding(&contender)
+        .expect("join existing claim");
+    assert!(!inserted);
+    assert_eq!(winner.account_id, "acc-1");
+    assert_eq!(winner.updated_at, 100);
+}
+
+/// 函数 `conversation_binding_delete_helpers_remove_rows`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// 无
+///
+/// # 返回
+/// 无
+#[test]
+fn conversation_binding_delete_helpers_remove_rows() {
+    let storage = Storage::open_in_memory().expect("open in memory");
+    storage.init().expect("init schema");
+
+    let mut first = sample_binding();
+    let second = ConversationBinding {
+        platform_key_hash: "key-hash-1".to_string(),
+        conversation_id: "conv-2".to_string(),
+        account_id: "acc-1".to_string(),
+        thread_epoch: 1,
+        thread_anchor: "thread-anchor-2".to_string(),
+        status: "active".to_string(),
+        last_model: None,
+        last_switch_reason: None,
+        created_at: 100,
+        updated_at: 100,
+        last_used_at: 90,
+    };
+    first.last_used_at = 80;
+
+    storage
+        .upsert_conversation_binding(&first)
+        .expect("insert first binding");
+    storage
+        .upsert_conversation_binding(&second)
+        .expect("insert second binding");
+
+    let removed = storage
+        .delete_stale_conversation_bindings(85)
+        .expect("delete stale bindings");
+    assert_eq!(removed, 1);
+    assert!(storage
+        .get_conversation_binding("key-hash-1", "conv-1")
+        .expect("load deleted binding")
+        .is_none());
+
+    storage
+        .delete_conversation_bindings_for_account("acc-1")
+        .expect("delete account bindings");
+    assert!(storage
+        .get_conversation_binding("key-hash-1", "conv-2")
+        .expect("load remaining binding")
+        .is_none());
+}
+
+#[test]
+fn active_conversation_binding_account_counts_groups_by_platform_key() {
+    let storage = Storage::open_in_memory().expect("open in memory");
+    storage.init().expect("init schema");
+
+    for (conversation_id, account_id, platform_key_hash, status) in [
+        ("conv-1", "acc-1", "key-hash-1", "active"),
+        ("conv-2", "acc-1", "key-hash-1", "active"),
+        ("conv-3", "acc-2", "key-hash-1", "active"),
+        ("conv-4", "acc-2", "key-hash-1", "archived"),
+        ("conv-5", "acc-3", "key-hash-2", "active"),
+    ] {
+        let mut binding = sample_binding();
+        binding.platform_key_hash = platform_key_hash.to_string();
+        binding.conversation_id = conversation_id.to_string();
+        binding.account_id = account_id.to_string();
+        binding.status = status.to_string();
+        storage
+            .upsert_conversation_binding(&binding)
+            .expect("insert binding");
+    }
+
+    let counts = storage
+        .active_conversation_binding_account_counts("key-hash-1")
+        .expect("load counts");
+
+    assert_eq!(counts.get("acc-1"), Some(&2));
+    assert_eq!(counts.get("acc-2"), Some(&1));
+    assert_eq!(counts.get("acc-3"), None);
+}
+
+#[test]
+fn conversation_binding_lookup_and_cleanup_queries_use_indexes() {
+    let storage = Storage::open_in_memory().expect("open in memory");
+    storage.init().expect("init schema");
+
+    let binding_lookup_plan = storage
+        .conn
+        .query_row(
+            &format!("EXPLAIN QUERY PLAN {}", conversation_binding_lookup_sql()),
+            ("key-hash-1", "conv-1"),
+            |row| row.get::<_, String>(3),
+        )
+        .expect("explain binding lookup");
+    assert!(
+        binding_lookup_plan.contains("sqlite_autoindex_conversation_bindings_1")
+            || binding_lookup_plan.contains("PRIMARY KEY"),
+        "expected conversation binding primary key lookup, got {binding_lookup_plan}"
+    );
+
+    let account_delete_plan = storage
+        .conn
+        .query_row(
+            &format!(
+                "EXPLAIN QUERY PLAN {}",
+                delete_conversation_bindings_for_account_sql()
+            ),
+            ["acc-1"],
+            |row| row.get::<_, String>(3),
+        )
+        .expect("explain account cleanup");
+    assert!(
+        account_delete_plan.contains("idx_conversation_bindings_account_id"),
+        "expected account cleanup index in plan, got {account_delete_plan}"
+    );
+
+    let stale_delete_plan = storage
+        .conn
+        .query_row(
+            &format!(
+                "EXPLAIN QUERY PLAN {}",
+                delete_stale_conversation_bindings_sql()
+            ),
+            [85_i64],
+            |row| row.get::<_, String>(3),
+        )
+        .expect("explain stale cleanup");
+    assert!(
+        stale_delete_plan.contains("idx_conversation_bindings_last_used_at"),
+        "expected stale cleanup index in plan, got {stale_delete_plan}"
+    );
+}

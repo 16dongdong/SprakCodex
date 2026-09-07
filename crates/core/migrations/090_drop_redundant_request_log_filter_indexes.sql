@@ -1,0 +1,11 @@
+DROP INDEX IF EXISTS idx_request_logs_status_code_created_at;
+DROP INDEX IF EXISTS idx_request_logs_method_created_at;
+DROP INDEX IF EXISTS idx_request_logs_key_id_created_at;
+DROP INDEX IF EXISTS idx_request_logs_account_id_created_at;
+DROP INDEX IF EXISTS idx_request_logs_trace_id_created_at;
+DROP INDEX IF EXISTS idx_request_logs_model_created_at;
+DROP INDEX IF EXISTS idx_request_logs_request_type_created_at;
+DROP INDEX IF EXISTS idx_request_logs_gateway_mode_created_at;
+DROP INDEX IF EXISTS idx_request_logs_route_strategy_created_at;
+DROP INDEX IF EXISTS idx_request_logs_route_source_created_at;
+DROP INDEX IF EXISTS idx_request_logs_actual_source_id_created_at;

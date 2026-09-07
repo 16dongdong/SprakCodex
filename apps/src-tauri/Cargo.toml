@@ -1,0 +1,57 @@
+[package]
+name = "CodexManager"
+version = "0.6.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.5.6", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.10.3", features = ["tray-icon", "image-png", "macos-private-api"] }
+tauri-plugin-log = "2"
+tauri-plugin-single-instance = "2.4.0"
+tauri-plugin-autostart = "2.5.1"
+tauri-plugin-window-state = "2.4.1"
+codexmanager-core = { path = "../../crates/core" }
+codexmanager-service = { path = "../../crates/service" }
+webbrowser = "0.8"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+semver = "1.0"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
+rfd = "0.15"
+rusqlite = { path = "../../crates/rusqlite", features = ["bundled", "backup"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+glib = "0.18"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
+
+[patch.crates-io]
+tokio-tungstenite = { git = "https://github.com/openai-oss-forks/tokio-tungstenite", rev = "0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186" }
+tungstenite = { git = "https://github.com/openai-oss-forks/tungstenite-rs", rev = "4fffad30fe373adbdcffab9545e9e9bf4f2fc19f" }
+
+[patch."ssh://git@github.com/openai-oss-forks/tungstenite-rs.git"]
+tungstenite = { git = "https://github.com/openai-oss-forks/tungstenite-rs", rev = "4fffad30fe373adbdcffab9545e9e9bf4f2fc19f" }
+# This manifest is excluded from the root workspace, so it needs its own
+# compact development profiles as well.
+[profile.dev]
+debug = "line-tables-only"
+incremental = false
+
+[profile.test]
+debug = "line-tables-only"
+incremental = false

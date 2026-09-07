@@ -1,0 +1,23 @@
+{
+  "revision": 8,
+  "source_sha256": "ccc924d8388571e3ecfa722589e383b5de8038e0b02a096dd618c140066bced3",
+  "astra": {
+    "slug": "gpt-6-astra",
+    "display_name": "GPT-6-Astra",
+    "description": "Our most capable model for complex, demanding work.",
+    "visibility": "list",
+    "priority": 1,
+    "default_reasoning_effort": "low",
+    "context_window": 272000,
+    "max_context_window": 872000,
+    "capabilities": {"reasoning_efforts":["low","medium","high","xhigh","max","ultra"],"service_tiers":["priority"],"additional_speed_tiers":["fast"],"input_modalities":["text","image"],"supported_endpoints":["/v1/responses","/v1/chat/completions"],"api_context_window":1050000,"max_output_tokens":128000,"prefer_websockets":true,"supports_parallel_tool_calls":true,"supports_reasoning_summaries":true,"default_reasoning_summary":"none","reasoning_summary_format":"experimental","supports_verbosity":true,"default_verbosity":"low","supports_image_detail_original":true,"supports_search_tool":true,"apply_patch_tool_type":"freeform","web_search_tool_type":"text_and_image","shell_type":"unified_exec","truncation_mode":"tokens","truncation_limit":10000,"experimental_supported_tools":[],"effective_context_window_percent":95,"minimal_client_version":"0.153.0","default_service_tier":null,"auto_compact_token_limit":null,"auto_review_model_override":null,"comp_hash":"3000","tool_mode":"code_mode_only","multi_agent_version":"v2","multi_agent_reasoning_effort":"xhigh","use_responses_lite":true,"include_skills_usage_instructions":false},
+    "price_status": "official",
+    "price_source": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+    "price_tiers": [
+      {"min_input_tokens":0,"input_microusd_per_1m":10000000,"cached_input_microusd_per_1m":1000000,"cache_write_microusd_per_1m":12500000,"output_microusd_per_1m":50000000},
+      {"min_input_tokens":272001,"input_microusd_per_1m":20000000,"cached_input_microusd_per_1m":2000000,"cache_write_microusd_per_1m":25000000,"output_microusd_per_1m":75000000}
+    ]
+  },
+  "sol_slug": "gpt-5.6-sol",
+  "sol_capabilities": {"reasoning_efforts":["low","medium","high","xhigh","max","ultra"],"service_tiers":["priority","ultrafast"],"additional_speed_tiers":["fast"],"input_modalities":["text","image"],"prefer_websockets":true,"supports_parallel_tool_calls":true,"supports_reasoning_summaries":true,"default_reasoning_summary":"none","reasoning_summary_format":"experimental","supports_verbosity":true,"default_verbosity":"low","supports_image_detail_original":true,"supports_search_tool":true,"apply_patch_tool_type":"freeform","web_search_tool_type":"text_and_image","shell_type":"shell_command","truncation_mode":"tokens","truncation_limit":10000,"experimental_supported_tools":[],"effective_context_window_percent":95,"minimal_client_version":"0.144.0","default_service_tier":null,"auto_compact_token_limit":null,"auto_review_model_override":null,"comp_hash":"3000","tool_mode":"code_mode_only","multi_agent_version":"v2","use_responses_lite":true,"include_skills_usage_instructions":false}
+}

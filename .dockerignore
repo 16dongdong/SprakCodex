@@ -1,0 +1,17 @@
+**/target
+**/node_modules
+**/.next
+apps/dist
+apps/out
+apps/.vite
+apps/.turbo
+*.tsbuildinfo
+.git
+.github
+portable
+docs
+specs
+.worktrees
+*.db
+*.sqlite
+*.log

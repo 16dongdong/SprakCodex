@@ -1,0 +1,682 @@
+use crate::app_storage::apply_runtime_storage_env;
+use crate::commands::shared::rpc_call_in_background;
+
+#[derive(Debug, serde::Deserialize)]
+pub struct AccountSortUpdatePayload {
+    #[serde(rename = "accountId", alias = "account_id")]
+    account_id: String,
+    sort: i64,
+}
+
+/// 函数 `account_update_payload`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// - account_id: 参数 account_id
+/// - sort: 参数 sort
+/// - status: 参数 status
+/// - label: 参数 label
+/// - note: 参数 note
+/// - tags: 参数 tags
+///
+/// # 返回
+/// 返回函数执行结果
+fn account_update_payload(
+    account_id: String,
+    sort: Option<i64>,
+    preferred: Option<bool>,
+    status: Option<String>,
+    label: Option<String>,
+    group_name: Option<String>,
+    note: Option<String>,
+    tags: Option<String>,
+    quota_capacity_primary_window_tokens: Option<i64>,
+    quota_capacity_secondary_window_tokens: Option<i64>,
+) -> Option<serde_json::Value> {
+    let mut params = serde_json::Map::new();
+    params.insert("accountId".to_string(), serde_json::json!(account_id));
+    if let Some(value) = sort {
+        params.insert("sort".to_string(), serde_json::json!(value));
+    }
+    if let Some(value) = preferred {
+        params.insert("preferred".to_string(), serde_json::json!(value));
+    }
+    if let Some(value) = status {
+        let trimmed = value.trim();
+        if !trimmed.is_empty() {
+            params.insert("status".to_string(), serde_json::json!(trimmed));
+        }
+    }
+    if let Some(value) = label {
+        params.insert("label".to_string(), serde_json::json!(value));
+    }
+    if let Some(value) = group_name {
+        params.insert("groupName".to_string(), serde_json::json!(value.trim()));
+    }
+    if let Some(value) = note {
+        params.insert("note".to_string(), serde_json::json!(value));
+    }
+    if let Some(value) = tags {
+        params.insert("tags".to_string(), serde_json::json!(value));
+    }
+    if let Some(value) = quota_capacity_primary_window_tokens {
+        params.insert(
+            "quotaCapacityPrimaryWindowTokens".to_string(),
+            serde_json::json!(value),
+        );
+    }
+    if let Some(value) = quota_capacity_secondary_window_tokens {
+        params.insert(
+            "quotaCapacitySecondaryWindowTokens".to_string(),
+            serde_json::json!(value),
+        );
+    }
+    if params.is_empty() {
+        None
+    } else {
+        Some(serde_json::Value::Object(params))
+    }
+}
+
+/// 函数 `service_account_list`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_list(
+    app: tauri::AppHandle,
+    addr: Option<String>,
+) -> Result<serde_json::Value, String> {
+    apply_runtime_storage_env(&app);
+    rpc_call_in_background("account/list", addr, None).await
+}
+
+/// 函数 `service_account_delete`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - account_id: 参数 account_id
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_delete(
+    addr: Option<String>,
+    account_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({ "accountId": account_id });
+    rpc_call_in_background("account/delete", addr, Some(params)).await
+}
+
+/// 函数 `service_account_delete_many`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - account_ids: 参数 account_ids
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_delete_many(
+    addr: Option<String>,
+    account_ids: Vec<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({ "accountIds": account_ids });
+    rpc_call_in_background("account/deleteMany", addr, Some(params)).await
+}
+
+/// 函数 `service_account_delete_unavailable_free`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// - addr: 参数 addr
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_delete_unavailable_free(
+    addr: Option<String>,
+) -> Result<serde_json::Value, String> {
+    rpc_call_in_background("account/deleteUnavailableFree", addr, None).await
+}
+
+/// 函数 `service_account_delete_by_statuses`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-05-04
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - statuses: 参数 statuses
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_delete_by_statuses(
+    addr: Option<String>,
+    statuses: Vec<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({ "statuses": statuses });
+    rpc_call_in_background("account/deleteByStatuses", addr, Some(params)).await
+}
+
+/// 函数 `service_account_update`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-02
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - account_id: 参数 account_id
+/// - sort: 参数 sort
+/// - status: 参数 status
+/// - label: 参数 label
+/// - note: 参数 note
+/// - tags: 参数 tags
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_update(
+    addr: Option<String>,
+    account_id: String,
+    sort: Option<i64>,
+    preferred: Option<bool>,
+    status: Option<String>,
+    label: Option<String>,
+    group_name: Option<String>,
+    note: Option<String>,
+    tags: Option<String>,
+    quota_capacity_primary_window_tokens: Option<i64>,
+    quota_capacity_secondary_window_tokens: Option<i64>,
+) -> Result<serde_json::Value, String> {
+    rpc_call_in_background(
+        "account/update",
+        addr,
+        account_update_payload(
+            account_id,
+            sort,
+            preferred,
+            status,
+            label,
+            group_name,
+            note,
+            tags,
+            quota_capacity_primary_window_tokens,
+            quota_capacity_secondary_window_tokens,
+        ),
+    )
+    .await
+}
+
+#[tauri::command]
+pub async fn service_account_update_sorts(
+    addr: Option<String>,
+    updates: Vec<AccountSortUpdatePayload>,
+) -> Result<serde_json::Value, String> {
+    let updates = updates
+        .into_iter()
+        .map(|update| {
+            serde_json::json!({
+                "accountId": update.account_id,
+                "sort": update.sort,
+            })
+        })
+        .collect::<Vec<_>>();
+    let params = serde_json::json!({ "updates": updates });
+    rpc_call_in_background("account/updateSorts", addr, Some(params)).await
+}
+
+/// 函数 `service_account_warmup`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-04-14
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - account_ids: 参数 account_ids
+/// - message: 参数 message
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_warmup(
+    addr: Option<String>,
+    account_ids: Vec<String>,
+    message: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountIds": account_ids,
+        "message": message.unwrap_or_default(),
+    });
+    rpc_call_in_background("account/warmup", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_fetch_models(
+    addr: Option<String>,
+    account_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({ "accountId": account_id });
+    rpc_call_in_background("account/fetchModels", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_associate_models(
+    addr: Option<String>,
+    account_id: String,
+    upstream_models: Vec<String>,
+    display_names: Option<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "upstreamModels": upstream_models,
+        "displayNames": display_names,
+    });
+    rpc_call_in_background("account/associateModels", addr, Some(params)).await
+}
+
+/// 函数 `service_account_test_start`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-08-26
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - account_id: 参数 account_id
+/// - model: 参数 model
+/// - prompt: 参数 prompt
+/// - kind: 参数 kind
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_test_start(
+    addr: Option<String>,
+    account_id: String,
+    model: Option<String>,
+    prompt: Option<String>,
+    kind: Option<String>,
+    test_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "model": model,
+        "prompt": prompt,
+        "kind": kind,
+        "testId": test_id,
+    });
+    rpc_call_in_background("account/test", addr, Some(params)).await
+}
+
+/// 函数 `service_account_test_cancel`
+///
+/// 作者: gaohongshun
+///
+/// 时间: 2026-08-26
+///
+/// # 参数
+/// - addr: 参数 addr
+/// - account_id: 参数 account_id
+///
+/// # 返回
+/// 返回函数执行结果
+#[tauri::command]
+pub async fn service_account_test_cancel(
+    addr: Option<String>,
+    account_id: String,
+    test_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "testId": test_id,
+    });
+    rpc_call_in_background("account/test/cancel", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_get(
+    addr: Option<String>,
+    account_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({ "accountId": account_id });
+    rpc_call_in_background("account/proxy/get", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_set(
+    addr: Option<String>,
+    account_id: String,
+    enabled: bool,
+    source: Option<String>,
+    proxy_profile_id: Option<String>,
+    proxy_url: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "enabled": enabled,
+        "source": source,
+        "proxyProfileId": proxy_profile_id,
+        "proxyUrl": proxy_url,
+    });
+    rpc_call_in_background("account/proxy/set", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_clear(
+    addr: Option<String>,
+    account_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({ "accountId": account_id });
+    rpc_call_in_background("account/proxy/clear", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_test(
+    addr: Option<String>,
+    account_id: String,
+    enabled: Option<bool>,
+    source: Option<String>,
+    proxy_profile_id: Option<String>,
+    proxy_url: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "enabled": enabled,
+        "source": source,
+        "proxyProfileId": proxy_profile_id,
+        "proxyUrl": proxy_url,
+    });
+    rpc_call_in_background("account/proxy/test", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_latency_test(
+    addr: Option<String>,
+    account_id: String,
+    preset_id: Option<String>,
+    custom_url: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "presetId": preset_id,
+        "customUrl": custom_url,
+    });
+    rpc_call_in_background("account/proxy/latency-test", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_speed_test(
+    addr: Option<String>,
+    account_id: String,
+    provider_id: Option<String>,
+    file_size_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "providerId": provider_id,
+        "fileSizeId": file_size_id,
+    });
+    rpc_call_in_background("account/proxy/speed-test", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_cloudflare_speed_test(
+    addr: Option<String>,
+    account_id: String,
+    config: Option<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "config": config,
+    });
+    rpc_call_in_background("account/proxy/cloudflare-speed-test", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_test_job(
+    addr: Option<String>,
+    account_id: String,
+    job_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "jobId": job_id,
+    });
+    rpc_call_in_background("account/proxy/test-job", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_cancel_test(
+    addr: Option<String>,
+    account_id: String,
+    job_id: String,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "jobId": job_id,
+    });
+    rpc_call_in_background("account/proxy/cancel-test", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_speed_test_history(
+    addr: Option<String>,
+    account_id: String,
+    limit: Option<usize>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "limit": limit,
+    });
+    rpc_call_in_background("account/proxy/speed-test-history", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_latency_test_history(
+    addr: Option<String>,
+    account_id: String,
+    limit: Option<usize>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "limit": limit,
+    });
+    rpc_call_in_background("account/proxy/latency-test-history", addr, Some(params)).await
+}
+
+#[tauri::command]
+pub async fn service_account_proxy_diagnostics_history(
+    addr: Option<String>,
+    account_id: String,
+    limit: Option<usize>,
+) -> Result<serde_json::Value, String> {
+    let params = serde_json::json!({
+        "accountId": account_id,
+        "limit": limit,
+    });
+    rpc_call_in_background("account/proxy/diagnostics-history", addr, Some(params)).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::account_update_payload;
+
+    /// 函数 `account_update_payload_supports_status_only_updates`
+    ///
+    /// 作者: gaohongshun
+    ///
+    /// 时间: 2026-04-02
+    ///
+    /// # 参数
+    /// 无
+    ///
+    /// # 返回
+    /// 无
+    #[test]
+    fn account_update_payload_supports_status_only_updates() {
+        let actual = account_update_payload(
+            "acc-1".to_string(),
+            None,
+            None,
+            Some("active".to_string()),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        .expect("payload");
+        let expected = serde_json::json!({
+            "accountId": "acc-1",
+            "status": "active"
+        });
+        assert_eq!(actual, expected);
+    }
+
+    /// 函数 `account_update_payload_supports_sort_only_updates`
+    ///
+    /// 作者: gaohongshun
+    ///
+    /// 时间: 2026-04-02
+    ///
+    /// # 参数
+    /// 无
+    ///
+    /// # 返回
+    /// 无
+    #[test]
+    fn account_update_payload_supports_sort_only_updates() {
+        let actual = account_update_payload(
+            "acc-1".to_string(),
+            Some(5),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        .expect("payload");
+        let expected = serde_json::json!({
+            "accountId": "acc-1",
+            "sort": 5
+        });
+        assert_eq!(actual, expected);
+    }
+
+    /// 函数 `account_update_payload_omits_blank_status`
+    ///
+    /// 作者: gaohongshun
+    ///
+    /// 时间: 2026-04-02
+    ///
+    /// # 参数
+    /// 无
+    ///
+    /// # 返回
+    /// 无
+    #[test]
+    fn account_update_payload_omits_blank_status() {
+        let actual = account_update_payload(
+            "acc-1".to_string(),
+            None,
+            None,
+            Some("   ".to_string()),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        .expect("payload");
+        let expected = serde_json::json!({
+            "accountId": "acc-1"
+        });
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn account_update_payload_supports_preferred_updates() {
+        let actual = account_update_payload(
+            "acc-1".to_string(),
+            None,
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        .expect("payload");
+        let expected = serde_json::json!({
+            "accountId": "acc-1",
+            "preferred": true
+        });
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn account_update_payload_distinguishes_omitted_and_cleared_group_name() {
+        let omitted = account_update_payload(
+            "acc-1".to_string(),
+            None,
+            Some(true),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        .expect("omitted payload");
+        assert!(omitted.get("groupName").is_none());
+
+        let cleared = account_update_payload(
+            "acc-1".to_string(),
+            None,
+            None,
+            None,
+            None,
+            Some("   ".to_string()),
+            None,
+            None,
+            None,
+            None,
+        )
+        .expect("cleared payload");
+        assert_eq!(
+            cleared.get("groupName").and_then(|value| value.as_str()),
+            Some("")
+        );
+    }
+}

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CodexManager</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #eef5fb;
+        --fg: #162033;
+        --muted: #667085;
+        --brand: #1f6feb;
+        --ring: rgba(31, 111, 235, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        background: var(--brand);
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 800;
+        box-shadow: 0 16px 42px rgba(31, 111, 235, 0.24);
+      }
+
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid var(--ring);
+        border-top-color: var(--brand);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      .copy {
+        text-align: center;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .sub {
+        margin-top: 4px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a;
+          --fg: #e5edf7;
+          --muted: #94a3b8;
+          --brand: #4f8cff;
+          --ring: rgba(79, 140, 255, 0.2);
+        }
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="logo">CM</div>
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="copy">
+        <div class="title">CodexManager</div>
+        <div class="sub">Loading desktop app...</div>
+      </div>
+    </main>
+  </body>
+</html>

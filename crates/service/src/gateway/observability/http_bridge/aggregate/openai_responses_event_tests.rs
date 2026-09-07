@@ -1,0 +1,54 @@
+use super::{OpenAIResponsesEvent, SseTerminal};
+
+#[test]
+fn parse_openai_responses_event_maps_bare_incomplete_to_user_friendly_terminal() {
+    let lines = vec![
+        "event: response.incomplete\n".to_string(),
+        "data: {\"type\":\"response.incomplete\",\"response\":{\"status\":\"incomplete\"}}\n"
+            .to_string(),
+        "\n".to_string(),
+    ];
+
+    let event = OpenAIResponsesEvent::parse(&lines).expect("parsed event");
+    assert_eq!(event.event_type.as_deref(), Some("response.incomplete"));
+    assert!(matches!(
+        event.terminal,
+        Some(SseTerminal::Err(ref message))
+            if message == "连接中断（可能是网络波动或客户端主动取消）"
+    ));
+}
+
+#[test]
+fn parse_openai_responses_event_maps_stream_timeout_hint_to_idle_timeout() {
+    let lines = vec![
+        "event: response.incomplete\n".to_string(),
+        "data: {\"type\":\"response.incomplete\",\"response\":{\"status\":\"incomplete\",\"status_details\":{\"error\":{\"message\":\"stream timeout at upstream\",\"code\":\"stream_timeout\"}}}}\n".to_string(),
+        "\n".to_string(),
+    ];
+
+    let event = OpenAIResponsesEvent::parse(&lines).expect("parsed event");
+    assert_eq!(
+        event.upstream_error_hint.as_deref(),
+        Some("code=stream_timeout stream timeout at upstream")
+    );
+    assert!(matches!(
+        event.terminal,
+        Some(SseTerminal::Err(ref message)) if message == "上游流式空闲超时"
+    ));
+}
+
+#[test]
+fn parse_openai_responses_event_treats_partial_image_as_non_terminal() {
+    let lines = vec![
+        "event: response.image_generation_call.partial_image\n".to_string(),
+        "data: {\"type\":\"response.image_generation_call.partial_image\",\"item_id\":\"ig_1\",\"partial_image_b64\":\"cGFydA==\",\"partial_image_index\":0}\n".to_string(),
+        "\n".to_string(),
+    ];
+
+    let event = OpenAIResponsesEvent::parse(&lines).expect("parsed event");
+    assert_eq!(
+        event.event_type.as_deref(),
+        Some("response.image_generation_call.partial_image")
+    );
+    assert!(event.terminal.is_none());
+}

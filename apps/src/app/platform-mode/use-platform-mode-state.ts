@@ -1,0 +1,388 @@
+"use client";
+
+import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  CODEX_PROFILE_CANDIDATES_QUERY_KEY,
+  CODEX_PROFILE_STATUS_QUERY_KEY,
+  codexProfileClient,
+} from "@/lib/api/codex-profile-client";
+import { getAppErrorMessage } from "@/lib/api/transport";
+import {
+  buildOpenAiGatewayEndpoint,
+  resolveGatewayOrigin,
+} from "@/lib/gateway/endpoints";
+import { useCodexProfileModeStatus } from "@/hooks/useCodexProfileModeStatus";
+import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
+import { useDesktopPageActive } from "@/hooks/useDesktopPageActive";
+import { useAppStore } from "@/lib/store/useAppStore";
+import type {
+  CodexProfileHistoryRepairSummary,
+  CodexProfileMode,
+  CodexRuntimeReloadResult,
+} from "@/types";
+
+const EMPTY_CANDIDATES = { accounts: [], apiKeys: [] };
+const RELOAD_AFTER_SWITCH_STORAGE_KEY =
+  "codexmanager.platform-mode.reload-after-switch";
+const RELOAD_AFTER_SWITCH_EVENT =
+  "codexmanager:platform-mode-reload-after-switch";
+const SAFE_RELOAD_DEFAULT_MIGRATION_KEY =
+  "codexmanager.platform-mode.reload-safe-default-v2";
+
+let reloadAfterSwitchMemoryValue = false;
+
+function getReloadAfterSwitchPreference(): boolean {
+  if (typeof window === "undefined") {
+    return reloadAfterSwitchMemoryValue;
+  }
+  try {
+    if (window.localStorage.getItem(SAFE_RELOAD_DEFAULT_MIGRATION_KEY) !== "1") {
+      // Older versions enabled process termination by default. Reset that inherited preference
+      // once; users can explicitly opt in again after the migration.
+      window.localStorage.setItem(RELOAD_AFTER_SWITCH_STORAGE_KEY, "false");
+      window.localStorage.setItem(SAFE_RELOAD_DEFAULT_MIGRATION_KEY, "1");
+    }
+    const stored = window.localStorage.getItem(RELOAD_AFTER_SWITCH_STORAGE_KEY);
+    if (stored === "true" || stored === "false") {
+      reloadAfterSwitchMemoryValue = stored === "true";
+    }
+  } catch {
+    // Use the in-memory preference when browser storage is unavailable.
+  }
+  return reloadAfterSwitchMemoryValue;
+}
+
+function subscribeToReloadAfterSwitchPreference(
+  onStoreChange: () => void,
+): () => void {
+  if (typeof window === "undefined") {
+    return () => undefined;
+  }
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === RELOAD_AFTER_SWITCH_STORAGE_KEY) {
+      onStoreChange();
+    }
+  };
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(RELOAD_AFTER_SWITCH_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(RELOAD_AFTER_SWITCH_EVENT, onStoreChange);
+  };
+}
+
+export function historyRepairChangeCount(
+  summary: CodexProfileHistoryRepairSummary | null,
+): number {
+  if (!summary) return 0;
+  return (
+    summary.changedRolloutFileCount +
+    summary.updatedSqliteRowCount +
+    summary.addedSessionIndexEntryCount
+  );
+}
+
+export function pickAvailableCandidateId<T extends { id: string }>(
+  preferredId: string | null | undefined,
+  managedId: string | null | undefined,
+  candidates: T[],
+): string {
+  const ids = new Set(candidates.map((item) => item.id));
+  if (preferredId && ids.has(preferredId)) return preferredId;
+  if (managedId && ids.has(managedId)) return managedId;
+  return candidates[0]?.id || "";
+}
+
+export function modeImpact(
+  mode: CodexProfileMode | null,
+  t: (value: string, params?: Record<string, string | number>) => string,
+): string {
+  if (mode === "direct_account") {
+    return t("Codex 直接连接 OpenAI，并跟随 OpenAI 官方模型目录；CodexManager 不参与请求转发或模型目录管理。");
+  }
+  if (mode === "gateway") {
+    return t("Codex 请求由 CodexManager 转发；实际路由和模型目录取决于当前平台密钥的配置。");
+  }
+  return t("选择接入方式后，CodexManager 会接管该 Codex profile 的 auth.json / config.toml。");
+}
+
+export function usePlatformModePageState(
+  t: (value: string, params?: Record<string, string | number>) => string,
+) {
+  const queryClient = useQueryClient();
+  const serviceStatus = useAppStore((state) => state.serviceStatus);
+  const { mode, canAccessManagementRpc } = useRuntimeCapabilities();
+  const isServiceReady = canAccessManagementRpc && serviceStatus.connected;
+  const isPageActive = useDesktopPageActive("/platform-mode/");
+  const [codexHomeDraft, setCodexHomeDraft] = useState<string | null>(null);
+  const [selectedAccountIdDraft, setSelectedAccountIdDraft] = useState<string | null>(null);
+  const [selectedApiKeyIdDraft, setSelectedApiKeyIdDraft] = useState<string | null>(null);
+  const [gatewayBaseUrlDraft, setGatewayBaseUrlDraft] = useState<string | null>(null);
+  const [supportsWebsocketsDraft, setSupportsWebsocketsDraft] = useState<boolean | null>(
+    null,
+  );
+  const reloadAfterSwitch = useSyncExternalStore(
+    subscribeToReloadAfterSwitchPreference,
+    getReloadAfterSwitchPreference,
+    () => false,
+  );
+  const browserOrigin = useSyncExternalStore(
+    () => () => undefined,
+    () =>
+      mode === "web-gateway" && typeof window !== "undefined"
+        ? window.location.origin
+        : "",
+    () => "",
+  );
+
+  const defaultGatewayBaseUrl = useMemo(() => {
+    const origin = resolveGatewayOrigin({
+      browserOrigin,
+      runtimeMode: mode,
+      serviceAddr: serviceStatus.addr,
+    });
+    return buildOpenAiGatewayEndpoint(origin);
+  }, [browserOrigin, mode, serviceStatus.addr]);
+
+  const statusQuery = useCodexProfileModeStatus();
+
+  const setReloadAfterSwitch = (enabled: boolean) => {
+    reloadAfterSwitchMemoryValue = enabled;
+    try {
+      window.localStorage.setItem(
+        RELOAD_AFTER_SWITCH_STORAGE_KEY,
+        String(enabled),
+      );
+    } catch {
+      // The preference still applies to the current page session.
+    }
+    window.dispatchEvent(new Event(RELOAD_AFTER_SWITCH_EVENT));
+  };
+  const candidatesQuery = useQuery({
+    queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY,
+    queryFn: () => codexProfileClient.listCandidates(),
+    enabled: isServiceReady,
+    retry: 1,
+    staleTime: 0,
+    refetchInterval: isServiceReady && isPageActive ? 5_000 : false,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+  });
+
+  const status = statusQuery.status;
+  const candidates = candidatesQuery.data || EMPTY_CANDIDATES;
+  const codexHomeInput = codexHomeDraft ?? status?.codexHome ?? "";
+  const selectedAccountId = pickAvailableCandidateId(
+    selectedAccountIdDraft,
+    status?.selectedAccountId,
+    candidates.accounts,
+  );
+  const selectedApiKeyId = pickAvailableCandidateId(
+    selectedApiKeyIdDraft,
+    status?.selectedApiKeyId,
+    candidates.apiKeys,
+  );
+  const gatewayBaseUrl =
+    gatewayBaseUrlDraft ?? status?.gatewayBaseUrl ?? defaultGatewayBaseUrl;
+  const supportsWebsockets =
+    supportsWebsocketsDraft ?? status?.supportsWebsockets ?? false;
+  const isDirectActive = status?.mode === "direct_account";
+  const isGatewayActive = status?.mode === "gateway";
+  const activeAccountValue = status?.selectedAccountId
+    ? candidates.accounts.find((item) => item.id === status.selectedAccountId)?.label ||
+      status.selectedAccountId
+    : "-";
+  const activeKeyValue = status?.selectedApiKeyId
+    ? candidates.apiKeys.find((item) => item.id === status.selectedApiKeyId)?.name ||
+      status.selectedApiKeyId
+    : "-";
+
+  const refreshAll = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: CODEX_PROFILE_STATUS_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY }),
+    ]);
+  };
+
+  const showHistoryRepairToast = (summary: CodexProfileHistoryRepairSummary | null) => {
+    if (!summary) return;
+    if (summary.warnings.length > 0) {
+      toast.warning(`${t("历史修复完成但有警告")}：${summary.warnings[0]}`);
+      return;
+    }
+    if (historyRepairChangeCount(summary) > 0) {
+      toast.success(t("历史会话可见性已修复"));
+    }
+  };
+
+  const showRuntimeReloadToast = (result: CodexRuntimeReloadResult | null) => {
+    if (!result) return;
+    if (!result.requested) {
+      toast.info(t("配置已切换；现有 Codex 进程将在下次启动时生效"));
+      return;
+    }
+    if (result.warnings.length > 0) {
+      toast.warning(
+        `${t("配置已切换，但 Codex 后台重载有警告")}: ${result.warnings[0]}`,
+      );
+      return;
+    }
+    if (result.signaledProcessCount > 0) {
+      toast.success(
+        t("已请求重载 {count} 个 Codex 后台进程", {
+          count: result.signaledProcessCount,
+        }),
+      );
+      return;
+    }
+    toast.info(t("未发现需要重载的 Codex 后台进程"));
+  };
+
+  const saveConfigMutation = useMutation({
+    mutationFn: () => codexProfileClient.setConfig(codexHomeInput),
+    onSuccess: async (nextStatus) => {
+      setCodexHomeDraft(nextStatus.codexHome);
+      await refreshAll();
+      toast.success(t("Codex profile 路径已保存"));
+    },
+    onError: (error: unknown) => {
+      toast.error(`${t("保存失败")}: ${getAppErrorMessage(error)}`);
+    },
+  });
+
+  const applyDirectMutation = useMutation({
+    mutationFn: () =>
+      codexProfileClient.applyDirectAccount({
+        accountId: selectedAccountId,
+        codexHome: codexHomeInput,
+        reloadAfterSwitch,
+      }),
+    onSuccess: async (nextStatus) => {
+      await refreshAll();
+      toast.success(t("已切换为直接连接 OpenAI"));
+      showHistoryRepairToast(nextStatus.historyRepair);
+      showRuntimeReloadToast(nextStatus.runtimeReload);
+    },
+    onError: (error: unknown) => {
+      toast.error(`${t("切换失败")}: ${getAppErrorMessage(error)}`);
+    },
+  });
+
+  const applyGatewayMutation = useMutation({
+    mutationFn: () =>
+      codexProfileClient.applyGateway({
+        apiKeyId: selectedApiKeyId,
+        codexHome: codexHomeInput,
+        baseUrl: gatewayBaseUrl,
+        supportsWebsockets,
+        reloadAfterSwitch,
+      }),
+    onSuccess: async (nextStatus) => {
+      await refreshAll();
+      toast.success(t("已切换为通过 CodexManager"));
+      showHistoryRepairToast(nextStatus.historyRepair);
+      showRuntimeReloadToast(nextStatus.runtimeReload);
+    },
+    onError: (error: unknown) => {
+      toast.error(`${t("切换失败")}: ${getAppErrorMessage(error)}`);
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: () => codexProfileClient.restore(codexHomeInput),
+    onSuccess: async () => {
+      await refreshAll();
+      toast.success(t("已恢复接管前的 Codex 配置"));
+    },
+    onError: (error: unknown) => {
+      toast.error(`${t("恢复失败")}: ${getAppErrorMessage(error)}`);
+    },
+  });
+
+  const repairHistoryMutation = useMutation({
+    mutationFn: () => codexProfileClient.repairHistory(codexHomeInput),
+    onSuccess: async (summary) => {
+      await refreshAll();
+      showHistoryRepairToast(summary);
+      if (summary.warnings.length === 0 && historyRepairChangeCount(summary) === 0) {
+        toast.success(t("历史会话已与当前模式一致"));
+      }
+    },
+    onError: (error: unknown) => {
+      toast.error(`${t("修复失败")}: ${getAppErrorMessage(error)}`);
+    },
+  });
+
+  const pruneHistoryBackupsMutation = useMutation({
+    mutationFn: () => codexProfileClient.pruneHistoryBackups(codexHomeInput),
+    onSuccess: async (result) => {
+      await refreshAll();
+      if (result.warnings.length > 0) {
+        toast.warning(`${t("清理完成但有警告")}：${result.warnings[0]}`);
+        return;
+      }
+      toast.success(
+        t("已清理 {count} 份历史备份，释放 {bytes}", {
+          count: result.removedCount,
+          bytes: result.removedBytes,
+        }),
+      );
+    },
+    onError: (error: unknown) => {
+      toast.error(`${t("清理失败")}: ${getAppErrorMessage(error)}`);
+    },
+  });
+
+  const isMutating =
+    saveConfigMutation.isPending ||
+    applyDirectMutation.isPending ||
+    applyGatewayMutation.isPending ||
+    restoreMutation.isPending ||
+    repairHistoryMutation.isPending ||
+    pruneHistoryBackupsMutation.isPending;
+
+  const latestHistoryRepair =
+    repairHistoryMutation.data ||
+    applyDirectMutation.data?.historyRepair ||
+    applyGatewayMutation.data?.historyRepair ||
+    status?.historyRepair ||
+    null;
+
+  return {
+    serviceStatus,
+    mode,
+    isServiceReady,
+    statusQuery,
+    candidatesQuery,
+    status,
+    candidates,
+    codexHomeInput,
+    selectedAccountId,
+    selectedApiKeyId,
+    gatewayBaseUrl,
+    supportsWebsockets,
+    reloadAfterSwitch,
+    defaultGatewayBaseUrl,
+    isDirectActive,
+    isGatewayActive,
+    activeAccountValue,
+    activeKeyValue,
+    setCodexHomeDraft,
+    setSelectedAccountIdDraft,
+    setSelectedApiKeyIdDraft,
+    setGatewayBaseUrlDraft,
+    setSupportsWebsocketsDraft,
+    setReloadAfterSwitch,
+    refreshAll,
+    saveConfigMutation,
+    applyDirectMutation,
+    applyGatewayMutation,
+    restoreMutation,
+    repairHistoryMutation,
+    pruneHistoryBackupsMutation,
+    isMutating,
+    latestHistoryRepair,
+  };
+}

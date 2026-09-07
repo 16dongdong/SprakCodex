@@ -1,0 +1,237 @@
+# System Internal Interface Inventory
+
+本文档把当前系统里可对接的内部接口一次性列出来，方便桌面端、Web 端、自动化脚本和第三方集成统一查看。  
+这份表不再只列页面上“常用”的那部分，而是按代码真实入口补齐：
+
+- Tauri 命令：以 [apps/src-tauri/src/commands/registry.rs](../../../apps/src-tauri/src/commands/registry.rs) 为准
+- 前端命令映射：以 [apps/src/lib/api/transport.ts](../../../apps/src/lib/api/transport.ts) 为准
+- JSON-RPC 方法：以 [crates/service/src/rpc_dispatch](../../../crates/service/src/rpc_dispatch) 和 [crates/service/src/plugin/mod.rs](../../../crates/service/src/plugin/mod.rs) 为准
+- Service / Web HTTP 路由：以 [crates/service/src/http/backend_router.rs](../../../crates/service/src/http/backend_router.rs)、[crates/service/src/http/proxy_runtime.rs](../../../crates/service/src/http/proxy_runtime.rs)、[crates/web/src/main.rs](../../../crates/web/src/main.rs) 为准
+
+## 1. 接口分层
+
+- `Tauri` 命令：桌面端调用入口，参数名以 Rust `#[tauri::command]` 为准
+- `JSON-RPC` 方法：`service` 进程对外的内部方法名，默认走 `POST /rpc`
+- `direct` 本地命令：仅桌面端本地可用，不经过 RPC
+- `HTTP` 路由：`service` / `web` 进程直接暴露的服务端接口
+
+## 2. Tauri / RPC / direct 对照表
+
+| 模块 | Tauri 命令 | RPC / 类型 | 关键参数 / 备注 |
+| --- | --- | --- | --- |
+| 基础 | `app_settings_get` | `appSettings/get` | 读取应用设置 |
+| 基础 | `app_settings_set` | `appSettings/set` | 参数：`patch` |
+| 基础 | `app_close_to_tray_on_close_get` | `direct` | 读取“关闭到托盘”状态 |
+| 基础 | `app_close_to_tray_on_close_set` | `direct` | 参数：`enabled` |
+| 基础 | `service_initialize` | `initialize` | 初始化服务、返回版本和平台信息 |
+| 基础 | `service_start` | `direct` | 参数：`addr`，桌面端拉起本地 `service` 进程 |
+| 基础 | `service_stop` | `direct` | 停止本地 `service` 进程 |
+| 基础 | `service_rpc_token` | `direct` | 返回当前 RPC 鉴权 token |
+| 基础 | `service_startup_snapshot` | `startup/snapshot` | 参数：`requestLogLimit` |
+| 基础 | `service_listen_config_get` | `service/listenConfig/get` | 读取服务监听模式 |
+| 基础 | `service_listen_config_set` | `service/listenConfig/set` | 参数：`mode` |
+| 账号 | `service_account_list` | `account/list` | 参数：`page`、`pageSize`、`query`、`filter`、`groupFilter` |
+| 账号 | `service_account_delete` | `account/delete` | 参数：`accountId` |
+| 账号 | `service_account_delete_many` | `account/deleteMany` | 参数：`accountIds` |
+| 账号 | `service_account_delete_unavailable_free` | `account/deleteUnavailableFree` | 删除不可用免费账号 |
+| Account | `service_account_update` | `account/update` | Parameters: `accountId`, `sort`, `status`, `label`, `groupName`, `note`, `tags`; only administrators may change `groupName` |
+| 账号 | `service_account_import` | `account/import` | 参数：`contents[]` 或 `content` |
+| 账号 | `service_account_import_by_file` | `direct` | 桌面端打开文件选择器，读取 `.json/.txt`，产出 `contents` 后再交给 `service_account_import` |
+| 账号 | `service_account_import_by_directory` | `direct` | 桌面端打开目录选择器，递归读取账号文件，产出 `contents` 后再交给 `service_account_import` |
+| 账号 | `service_account_export_by_account_files` | `direct -> account/export` | 桌面端先选择目录，再调用 RPC `account/export`；Web 模式会改走 `account/exportData` 浏览器下载 |
+| 账号 | `local_account_delete` | `direct` | 参数：`accountId`，直接操作本地 SQLite，不经过服务 |
+| 用量 | `service_usage_read` | `account/usage/read` | 参数：`accountId` |
+| 用量 | `service_usage_list` | `account/usage/list` | 返回全部账号最新快照 |
+| 用量 | `service_usage_aggregate` | `account/usage/aggregate` | 返回全局聚合汇总 |
+| 用量 | `service_usage_refresh` | `account/usage/refresh` | 参数可选：`accountId`；不传则刷新全部 |
+| 登录 | `service_login_start` | `account/login/start` | 参数：`loginType`、`openBrowser`、`note`、`tags`、`groupName`、`workspaceId` |
+| 登录 | `service_login_status` | `account/login/status` | 参数：`loginId` |
+| Login | `service_login_cancel` | `account/login/cancel` | Param: `loginId`; cancels an in-progress login flow |
+| 登录 | `service_login_complete` | `account/login/complete` | 参数：`state`、`code`、`redirectUri` |
+| 登录 | `service_login_chatgpt_auth_tokens` | `account/login/start` | 固定参数：`type=chatgptAuthTokens`；其余参数：`accessToken`、`refreshToken`、`idToken`、`chatgptAccountId`、`workspaceId`、`chatgptPlanType` |
+| 登录 | `service_account_read` | `account/read` | 参数：`refreshToken` |
+| 登录 | `service_account_logout` | `account/logout` | 退出当前登录态 |
+| 登录 | `service_chatgpt_auth_tokens_refresh` | `account/chatgptAuthTokens/refresh` | 参数：`reason`、`previousAccountId` |
+| 聚合 API | `service_aggregate_api_list` | `aggregateApi/list` | 列表 |
+| 聚合 API | `service_aggregate_api_create` | `aggregateApi/create` | 参数：`providerType`、`supplierName`、`sort`、`url`、`key`、`authType`、`authCustomEnabled`、`authParams`、`actionCustomEnabled`、`action`、`username`、`password` |
+| 聚合 API | `service_aggregate_api_update` | `aggregateApi/update` | 参数：`id`、`providerType`、`supplierName`、`sort`、`url`、`key`、`authType`、`authCustomEnabled`、`authParams`、`actionCustomEnabled`、`action`、`username`、`password` |
+| 聚合 API | `service_aggregate_api_read_secret` | `aggregateApi/readSecret` | 参数：`id` |
+| 聚合 API | `service_aggregate_api_delete` | `aggregateApi/delete` | 参数：`id` |
+| 聚合 API | `service_aggregate_api_test_connection` | `aggregateApi/testConnection` | 参数：`id` |
+| 平台密钥 | `service_apikey_list` | `apikey/list` | 列表 |
+| 平台密钥 | `service_apikey_read_secret` | `apikey/readSecret` | 参数：`keyId`，前端会映射成 RPC 参数 `id` |
+| Platform API key | `service_apikey_create` | `apikey/create` | Parameters: `name`, `modelSlug`, `reasoningEffort`, `serviceTier`, `protocolType`, `upstreamBaseUrl`, `staticHeadersJson`, `rotationStrategy`, `aggregateApiId`, `accountPlanFilter`, `accountGroupFilter`, `quotaLimitTokens`, `customKey` |
+| 平台密钥 | `service_apikey_models` | `apikey/models` | 参数可选：`refreshRemote` |
+| 平台密钥 | `service_apikey_usage_stats` | `apikey/usageStats` | 用量统计 |
+| Platform API key | `service_apikey_update_model` | `apikey/updateModel` | Parameters: `keyId`, `name`, `modelSlug`, `reasoningEffort`, `serviceTier`, `protocolType`, `upstreamBaseUrl`, `staticHeadersJson`, `rotationStrategy`, `aggregateApiId`, `accountPlanFilter`, `accountGroupFilter`, and `quotaLimitTokens`; `customKey` is create-only. Desktop-only `hasName`, `hasModelConfig`, `hasRoutingConfig`, `hasAccountGroupFilter`, and `hasQuotaLimitTokens` are presence markers that distinguish omission from explicit clearing and are not forwarded as domain fields; only administrators may change the account-group filter |
+| 平台密钥 | `service_apikey_delete` | `apikey/delete` | 参数：`keyId` |
+| 平台密钥 | `service_apikey_disable` | `apikey/disable` | 参数：`keyId` |
+| 平台密钥 | `service_apikey_enable` | `apikey/enable` | 参数：`keyId` |
+| 网关 | `service_gateway_route_strategy_get` | `gateway/routeStrategy/get` | 读取路由策略与手动优选账号 |
+| 网关 | `service_gateway_route_strategy_set` | `gateway/routeStrategy/set` | 参数：`strategy` |
+| 网关 | `service_gateway_manual_account_get` | `gateway/manualAccount/get` | 读取手动优选账号 |
+| 网关 | `service_gateway_manual_account_set` | `gateway/manualAccount/set` | 参数：`accountId` |
+| 网关 | `service_gateway_manual_account_clear` | `gateway/manualAccount/clear` | 清空手动优选账号 |
+| 网关 | `service_gateway_background_tasks_get` | `gateway/backgroundTasks/get` | 读取后台任务配置 |
+| 网关 | `service_gateway_background_tasks_set` | `gateway/backgroundTasks/set` | 参数：`usagePollingEnabled`、`usagePollIntervalSecs`、`gatewayKeepaliveEnabled`、`gatewayKeepaliveIntervalSecs`、`tokenRefreshPollingEnabled`、`tokenRefreshPollIntervalSecs`、`usageRefreshWorkers`、`httpWorkerFactor`、`httpWorkerMin`、`httpStreamWorkerFactor`、`httpStreamWorkerMin` |
+| 网关 | `service_gateway_concurrency_recommend_get` | `gateway/concurrencyRecommendation/get` | 读取系统推导的并发建议 |
+| 网关 | `service_gateway_upstream_proxy_get` | `gateway/upstreamProxy/get` | 读取上游代理 |
+| 网关 | `service_gateway_upstream_proxy_set` | `gateway/upstreamProxy/set` | 参数：`proxyUrl` |
+| 网关 | `service_gateway_transport_get` | `gateway/transport/get` | 读取传输层配置 |
+| Gateway | `service_gateway_transport_set` | `gateway/transport/set` | Params: `sseKeepaliveEnabled`, `sseKeepaliveIntervalMs`, `upstreamTotalTimeoutMs`, `upstreamStreamTimeoutMs` |
+| 请求日志 | `service_requestlog_list` | `requestlog/list` | 参数：`query`、`statusFilter`、`page`、`pageSize` |
+| 请求日志 | `service_requestlog_summary` | `requestlog/summary` | 参数：`query`、`statusFilter` |
+| 请求日志 | `service_requestlog_clear` | `requestlog/clear` | 清空请求日志 |
+| 请求日志 | `service_requestlog_today_summary` | `requestlog/today_summary` | 今日汇总 |
+| 插件中心 | `service_plugin_catalog_list` | `plugin/catalog/list` | 参数：`marketMode`、`sourceUrl` |
+| 插件中心 | `service_plugin_catalog_refresh` | `plugin/catalog/refresh` | 刷新插件目录 |
+| 插件中心 | `service_plugin_install` | `plugin/install` | 参数：`entry` |
+| 插件中心 | `service_plugin_update` | `plugin/update` | 参数：`entry` |
+| 插件中心 | `service_plugin_uninstall` | `plugin/uninstall` | 参数：`pluginId` |
+| 插件中心 | `service_plugin_list` | `plugin/list` | 已安装插件列表 |
+| 插件中心 | `service_plugin_enable` | `plugin/enable` | 参数：`pluginId` |
+| 插件中心 | `service_plugin_disable` | `plugin/disable` | 参数：`pluginId` |
+| 插件中心 | `service_plugin_tasks_update` | `plugin/tasks/update` | 参数：`taskId`、`intervalSeconds` |
+| 插件中心 | `service_plugin_tasks_list` | `plugin/tasks/list` | 参数可选：`pluginId` |
+| 插件中心 | `service_plugin_tasks_run` | `plugin/tasks/run` | 参数：`taskId`、`input` |
+| 插件中心 | `service_plugin_logs_list` | `plugin/logs/list` | 参数：`pluginId`、`taskId`、`limit` |
+| Codex Skills | `service_codex_skills_list` | `codexSkills/list` | Optional param: `codexHome`; scans user and built-in Skills |
+| Codex Skills | `service_codex_skills_install_zip` | `codexSkills/installZip` | Params: `fileName`, `archiveBase64`; optional: `codexHome` |
+| Codex Skills | `service_codex_skills_import_directory` | `codexSkills/importDirectory` | Param: `sourcePath`; optional: `codexHome` |
+| Codex Skills | `service_codex_skills_delete` | `codexSkills/delete` | Param: `directoryName`; optional: `codexHome` |
+| Codex Skills | `service_codex_skills_marketplace_list` | `codexSkills/marketplaceList` | Optional param: `codexHome`; lists Marketplaces and available plugins |
+| Codex Skills | `service_codex_skills_marketplace_add` | `codexSkills/marketplaceAdd` | Param: `source`; optional: `refName`, `codexHome` |
+| Codex Skills | `service_codex_skills_marketplace_refresh` | `codexSkills/marketplaceRefresh` | Optional params: `marketplaceName`, `codexHome` |
+| Codex Skills | `service_codex_skills_marketplace_plugin_install` | `codexSkills/marketplacePluginInstall` | Param: `pluginId`; optional: `codexHome`; installs the complete Codex plugin |
+| Codex Projects | `app_codex_projects_list` | `direct (desktop only)` | Lists project folders saved locally by the current desktop client |
+| Codex Projects | `app_codex_project_add` | `direct (desktop only)` | Opens the system folder picker, canonicalizes, and saves the selected folder |
+| Codex Projects | `app_codex_project_remove` | `direct (desktop only)` | Param: `path`; removes only the saved entry and never project files |
+| Codex Projects | `app_codex_project_launch` | `direct (desktop only)` | Params: `path`, `action=start|resume`; on Windows/macOS, `start` opens the workspace in the ChatGPT Codex App and `resume` uses the local CLI session picker |
+| 系统 | `open_in_browser` | `direct` | 参数：`url`，本地打开浏览器 |
+| 系统 | `open_in_file_manager` | `direct` | 参数：`path`，本地打开目录 |
+| 系统 | `app_window_unsaved_draft_sections_set` | `direct` | 参数：`sections[]`，设置页未保存草稿标记 |
+| 更新 | `app_update_check` | `direct` | 检查更新 |
+| 更新 | `app_update_prepare` | `direct` | 下载 / 预备更新 |
+| 更新 | `app_update_apply_portable` | `direct` | 便携版应用更新 |
+| 更新 | `app_update_launch_installer` | `direct` | 安装包模式启动安装器 |
+| 更新 | `app_update_status` | `direct` | 读取更新状态 |
+| 更新 | `app_update_open_logs_dir` | `direct` | 参数可选：`assetPath`，打开更新日志目录 |
+
+## 3. 仅 RPC 暴露的方法
+
+这些方法目前没有同名 Tauri 命令，但服务端已经实现，适合 Web 端、脚本端或后续接入方直接走 JSON-RPC。
+
+| 模块 | RPC 方法 | 关键参数 / 备注 |
+| --- | --- | --- |
+| 账号导出 | `account/export` | 参数：`outputDir`；把账号逐个写入指定目录 |
+| 账号导出 | `account/exportData` | 无参数；直接返回 `{ files: [{ fileName, content }], exported }`，主要给浏览器下载导出用 |
+| Web 鉴权 | `webAuth/status` | 读取 Web 管理页密码配置状态 |
+| Web 鉴权 | `webAuth/password/set` | 参数：`password` |
+| Web 鉴权 | `webAuth/password/clear` | 清空 Web 管理页密码 |
+
+## 4. Service / Web HTTP 路由
+
+### 4.1 Service 进程 HTTP 路由
+
+| 路由 | 方法 | 说明 |
+| --- | --- | --- |
+| `/rpc` | `POST` | JSON-RPC 统一入口 |
+| `/auth/callback` | `GET` | 登录回调入口，浏览器授权后回跳这里 |
+| `/metrics` | `GET` | 指标输出 |
+| `/health` | `GET` | 健康检查，返回 `ok` |
+| `/v1/models` | `GET` | 网关模型列表；部分场景会本地直接响应 |
+| `/v1/responses` | `POST` | OpenAI 兼容 Responses 入口 |
+| `/v1/responses/compact` | `POST` | 紧凑型 Responses 入口 |
+| `/v1/chat/completions` | `POST` | OpenAI Chat Completions 入口，内部会适配到 `/v1/responses` |
+| `/v1/messages/count_tokens` | `POST` | Anthropic 风格 token 估算，本地轻量响应 |
+| 其他未命中内部路由的路径 | `ANY` | 统一落到网关 handler，继续按协议适配与上游转发 |
+
+### 4.2 Web 管理页 HTTP 路由
+
+| 路由 | 方法 | 说明 |
+| --- | --- | --- |
+| `/api/runtime` | `GET` | 返回当前运行时能力，如 `rpcBaseUrl`、是否可自更新、是否支持本地目录等 |
+| `/api/rpc` | `POST` | Web -> Service 的 RPC 代理 |
+| `/__auth_status` | `GET` | Web 鉴权状态 |
+| `/__login` | `GET` / `POST` | Web 登录页与提交入口 |
+| `/__logout` | `GET` / `POST` | Web 登出 |
+| `/__quit` | `GET` | 请求 Web 进程退出 |
+| `/`、`/{*path}` | `GET` | 静态 UI、内嵌 UI 或缺省提示页 |
+
+## 5. 导入 / 导出链路补充
+
+这是当前最容易遗漏、也最容易接错的一组接口。
+
+### 5.1 导入
+
+| 场景 | 实际链路 | 说明 |
+| --- | --- | --- |
+| 桌面端手动选文件导入 | `service_account_import_by_file` -> 本地文件选择器 -> `service_account_import` -> `account/import` | 先读取文件内容，再统一走 RPC 导入 |
+| 桌面端手动选目录导入 | `service_account_import_by_directory` -> 本地目录选择器 -> `service_account_import` -> `account/import` | 目录会递归收集 `.json/.txt` |
+| Web 端文件导入 | `service_account_import_by_file` / `service_account_import_by_directory` -> 浏览器文件选择 -> `service_account_import` -> `account/import` | Web 模式下 `transport.ts` 用浏览器 `<input type=file>` 模拟本地导入 |
+| 直接脚本导入 | 直接调 `account/import` | 最稳，传 `contents[]` 即可 |
+
+### 5.2 导出
+
+| 场景 | 实际链路 | 说明 |
+| --- | --- | --- |
+| 桌面端导出到目录 | `service_account_export_by_account_files` -> 本地目录选择器 -> `account/export` | 服务端把每个账号写成单独文件到 `outputDir` |
+| Web 端导出下载 | `service_account_export_by_account_files` -> `account/exportData` -> 浏览器逐个下载 | Web 端不会写本地目录，而是拿到文件内容后下载 |
+| 直接脚本导出到目录 | 直接调 `account/export` | 传 `outputDir` |
+| 直接脚本导出到内存 | 直接调 `account/exportData` | 拿到 `files[]` 自己处理 |
+
+## 6. 常用能力速查
+
+| 常见叫法 | 对应入口 |
+| --- | --- |
+| 用户列表 / 账号列表 | `service_account_list` / `account/list` |
+| Update one account's notes / tags / status / custom group | `service_account_update` / `account/update` |
+| Restrict one API key's account candidate pool to a custom group | `service_apikey_create` / `service_apikey_update_model` with `accountGroupFilter` |
+| 批量删除账号 | `service_account_delete_many` / `account/deleteMany` |
+| 删除不可用免费账号 | `service_account_delete_unavailable_free` / `account/deleteUnavailableFree` |
+| 导入账号文本 / JSON | `service_account_import` / `account/import` |
+| 桌面端导出账号文件 | `service_account_export_by_account_files` -> `account/export` |
+| Web 端下载导出账号 | `service_account_export_by_account_files` -> `account/exportData` |
+| 刷新账号用量 | `service_usage_refresh` / `account/usage/refresh` |
+| 账号用量列表 | `service_usage_list` / `account/usage/list` |
+| 当前登录态账号 | `service_account_read` / `account/read` |
+| 刷新 ChatGPT Auth Tokens | `service_chatgpt_auth_tokens_refresh` / `account/chatgptAuthTokens/refresh` |
+| 平台 Key 列表 | `service_apikey_list` / `apikey/list` |
+| 聚合 API 连通性测试 | `service_aggregate_api_test_connection` / `aggregateApi/testConnection` |
+| 网关路由策略 | `service_gateway_route_strategy_get` / `gateway/routeStrategy/get` |
+| 系统推导并发建议 | `service_gateway_concurrency_recommend_get` / `gateway/concurrencyRecommendation/get` |
+| 请求日志列表 | `service_requestlog_list` / `requestlog/list` |
+| 插件任务执行 | `service_plugin_tasks_run` / `plugin/tasks/run` |
+| Web 管理页密码状态 | `webAuth/status` |
+
+## 7. 插件运行内建函数
+
+当前 Rhai 运行时按权限开放这些函数：
+
+| 权限 | 函数 | 说明 |
+| --- | --- | --- |
+| `settings:read` | `get_setting(key)` | 读取单个设置 |
+| `settings:read` | `list_settings()` | 获取全部设置 |
+| `network` | `http_get(url)` | 发起 GET 请求 |
+| `network` | `http_post(url, body)` | 发起 POST 请求 |
+| `accounts:cleanup` | `cleanup_banned_accounts()` | 清理封禁账号 |
+| `accounts:cleanup` | `cleanup_unavailable_free_accounts()` | 清理不可用免费账号 |
+
+公共函数：
+
+- `log(message)`：写入运行日志
+
+## 8. 现有内置插件
+
+- `cleanup-banned-accounts`：封禁账号清理
+- `cleanup-unavailable-free-accounts`：不可用免费账号定时清理
+
+## 9. 对接建议
+
+- 桌面端集成优先用 Tauri 命令，尤其是文件导入、目录导出、打开浏览器、打开文件夹、自更新。
+- Web / Docker / 远程脚本优先直接走 JSON-RPC，不要假设存在本地文件选择器。
+- 导出场景要先分清“写目录”还是“浏览器下载”：
+  - 写目录：`account/export`
+  - 浏览器下载：`account/exportData`
+- 如果你做 Service 级集成，除了 `/rpc` 外，还要注意 `/health`、`/metrics`、`/auth/callback` 和 OpenAI 兼容的网关路径。
+- 如果你要让 Rhai 脚本直接调用“用户列表”“平台 Key 列表”这类系统接口，需要先在服务端封装成受控函数；当前脚本默认只开放表中列出的内建函数。

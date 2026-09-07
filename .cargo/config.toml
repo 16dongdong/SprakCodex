@@ -1,0 +1,8 @@
+[build]
+target-dir = "target"
+
+[target.'cfg(target_env = "msvc")']
+# MSVC emits the informational "Creating library ..." line on stdout for test
+# and cdylib links. Rust 1.97 surfaces that localized linker chatter as a
+# linker_messages warning even though the link succeeds.
+rustflags = ["-A", "linker-messages"]
