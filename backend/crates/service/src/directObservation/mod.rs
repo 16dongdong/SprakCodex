@@ -158,7 +158,13 @@ fn startRuntime(
             tokio::spawn(async move {
                 let dll = std::env::var_os("CODEXMANAGER_OBSERVATION_DLL")
                     .map(PathBuf::from)
-                    .or_else(|| std::env::current_exe().ok().and_then(|path| path.parent().map(|dir| dir.join("cphook.dll"))));
+                    .or_else(|| {
+                        std::env::current_exe().ok().and_then(|path| {
+                            let directory = path.parent()?;
+                            [directory.join("cphook.dll"), directory.join("resources/cphook.dll"), directory.join("Resources/cphook.dll")]
+                                .into_iter().find(|candidate| candidate.is_file())
+                        })
+                    });
                 let Some(dll) = dll else {
                     log::error!("无法确定观测注入 DLL 路径");
                     return;
