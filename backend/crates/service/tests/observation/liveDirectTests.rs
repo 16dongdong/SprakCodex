@@ -62,7 +62,19 @@ fn officialTransportRecordsUsage() {
     let database = directory.join("observation.db");
     let storage = Storage::open(&database).unwrap();
     storage.init().unwrap();
-    let authority = certificateAuthority::Authority::create(observationHosts).unwrap();
+    // 过期批次验收不调整系统或客户端时钟；必须由生产维护任务完成续签，真实 CLI 才能通过叶子有效期校验。
+    let expiredCertificate =
+        std::env::var("OBSERVATION_TEST_EXPIRED_CERTIFICATE").as_deref() == Ok("true");
+    let authority = if expiredCertificate {
+        certificateAuthority::Authority::signAt(
+            observationHosts,
+            rcgen::KeyPair::generate().unwrap(),
+            time::OffsetDateTime::now_utc() - time::Duration::days(8),
+        )
+        .unwrap()
+    } else {
+        certificateAuthority::Authority::create(observationHosts).unwrap()
+    };
     let certificate = directory.join("authority.pem");
     std::fs::write(&certificate, &authority.pem).unwrap();
     let (sink, databaseWorker) = recordSink::RecordSink::start(database).unwrap();

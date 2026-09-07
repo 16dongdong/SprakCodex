@@ -110,6 +110,8 @@ impl Engine {
 
 // 限制监听连接数；停止先取消网络任务，再给解码和持久化任务完成 EOF 处理的机会。
 pub(super) async fn serve(listener: LoopbackListeners, engine: Arc<Engine>) {
+    // 续签与连接共用运行期取消和任务回收；不是游离的定时器，监听停止后维护任务必须一起退出。
+    engine.tasks.spawn(engine.authority.maintenance(engine.cancel.clone()));
     let permits = Arc::new(Semaphore::new(maxConnections));
     loop {
         let accepted = tokio::select! { _ = engine.cancel.cancelled() => break, accepted = listener.accept() => accepted };

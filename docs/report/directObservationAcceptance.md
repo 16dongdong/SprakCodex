@@ -463,3 +463,48 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 
 并发加载和两路官方流量已取得上述证据；无持久化完成事件的生产接入、完整宿主重启恢复、
 证书续期及已安装应用更新仍需继续，不能由本节结果替代。
+
+## 运行期证书续签与过期批次真实验收（2026-09-08）
+
+`certificateAuthority.rs` 原先只在启动时签发 7 天证书，运行时间超过有效期后，新的 TLS 握手会失败。
+现保留原签名身份和固定站点 `ServerConfig`，用 `SiteResolver` 在握手时读取当前证书批次：
+
+- 证书有效期仍为 7 天，提前 1 天续签；维护任务首轮立即检查，之后每小时检查一次。
+- 同步密钥生成在阻塞工作线程执行，不持有发布锁签发；所有白名单站点完成并校验公私钥匹配后才整批替换。
+- 失败不发布半批证书，错误明确记录，下一检查周期重试；较旧时间的任务不覆盖更新批次。
+- 只更新叶子证书与站点密钥，CA 签名身份、公开信任文件、系统根集合、上游校验及已有 TLS 连接不变。
+- 维护任务归属 `transport::serve` 的 `TaskTracker`，与连接共用取消和退出等待，不启动独立常驻进程。
+
+`certificateRenewalTests.rs` 六项测试通过：
+
+1. 阈值前不续签，阈值到达后一次更新全部站点，重复检查不重复签发。
+2. 原客户端仅加载一次公开根、禁用会话恢复，推进其独立验证时钟到第 8 天；新叶子握手成功，错误主机名仍失败。
+   即使原公开 CA 的证书有效期已过去，Rustls 保留的信任锚仍校验新叶子的签名和有效期；不据此推断其他 TLS 库行为。
+3. 过期批次在正常时钟下先握手失败，生产维护任务首轮续签后成功；停用后任务退出并释放签名状态引用。
+4. 更新批次后，之前建立的 TLS 流继续双向字节往返。
+5. 预先取消不进行续签；站点签发部分失败不改变原批次。
+6. 较旧时间请求不覆盖新有效期的证书。
+
+真实探针增加 `OBSERVATION_TEST_EXPIRED_CERTIFICATE=true`，仅把本次独立观测器的初始签发时间设为 8 天前。
+不调整系统或 CLI 时间、不关闭证书验证、不修改客户端代理/CA 环境。生产维护任务实际输出续签成功后，
+两个独立官方 CLI 完成并发生成；客户端使用最初的公开信任文件，不在测试中换发其信任材料。
+
+| 协议 | 生成 / 预热 / 失败握手 | 输入 | 缓存 | 输出 | 费用快照 / 钱包扣费 |
+| --- | --- | ---: | ---: | ---: | --- |
+| WebSocket | 2 / 2 / 0 | 40628 | 22784 | 16 | 2 / 0 |
+| SSE | 2 / 0 / 14 | 40652 | 22784 | 16 | 2 / 0 |
+
+响应 ID、模型、逐请求用量与独立客户端记录对应，SSE 失败握手仍为探针主动触发的协议回退。
+证据目录分别为 `backend/target/observationRenewed5a1bc56110a44861affdd6793337b79b` 和
+`backend/target/observationRenewedSse5cd7e784e8524ca8b8d7d54216a2ff22`。
+46 项观测回归通过，11 项需显式环境的测试默认跳过；Tauri 独立工作区检查通过。
+
+```powershell
+$env:OBSERVATION_TEST_CAPTURE_MODE='concurrent'
+$env:OBSERVATION_TEST_EXPIRED_CERTIFICATE='true'
+# 每种协议使用全新目录，其余官方 CLI、模型、生产 DLL 与上游参数沿用真实流量探针。
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
+```
+
+本节验证续签机制、TLS 有效期边界、连接连续性及官方真实请求，并非声称已经实际等待运行 7 天。
+无持久化事件的生产接入、完整宿主重启恢复和实际安装更新仍待完成。
