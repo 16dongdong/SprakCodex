@@ -73,11 +73,3 @@ winres = "0.1"
 name = "observationReadyFixture"
 path = "tests/observation/readyFixture.rs"
 crate-type = ["cdylib"]
-
-[target.'cfg(windows)'.dev-dependencies]
-retour = "0.3"
-
-[[example]]
-name = "runtimeUsageFixture"
-path = "tests/observation/runtimeUsageFixture.rs"
-crate-type = ["cdylib"]

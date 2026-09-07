@@ -83,7 +83,7 @@ fn explicitModuleSelectsItsOwnDirectory() {
             .unwrap()
             .isActive());
     }
-    assert!(!fixture.directory.join("debug/hook.json").exists());
+    assert!(!fixture.directory.join("debug").join(configFileName).exists());
     writeRelayConfig(&config, 0, None).unwrap();
     let stopped: serde_json::Value =
         serde_json::from_slice(&std::fs::read(&config).unwrap()).unwrap();
@@ -111,6 +111,14 @@ fn invalidExplicitModuleNeverSelectsAnotherFile() {
 #[test]
 fn missingInstalledModuleIsAnError() {
     let fixture = Fixture::new();
+    assert!(resolveModule(&fixture.directory.join("desktop.exe"), None).is_err());
+}
+
+// 旧资源文件不能满足新就绪协议，避免升级后仍装入仅有旧网络能力的模块。
+#[test]
+fn legacyModuleDoesNotSatisfyCurrentInstall() {
+    let fixture = Fixture::new();
+    std::fs::write(fixture.directory.join("cphook.dll"), b"legacy fixture").unwrap();
     assert!(resolveModule(&fixture.directory.join("desktop.exe"), None).is_err());
 }
 

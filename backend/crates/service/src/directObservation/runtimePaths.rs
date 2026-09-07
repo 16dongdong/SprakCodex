@@ -1,8 +1,9 @@
 //! 注入路径在一次运行开始时固定，配置与 DLL 同目录；停止复用同一路径而不重新读取环境。
 use std::path::{Path, PathBuf};
 
-const moduleFileName: &str = "cphook.dll";
-const configFileName: &str = "hook.json";
+// 安装资源按就绪协议分名，旧 DLL 可以留在既有客户端中，不通过覆盖已映射文件或卸载旧回调升级。
+const moduleFileName: &str = "observationHook8.dll";
+const configFileName: &str = cpcommon::relayContract::configName;
 
 // 启动时解析显式 DLL 或安装资源；Windows 资源缺失直接失败，非 Windows 仅使用显式代理入口。
 pub(super) fn resolve() -> Result<Option<PathBuf>, String> {

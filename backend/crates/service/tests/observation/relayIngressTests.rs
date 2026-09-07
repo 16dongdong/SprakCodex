@@ -1,5 +1,5 @@
 use super::*;
-use cpcommon::hook_proxy::encode_header;
+use cpcommon::hook_proxy::{encode_header, HookProxyTarget};
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
@@ -36,7 +36,8 @@ async fn fragmentedRelayHeaderPreservesTarget() {
     let Ingress::Relay(parsed) = readIngress(&mut reader).await.unwrap() else {
         panic!("入口类型错误")
     };
-    assert_eq!(parsed, target);
+    assert_eq!(parsed.target, target);
+    assert_eq!(parsed.kind, cpcommon::hook_proxy::RouteKind::Direct);
     sending.await.unwrap();
 }
 

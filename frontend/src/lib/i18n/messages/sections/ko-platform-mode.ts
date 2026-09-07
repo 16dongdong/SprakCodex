@@ -21,7 +21,7 @@ export const KO_PLATFORM_MODE_MESSAGES: MessageCatalog = {
   混合路由: "혼합 라우팅",
   "所选 OpenAI 账号": "선택한 OpenAI 계정",
   "CodexManager 可记录": "CodexManager에서 기록",
-  "CodexManager 不记录": "CodexManager에서 기록하지 않음",
+  "启用观测后可记录": "관측을 활성화하면 기록",
   "切换后尝试重载后台": "전환 후 백그라운드 다시 로드 시도",
   "下次启动时生效": "다음 시작 시 적용",
   无法确认: "확인할 수 없음",
@@ -78,8 +78,8 @@ export const KO_PLATFORM_MODE_MESSAGES: MessageCatalog = {
   账号直连: "계정 직결",
   "OpenAI 账号": "OpenAI 계정",
   选择账号: "계정 선택",
-  "直连 OpenAI 官方后端，不经过 CodexManager 网关；不会产生 CodexManager 请求日志，仪表盘用量统计不可用。":
-    "CodexManager 게이트웨이를 거치지 않고 OpenAI 공식 백엔드에 직접 연결합니다. CodexManager 요청 로그와 대시보드 사용량 통계는 사용할 수 없습니다.",
+  "直连 OpenAI 官方后端，不经过 CodexManager 网关；启用直连观测后可记录请求、实际用量和费用快照。":
+    "CodexManager 게이트웨이를 거치지 않고 OpenAI 공식 백엔드에 직접 연결합니다. 직접 연결 관측을 활성화하면 요청, 실제 사용량 및 비용 스냅샷을 기록합니다.",
   "没有可用于账号直连的 active OpenAI 账号。":
     "계정 직결에 사용할 수 있는 활성 OpenAI 계정이 없습니다.",
   "去添加 OpenAI 账号": "OpenAI 계정 추가",

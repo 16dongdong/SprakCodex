@@ -237,6 +237,7 @@ export function ReloadAfterSwitchOption({
   );
 }
 
+// 接入概要展示模式能力；直连统计由独立观测开关控制，不能仅因没有经过网关就宣称不记录。
 export function CurrentModeCard({
   t,
   status,
@@ -286,7 +287,7 @@ export function CurrentModeCard({
     status?.mode === "gateway"
       ? t("CodexManager 可记录")
       : status?.mode === "direct_account"
-        ? t("CodexManager 不记录")
+        ? t("启用观测后可记录")
         : "-";
   return (
     <Card className="overflow-hidden border-primary/20 bg-primary/5 shadow-sm lg:col-span-2 xl:col-span-1">
@@ -327,6 +328,7 @@ export function CurrentModeCard({
   );
 }
 
+// 直连账号选择与观测开关相互独立；预览说明可记录能力，不改动账号应用动作或承诺未启用时已采集。
 export function DirectAccountCard({
   t,
   candidates,
@@ -369,7 +371,7 @@ export function DirectAccountCard({
         </div>
         <CardDescription>
           {t(
-            "直连 OpenAI 官方后端，不经过 CodexManager 网关；不会产生 CodexManager 请求日志，仪表盘用量统计不可用。",
+            "直连 OpenAI 官方后端，不经过 CodexManager 网关；启用直连观测后可记录请求、实际用量和费用快照。",
           )}
         </CardDescription>
       </CardHeader>
@@ -425,7 +427,7 @@ export function DirectAccountCard({
           connection={t("直接连接 OpenAI")}
           route={t("所选 OpenAI 账号")}
           catalog={t("OpenAI 官方目录")}
-          telemetry={t("CodexManager 不记录")}
+          telemetry={t("启用观测后可记录")}
           reloadAfterSwitch={reloadAfterSwitch}
         />
         <Button

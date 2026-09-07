@@ -6,6 +6,9 @@ pub mod hook_ready;
 #[allow(non_snake_case)]
 pub mod relayContract;
 
+#[allow(non_snake_case, non_upper_case_globals)]
+pub mod completionSpool;
+
 #[cfg(windows)]
 #[allow(non_snake_case)]
 pub mod runtimeLease;

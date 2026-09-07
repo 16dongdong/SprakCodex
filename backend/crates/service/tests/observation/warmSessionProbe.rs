@@ -73,15 +73,8 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     peer.call("initialize", json!({"clientInfo":{"name":"observationProbe","version":"1"},"capabilities":{"experimentalApi":true,"optOutNotificationMethods":["rawResponseItem/completed","item/reasoning/textDelta","item/reasoning/summaryTextDelta","item/agentMessage/delta","item/completed"]}}));
     peer.initialized();
     let model = std::env::var("OBSERVATION_TEST_MODEL").unwrap();
-    let runtimeProof = std::env::var("OBSERVATION_TEST_CAPTURE_MODE").as_deref() == Ok("runtime");
-    let result = peer.call("thread/start", json!({"model":model,"cwd":directory,"approvalPolicy":"never","sandbox":"read-only","ephemeral":runtimeProof,"experimentalRawEvents":true}));
+    let result = peer.call("thread/start", json!({"model":model,"cwd":directory,"approvalPolicy":"never","sandbox":"read-only","ephemeral":false,"experimentalRawEvents":true}));
     assert_eq!(result["modelProvider"], "openai");
-    if runtimeProof {
-        assert!(
-            result["thread"]["path"].is_null(),
-            "无持久化验收不应返回会话文件路径"
-        );
-    }
     let thread = result["thread"]["id"]
         .as_str()
         .expect("缺少 thread ID")
@@ -111,12 +104,11 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     waitReady(identity.pid, &target.moduleDirectory.join("cphook.dll"));
     let after = peer.turn(&thread);
     let persisted = Instant::now();
-    while !runtimeProof
-        && sink
-            .counters
-            .written
-            .load(std::sync::atomic::Ordering::Relaxed)
-            < after.len() as u64
+    while sink
+        .counters
+        .written
+        .load(std::sync::atomic::Ordering::Relaxed)
+        < after.len() as u64
     {
         assert!(
             persisted.elapsed() < Duration::from_secs(10),
@@ -124,7 +116,7 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
         );
         std::thread::sleep(Duration::from_millis(20));
     }
-    let evidence = json!({"threadId":thread,"model":result["model"],"ephemeral":runtimeProof,"before":before,"after":after});
+    let evidence = json!({"threadId":thread,"model":result["model"],"ephemeral":false,"before":before,"after":after});
     std::fs::write(
         directory.join("warmEvidence.json"),
         serde_json::to_vec_pretty(&evidence).unwrap(),
@@ -168,9 +160,6 @@ pub(super) fn verify(directory: &Path, storage: &Storage) {
     let evidence: Value =
         serde_json::from_slice(&std::fs::read(directory.join("warmEvidence.json")).unwrap())
             .unwrap();
-    if std::env::var("OBSERVATION_TEST_CAPTURE_MODE").as_deref() == Ok("runtime") {
-        return verifyRuntime(directory, &evidence);
-    }
     let records = storage.list_request_logs(None, 100).unwrap();
     let after = evidence["after"].as_array().unwrap();
     assert_eq!(records.len(), after.len(), "启用前的基线请求不应重复回填");
@@ -222,29 +211,4 @@ pub(super) fn verify(directory: &Path, storage: &Storage) {
         after.len()
     );
     println!("已运行会话：第二轮逐响应核对通过，生成数={}", after.len());
-}
-
-// ABI 探针只核对实际读取字段，不把它当作已完成的生产接入；无会话文件时仍须逐项等于独立 RPC 通知。
-fn verifyRuntime(directory: &Path, evidence: &Value) {
-    let contents = std::fs::read_to_string(directory.join("runtimeUsage.jsonl")).unwrap();
-    let records: Vec<Value> = contents
-        .lines()
-        .map(|line| serde_json::from_str(line).unwrap())
-        .collect();
-    let after = evidence["after"].as_array().unwrap();
-    assert_eq!(records.len(), after.len(), "运行期读数缺失或重复");
-    for response in after {
-        let record = records
-            .iter()
-            .find(|record| record["responseId"] == response["responseId"])
-            .expect("运行期响应 ID 不匹配");
-        assert_eq!(record["threadId"], evidence["threadId"]);
-        assert_eq!(record["provider"], "openai");
-        assert_eq!(record["model"], evidence["model"]);
-        assert_eq!(record["usage"], response["usage"]);
-    }
-    println!(
-        "无持久化会话 ABI 验证通过，响应数={}；生产接入仍需实现",
-        records.len()
-    );
 }

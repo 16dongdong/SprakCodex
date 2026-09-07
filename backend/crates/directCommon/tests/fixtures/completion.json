@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "provider": "openai",
+  "model": "gpt-5.6-sol",
+  "threadId": "00000000-0000-0000-0000-000000000001",
+  "turnId": "turn-fixture",
+  "responseId": "resp_fixture",
+  "timestampMillis": 1700000000000,
+  "inputTokens": 10,
+  "cachedInputTokens": 2,
+  "cacheWriteInputTokens": 0,
+  "outputTokens": 3,
+  "reasoningOutputTokens": 1,
+  "totalTokens": 13
+}

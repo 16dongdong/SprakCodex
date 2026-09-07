@@ -603,3 +603,101 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 25 个测试/文档测试组累计 2269 项通过、0 项失败、18 项显式跳过；其中服务库 1589 项通过，RPC 集成 49 项通过。
 完整输出为 `backend/target/observationWorkspaceFinalTests.log`。新增环境事务的加强断言与真实 provider 探针另行通过，
 Tauri 独立工作区检查通过。无持久化探针的子进程、模块目录与公开证书已回收，保留脱敏用量证据。
+
+## 原生完成事件正式接入（2026-09-08）
+
+早期 `runtimeUsageFixture` 和 `runtime` 探针模式已移除，避免维护两套相同偏移。正式链路为：
+`directHook/nativeCompletion.rs` → `directCommon/completionSpool.rs` →
+`service/directObservation/completionMonitor.rs` → `RecordSink::clientCompleted` → 已有响应去重与费用快照事务。
+
+- 原生入口仍按已验证 PDB/指令字节匹配；检查 `previous_turn_settings` 的 Option niche 后才读取模型。
+  不匹配的构建不猜测地址，模型标注为客户端上下文，不伪装成网络返回模型。
+- 每次完成只写有界计量元数据，临时副本同步后原子发布；不保存认证、提示词、输出正文或推理内容。
+- 模块旁的 `capture.json` 只定位数据目录，实际开关在共享 `observationCompletions/captureControl.json`，
+  避免升级后旧模块各自保留过时开关。主动停用在没有运行实例时也能撤销该选择。
+- 数据库确认后才删除文件；提交失败、宿主重启或客户端退出都不会依赖进程内游标恢复。
+  消费方按响应 ID 去重，原生与网络来源合并，不重复增加请求或费用快照。
+
+真实生产 DLL 验收：
+
+| 场景 | 确认响应 | 输入 / 缓存 / 输出 | 费用快照 / 钱包扣费 |
+| --- | ---: | --- | --- |
+| 无持久化，同一客户端，正常宿主退出及离线补录 | 3 | 111000 / 104192 / 24 | 3 / 0 |
+| 无持久化，强制结束宿主及离线补录 | 3 | 93357 / 92800 / 24 | 3 / 0 |
+| 宿主强制退出、客户端也退出，再启动宿主 | 2 | 逐响应与独立 RPC 核对 | 2 / 0 |
+
+对应证据目录：
+`observationNativeCompleted50e6808f36648a9a0f2a5287ad98896`、
+`observationNativeCrashdeaa6d46d38540cc84354ab053baee43`、
+`observationPublisherExit1f7a61d87c824f5889eac6f652257a70`，均位于 `backend/target/`。
+无持久化用例断言会话路径为空；离线轮次先确认磁盘事件存在，再让新宿主入库，未以会话文件代替原生入口。
+
+## 实际安装中发现并修复的出口问题
+
+首次第七版安装已移除界面限制，但宿主代理留空时暴露真实网络失败；当时立即关闭观测，恢复原连接路径，
+未把该安装视为通过。根因是旧 DLL 对本机 HTTP 代理连接省略私有头，宿主只收到裸 CONNECT，原代理地址丢失。
+
+第八版为所有被改连的连接发送来源头，使用保留位区分直接目标与本机 HTTP 代理。宿主按原代理建立专用连接池，
+直接连接固定原 IP，未知协议按原 IP/端口透传。显式代理入口仍使用宿主配置，二者不再混淆。
+安装资源改为 `observationHook8.dll`，控制文件改为 `relay8.json`，旧 `hook.json` 保持关闭，避免重新激活旧网络回调。
+另修复 `GlobalFree` 包装将 NULL 成功返回误判为错误的诊断，并将每条日志拼成单次追加，避免跨进程分片交错。
+
+宿主代理完全留空、CLI 环境不改写时：
+
+| 协议 | 生成 / 原生确认 | 输入 / 缓存 / 输出 | 费用快照 / 钱包扣费 |
+| --- | --- | --- | --- |
+| WebSocket | 2 / 2 | 40636 / 19200 / 16 | 2 / 0 |
+| SSE | 2 / 2 | 41272 / 22784 / 16 | 2 / 0 |
+
+证据为 `backend/target/observationOriginalProxyf6a14ecd4a32444f997303f6a29ba82a` 和
+`backend/target/observationOriginalProxySse71f49e4dcdf04cc0805ba9eca161fed3`。
+SSE 的 14 次失败握手仍是测试主动触发的传输回退，不是生成请求。
+本地回归另验证宿主配置为另一个错误代理时仍选择客户端原代理，以及 HTTP/TCP 使用原解析地址。
+
+第八版工作区全测：25 组累计 2283 项通过、0 项失败、18 项显式跳过；输出保存在
+`backend/target/observationRoute8WorkspaceTests.log`。真实 Winsock 双地址族生命周期、原生元数据与网络双源合并均通过。
+
+## 已安装应用与数据保留
+
+实际目标为 `D:\CodexManager\CodexManager.exe`，不是开发服务器或测试宿主。
+旧程序通过正常窗口关闭退出，未强杀或丢弃草稿。替换前使用 SQLite 在线备份合并 WAL，在内存中完成 DPAPI
+保护及解密字节校验，再存入原用户数据目录；原数据库不被复制成额外明文文件。
+内存恢复检查遵循 [SQLite 的 WAL 反序列化约束](https://www.sqlite.org/c3ref/deserialize.html)，
+仅对验证副本调整日志格式头，备份图像本身保持原值。
+
+实际 CLI 沿用原登录与代理，通过已安装应用完成请求 `111`：WebSocket 200，输入 20629、缓存 11392、
+输出 9、总量 20638。费用快照按实际单价独立计算为 52151 微美元，该请求的钱包扣费账本条目为 0。
+快照的 `charged_cost_microusd` 是计算价格，不等同于已经发生钱包扣款；扣款验证以账本为准。
+证据：`backend/target/installedObservation94d39920cd994fd7be30dc2a06a59100/evidence.json`。
+启动及开启观测前后的 `auth.json`、`config.toml` 指纹一致，账号 3 个、平台密钥 1 个保持不变。
+
+实际窗口确认日志横幅和切换网关入口消失，仪表盘分析不再模糊遮罩。同步修正接入页与引导页“不记录”的过时文案，
+并修复单元格和徽章重复规范化将 `clientResponse` 错标为 HTTP 的问题；客户端事件保留独立类型。
+
+### 最终安装复核
+
+更新最终界面后，再次通过正常关闭/启动重启实际安装程序，不重新点击启用。`relay8.json` 自动恢复为启用，
+运行所有者切换到新进程；DPAPI 签名身份指纹保持不变。新的真实 CLI 请求 `127` 成功返回指定文字：
+输入 20315、缓存 11392、输出 9、总量 20324，费用快照为 50581 微美元，与快照单价独立计算一致，
+该请求没有钱包扣费账本。证据为 `backend/target/installedObservationdbf62bcf35714adcb74bba5c77be81e8/evidence.json`。
+
+实际窗口同时显示“客户端事件”和 WebSocket 200 记录；原横幅、强制切换网关入口及统计模糊遮罩均不再存在。
+最后的 `auth.json`、`config.toml`、签名身份及安装文件哈希检查通过，账号和平台密钥数量保持原值。
+安装文件与同次 Release 构建一致；最终前端运行期测试 226 项、Tauri 单元测试 76 项通过，桌面 Release 构建通过。
+
+| 目标要求 | 最终证据 |
+| --- | --- |
+| 原 provider/base_url 和登录身份不被改写 | 独立 CLI 使用原登录；安装、启用、重启后两个客户端文件指纹一致 |
+| 不经过账号池、不扣钱包 | 对应记录 `key_id/account_id` 为空；请求 111/127 的扣费账本为 0 |
+| 已有与新启动客户端自动观测 | 已有无持久化会话、并发新 CLI、实际已运行客户端均有真实记录 |
+| 持久化启用和重启恢复 | 三宿主生命周期、宿主强制退出、发布者退出及实际安装程序重启验证 |
+| 请求、用量、费用对应 | 独立 RPC/CLI 记录逐响应核对；正式数据库再按快照单价独立计算 |
+| 前端恢复正确展示 | 实际窗口无原限制界面，客户端事件不再误标为 HTTP |
+| 构建、清理及回滚 | 全工作区与桌面验证通过；保留程序回滚目录和用户范围 DPAPI 数据库备份 |
+
+当前安装为 `D:\CodexManager\CodexManager.exe` 与 `observationHook8.dll`，观测保持启用。
+旧 DLL 仅因已有进程仍持有其映射而保留；旧 `hook.json` 处于关闭状态，不主动卸载其回调。
+原始程序回滚点为 `D:\CodexManager\rollback-observation7-20260907T222058Z`，
+最终更新前回滚点为 `D:\CodexManager\rollback-observation8-20260907T234930Z`；数据库备份保存在原应用数据目录，
+使用 `.db.dpapi` 后缀，仅当前用户可解密。部署与最后核对记录位于 `backend/target/observationDeployment8.json`、
+`observationFinalAudit.json`，不含认证原值。

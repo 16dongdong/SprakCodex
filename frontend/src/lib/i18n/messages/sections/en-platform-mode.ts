@@ -21,7 +21,7 @@ export const EN_PLATFORM_MODE_MESSAGES: MessageCatalog = {
   混合路由: "Hybrid routing",
   "所选 OpenAI 账号": "Selected OpenAI account",
   "CodexManager 可记录": "Recorded by CodexManager",
-  "CodexManager 不记录": "Not recorded by CodexManager",
+  "启用观测后可记录": "Recorded when observation is enabled",
   "切换后尝试重载后台": "Attempt a background reload after switching",
   "下次启动时生效": "Takes effect on the next start",
   无法确认: "Unable to determine",
@@ -78,8 +78,8 @@ export const EN_PLATFORM_MODE_MESSAGES: MessageCatalog = {
   账号直连: "Direct account",
   "OpenAI 账号": "OpenAI account",
   选择账号: "Select account",
-  "直连 OpenAI 官方后端，不经过 CodexManager 网关；不会产生 CodexManager 请求日志，仪表盘用量统计不可用。":
-    "Connect directly to the official OpenAI backend without going through the CodexManager gateway. CodexManager request logs and dashboard usage analytics will not be available.",
+  "直连 OpenAI 官方后端，不经过 CodexManager 网关；启用直连观测后可记录请求、实际用量和费用快照。":
+    "Connect directly to the official OpenAI backend without the CodexManager gateway. Enable direct observation to record requests, actual usage, and cost snapshots.",
   "没有可用于账号直连的 active OpenAI 账号。":
     "No active OpenAI account is available for direct account mode.",
   "去添加 OpenAI 账号": "Add OpenAI account",

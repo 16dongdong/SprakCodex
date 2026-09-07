@@ -19,7 +19,8 @@ import { EN_SKILLS_MESSAGES } from "./sections/en-skills";
 
 export const EN_MESSAGES: MessageCatalog = {
   客户端事件: "Client event",
-  "观测开关会保留；运行与记录状态以当前服务返回为准。": "The observation setting is saved; runtime and recorded-request status come from the current service.",
+  "Windows 自动接入已有和新启动的 Codex；已接入客户端的完成事件可在宿主恢复后补录。": "Windows automatically observes existing and newly launched Codex clients. Completion events from attached clients can be recovered after the host restarts.",
+  "退出应用不等于关闭观测；需停止记录时，请先点击“关闭观测”。": "Exiting the app does not disable observation. Click Disable observation first to stop recording.",
   "公开证书仅供客户端进程信任，不修改 auth.json、系统代理或系统证书库。Windows 签名密钥以当前用户 DPAPI 密文保留。": "The public certificate is trusted only by client processes. auth.json, system proxy settings, and system certificate stores are unchanged. On Windows the signing key is stored as current-user DPAPI ciphertext.",
   ...EN_PROJECTS_MESSAGES,
   ...EN_SKILLS_MESSAGES,
@@ -1708,9 +1709,8 @@ export const EN_MESSAGES: MessageCatalog = {
   "关闭观测": "Stop observation",
   "观测操作失败": "Observation operation failed",
   "管理直连观测": "Manage direct observation",
-  "本机代理：": "Local proxy:",
+  "本机观测入口：": "Local observation endpoint:",
   "公开证书：": "Public certificate:",
   "状态：运行中 · 已写入 {written} 条 · 写入异常 {errors} 次": "Running · {written} records written · {errors} write errors",
-  "已启用直连观测时，CodexManager 会记录新启动 Codex 的请求日志和实际用量。": "When direct observation is enabled, requests and actual usage from newly launched Codex sessions are recorded.",
   "保留 Codex 原有登录与上游，记录请求、实际 Token 用量和模型价格费用快照，不扣除平台钱包或密钥额度。": "Keeps the original Codex login and upstream, recording requests, actual token usage and price snapshots without charging platform wallets or key quotas.",
 };

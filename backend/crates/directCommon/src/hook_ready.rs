@@ -14,8 +14,8 @@ pub fn event_name(pid: u32, module: &Path) -> String {
         .fold(0xcbf29ce484222325_u64, |hash, byte| {
             (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
         });
-    // 第六版还要求公开运行目录元数据已发布，避免宿主把未具备目录发现能力的旧模块当成完整就绪。
-    format!("Local\\ObservationHookReady6-{pid}-{hash:016x}")
+    // 第八版保留原代理路由，旧版省略该信息，不能当作当前传输能力。
+    format!("Local\\ObservationHookReady8-{pid}-{hash:016x}")
 }
 
 #[cfg(test)]

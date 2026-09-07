@@ -101,8 +101,10 @@ impl SessionPeer {
                 }
                 Some("turn/completed") if payload["turn"]["id"] == turn => {
                     assert_eq!(
-                        payload["turn"]["status"], "completed",
-                        "app-server 轮次未成功"
+                        payload["turn"]["status"],
+                        "completed",
+                        "app-server 轮次未成功，分类={}",
+                        failureCode(&payload["turn"]["error"]["codexErrorInfo"])
                     );
                     assert!(!responses.is_empty(), "成功轮次缺少逐响应完成用量");
                     return responses;
@@ -133,5 +135,27 @@ impl SessionPeer {
     // 调用方先结束子进程，再回收读取线程，避免把仍在运行的会话误当 EOF。
     pub(super) fn joinReader(&mut self) {
         self.reader.take().unwrap().join().unwrap();
+    }
+}
+
+// 失败诊断只保留枚举名与数字状态，不输出服务器 message、附加说明或请求正文。
+fn failureCode(error: &Value) -> String {
+    let label = error.as_str().or_else(|| {
+        error
+            .as_object()
+            .and_then(|object| object.keys().next().map(String::as_str))
+    });
+    let Some(label) = label.filter(|label| {
+        label.len() <= 64 && label.bytes().all(|byte| byte.is_ascii_alphanumeric())
+    }) else {
+        return "unknown".into();
+    };
+    let status = error
+        .get(label)
+        .and_then(|value| value.get("httpStatusCode"))
+        .and_then(Value::as_u64);
+    match status {
+        Some(status) => format!("{label}:{status}"),
+        None => label.to_owned(),
     }
 }

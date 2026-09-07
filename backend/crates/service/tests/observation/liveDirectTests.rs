@@ -2,6 +2,9 @@
 use super::*;
 use codexmanager_core::storage::Storage;
 #[cfg(windows)]
+#[path = "hostRestartProbe.rs"]
+mod hostRestartProbe;
+#[cfg(windows)]
 #[path = "injectedClientProbe.rs"]
 mod injectedClientProbe;
 #[path = "nativeUsageVerifier.rs"]
@@ -12,9 +15,6 @@ mod sessionRpcPeer;
 #[cfg(windows)]
 #[path = "warmSessionProbe.rs"]
 mod warmSessionProbe;
-#[cfg(windows)]
-#[path = "hostRestartProbe.rs"]
-mod hostRestartProbe;
 use std::{
     fs::File,
     process::{Command, Stdio},
@@ -53,13 +53,13 @@ fn officialTransportRecordsUsage() {
     assert!(
         matches!(
             captureMode.as_str(),
-            "explicit" | "injected" | "monitored" | "concurrent" | "warm" | "runtime"
+            "explicit" | "injected" | "monitored" | "concurrent" | "warm"
         ),
-        "抓取方式必须为 explicit、injected、monitored、concurrent、warm 或 runtime"
+        "抓取方式必须为 explicit、injected、monitored、concurrent 或 warm"
     );
     let injected = captureMode == "injected";
     let native = captureMode != "explicit";
-    let warm = matches!(captureMode.as_str(), "warm" | "runtime");
+    let warm = captureMode == "warm";
     assert!(directory.is_absolute(), "测试目录必须为绝对路径");
     std::fs::create_dir(&directory).expect("测试目录必须是本次新建目录");
     let database = directory.join("observation.db");
@@ -84,6 +84,24 @@ fn officialTransportRecordsUsage() {
     let mut warmSink = warm.then(|| sink.clone());
     let counters = sink.counters.clone();
     let cancel = CancellationToken::new();
+    let nativeCompletions =
+        std::env::var("OBSERVATION_TEST_NATIVE_COMPLETIONS").as_deref() == Ok("true");
+    assert!(
+        !nativeCompletions || native && !warm,
+        "原生文件并行核对用于新 CLI 的网络验收"
+    );
+    let completionDirectory = directory.join(cpcommon::completionSpool::directoryName);
+    let completionFiles = nativeCompletions.then(|| {
+        completionMonitor::Monitor::start(
+            completionMonitor::Settings {
+                directory: completionDirectory.clone(),
+                allow: Arc::new(|_| true),
+            },
+            sink.clone(),
+            cancel.clone(),
+        )
+        .unwrap()
+    });
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
         .enable_all()
@@ -211,13 +229,38 @@ fn officialTransportRecordsUsage() {
     } else {
         runClient(&mut command)
     };
+    if result && nativeCompletions {
+        // 真正的原生文件消费者必须逐条确认，网络来源存在不能掩盖原生完成入口未工作。
+        let stdout = std::fs::read_to_string(&events).unwrap();
+        let completed = stdout
+            .lines()
+            .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
+            .filter(|event| event["type"] == "turn.completed")
+            .count() as u64;
+        let started = Instant::now();
+        while counters.nativeAccepted.load(Ordering::Relaxed) < completed {
+            assert!(
+                started.elapsed() < Duration::from_secs(10),
+                "新 CLI 的原生完成事件未确认"
+            );
+            std::thread::sleep(Duration::from_millis(20));
+        }
+        assert_eq!(counters.nativeAccepted.load(Ordering::Relaxed), completed);
+        println!("原生完成事件与网络来源并行确认通过，原生事件={completed}");
+    }
     cancel.cancel();
+    drop(completionFiles);
     runtime.block_on(serving).unwrap();
     runtime.shutdown_timeout(Duration::from_secs(5));
     databaseWorker.join().unwrap();
     std::fs::remove_file(certificate).unwrap();
     assert!(result, "官方 CLI 请求失败，检查隔离目录中的诊断文件");
     assert_eq!(counters.errors.load(Ordering::Relaxed), 0);
+    if nativeCompletions {
+        std::fs::remove_file(completionDirectory.join(cpcommon::completionSpool::controlName))
+            .unwrap();
+        std::fs::remove_dir(completionDirectory).unwrap();
+    }
     if warm {
         #[cfg(windows)]
         warmSessionProbe::verify(&directory, &storage);

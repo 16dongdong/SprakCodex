@@ -28,6 +28,10 @@ mod systemProxy;
 #[allow(non_snake_case, non_upper_case_globals)]
 mod runtimeMetadata;
 
+#[cfg(all(windows, target_arch = "x86_64"))]
+#[allow(non_snake_case, non_upper_case_globals)]
+mod nativeCompletion;
+
 #[cfg(windows)]
 #[path = "windowsRuntime.rs"]
 #[allow(non_snake_case, non_upper_case_globals)]

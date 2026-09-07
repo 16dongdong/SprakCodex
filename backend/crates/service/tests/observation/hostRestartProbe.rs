@@ -241,6 +241,14 @@ fn existingSessionSurvivesHostRestart() {
     .unwrap();
     let cli = PathBuf::from(std::env::var_os("OBSERVATION_TEST_CLI").unwrap());
     let model = std::env::var("OBSERVATION_TEST_MODEL").unwrap();
+    let ephemeral = std::env::var("OBSERVATION_TEST_EPHEMERAL").as_deref() == Ok("true");
+    let crash = std::env::var("OBSERVATION_TEST_HOST_CRASH").as_deref() == Ok("true");
+    let exitOffline =
+        std::env::var("OBSERVATION_TEST_CLIENT_EXIT_OFFLINE").as_deref() == Ok("true");
+    assert!(
+        !exitOffline || ephemeral,
+        "客户端离线退出验收必须排除会话文件来源"
+    );
     let mut command = warmSessionProbe::command(&cli);
     command
         .stdin(Stdio::piped())
@@ -253,14 +261,21 @@ fn existingSessionSurvivesHostRestart() {
     let mut peer = SessionPeer::new(&mut client.0);
     peer.call("initialize", json!({"clientInfo":{"name":"hostRestartProbe","version":"1"},"capabilities":{"experimentalApi":true,"optOutNotificationMethods":["rawResponseItem/completed","item/reasoning/textDelta","item/reasoning/summaryTextDelta","item/agentMessage/delta","item/completed"]}}));
     peer.initialized();
-    let result = peer.call("thread/start", json!({"model":model,"cwd":directory,"approvalPolicy":"never","sandbox":"read-only","ephemeral":false,"experimentalRawEvents":true}));
+    let result = peer.call("thread/start", json!({"model":model,"cwd":directory,"approvalPolicy":"never","sandbox":"read-only","ephemeral":ephemeral,"experimentalRawEvents":true}));
     assert_eq!(result["modelProvider"], "openai");
+    if ephemeral {
+        assert!(
+            result["thread"]["path"].is_null(),
+            "无持久化验收不应存在会话文件"
+        );
+    }
     let thread = result["thread"]["id"].as_str().unwrap();
     let baseline = peer.turn(thread);
     let identity = nativeInjection::candidate(client.0.id()).unwrap();
     let mut expected = Vec::new();
     let mut hosts = Vec::new();
     let mut signingIdentity = None;
+    let mut clientClosed = false;
     for phase in 0..3 {
         let config = json!({"phase":phase,"ready":format!("ready{phase}.json"),"restore":phase!=0,"pid":identity.pid,"createdAt":identity.createdAt,"executable":identity.executable,"threadId":thread});
         let (mut host, state) = startHost(&directory, &config);
@@ -272,23 +287,57 @@ fn existingSessionSurvivesHostRestart() {
                 assert_eq!(previous, &fingerprint, "宿主重启改变了观测签名身份");
             }
             signingIdentity = Some(fingerprint);
-            warmSessionProbe::waitReady(identity.pid, &directory.join("module/cphook.dll"));
-            expected.extend(peer.turn(thread));
+            if !clientClosed {
+                warmSessionProbe::waitReady(identity.pid, &directory.join("module/cphook.dll"));
+                expected.extend(peer.turn(thread));
+            }
             verifyRows(&directory, &expected, &model);
         }
-        stopHost(&mut host, phase == 1);
+        if phase == 0 && crash {
+            // 只终止本测试创建的宿主，验证没有执行 shutdownRuntime 时的数据及开关恢复。
+            host.0.kill().unwrap();
+            host.0.wait().unwrap();
+        } else {
+            stopHost(&mut host, phase == 1);
+        }
         verifyListenerClosed(&state);
         assert!(
-            client.0.try_wait().unwrap().is_none(),
+            client.0.try_wait().unwrap().is_some() == clientClosed,
             "宿主退出不应结束原 CLI"
         );
+        if phase == 0 && ephemeral {
+            // 此轮宿主确实已经退出，原客户端也没有会话文件；必须先留下真实完成事件，下一宿主再入库。
+            let offline = peer.turn(thread);
+            let pending =
+                std::fs::read_dir(directory.join(cpcommon::completionSpool::directoryName))
+                    .unwrap()
+                    .filter(|entry| {
+                        cpcommon::completionSpool::isReady(&entry.as_ref().unwrap().path())
+                    })
+                    .count();
+            assert_eq!(pending, offline.len(), "宿主离线期间的完成事件未持久化");
+            expected.extend(offline);
+            if exitOffline {
+                // 宿主恢复前结束原生发布者，证明补录不依赖它继续存活或保留进程内映射。
+                peer.closeInput();
+                assert!(waitClient(&mut client.0));
+                peer.joinReader();
+                clientClosed = true;
+            }
+        }
     }
-    let afterDisable = peer.turn(thread);
+    let afterDisable = if clientClosed {
+        Vec::new()
+    } else {
+        peer.turn(thread)
+    };
     verifyRows(&directory, &expected, &model);
-    peer.closeInput();
-    assert!(waitClient(&mut client.0));
-    peer.joinReader();
-    let evidence = json!({"threadId":thread,"signingFingerprint":signingIdentity,"hosts":hosts,"baseline":baseline,"observed":expected,"afterDisable":afterDisable});
+    if !clientClosed {
+        peer.closeInput();
+        assert!(waitClient(&mut client.0));
+        peer.joinReader();
+    }
+    let evidence = json!({"threadId":thread,"ephemeral":ephemeral,"crash":crash,"clientExitedOffline":exitOffline,"signingFingerprint":signingIdentity,"hosts":hosts,"baseline":baseline,"observed":expected,"afterDisable":afterDisable});
     std::fs::write(
         directory.join("restartEvidence.json"),
         serde_json::to_vec_pretty(&evidence).unwrap(),
@@ -305,5 +354,20 @@ fn existingSessionSurvivesHostRestart() {
     std::fs::remove_file(directory.join("observationAuthority.lock")).unwrap();
     std::fs::remove_dir(directory.join("observerHome/sessions")).unwrap();
     std::fs::remove_dir(directory.join("observerHome")).unwrap();
-    println!("完整宿主重启通过：原 CLI/thread 保持、两轮用量和费用对应、主动停用后不恢复");
+    let completions = directory.join(cpcommon::completionSpool::directoryName);
+    let entries: Vec<_> = std::fs::read_dir(&completions)
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .collect();
+    assert_eq!(
+        entries,
+        vec![completions.join(cpcommon::completionSpool::controlName)],
+        "确认后仍有未清理的完成事件"
+    );
+    std::fs::remove_file(&entries[0]).unwrap();
+    std::fs::remove_dir(completions).unwrap();
+    println!(
+        "完整宿主重启通过：无持久化={ephemeral}，强制退出={crash}，确认响应={}，主动停用后不恢复",
+        expected.len()
+    );
 }

@@ -98,7 +98,7 @@ impl RoutingFixture {
     // 只原子发布无秘密网络配置；零端口停用通过正式宿主函数执行。
     fn publish(&self, settings: &RelayConfig) {
         runtimePaths::writeAtomically(
-            &self.directory.join("hook.json"),
+            &self.directory.join(cpcommon::relayContract::configName),
             &serde_json::to_vec(settings).unwrap(),
         )
         .unwrap();
@@ -130,6 +130,14 @@ impl RoutingFixture {
             stream.set_nonblocking(false).unwrap();
             stream.set_read_timeout(Some(waitLimit)).unwrap();
             stream.set_write_timeout(Some(waitLimit)).unwrap();
+            if expected.local_addr().unwrap() != destination {
+                // 代理改连也包含原出口，不能继续用省略元数据的裸 HTTP 模式通过验收。
+                let mut header=[0u8;cpcommon::hook_proxy::HEADER_LEN];
+                stream.read_exact(&mut header).unwrap();
+                let route=cpcommon::hook_proxy::decodeRoute(&header).unwrap();
+                assert_eq!(route.kind,cpcommon::hook_proxy::RouteKind::HttpProxy);
+                assert_eq!(std::net::SocketAddr::new(route.target.ip,route.target.port),destination);
+            }
             let mut request = [0u8; 5];
             stream.read_exact(&mut request).unwrap();
             assert_eq!(&request, probeBytes);
@@ -201,13 +209,13 @@ fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
     settings.owner = Some(currentIdentity().unwrap());
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    runtimePaths::writeRelayConfig(&fixture.directory.join("hook.json"), 0, None).unwrap();
+    runtimePaths::writeRelayConfig(&fixture.directory.join(cpcommon::relayContract::configName), 0, None).unwrap();
     fixture.probe(destination, &original);
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    std::fs::write(fixture.directory.join("hook.json"), b"{").unwrap();
+    std::fs::write(fixture.directory.join(cpcommon::relayContract::configName), b"{").unwrap();
     fixture.probe(destination, &original);
-    std::fs::remove_file(fixture.directory.join("hook.json")).unwrap();
+    std::fs::remove_file(fixture.directory.join(cpcommon::relayContract::configName)).unwrap();
     fixture.probe(destination, &original);
     assert_eq!(
         original.accept().unwrap_err().kind(),

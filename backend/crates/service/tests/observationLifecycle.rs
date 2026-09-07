@@ -45,16 +45,37 @@ fn lifecycleWorker() {
     storage.init().unwrap();
     let setting = directObservation::enabledSettingKey;
     storage.set_app_setting(setting, "true", now_ts()).unwrap();
+    // 模拟宿主已经退出、但客户端仍持有完成入口的状态；没有 Running 也必须能主动撤销共享开关。
+    let completionDirectory = directory.join(cpcommon::completionSpool::directoryName);
+    std::fs::create_dir(&completionDirectory).unwrap();
+    let control = completionDirectory.join(cpcommon::completionSpool::controlName);
+    std::fs::write(
+        &control,
+        serde_json::to_vec(&cpcommon::completionSpool::Settings {
+            enabled: true,
+            directory: completionDirectory.clone(),
+        })
+        .unwrap(),
+    )
+    .unwrap();
     assert!(!directObservation::shutdownRuntime().unwrap().running);
     assert!(!directObservation::shutdownRuntime().unwrap().running);
     assert_eq!(
         storage.get_app_setting(setting).unwrap().as_deref(),
         Some("true")
     );
+    let retained: cpcommon::completionSpool::Settings =
+        serde_json::from_slice(&std::fs::read(&control).unwrap()).unwrap();
+    assert!(retained.enabled);
     assert!(!directObservation::stop().unwrap().running);
     assert!(!directObservation::stop().unwrap().running);
     assert_eq!(
         storage.get_app_setting(setting).unwrap().as_deref(),
         Some("false")
     );
+    let disabled: cpcommon::completionSpool::Settings =
+        serde_json::from_slice(&std::fs::read(&control).unwrap()).unwrap();
+    assert!(!disabled.enabled);
+    std::fs::remove_file(control).unwrap();
+    std::fs::remove_dir(completionDirectory).unwrap();
 }

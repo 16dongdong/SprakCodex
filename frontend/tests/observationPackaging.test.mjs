@@ -10,8 +10,8 @@ test("观测 DLL 打包路径位于本仓库且不携带父目录层次", () => 
   const configDirectory = resolve(repositoryRoot, "frontend/src-tauri");
   const config = JSON.parse(readFileSync(resolve(configDirectory, "tauri.windows.conf.json"), "utf8"));
   const [[source, target]] = Object.entries(config.bundle.resources);
-  assert.equal(resolve(configDirectory, source), resolve(repositoryRoot, "backend/target/release/cphook.dll"));
-  assert.equal(target, "cphook.dll");
+  assert.equal(resolve(configDirectory, source), resolve(repositoryRoot, "backend/target/observationBuild/release/cphook.dll"));
+  assert.equal(target, "observationHook8.dll");
   for (const crate of ["directHook", "directCommon"]) {
     assert.ok(existsSync(resolve(repositoryRoot, `backend/crates/${crate}/src/lib.rs`)));
   }
@@ -25,6 +25,7 @@ test("桌面预构建在复用前端产物前编译本地 DLL", () => {
   const buildHook = readFileSync(resolve(scripts, "buildObservationHook.mjs"), "utf8");
   assert.ok(buildHook.includes('"--locked"'));
   assert.ok(buildHook.includes('"codexmanager-direct-hook"'));
+  assert.ok(buildHook.includes('resolve(backendRoot, "target/observationBuild")'));
   const commonConfig = JSON.parse(readFileSync(resolve(scripts, "../tauri.conf.json"), "utf8"));
   assert.equal(commonConfig.bundle.resources, undefined);
 });

@@ -1,13 +1,17 @@
 //! 在目标用户进程中只读当前活动网络的静态代理元数据；所有 WinHTTP 返回的字符串按 API 契约释放。
 use super::proxyDiscovery::ProxyEndpoints;
-use windows::Win32::{
-    Foundation::{GlobalFree, HGLOBAL},
-    Networking::WinHttp::{
-        WinHttpGetIEProxyConfigForCurrentUser, WINHTTP_CURRENT_USER_IE_PROXY_CONFIG,
-    },
+use windows::Win32::Networking::WinHttp::{
+    WinHttpGetIEProxyConfigForCurrentUser, WINHTTP_CURRENT_USER_IE_PROXY_CONFIG,
 };
 
 const MAX_PROXY_CHARS: usize = 32768;
+
+// GlobalFree 成功返回 NULL；windows 0.58 的 Result<HGLOBAL> 包装把它解释为错误，因此保留真实 ABI 返回值。
+#[link(name = "kernel32")]
+extern "system" {
+    #[link_name = "GlobalFree"]
+    fn releaseGlobal(pointer: *mut std::ffi::c_void) -> *mut std::ffi::c_void;
+}
 
 // 不保存代理 URL、自动脚本 URL 或 bypass 文本；它们的内存只在一次配置查询中存活。
 struct SystemProxy(WINHTTP_CURRENT_USER_IE_PROXY_CONFIG);
@@ -20,7 +24,7 @@ impl Drop for SystemProxy {
             self.0.lpszProxyBypass,
             self.0.lpszAutoConfigUrl,
         ] {
-            if !pointer.is_null() && unsafe { GlobalFree(HGLOBAL(pointer.0.cast())) }.is_err() {
+            if !pointer.is_null() && !unsafe { releaseGlobal(pointer.0.cast()) }.is_null() {
                 super::imp::log("释放系统代理元数据失败");
             }
         }
@@ -46,3 +50,7 @@ pub(super) fn appendCurrent(endpoints: &mut ProxyEndpoints) {
         endpoints.addSystemList(&list);
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/unit/systemMemoryTests.rs"]
+mod tests;

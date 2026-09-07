@@ -18,6 +18,11 @@ test("直连 WebSocket、预热与网关传输标签一致", async () => {
     for (const value of ["ws", "websocket", " WebSocket ", "websocketHandshake"]) assert.equal(normalizeRequestType(value), "ws");
     for (const value of ["websocketPrewarm", "wsPrewarm"]) assert.equal(normalizeRequestType(value), "wsPrewarm");
     assert.equal(normalizeRequestType("clientResponse"), "client");
+    // 两层组件重复调用时保持同一类型，尤其不能把客户端完成事件变成 HTTP。
+    for (const value of ["clientResponse", "client", "websocket", "wsPrewarm", "http"]) {
+      const normalized = normalizeRequestType(value);
+      assert.equal(normalizeRequestType(normalized), normalized);
+    }
     for (const value of ["http", "sse", ""]) assert.equal(normalizeRequestType(value), "http");
   } finally {
     await unlink(modulePath);

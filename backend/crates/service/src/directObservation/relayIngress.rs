@@ -1,5 +1,5 @@
 //! Relay 与普通 HTTP 共用入口：按字节流读取完整前缀，使用 rustls 解码握手，并保留探测消费的字节。
-use cpcommon::hook_proxy::{decode_header, HookProxyTarget, HEADER_LEN, HEADER_MAGIC};
+use cpcommon::hook_proxy::{decodeRoute, HookRoute, HEADER_LEN, HEADER_MAGIC};
 use std::io::{self, Cursor};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite};
 
@@ -10,7 +10,7 @@ const tlsHandshakeRecord: u8 = 22;
 // 探测结果把私有头和普通 HTTP 分开；普通入口携带预读字节，转交 Hyper 前必须回放。
 pub(super) enum Ingress {
     Http(Vec<u8>),
-    Relay(HookProxyTarget),
+    Relay(HookRoute),
 }
 
 // TCP 分包不是协议边界；先读足魔数，再读取并校验全部固定头。EOF 和非法头返回 IO 错误。
@@ -21,7 +21,7 @@ pub(super) async fn readIngress<S: AsyncRead + Unpin>(stream: &mut S) -> io::Res
         return Ok(Ingress::Http(header[..HEADER_MAGIC.len()].to_vec()));
     }
     stream.read_exact(&mut header[HEADER_MAGIC.len()..]).await?;
-    decode_header(&header)
+    decodeRoute(&header)
         .map(Ingress::Relay)
         .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "Relay 目标头无效"))
 }

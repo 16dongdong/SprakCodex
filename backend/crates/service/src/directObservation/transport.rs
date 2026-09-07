@@ -24,6 +24,10 @@ use tokio::{
 use tokio_util::{sync::CancellationToken, task::TaskTracker};
 use tungstenite::proxy::ProxyConfig;
 
+#[cfg(test)]
+#[path = "../../tests/observation/originalRouteTests.rs"]
+mod originalRouteTests;
+
 pub(super) type ResponseBody = UnsyncBoxBody<Bytes, io::Error>;
 pub(super) const connectTimeout: Duration = Duration::from_secs(20);
 const maxConnections: usize = 128;
@@ -36,6 +40,7 @@ pub(super) struct Engine {
     pub sink: RecordSink,
     pub cancel: CancellationToken,
     pub tasks: TaskTracker,
+    pinned: Option<(String, std::net::SocketAddr)>,
 }
 
 impl Engine {
@@ -57,28 +62,7 @@ impl Engine {
             webpki_roots::TLS_SERVER_ROOTS.iter().cloned(),
         ))
         .with_no_client_auth();
-        let mut builder = reqwest::Client::builder()
-            .no_proxy()
-            .use_rustls_tls()
-            .redirect(reqwest::redirect::Policy::none())
-            .retry(reqwest::retry::never())
-            .connect_timeout(connectTimeout)
-            .read_timeout(Duration::from_secs(180))
-            .no_gzip()
-            .no_brotli()
-            .no_deflate()
-            .no_zstd();
-        let proxy = match proxy.filter(|value| !value.trim().is_empty()) {
-            Some(address) => {
-                let parsed = ProxyConfig::parse(&address)
-                    .map_err(|_| "观测出口仅支持 HTTP CONNECT 或 SOCKS5 代理")?;
-                builder =
-                    builder.proxy(reqwest::Proxy::all(&address).map_err(|_| "观测出口地址无效")?);
-                Some(parsed)
-            }
-            None => None,
-        };
-        let client = builder.build().map_err(|_| "创建观测上游连接池失败")?;
+        let (client, proxy) = buildClient(proxy, None)?;
         Ok(Self {
             authority,
             client,
@@ -87,6 +71,7 @@ impl Engine {
             sink,
             cancel,
             tasks: TaskTracker::new(),
+            pinned: None,
         })
     }
 
@@ -98,6 +83,12 @@ impl Engine {
                 tokio_tungstenite::proxy::connect_via_proxy(stream, proxy, host, port)
                     .await
                     .map_err(|_| io::Error::other("观测出口隧道失败"))
+            } else if let Some((expected, address)) = &self.pinned {
+                if expected == host && address.port() == port {
+                    TcpStream::connect(*address).await
+                } else {
+                    TcpStream::connect((host, port)).await
+                }
             } else {
                 TcpStream::connect((host, port)).await
             }
@@ -106,12 +97,68 @@ impl Engine {
             .await
             .map_err(|_| io::Error::other("观测出口连接超时"))?
     }
+
+    // 原生路由使用客户端自己的代理或已解析地址；共享证书、计数和任务寿命，不创建第二套后台运行期。
+    fn forNativeRoute(
+        &self,
+        proxy: Option<std::net::SocketAddr>,
+        pinned: Option<(String, std::net::SocketAddr)>,
+    ) -> Result<Arc<Self>, String> {
+        let (client, proxy) = buildClient(
+            proxy.map(|address| format!("http://{address}")),
+            pinned.as_ref(),
+        )?;
+        Ok(Arc::new(Self {
+            authority: self.authority.clone(),
+            client,
+            websocketTls: self.websocketTls.clone(),
+            proxy,
+            sink: self.sink.clone(),
+            cancel: self.cancel.clone(),
+            tasks: self.tasks.clone(),
+            pinned,
+        }))
+    }
+}
+
+// 连接池按实际传输边界建立；原始代理/地址决定原生连接出口，显式代理入口才使用宿主配置。
+fn buildClient(
+    proxy: Option<String>,
+    pinned: Option<&(String, std::net::SocketAddr)>,
+) -> Result<(reqwest::Client, Option<ProxyConfig>), String> {
+    let mut builder = reqwest::Client::builder()
+        .no_proxy()
+        .use_rustls_tls()
+        .redirect(reqwest::redirect::Policy::none())
+        .retry(reqwest::retry::never())
+        .connect_timeout(connectTimeout)
+        .read_timeout(Duration::from_secs(180))
+        .no_gzip()
+        .no_brotli()
+        .no_deflate()
+        .no_zstd();
+    let proxy = match proxy.filter(|value| !value.trim().is_empty()) {
+        Some(address) => {
+            let parsed = ProxyConfig::parse(&address)
+                .map_err(|_| "观测出口仅支持 HTTP CONNECT 或 SOCKS5 代理")?;
+            builder = builder.proxy(reqwest::Proxy::all(&address).map_err(|_| "观测出口地址无效")?);
+            Some(parsed)
+        }
+        None => None,
+    };
+    if let Some((host, address)) = pinned {
+        builder = builder.resolve(host, *address);
+    }
+    let client = builder.build().map_err(|_| "创建观测上游连接池失败")?;
+    Ok((client, proxy))
 }
 
 // 限制监听连接数；停止先取消网络任务，再给解码和持久化任务完成 EOF 处理的机会。
 pub(super) async fn serve(listener: LoopbackListeners, engine: Arc<Engine>) {
     // 续签与连接共用运行期取消和任务回收；不是游离的定时器，监听停止后维护任务必须一起退出。
-    engine.tasks.spawn(engine.authority.maintenance(engine.cancel.clone()));
+    engine
+        .tasks
+        .spawn(engine.authority.maintenance(engine.cancel.clone()));
     let permits = Arc::new(Semaphore::new(maxConnections));
     loop {
         let accepted = tokio::select! { _ = engine.cancel.cancelled() => break, accepted = listener.accept() => accepted };
@@ -159,9 +206,18 @@ async fn serveAccepted(mut stream: TcpStream, engine: Arc<Engine>) {
 async fn serveRelay(
     mut stream: TcpStream,
     engine: Arc<Engine>,
-    target: cpcommon::hook_proxy::HookProxyTarget,
+    route: cpcommon::hook_proxy::HookRoute,
 ) {
     use super::relayIngress;
+    let target = route.target;
+    let original = std::net::SocketAddr::new(target.ip, target.port);
+    if route.kind == cpcommon::hook_proxy::RouteKind::HttpProxy {
+        match engine.forNativeRoute(Some(original), None) {
+            Ok(routed) => serveConnection(stream, routed, None).await,
+            Err(error) => log::error!("创建原代理传输失败：{error}"),
+        }
+        return;
+    }
     let operation = async {
         let (host, prefix) = if target.port == 443 {
             tokio::time::timeout(connectTimeout, relayIngress::readHello(&mut stream))
@@ -182,14 +238,15 @@ async fn serveRelay(
             )
             .await
             .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "Relay TLS 握手超时"))??;
-            serveConnection(
-                accepted,
-                engine.clone(),
-                Some(format!("{host}:{}", target.port)),
-            )
-            .await;
+            let routed = engine
+                .forNativeRoute(None, Some((host.clone(), original)))
+                .map_err(io::Error::other)?;
+            serveConnection(accepted, routed, Some(format!("{host}:{}", target.port))).await;
         } else {
-            let mut upstream = engine.connect(&target.ip.to_string(), target.port).await?;
+            // 未观察的协议沿原 IP/端口直通，不能把宿主代理再叠加到客户端已经选定的传输上。
+            let mut upstream = tokio::time::timeout(connectTimeout, TcpStream::connect(original))
+                .await
+                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "原连接超时"))??;
             tokio::io::copy_bidirectional(&mut stream, &mut upstream).await?;
         }
         Ok::<_, io::Error>(())

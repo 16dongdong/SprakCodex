@@ -5,6 +5,7 @@ mod authorityStore;
 mod certificateAuthority;
 mod clientEventMonitor;
 mod clientEvents;
+mod completionMonitor;
 mod loopbackListeners;
 #[cfg(windows)]
 mod nativeInjection;
@@ -141,7 +142,7 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
             let storage = match crate::storage_helpers::open_storage() {
                 Some(storage) => storage,
                 None => {
-                    if let Err(error) = cleanupRunning(current) {
+                    if let Err(error) = cleanupRunning(current, true) {
                         log::error!("直连观测启动回滚失败：{error}");
                     }
                     return Err("打开观测设置失败".into());
@@ -155,10 +156,16 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
                 )
                 .is_err()
             {
-                if let Err(error) = cleanupRunning(current) {
+                if let Err(error) = cleanupRunning(current, true) {
                     log::error!("直连观测启动回滚失败：{error}");
                 }
                 return Err("保存直连观测开关失败".into());
+            }
+            if let Err(error) = setCompletionCapture(&current, true) {
+                if let Err(cleanup) = cleanupRunning(current, true) {
+                    log::error!("完成事件启动回滚失败：{cleanup}");
+                }
+                return Err(error);
             }
             *guard = Some(current);
             Ok(statusOf(guard.as_ref()))
@@ -195,12 +202,23 @@ fn startRuntime(
         clientEventMonitor::Settings {
             home: clientEventMonitor::defaultHome()?,
             since: chrono::Utc::now().timestamp_millis(),
-            allow: scope.allowEvents,
+            allow: scope.allowEvents.clone(),
         },
         sink.clone(),
         cancel.clone(),
     )?;
     let homes = clientEvents.registration();
+    let completions = completionMonitor::Monitor::start(
+        completionMonitor::Settings {
+            directory: certificate
+                .parent()
+                .ok_or("观测数据目录缺失")?
+                .join(cpcommon::completionSpool::directoryName),
+            allow: scope.allowEvents,
+        },
+        sink.clone(),
+        cancel.clone(),
+    )?;
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
     let workerConfig = relayConfig.clone();
@@ -261,6 +279,7 @@ fn startRuntime(
             });
             // 网络任务先析构关闭发送端，数据库线程再排空队列，避免停止时漏掉已经完成的费用快照。
             drop(clientEvents);
+            drop(completions);
             runtime.shutdown_timeout(std::time::Duration::from_secs(5));
             if databaseThread.join().is_err() {
                 log::error!("观测数据库线程异常退出");
@@ -305,7 +324,13 @@ pub fn shutdownRuntime() -> Result<ObservationStatus, String> {
 }
 
 // 统一释放线程、证书和 Relay 配置；启动持久化失败时复用该路径，避免留下半启动状态。
-fn cleanupRunning(current: Running) -> Result<(), String> {
+fn cleanupRunning(current: Running, disableCapture: bool) -> Result<(), String> {
+    // 正常宿主退出保留捕获选择和受管元数据目录；只有主动停用或失败回滚才撤销后续完成事件。
+    let captureResult = if disableCapture {
+        setCompletionCapture(&current, false)
+    } else {
+        Ok(())
+    };
     // 先撤销新连接路由再取消 listener；即使文件发布失败也继续回收，运行线程退出会使缓存身份失效。
     let relayResult = current
         .relayConfig
@@ -321,7 +346,45 @@ fn cleanupRunning(current: Running) -> Result<(), String> {
     };
     joined.map_err(|_| "观测线程异常退出".to_string())?;
     certificateResult?;
+    captureResult?;
     relayResult.map(|_| ())
+}
+
+// 开关在受管数据目录统一发布，模块旁仅保存定位；正常宿主退出不调用此函数，显式停用影响所有版本的已加载模块。
+fn setCompletionCapture(current: &Running, enabled: bool) -> Result<(), String> {
+    use cpcommon::completionSpool::{self, Location};
+    let Some(relay) = &current.relayConfig else {
+        return Ok(());
+    };
+    let directory = current
+        .certificate
+        .parent()
+        .ok_or("完成事件数据目录缺失")?
+        .join(completionSpool::directoryName);
+    writeCompletionControl(&directory, enabled)?;
+    if enabled {
+        let location =
+            serde_json::to_vec(&Location { directory }).map_err(|_| "编码完成事件定位失败")?;
+        runtimePaths::writeAtomically(
+            &relay.with_file_name(completionSpool::settingsName),
+            &location,
+        )?;
+    }
+    Ok(())
+}
+
+// 数据目录是开关的唯一所有者；没有运行实例时也能撤销已有模块的捕获选择，不依赖已失效的监听状态。
+fn writeCompletionControl(directory: &std::path::Path, enabled: bool) -> Result<(), String> {
+    use cpcommon::completionSpool::{self, Settings};
+    if !enabled && !directory.join(completionSpool::controlName).exists() {
+        return Ok(());
+    }
+    let encoded = serde_json::to_vec(&Settings {
+        enabled,
+        directory: directory.to_owned(),
+    })
+    .map_err(|_| "编码完成事件开关失败")?;
+    runtimePaths::writeAtomically(&directory.join(completionSpool::controlName), &encoded)
 }
 
 // 同一锁内串行化开关写入和资源释放；disable 为 false 时绝不写入持久化设置。
@@ -335,7 +398,14 @@ fn stopInternal(disable: bool) -> Result<ObservationStatus, String> {
     } else {
         None
     };
-    let cleanupResult = guard.take().map(cleanupRunning).unwrap_or(Ok(()));
+    let cleanupResult = match guard.take() {
+        Some(current) => cleanupRunning(current, disable),
+        None if disable => writeCompletionControl(
+            &crate::process_env::db_dir().join(cpcommon::completionSpool::directoryName),
+            false,
+        ),
+        None => Ok(()),
+    };
     let persistResult = match storage {
         Some(Ok(storage)) => storage
             .set_app_setting(

@@ -15,6 +15,8 @@ use tokio::sync::mpsc;
 pub(super) struct Counters {
     pub written: AtomicU64,
     pub errors: AtomicU64,
+    // 原生文件确认数与唯一请求数分开，便于验证跨来源去重而不把同一请求计成两次。
+    pub nativeAccepted: AtomicU64,
 }
 
 pub(super) struct Exchange {

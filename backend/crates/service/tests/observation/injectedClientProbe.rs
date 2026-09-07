@@ -189,6 +189,26 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
     };
     let module = target.moduleDirectory.join("cphook.dll");
     std::fs::copy(source, &module).unwrap();
+    if std::env::var("OBSERVATION_TEST_NATIVE_COMPLETIONS").as_deref() == Ok("true") {
+        // 控制仅发布在本探针独占目录；生产 DLL 写出真实完成事件，与网络观测独立核对后合并。
+        use cpcommon::completionSpool::{self, Location, Settings};
+        let events = directory.join(completionSpool::directoryName);
+        std::fs::create_dir_all(&events).unwrap();
+        runtimePaths::writeAtomically(
+            &events.join(completionSpool::controlName),
+            &serde_json::to_vec(&Settings {
+                enabled: true,
+                directory: events.clone(),
+            })
+            .unwrap(),
+        )
+        .unwrap();
+        runtimePaths::writeAtomically(
+            &target.moduleDirectory.join(completionSpool::settingsName),
+            &serde_json::to_vec(&Location { directory: events }).unwrap(),
+        )
+        .unwrap();
+    }
     let settings = RelayConfig {
         relayPort,
         forceProxyTcp: true,
@@ -196,7 +216,7 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
         caCertificatePath: Some(certificate.to_owned()),
     };
     runtimePaths::writeAtomically(
-        &target.moduleDirectory.join("hook.json"),
+        &target.moduleDirectory.join(cpcommon::relayContract::configName),
         &serde_json::to_vec(&settings).unwrap(),
     )
     .unwrap();

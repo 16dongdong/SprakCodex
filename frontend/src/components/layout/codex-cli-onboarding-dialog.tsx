@@ -57,6 +57,7 @@ const GUIDE_STEPS = [
   },
 ] as const;
 
+// 初次接入只引导用户明确选择连接方式；直连的日志能力由独立观测开关决定，不再显示过时的统计禁用说明。
 export function CodexCliOnboardingDialog({
   open,
   onOpenChange,
@@ -247,7 +248,7 @@ export function CodexCliOnboardingDialog({
                   <div className="font-medium text-foreground">{t("直接连接 OpenAI")}</div>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
                     {t(
-                      "直连 OpenAI 官方后端，不经过 CodexManager 网关；不会产生 CodexManager 请求日志，仪表盘用量统计不可用。",
+                      "直连 OpenAI 官方后端，不经过 CodexManager 网关；启用直连观测后可记录请求、实际用量和费用快照。",
                     )}
                   </p>
                 </div>

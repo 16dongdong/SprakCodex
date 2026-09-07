@@ -5,6 +5,13 @@
 
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
+// 保留 32 字节头，原保留位明确区分真实目的地与客户端已选择的明文 HTTP 代理。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RouteKind { Direct, HttpProxy }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HookRoute { pub target: HookProxyTarget, pub kind: RouteKind }
+
 pub const HEADER_MAGIC: [u8; 8] = *b"CPROXYH1";
 pub const HEADER_LEN: usize = 32;
 
@@ -37,6 +44,22 @@ pub fn encode_header(target: &HookProxyTarget) -> [u8; HEADER_LEN] {
     header
 }
 
+// 代理连接也必须传递原端点，不能以裸 CONNECT 丢掉客户端出口后再使用宿主的代理配置。
+#[allow(non_snake_case)]
+pub fn encodeRoute(target: &HookProxyTarget, kind: RouteKind) -> [u8;HEADER_LEN] {
+    let mut header=encode_header(target);
+    header[9]=match kind { RouteKind::Direct => 0, RouteKind::HttpProxy => 1 };
+    header
+}
+
+// 新路由解码保持旧直接连接兼容；未知标志和非回环代理目标不作为已验证的本机代理。
+#[allow(non_snake_case)]
+pub fn decodeRoute(header: &[u8]) -> Option<HookRoute> {
+    let target=decode_header(header)?;
+    let kind=match header[9] {0=>RouteKind::Direct,1 if target.ip.is_loopback()=>RouteKind::HttpProxy,_=>return None};
+    Some(HookRoute{target,kind})
+}
+
 /// 校验并解析 Relay 握手头；魔数、地址族或端口非法时返回 `None`。
 pub fn decode_header(header: &[u8]) -> Option<HookProxyTarget> {
     if header.len() != HEADER_LEN || header[..HEADER_MAGIC.len()] != HEADER_MAGIC {
@@ -60,6 +83,10 @@ pub fn decode_header(header: &[u8]) -> Option<HookProxyTarget> {
     };
     Some(HookProxyTarget { ip, port, pid })
 }
+
+#[cfg(test)]
+#[path = "../tests/unit/routeHeaderTests.rs"]
+mod routeTests;
 
 #[cfg(test)]
 mod tests {

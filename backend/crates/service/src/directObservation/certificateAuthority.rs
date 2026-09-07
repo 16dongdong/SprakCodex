@@ -64,6 +64,7 @@ impl ResolvesServerCert for SiteResolver {
     }
 }
 
+#[derive(Clone)]
 pub(super) struct Authority {
     pub pem: String,
     pub hosts: HashMap<String, Arc<ServerConfig>>,

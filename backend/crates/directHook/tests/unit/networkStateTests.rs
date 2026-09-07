@@ -35,7 +35,7 @@ fn concurrentSendWritesRelayHeaderOnce() {
     sender.shutdown(std::net::Shutdown::Write).unwrap();
     let mut received = Vec::new();
     reader.read_to_end(&mut received).unwrap();
-    let mut expected = encode_header(&target).to_vec();
+    let mut expected = cpcommon::hook_proxy::encode_header(&target).to_vec();
     expected.extend_from_slice(b"END");
     assert_eq!(received, expected);
     forget_proxy_socket(socket);

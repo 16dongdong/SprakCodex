@@ -1,6 +1,6 @@
 //! Windows 网络回调与运行期配置；不修改原登录、时区、系统代理和子进程行为。
 use super::relayControl::RelayControl;
-use cpcommon::hook_proxy::{encode_header, HookProxyTarget};
+use cpcommon::hook_proxy::{encodeRoute, HookProxyTarget, RouteKind};
 use cpcommon::relayContract::RelayConfig;
 use retour::GenericDetour;
 use std::collections::HashMap;
@@ -53,7 +53,7 @@ fn proxyRuntimeConfig() -> Option<Arc<RelayConfig>> {
 // TLS 读取入口与网络入口共用同一份活跃实例快照；证书初始化可先于 NETWORK_READY 完成。
 pub(super) fn relaySnapshot() -> Option<Arc<RelayConfig>> {
     static control: OnceLock<Mutex<RelayControl>> = OnceLock::new();
-    let path = dll_dir()?.join("hook.json");
+    let path = dll_dir()?.join(cpcommon::relayContract::configName);
     control
         .get_or_init(|| Mutex::new(RelayControl::default()))
         .lock()
@@ -86,7 +86,9 @@ pub(super) fn log(msg: &str) {
             .append(true)
             .open(dir.join("cphook.log"))
         {
-            let _ = writeln!(f, "[pid {}] {msg}", std::process::id());
+            // 先拼成一条再追加，避免多个进程的格式化分片把 PID 和诊断内容交叉写入。
+            let line = format!("[pid {}] {msg}\n", std::process::id());
+            let _ = f.write_all(line.as_bytes());
         }
     }
 }
@@ -163,6 +165,7 @@ impl RelaySockaddr {
 #[derive(Clone, Copy)]
 struct ProxySocketState {
     target: HookProxyTarget,
+    viaProxy: bool,
     header_sent: bool,
     failed: bool,
 }
@@ -289,7 +292,7 @@ unsafe fn send_header_bytes(socket: SOCKET, bytes: &[u8]) -> bool {
 
 // 编码共享的固定头并发送，失败设连接重置错误，不继续发送应用正文。
 unsafe fn send_proxy_header(socket: SOCKET, state: ProxySocketState) -> bool {
-    let header = encode_header(&state.target);
+    let header = encodeRoute(&state.target, if state.viaProxy { RouteKind::HttpProxy } else { RouteKind::Direct });
     if send_header_bytes(socket, &header) {
         true
     } else {
@@ -332,13 +335,14 @@ unsafe fn ensure_proxy_header_sent(socket: SOCKET) -> bool {
 }
 
 // 新连接独占其头部状态；closesocket 后相同数字句柄可以安全注册为另一条连接。
-fn remember_proxy_socket(socket: SOCKET, target: HookProxyTarget, header_sent: bool) {
+fn remember_proxy_socket(socket: SOCKET, target: HookProxyTarget, viaProxy: bool) {
     if let Ok(mut sockets) = proxy_sockets().lock() {
         sockets.insert(
             socket_key(socket),
             Arc::new(Mutex::new(ProxySocketState {
                 target,
-                header_sent,
+                viaProxy,
+                header_sent: false,
                 failed: false,
             })),
         );
@@ -383,14 +387,10 @@ unsafe fn proxy_connect(
     };
     let ret = original_connect(relay.as_ptr(), relay.len());
     if ret == 0 {
-        if passthrough {
-            // 透传:目标自己会发 HTTP CONNECT,不补私有头(header_sent=true 让 send hook 跳过)。
-            remember_proxy_socket(socket, target, true);
-        } else {
-            remember_proxy_socket(socket, target, false);
-            if !ensure_proxy_header_sent(socket) {
-                return Some(-1);
-            }
+        // 两种来源都先发送路由头；应用自己的 CONNECT 随后原样发送，宿主据头部保留原代理出口。
+        remember_proxy_socket(socket, target, passthrough);
+        if !ensure_proxy_header_sent(socket) {
+            return Some(-1);
         }
         log(&format!(
             "TCP 已接入观测 Relay, target={}:{} relay_port={} passthrough={}",
@@ -650,7 +650,7 @@ unsafe extern "system" fn hook_connect_ex(
     let runtime = proxyRuntimeConfig();
     // 是否改连 relay、以及是否透传(目标走本机已知代理端口):
     // - 外部目标:改连 relay,发私有头;
-    // - 本机已知代理端口:改连 relay,透传(目标自己会发 HTTP CONNECT);
+    // - 本机已知代理端口:标记原代理，路由头后仍是目标自己的 HTTP CONNECT；
     // - 其它回环:直连放行。
     let target = sockaddr_target(name, name_len);
     let (should_redirect, passthrough) = match target {
@@ -691,9 +691,9 @@ unsafe extern "system" fn hook_connect_ex(
             overlapped,
         );
         if result.as_bool() {
-            // 同步完成:登记;非透传立即补发私有头;两种模式都把可选初始数据原样发出。
+            // 同步完成先提交来源路由，再发送应用初始数据；返回的字节数只包含应用数据。
             remember_proxy_socket(socket, target, passthrough);
-            if !passthrough && !ensure_proxy_header_sent(socket) {
+            if !ensure_proxy_header_sent(socket) {
                 return BOOL(0);
             }
             if send_data_len > 0 && !send_buffer.is_null() {
@@ -710,8 +710,7 @@ unsafe extern "system" fn hook_connect_ex(
             }
             return BOOL(1);
         }
-        // 异步挂起:仅登记;非透传的私有头延后到首个 WSASend 由 ensure_proxy_header_sent 补发,
-        // 透传(header_sent=true)则让目标自己的 HTTP CONNECT 原样到达 relay。
+        // 异步挂起只登记，来源路由头延后到首个 WSASend；不把代理连接误标为已经发送头部。
         let err = WSAGetLastError().0;
         if err == WSA_IO_PENDING {
             remember_proxy_socket(socket, target, passthrough);
@@ -926,6 +925,14 @@ unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
             .and_then(|path| super::runtimeMetadata::publish(&path))
             .map_err(|error| log(error))
             .is_ok();
+    }
+    if ready {
+        #[cfg(target_arch = "x86_64")]
+        match dll_path().ok_or("读取完成入口模块路径失败").and_then(|path| super::nativeCompletion::install(&path)) {
+            Ok(true) => log("原生完成事件入口已安装"),
+            Ok(false) => log("当前构建没有匹配的原生完成事件布局，保留网络与文件来源"),
+            Err(error) => { log(error); ready = false; }
+        }
     }
     if ready {
         NETWORK_READY.store(true, Ordering::Release);
