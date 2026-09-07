@@ -1,7 +1,4 @@
-//! cpcommon:Host 与 cphook 之间的编译期共享契约。
-//!
-//! 它编译为 rlib 静态链入 `Cproxy.exe` 和 `cphook.dll`,本身不产出 DLL。
+//! 宿主与进程内观测模块共用的 Relay 字节协议和就绪事件契约；静态链接，不启动外部程序。
 
 pub mod hook_proxy;
 pub mod hook_ready;
-pub mod runtime_paths;

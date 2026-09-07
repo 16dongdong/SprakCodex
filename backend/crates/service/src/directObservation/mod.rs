@@ -1,6 +1,8 @@
 //! 直连观测宿主：线程、TLS 密钥与数据库消费者均在当前进程，不依赖独立程序。
 //! 开关默认关闭，用户启用后跨重启保留；服务退出只释放运行资源，不改变用户选择。
 mod certificateAuthority;
+#[cfg(windows)]
+mod nativeInjection;
 #[allow(non_snake_case)]
 mod processInjector;
 mod recordSink;
@@ -196,18 +198,20 @@ fn startRuntime(
                         tokio::select! {
                             _ = monitorEngine.cancelled() => break,
                             _ = interval.tick() => {
-                                for candidate in processInjector::findCandidates() {
-                                    if injected.contains(&candidate.pid) { continue; }
+                                let candidates = processInjector::findCandidates();
+                                injected.retain(|candidate| candidates.contains(candidate));
+                                for candidate in candidates {
+                                    if monitorEngine.is_cancelled() { break; }
+                                    if injected.contains(&candidate) { continue; }
                                     let pid = candidate.pid;
                                     let path = dll.clone();
-                                    match tokio::task::spawn_blocking(move || processInjector::inject(pid, &path)).await {
-                                        Ok(Ok(())) => { injected.insert(pid); log::info!("已接管 Codex 进程 pid={pid}"); }
+                                    let target = candidate.clone();
+                                    match tokio::task::spawn_blocking(move || processInjector::inject(&target, &path)).await {
+                                        Ok(Ok(())) => { injected.insert(candidate); log::info!("观测模块就绪 pid={pid}"); }
                                         Ok(Err(error)) => log::debug!("Codex 进程 pid={pid} 接管失败：{error}"),
                                         Err(error) => log::debug!("Codex 进程 pid={pid} 接管任务失败：{error}"),
                                     }
                                 }
-                                let candidates = processInjector::findCandidates();
-                                injected.retain(|pid| candidates.iter().any(|candidate| candidate.pid == *pid));
                             }
                         }
                     }

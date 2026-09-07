@@ -5,7 +5,8 @@
 `21be653e7dc91eb9a4873e1c1627ae4773739ef9`。
 
 这两个目录已成为本仓库源码，不在构建或运行时访问原仓库。
-导入的源文件保留原有注释；本仓库调整 Cargo 工作区、依赖路径及打包流程。
+本仓库保留 Relay 字节协议，并维护宿主与 DLL 的共享就绪协议；已移除画像、注册表与子进程控制逻辑。
+网络运行期和 trampoline 安装分别位于 `windowsRuntime.rs` 与 `hookInstall.rs`，测试位于独立的 `tests/unit/`。
 原始源码许可为 Apache-2.0，完整许可见 `directHookApacheLicense.txt`。
 
 ## 构建

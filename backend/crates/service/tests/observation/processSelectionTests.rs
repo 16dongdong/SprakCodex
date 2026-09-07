@@ -6,7 +6,13 @@ fn selectionRequiresTargetExecutableName() {
     for name in ["codex.exe", "Codex.exe", "codex-app.exe"] {
         assert!(isTargetExecutable(Path::new(name)));
     }
-    for name in ["server.exe", "node.exe", "app-server", "my-codex.exe", "codex.exe.backup"] {
+    for name in [
+        "server.exe",
+        "node.exe",
+        "app-server",
+        "my-codex.exe",
+        "codex.exe.backup",
+    ] {
         assert!(!isTargetExecutable(Path::new(name)));
     }
 }

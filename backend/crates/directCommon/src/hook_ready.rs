@@ -1,14 +1,22 @@
-//! cphook 与 Host 共享的就绪同步命名。
+//! 模块就绪事件同时绑定 PID 与 DLL 路径，避免另一目录的模块或旧协议事件被误认为本次初始化成功。
+use std::path::Path;
 
-/// 生成当前进程专属的就绪事件名，避免多个目标进程共享初始化状态。
-pub fn event_name(pid: u32) -> String {
-    format!("Local\\CproxyHookReady-{pid}")
+/// 宿主与 DLL 按实际加载路径生成相同的版本化名称；事件名用于区分模块实例，不代替鉴权。
+pub fn event_name(pid: u32, module: &Path) -> String {
+    // FNV-1a 只用于压缩路径标识，不用于密码学；先消除 Windows 扩展路径和大小写差异。
+    let normalized = module
+        .to_string_lossy()
+        .trim_start_matches("\\\\?\\")
+        .replace('/', "\\")
+        .to_lowercase();
+    let hash = normalized
+        .bytes()
+        .fold(0xcbf29ce484222325_u64, |hash, byte| {
+            (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
+        });
+    format!("Local\\ObservationHookReady2-{pid}-{hash:016x}")
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn event_name_is_local_and_pid_scoped() {
-        assert_eq!(super::event_name(42), "Local\\CproxyHookReady-42");
-    }
-}
+#[path = "../tests/unit/readyEventTests.rs"]
+mod tests;

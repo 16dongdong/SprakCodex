@@ -5,27 +5,39 @@ use std::path::{Path, PathBuf};
 
 const targetProcessNames: &[&str] = &["codex.exe", "codex-app.exe"];
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct ProcessCandidate {
     pub pid: u32,
+    pub createdAt: u64,
     pub executable: PathBuf,
 }
 
 // 过滤 Codex 主进程和 app-server，返回本次扫描的实时 PID；调用方不得缓存 PID 跨重启使用。
 pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
-    let system = sysinfo::System::new_all();
+    // 扫描只需要可执行路径，不采集全机环境变量、CPU、磁盘和内存统计。
+    let processes = sysinfo::ProcessRefreshKind::new().with_exe(sysinfo::UpdateKind::OnlyIfNotSet);
+    let system =
+        sysinfo::System::new_with_specifics(sysinfo::RefreshKind::new().with_processes(processes));
     system
         .processes()
         .iter()
         .filter_map(|(pid, process)| {
             let executable = process.exe()?.to_path_buf();
-            if isTargetExecutable(&executable) {
+            if !isTargetExecutable(&executable) {
+                return None;
+            }
+            #[cfg(windows)]
+            {
+                let candidate = super::nativeInjection::candidate(pid.as_u32()).ok()?;
+                isTargetExecutable(&candidate.executable).then_some(candidate)
+            }
+            #[cfg(not(windows))]
+            {
                 Some(ProcessCandidate {
                     pid: pid.as_u32(),
+                    createdAt: process.start_time(),
                     executable,
                 })
-            } else {
-                None
             }
         })
         .collect()
@@ -35,99 +47,23 @@ pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
 fn isTargetExecutable(executable: &Path) -> bool {
     executable.file_name().is_some_and(|name| {
         let name = name.to_string_lossy();
-        targetProcessNames.iter().any(|target| name.eq_ignore_ascii_case(target))
+        targetProcessNames
+            .iter()
+            .any(|target| name.eq_ignore_ascii_case(target))
     })
 }
 
-// 使用绝对 DLL 路径，并在注入前检查架构路径；失败返回可展示诊断，绝不报告假成功。
+// 进程发现与加载事务分离：仅实际 DLL 就绪返回成功，失败语义由 Windows 生命周期模块统一负责。
 #[cfg(windows)]
-pub(super) fn inject(pid: u32, dll: &Path) -> Result<(), String> {
-    use std::ffi::c_void;
-    use std::os::windows::ffi::OsStrExt;
-    use windows::core::s;
-    use windows::Win32::Foundation::{CloseHandle, FALSE};
-    use windows::Win32::System::Diagnostics::Debug::WriteProcessMemory;
-    use windows::Win32::System::LibraryLoader::{GetModuleHandleA, GetProcAddress};
-    use windows::Win32::System::Memory::{
-        VirtualAllocEx, VirtualFreeEx, MEM_COMMIT, MEM_RELEASE, MEM_RESERVE, PAGE_READWRITE,
-    };
-    use windows::Win32::System::Threading::{
-        CreateRemoteThread, GetExitCodeThread, OpenProcess, WaitForSingleObject,
-        PROCESS_CREATE_THREAD, PROCESS_QUERY_INFORMATION, PROCESS_VM_OPERATION, PROCESS_VM_READ,
-        PROCESS_VM_WRITE,
-    };
-
-    if !dll.is_file() {
-        return Err(format!("注入 DLL 不存在: {}", dll.display()));
-    }
-    let path: Vec<u16> = dll
-        .as_os_str()
-        .encode_wide()
-        .chain(std::iter::once(0))
-        .collect();
-    unsafe {
-        let access = PROCESS_CREATE_THREAD
-            | PROCESS_QUERY_INFORMATION
-            | PROCESS_VM_OPERATION
-            | PROCESS_VM_WRITE
-            | PROCESS_VM_READ;
-        let process = OpenProcess(access, FALSE, pid)
-            .map_err(|error| format!("打开 Codex 进程失败 pid={pid}: {error}"))?;
-        let result = (|| {
-            let remote = VirtualAllocEx(
-                process,
-                None,
-                path.len() * 2,
-                MEM_COMMIT | MEM_RESERVE,
-                PAGE_READWRITE,
-            );
-            if remote.is_null() {
-                return Err("分配远程注入缓冲区失败".to_string());
-            }
-            if WriteProcessMemory(
-                process,
-                remote,
-                path.as_ptr() as *const c_void,
-                path.len() * 2,
-                None,
-            )
-            .is_err()
-            {
-                let _ = VirtualFreeEx(process, remote, 0, MEM_RELEASE);
-                return Err("写入远程 DLL 路径失败".to_string());
-            }
-            let kernel = GetModuleHandleA(s!("kernel32.dll")).map_err(|error| error.to_string())?;
-            let loadLibrary =
-                GetProcAddress(kernel, s!("LoadLibraryW")).ok_or("找不到 LoadLibraryW")?;
-            let start = Some(std::mem::transmute::<
-                unsafe extern "system" fn() -> isize,
-                unsafe extern "system" fn(*mut c_void) -> u32,
-            >(loadLibrary));
-            let thread = CreateRemoteThread(process, None, 0, start, Some(remote), 0, None)
-                .map_err(|error| format!("创建远程线程失败: {error}"))?;
-            let wait = WaitForSingleObject(thread, 10_000);
-            let mut exitCode = 0u32;
-            let _ = GetExitCodeThread(thread, &mut exitCode);
-            let _ = CloseHandle(thread);
-            let _ = VirtualFreeEx(process, remote, 0, MEM_RELEASE);
-            if wait.0 == 0x00000102 {
-                return Err("等待远程 DLL 加载超时".to_string());
-            }
-            if exitCode == 0 {
-                return Err("目标进程拒绝加载观测 DLL".to_string());
-            }
-            Ok(())
-        })();
-        let _ = CloseHandle(process);
-        result
-    }
+pub(super) fn inject(candidate: &ProcessCandidate, dll: &Path) -> Result<(), String> {
+    super::nativeInjection::inject(candidate, dll)
 }
 
+// 非 Windows 宿主只有显式代理入口，不将缺失的原生能力伪装为成功。
 #[cfg(not(windows))]
-pub(super) fn inject(_pid: u32, _dll: &Path) -> Result<(), String> {
-    Err("当前平台没有 Windows 进程注入实现".to_string())
+pub(super) fn inject(_candidate: &ProcessCandidate, _dll: &Path) -> Result<(), String> {
+    Err("当前平台没有 Windows 进程注入实现".into())
 }
-
 #[cfg(test)]
 #[path = "../../tests/observation/processSelectionTests.rs"]
 mod tests;
