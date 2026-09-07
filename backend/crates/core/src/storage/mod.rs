@@ -28,7 +28,7 @@ mod model_price_rules;
 mod model_sources;
 #[allow(non_snake_case)]
 mod observationRecords;
-pub use observationRecords::observationPrewarmRequestType;
+pub use observationRecords::{observationClientRequestType, observationPrewarmRequestType};
 mod plugins;
 mod proxy_profiles;
 mod proxy_tests;

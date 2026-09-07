@@ -18,6 +18,7 @@ import { KO_RUNTIME_UI_MESSAGES } from "./sections/ko-runtime-ui";
 import { KO_SKILLS_MESSAGES } from "./sections/ko-skills";
 
 export const KO_MESSAGES: MessageCatalog = {
+  客户端事件: "클라이언트 이벤트",
   "观测开关会保留；运行与记录状态以当前服务返回为准。": "관측 설정은 저장되며 실행 및 기록 상태는 현재 서비스 응답을 기준으로 합니다.",
   "公开证书仅供客户端进程信任，不修改 auth.json、系统代理或系统证书库。Windows 签名密钥以当前用户 DPAPI 密文保留。": "공개 인증서는 클라이언트 프로세스에서만 신뢰하며 auth.json, 시스템 프록시 및 인증서 저장소는 변경하지 않습니다. Windows 서명 키는 현재 사용자 범위의 DPAPI 암호문으로 보관합니다.",
   "刷新接口返回 401，尚未确认授权过期": "갱신 요청이 401을 반환했습니다. 인증 만료는 확인되지 않았습니다.",

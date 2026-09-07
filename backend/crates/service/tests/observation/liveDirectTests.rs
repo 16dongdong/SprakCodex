@@ -6,6 +6,12 @@ use codexmanager_core::storage::Storage;
 mod injectedClientProbe;
 #[path = "nativeUsageVerifier.rs"]
 mod nativeUsageVerifier;
+#[cfg(windows)]
+#[path = "sessionRpcPeer.rs"]
+mod sessionRpcPeer;
+#[cfg(windows)]
+#[path = "warmSessionProbe.rs"]
+mod warmSessionProbe;
 use std::{
     fs::File,
     process::{Command, Stdio},
@@ -42,11 +48,15 @@ fn officialTransportRecordsUsage() {
     let captureMode =
         std::env::var("OBSERVATION_TEST_CAPTURE_MODE").unwrap_or_else(|_| "explicit".into());
     assert!(
-        matches!(captureMode.as_str(), "explicit" | "injected" | "monitored"),
-        "抓取方式必须为 explicit、injected 或 monitored"
+        matches!(
+            captureMode.as_str(),
+            "explicit" | "injected" | "monitored" | "warm"
+        ),
+        "抓取方式必须为 explicit、injected、monitored 或 warm"
     );
     let injected = captureMode == "injected";
     let native = captureMode != "explicit";
+    let warm = captureMode == "warm";
     assert!(directory.is_absolute(), "测试目录必须为绝对路径");
     std::fs::create_dir(&directory).expect("测试目录必须是本次新建目录");
     let database = directory.join("observation.db");
@@ -56,6 +66,7 @@ fn officialTransportRecordsUsage() {
     let certificate = directory.join("authority.pem");
     std::fs::write(&certificate, &authority.pem).unwrap();
     let (sink, databaseWorker) = recordSink::RecordSink::start(database).unwrap();
+    let mut warmSink = warm.then(|| sink.clone());
     let counters = sink.counters.clone();
     let cancel = CancellationToken::new();
     let runtime = tokio::runtime::Builder::new_multi_thread()
@@ -91,30 +102,46 @@ fn officialTransportRecordsUsage() {
     let proxy = format!("http://127.0.0.1:{}", listener.port());
     let serving = runtime.spawn(transport::serve(listener, engine));
     let events = directory.join("clientEvents.jsonl");
-    let mut command = Command::new(cli);
+    let mut command = Command::new(&cli);
+    if warm {
+        #[cfg(windows)]
+        {
+            command = warmSessionProbe::command(&cli);
+        }
+        #[cfg(not(windows))]
+        {
+            panic!("暖会话探针仅支持 Windows");
+        }
+    } else {
+        command
+            .args([
+                "exec",
+                "--ignore-user-config",
+                "--json",
+                "--skip-git-repo-check",
+                "--sandbox",
+                "read-only",
+                "-c",
+                "project_doc_max_bytes=0",
+                "-m",
+                &model,
+                "-C",
+            ])
+            .arg(&directory)
+            // 省略位置参数会输出 stdin 等待标记；显式 "-" 在官方 CLI 中静默等待，不适合作为同步证据。
+            .args((!injected).then_some("只回复 OBSERVATION_OK，不要调用工具或读取文件。"));
+    }
     command
-        .args([
-            "exec",
-            "--ignore-user-config",
-            "--json",
-            "--skip-git-repo-check",
-            "--sandbox",
-            "read-only",
-            "-c",
-            "project_doc_max_bytes=0",
-            "-m",
-            &model,
-            "-C",
-        ])
-        .arg(&directory)
-        // 省略位置参数会输出 stdin 等待标记；显式 "-" 在官方 CLI 中静默等待，不适合作为同步证据。
-        .args((!injected).then_some("只回复 OBSERVATION_OK，不要调用工具或读取文件。"))
-        .stdin(if injected {
+        .stdin(if injected || warm {
             Stdio::piped()
         } else {
             Stdio::null()
         })
-        .stdout(File::create(&events).unwrap())
+        .stdout(if warm {
+            Stdio::piped()
+        } else {
+            Stdio::from(File::create(&events).unwrap())
+        })
         .stderr(File::create(directory.join("clientDiagnostics.log")).unwrap());
     // 显式代理仅属于旧协议探针；原生注入模式原样继承代理与 CA 环境，禁止把改环境当自动捕获。
     if !native {
@@ -143,7 +170,24 @@ fn officialTransportRecordsUsage() {
     let result = if native {
         #[cfg(windows)]
         {
-            injectedClientProbe::run(&mut command, &directory, &certificate, listenerPort(&proxy))
+            if warm {
+                warmSessionProbe::run(
+                    &mut command,
+                    warmSessionProbe::Options {
+                        directory: &directory,
+                        certificate: &certificate,
+                        port: listenerPort(&proxy),
+                        sink: warmSink.take().unwrap(),
+                    },
+                )
+            } else {
+                injectedClientProbe::run(
+                    &mut command,
+                    &directory,
+                    &certificate,
+                    listenerPort(&proxy),
+                )
+            }
         }
         #[cfg(not(windows))]
         {
@@ -159,8 +203,13 @@ fn officialTransportRecordsUsage() {
     std::fs::remove_file(certificate).unwrap();
     assert!(result, "官方 CLI 请求失败，检查隔离目录中的诊断文件");
     assert_eq!(counters.errors.load(Ordering::Relaxed), 0);
-    let stdout = std::fs::read_to_string(events).unwrap();
-    verifyCapturedRecords(&stdout, &storage, websocket);
+    if warm {
+        #[cfg(windows)]
+        warmSessionProbe::verify(&directory, &storage);
+    } else {
+        let stdout = std::fs::read_to_string(events).unwrap();
+        verifyCapturedRecords(&stdout, &storage, websocket);
+    }
 }
 
 // 用独立客户端事件核对每个网络响应及生成快照，失败握手与预热保留记录但不充当生成用量。
@@ -252,12 +301,15 @@ fn verifyCapturedRecords(stdout: &str, storage: &Storage, websocket: bool) {
         "网络捕获与客户端逐请求数量不一致"
     );
     for reported in native {
-        use sha2::{Digest, Sha256};
-        let digest = Sha256::digest(format!("chatgpt.com:{}", reported.responseId));
-        let trace = format!("observation:{digest:x}");
+        let (trace, aliases) = responseIdentity::traces(&reported.responseId);
         let matched = records
             .iter()
-            .find(|record| record.trace_id.as_deref() == Some(trace.as_str()))
+            .find(|record| {
+                record
+                    .trace_id
+                    .as_ref()
+                    .is_some_and(|id| id == &trace || aliases.contains(id))
+            })
             .expect("网络记录没有对应的真实响应 ID");
         assert_eq!(matched.input_tokens, Some(reported.usage.input_tokens));
         assert_eq!(

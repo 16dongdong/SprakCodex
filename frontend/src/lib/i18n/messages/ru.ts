@@ -18,6 +18,7 @@ import { RU_RUNTIME_UI_MESSAGES } from "./sections/ru-runtime-ui";
 import { RU_SKILLS_MESSAGES } from "./sections/ru-skills";
 
 export const RU_MESSAGES: MessageCatalog = {
+  客户端事件: "Событие клиента",
   "观测开关会保留；运行与记录状态以当前服务返回为准。": "Настройка наблюдения сохраняется; состояние работы и записей определяется текущим сервисом.",
   "公开证书仅供客户端进程信任，不修改 auth.json、系统代理或系统证书库。Windows 签名密钥以当前用户 DPAPI 密文保留。": "Открытый сертификат используется только клиентскими процессами. auth.json, системный прокси и хранилища сертификатов не изменяются. В Windows ключ подписи хранится как шифротекст DPAPI текущего пользователя.",
   ...RU_PROJECTS_MESSAGES,

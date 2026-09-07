@@ -12,10 +12,10 @@ use std::{
 };
 
 // 回收顺序是目标进程、模块文件；保留外层脱敏请求证据，不遗留注入模块或 hook 配置。
-struct InjectedTarget {
-    child: Option<Child>,
-    moduleDirectory: PathBuf,
-    monitor: Option<(
+pub(super) struct InjectedTarget {
+    pub(super) child: Option<Child>,
+    pub(super) moduleDirectory: PathBuf,
+    pub(super) monitor: Option<(
         tokio_util::sync::CancellationToken,
         std::thread::JoinHandle<()>,
     )>,
@@ -49,60 +49,13 @@ pub(super) fn run(
     certificate: &Path,
     relayPort: u16,
 ) -> bool {
-    let source = PathBuf::from(
-        std::env::var_os("OBSERVATION_TEST_NETWORK_DLL").expect("指定本次构建的生产 DLL"),
-    );
-    assert!(source.is_absolute() && source.is_file());
-    let moduleDirectory = directory.join("module");
-    std::fs::create_dir(&moduleDirectory).unwrap();
-    let mut target = InjectedTarget {
-        child: None,
-        moduleDirectory,
-        monitor: None,
-    };
+    let mut target = prepare(directory, certificate, relayPort);
     let module = target.moduleDirectory.join("cphook.dll");
-    std::fs::copy(source, &module).unwrap();
-    let settings = RelayConfig {
-        relayPort,
-        forceProxyTcp: true,
-        owner: Some(currentIdentity().unwrap()),
-        caCertificatePath: Some(certificate.to_owned()),
-    };
-    runtimePaths::writeAtomically(
-        &target.moduleDirectory.join("hook.json"),
-        &serde_json::to_vec(&settings).unwrap(),
-    )
-    .unwrap();
     let monitored = std::env::var("OBSERVATION_TEST_CAPTURE_MODE").as_deref() == Ok("monitored");
     // 隔离选择绑定创建时间和可执行文件，避免测试子进程退出后 PID 复用误选用户其他会话。
     let selectedProcess = std::sync::Arc::new(std::sync::Mutex::new(None));
     if monitored {
-        let cancel = tokio_util::sync::CancellationToken::new();
-        let workerCancel = cancel.clone();
-        let selection = selectedProcess.clone();
-        let module = module.clone();
-        let (ready, started) = std::sync::mpsc::sync_channel(1);
-        let worker = std::thread::spawn(move || {
-            let startup = std::sync::Mutex::new(Some(ready));
-            let runtime = tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build()
-                .unwrap();
-            runtime.block_on(processMonitor::run(module, workerCancel, move || {
-                let expected = selection.lock().unwrap().clone();
-                let candidates = processInjector::findCandidates()?
-                    .into_iter()
-                    .filter(|candidate| expected.as_ref() == Some(candidate))
-                    .collect();
-                // 第一次目录扫描已发生后再让父测试启动 CLI，构造真实的跨扫描周期首请求边界。
-                if let Some(ready) = startup.lock().unwrap().take() {
-                    ready.send(()).expect("通知首轮目录扫描完成");
-                }
-                Ok(candidates)
-            }));
-        });
-        target.monitor = Some((cancel, worker));
-        started.recv_timeout(Duration::from_secs(10)).unwrap();
+        target.monitor = Some(startMonitor(module.clone(), selectedProcess.clone()));
     }
     target.child = Some(command.spawn().expect("启动独立测试 CLI"));
     let client = target.child.as_mut().unwrap();
@@ -162,4 +115,68 @@ fn waitForPrompt(client: &mut Child, diagnostic: &Path) {
         );
         std::thread::sleep(Duration::from_millis(50));
     }
+}
+
+// 共用独占模块与配置准备，不启动客户端或扫描器；返回对象负责回收它拥有的资源。
+pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> InjectedTarget {
+    let source = PathBuf::from(
+        std::env::var_os("OBSERVATION_TEST_NETWORK_DLL").expect("指定本次构建的生产 DLL"),
+    );
+    assert!(source.is_absolute() && source.is_file());
+    let moduleDirectory = directory.join("module");
+    std::fs::create_dir(&moduleDirectory).unwrap();
+    let target = InjectedTarget {
+        child: None,
+        moduleDirectory,
+        monitor: None,
+    };
+    let module = target.moduleDirectory.join("cphook.dll");
+    std::fs::copy(source, &module).unwrap();
+    let settings = RelayConfig {
+        relayPort,
+        forceProxyTcp: true,
+        owner: Some(currentIdentity().unwrap()),
+        caCertificatePath: Some(certificate.to_owned()),
+    };
+    runtimePaths::writeAtomically(
+        &target.moduleDirectory.join("hook.json"),
+        &serde_json::to_vec(&settings).unwrap(),
+    )
+    .unwrap();
+    target
+}
+
+// 候选按完整进程实例限定；首轮目录扫描完成后返回，加载就绪由各场景独立等待。
+pub(super) fn startMonitor(
+    module: PathBuf,
+    selectedProcess: std::sync::Arc<std::sync::Mutex<Option<processInjector::ProcessCandidate>>>,
+) -> (
+    tokio_util::sync::CancellationToken,
+    std::thread::JoinHandle<()>,
+) {
+    let cancel = tokio_util::sync::CancellationToken::new();
+    let workerCancel = cancel.clone();
+    let selection = selectedProcess.clone();
+    let (ready, started) = std::sync::mpsc::sync_channel(1);
+    let worker = std::thread::spawn(move || {
+        let startup = std::sync::Mutex::new(Some(ready));
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        runtime.block_on(processMonitor::run(module, workerCancel, move || {
+            let expected = selection.lock().unwrap().clone();
+            let candidates = processInjector::findCandidates()?
+                .into_iter()
+                .filter(|candidate| expected.as_ref() == Some(candidate))
+                .collect();
+            // 第一次目录扫描已发生后再让父测试启动 CLI，构造真实的跨扫描周期首请求边界。
+            if let Some(ready) = startup.lock().unwrap().take() {
+                ready.send(()).expect("通知首轮目录扫描完成");
+            }
+            Ok(candidates)
+        }));
+    });
+    started.recv_timeout(Duration::from_secs(10)).unwrap();
+    (cancel, worker)
 }

@@ -17,6 +17,16 @@ pub(super) struct UsageParser {
 }
 
 impl UsageParser {
+    // 客户端已报告的完成用量不经过网络字节解码；只封装已验证字段，不暴露解析缓冲区。
+    pub(super) fn reported(model: String, responseId: String, usage: RequestTokenStat) -> Self {
+        Self {
+            model: Some(model),
+            responseId: Some(responseId),
+            usage,
+            terminal: true,
+            ..Default::default()
+        }
+    }
     // 只接受静态诊断，禁止将上游正文或含密钥 URL 带入错误记录。
     pub fn failure(problem: &'static str) -> Self {
         Self {

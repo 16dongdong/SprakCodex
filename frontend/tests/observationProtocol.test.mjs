@@ -17,6 +17,7 @@ test("直连 WebSocket、预热与网关传输标签一致", async () => {
     const { normalizeRequestType } = await import(pathToFileURL(modulePath).href);
     for (const value of ["ws", "websocket", " WebSocket ", "websocketHandshake"]) assert.equal(normalizeRequestType(value), "ws");
     for (const value of ["websocketPrewarm", "wsPrewarm"]) assert.equal(normalizeRequestType(value), "wsPrewarm");
+    assert.equal(normalizeRequestType("clientResponse"), "client");
     for (const value of ["http", "sse", ""]) assert.equal(normalizeRequestType(value), "http");
   } finally {
     await unlink(modulePath);

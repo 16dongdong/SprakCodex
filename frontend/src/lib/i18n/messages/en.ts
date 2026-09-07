@@ -18,6 +18,7 @@ import { EN_RUNTIME_UI_MESSAGES } from "./sections/en-runtime-ui";
 import { EN_SKILLS_MESSAGES } from "./sections/en-skills";
 
 export const EN_MESSAGES: MessageCatalog = {
+  客户端事件: "Client event",
   "观测开关会保留；运行与记录状态以当前服务返回为准。": "The observation setting is saved; runtime and recorded-request status come from the current service.",
   "公开证书仅供客户端进程信任，不修改 auth.json、系统代理或系统证书库。Windows 签名密钥以当前用户 DPAPI 密文保留。": "The public certificate is trusted only by client processes. auth.json, system proxy settings, and system certificate stores are unchanged. On Windows the signing key is stored as current-user DPAPI ciphertext.",
   ...EN_PROJECTS_MESSAGES,

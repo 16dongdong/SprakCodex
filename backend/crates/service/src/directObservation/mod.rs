@@ -3,6 +3,8 @@
 #[cfg(windows)]
 mod authorityStore;
 mod certificateAuthority;
+mod clientEvents;
+mod clientEventMonitor;
 mod loopbackListeners;
 #[cfg(windows)]
 mod processCatalog;
@@ -12,6 +14,7 @@ mod nativeInjection;
 mod processInjector;
 mod processMonitor;
 mod recordSink;
+mod responseIdentity;
 mod relayIngress;
 mod runtimePaths;
 mod streamObserver;
@@ -149,6 +152,9 @@ fn startRuntime(
     let proxy = crate::gateway::current_upstream_proxy_url();
     let (sink, databaseThread) =
         recordSink::RecordSink::start(crate::process_env::ensure_default_db_path())?;
+    let clientEvents = clientEventMonitor::EventMonitor::start(clientEventMonitor::Settings {
+        home: clientEventMonitor::defaultHome()?, since: chrono::Utc::now().timestamp_millis(), allow: Arc::new(|_| true),
+    }, sink.clone(), cancel.clone())?;
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
     let workerConfig = relayConfig.clone();
@@ -195,6 +201,7 @@ fn startRuntime(
                 transport::serve(listener, Arc::new(engine)).await;
             });
             // 网络任务先析构关闭发送端，数据库线程再排空队列，避免停止时漏掉已经完成的费用快照。
+            drop(clientEvents);
             runtime.shutdown_timeout(std::time::Duration::from_secs(5));
             if databaseThread.join().is_err() {
                 log::error!("观测数据库线程异常退出");

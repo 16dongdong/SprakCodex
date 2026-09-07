@@ -45,6 +45,9 @@ impl Exchange {
 pub(super) struct Record {
     request: RequestLog,
     parsed: UsageParser,
+    aliases: Vec<String>,
+    pricingAllowed: bool,
+    committed: Option<std::sync::mpsc::SyncSender<bool>>,
 }
 
 #[derive(Clone)]
@@ -74,15 +77,19 @@ impl RecordSink {
                     return;
                 }
                 while let Some(record) = receiver.blocking_recv() {
-                    match storage.insertObservation(
+                    let saved = storage.insertObservation(
                         &record.request,
                         &record.parsed.usage,
                         record
                             .parsed
                             .model
                             .as_deref()
+                            .filter(|_| record.pricingAllowed)
                             .map(crate::models_v2::policy_catalog_slug),
-                    ) {
+                        &record.aliases,
+                    );
+                    let success = saved.is_ok();
+                    match saved {
                         Ok(true) => {
                             workerCounters.written.fetch_add(1, Ordering::Relaxed);
                         }
@@ -91,6 +98,10 @@ impl RecordSink {
                             workerCounters.errors.fetch_add(1, Ordering::Relaxed);
                             log::error!("直连观测记录写入失败，事务已回滚");
                         }
+                    }
+                    // 接收者可能超时后重试；确认失败不撤销已提交记录，响应去重阻止重复计数。
+                    if let Some(committed) = record.committed {
+                        let _ = committed.send(success);
                     }
                 }
             })
@@ -101,12 +112,20 @@ impl RecordSink {
         Ok((Self { sender, counters }, worker))
     }
 
-    // 完整响应只提交一次；持久化去重键由主机和响应 ID 哈希组成，重连重放也不会重复计数。
+    // 完整响应以响应 ID 生成跨来源标识，同时识别旧主机散列；失败请求仍使用本次随机身份。
     pub async fn finish(&self, exchange: Exchange, parsed: UsageParser, status: u16) {
-        let identity = parsed.responseId.as_deref().unwrap_or(&exchange.identity);
-        let digest = Sha256::digest(format!("{}:{identity}", exchange.host));
+        let (trace, aliases) = match parsed.responseId.as_deref() {
+            Some(response) => super::responseIdentity::traces(response),
+            None => (
+                format!(
+                    "observation:{:x}",
+                    Sha256::digest(format!("{}:{}", exchange.host, exchange.identity))
+                ),
+                Vec::new(),
+            ),
+        };
         let request = RequestLog {
-            trace_id: Some(format!("observation:{digest:x}")),
+            trace_id: Some(trace),
             request_path: exchange.path.clone(),
             method: exchange.method,
             request_type: Some(exchange.protocol),
@@ -118,8 +137,57 @@ impl RecordSink {
             created_at: exchange.created,
             ..Default::default()
         };
-        if self.sender.send(Record { request, parsed }).await.is_err() {
+        if self
+            .sender
+            .send(Record {
+                request,
+                parsed,
+                aliases,
+                pricingAllowed: true,
+                committed: None,
+            })
+            .await
+            .is_err()
+        {
             self.counters.errors.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    // 客户端完成事件只报告已知模型和 usage；状态、URL、耗时均保持未知，不伪造成 HTTP 抓包。
+    pub(super) fn clientCompleted(
+        &self,
+        parsed: UsageParser,
+        timestamp: i64,
+        pricingAllowed: bool,
+    ) -> Result<(), String> {
+        let response = parsed
+            .responseId
+            .as_deref()
+            .ok_or("客户端事件缺少响应 ID")?;
+        let (trace, aliases) = super::responseIdentity::traces(response);
+        let request = RequestLog {
+            trace_id: Some(trace),
+            request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
+            model: parsed.model.clone(),
+            created_at: timestamp,
+            error: (!pricingAllowed)
+                .then(|| "客户端报告了尚未表达的缓存写入计费，用量保留而费用未知".into()),
+            ..Default::default()
+        };
+        let (committed, confirmation) = std::sync::mpsc::sync_channel(1);
+        self.sender
+            .blocking_send(Record {
+                request,
+                parsed,
+                aliases,
+                pricingAllowed,
+                committed: Some(committed),
+            })
+            .map_err(|_| "客户端事件写入队列已关闭".to_owned())?;
+        match confirmation.recv_timeout(std::time::Duration::from_secs(5)) {
+            Ok(true) => Ok(()),
+            Ok(false) => Err("客户端事件事务失败，保留读取位置供重试".into()),
+            Err(_) => Err("客户端事件提交确认超时，保留读取位置供重试".into()),
         }
     }
 }

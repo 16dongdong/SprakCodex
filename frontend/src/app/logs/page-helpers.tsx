@@ -371,11 +371,11 @@ export function resolveDisplayServiceTier(
   return "auto";
 }
 
-// 两种来源共享传输标签；非生成预热明确标注，避免把它看成普通生成或错误标成 HTTP。
+// 网络记录显示已知传输，客户端事件单独标注来源；预热不冒充生成，未知传输不冒充 HTTP。
 export function RequestTypeBadge({ requestType }: { requestType: string }) {
   const { t } = useI18n();
   const normalized = normalizeRequestType(requestType);
-  const label = normalized === "wsPrewarm" ? `WS · ${t("预热")}` : normalized.toUpperCase();
+  const label = normalized === "client" ? t("客户端事件") : normalized === "wsPrewarm" ? `WS · ${t("预热")}` : normalized.toUpperCase();
   const toneClass =
     normalized !== "http"
       ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-500"

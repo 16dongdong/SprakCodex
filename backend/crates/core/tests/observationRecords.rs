@@ -23,10 +23,10 @@ fn observationCreatesSnapshotWithoutWalletCharge() {
         ..Default::default()
     };
     assert!(storage
-        .insertObservation(&request, &usage, Some("gpt-5.4-mini"))
+        .insertObservation(&request, &usage, Some("gpt-5.4-mini"), &[])
         .unwrap());
     assert!(!storage
-        .insertObservation(&request, &usage, Some("gpt-5.4-mini"))
+        .insertObservation(&request, &usage, Some("gpt-5.4-mini"), &[])
         .unwrap());
     let snapshot = storage.get_charge_snapshot_v2(1).unwrap().unwrap();
     assert_eq!(snapshot.input_tokens, 100);
@@ -55,7 +55,7 @@ fn missingPriceRemainsUnknown() {
         ..Default::default()
     };
     assert!(storage
-        .insertObservation(&request, &usage, Some("fixture-no-price"))
+        .insertObservation(&request, &usage, Some("fixture-no-price"), &[])
         .unwrap());
     assert!(storage.get_charge_snapshot_v2(1).unwrap().is_none());
     assert_eq!(storage.request_charge_ledger_entry_count().unwrap(), 0);
@@ -84,7 +84,7 @@ fn prewarmKeepsRawUsageWithoutGenerationCharge() {
         ..Default::default()
     };
     assert!(storage
-        .insertObservation(&request, &usage, Some("gpt-5.4-mini"))
+        .insertObservation(&request, &usage, Some("gpt-5.4-mini"), &[])
         .unwrap());
     let records = storage.list_request_logs(None, 10).unwrap();
     assert_eq!(records.len(), 1);
@@ -116,11 +116,154 @@ fn combinedObservationDiagnosticPreservesUtf8() {
         ..Default::default()
     };
     storage
-        .insertObservation(&request, &RequestTokenStat::default(), None)
+        .insertObservation(&request, &RequestTokenStat::default(), None, &[])
         .unwrap();
     let records = storage.list_request_logs(None, 1).unwrap();
     assert_eq!(
         records[0].error.as_deref(),
         Some("上游握手失败；费用未知：缺少完整用量或模型价格，未生成零价快照")
     );
+}
+
+// 客户端先到、网络后到时保留请求主键，只更新更完整元数据，统计和费用都不得翻倍。
+#[test]
+fn networkEnrichesClientEventWithoutDoubleCounting() {
+    let storage = Storage::open_in_memory().unwrap();
+    storage.init().unwrap();
+    let event = RequestLog {
+        trace_id: Some("response:shared".into()),
+        request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
+        model: Some("gpt-5.4-mini".into()),
+        created_at: 1,
+        ..Default::default()
+    };
+    let usage = RequestTokenStat {
+        input_tokens: Some(100),
+        cached_input_tokens: Some(40),
+        output_tokens: Some(20),
+        total_tokens: Some(120),
+        ..Default::default()
+    };
+    assert!(storage
+        .insertObservation(&event, &usage, Some("gpt-5.4-mini"), &[])
+        .unwrap());
+    let originalCost = storage
+        .get_charge_snapshot_v2(1)
+        .unwrap()
+        .unwrap()
+        .base_cost_microusd;
+    let network = RequestLog {
+        request_path: "/backend-api/codex/responses".into(),
+        method: "POST".into(),
+        request_type: Some("websocket".into()),
+        status_code: Some(200),
+        duration_ms: Some(25),
+        upstream_url: Some("https://chatgpt.com/backend-api/codex/responses".into()),
+        ..event.clone()
+    };
+    assert!(!storage
+        .insertObservation(&network, &usage, Some("gpt-5.4-mini"), &[])
+        .unwrap());
+    assert!(!storage
+        .insertObservation(&event, &usage, Some("gpt-5.4-mini"), &[])
+        .unwrap());
+    let records = storage.list_request_logs(None, 10).unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].status_code, Some(200));
+    assert_eq!(records[0].request_type.as_deref(), Some("websocket"));
+    assert_eq!(
+        storage
+            .summarize_request_token_stats_between(0, 2)
+            .unwrap()
+            .input_tokens,
+        100
+    );
+    assert_eq!(
+        storage
+            .get_charge_snapshot_v2(1)
+            .unwrap()
+            .unwrap()
+            .base_cost_microusd,
+        originalCost
+    );
+    assert_eq!(storage.request_charge_ledger_entry_count().unwrap(), 0);
+}
+
+// 旧版主机相关标识迁移为响应标识时不能重复记录，也不能用较弱客户端字段覆盖已有网络证据。
+#[test]
+fn legacyIdentityIsReusedAcrossSources() {
+    let storage = Storage::open_in_memory().unwrap();
+    storage.init().unwrap();
+    let network = RequestLog {
+        trace_id: Some("legacy:response".into()),
+        request_type: Some("http".into()),
+        status_code: Some(200),
+        created_at: 1,
+        ..Default::default()
+    };
+    storage
+        .insertObservation(&network, &RequestTokenStat::default(), None, &[])
+        .unwrap();
+    let event = RequestLog {
+        trace_id: Some("response:canonical".into()),
+        request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
+        status_code: None,
+        ..network.clone()
+    };
+    assert!(!storage
+        .insertObservation(
+            &event,
+            &RequestTokenStat::default(),
+            None,
+            &["legacy:response".into()]
+        )
+        .unwrap());
+    let records = storage.list_request_logs(None, 10).unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].trace_id.as_deref(), Some("response:canonical"));
+    assert_eq!(records[0].request_type.as_deref(), Some("http"));
+    assert_eq!(records[0].status_code, Some(200));
+}
+
+// 网络先到但缺失 usage 时，客户端可补齐统计和快照，已知 HTTP 字段与请求主键保持不变。
+#[test]
+fn clientCompletionFillsMissingNetworkUsage() {
+    let storage = Storage::open_in_memory().unwrap();
+    storage.init().unwrap();
+    let network = RequestLog {
+        trace_id: Some("response:missing-usage".into()),
+        request_path: "/responses".into(),
+        method: "POST".into(),
+        request_type: Some("http".into()),
+        status_code: Some(200),
+        model: Some("gpt-5.4-mini".into()),
+        created_at: 1,
+        ..Default::default()
+    };
+    storage
+        .insertObservation(&network, &RequestTokenStat::default(), None, &[])
+        .unwrap();
+    let event = RequestLog {
+        request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
+        status_code: None,
+        ..network.clone()
+    };
+    let usage = RequestTokenStat {
+        input_tokens: Some(100),
+        cached_input_tokens: Some(40),
+        output_tokens: Some(20),
+        total_tokens: Some(120),
+        ..Default::default()
+    };
+    assert!(!storage
+        .insertObservation(&event, &usage, Some("gpt-5.4-mini"), &[])
+        .unwrap());
+    let records = storage.list_request_logs(None, 10).unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].request_type.as_deref(), Some("http"));
+    assert_eq!(records[0].status_code, Some(200));
+    assert_eq!(records[0].input_tokens, Some(100));
+    assert!(records[0].error.is_none());
+    assert!(storage.get_charge_snapshot_v2(1).unwrap().is_some());
+    assert_eq!(storage.request_charge_ledger_entry_count().unwrap(), 0);
 }

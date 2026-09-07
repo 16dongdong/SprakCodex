@@ -121,7 +121,7 @@ Windows 运行期将 CA 签名密钥保存为当前用户范围的 `observationA
 - 将客户端 `response_id` 与网络记录的去重标识逐条匹配，验证每条请求的模型和输入、缓存、输出、总 Token。
 - 实测 WebSocket：1 次生成、1 次预热；生成输入 **20630**、缓存 **11392**、输出 **8**，费用快照 **1**，扣费 **0**，逐请求核对通过。
 
-`nativeUsageVerifier.rs` **仅为测试验证器**，没有变更生产统计数据源。
+该阶段的 `nativeUsageVerifier.rs` **仅为测试验证器**；后续生产客户端事件来源在文末单独说明。
 常规 CLI 的逐请求事件已验证可用；`--ephemeral` 不持久化会话文件，原生记录也不提供完整 HTTP 状态和连接细节。
 这些局限保留在总验收中，不能通过改用文件记录来宣称所有网络模式均已自动接管。
 
@@ -296,3 +296,50 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 `backend/target/observationContinuousSsee06008cba1594cafa4c49bb5d415aee0`。
 SSE 失败握手仍是测试主动触发协议回退，不是生成请求。34 项服务观测单元测试、生命周期测试与 Tauri 检查通过。
 本节修复已复现的新进程启动问题；已有长连接、多目标加载竞争、完整重启和安装更新仍不由这些证据证明。
+
+## 已运行会话的完成事件补充与跨来源合并（2026-09-08）
+
+`warmSessionProbe.rs` 使用实际 `codex app-server`：先完成一轮官方生成，然后启用生产扫描器，
+保持进程、thread 和现有连接不变，再执行第二轮。原实现复现“第二轮成功、模块就绪、对应观测缺失”，
+失败证据位于 `backend/target/observationWarm97950af9232549a696560564d9cdba8e`。
+原会话明确允许技术方案变化，验收目标是请求记录、Token 和费用快照；这里增加补充来源，不用断开连接重试来规避遗漏。
+
+### 生产来源与字段真实性
+
+- `clientEventMonitor.rs` 使用文件变化通知监听当前 CLI home 的 `sessions` 目录，只接受 `rollout-*.jsonl`。
+  注册时刻之前的完成事件不回填；目录溢出和 Rescan 通知重新核对目录，读取失败保留位置并限速重试。
+- `clientEvents.rs` 流式处理 `session_meta`、`turn_context`、`token_usage_record`，未知正文直接跳过。
+  只提取官方 provider 标记、会话/轮次归属、模型上下文和实际 usage；半条 JSON 等待后续字节，缺失计数不补零。
+- 完成事件记录为 `clientResponse` / `clientObservation`，模型来源为 `client_context`。
+  HTTP 状态、URL、方法、路径和时长没有证据时保持未知；前端明确显示“客户端事件”，不伪装成 HTTP 抓包。
+- 网络来源继续保留。两者在 `recordSink.rs` 共用数据库写入队列；客户端读取位置在数据库提交确认后推进，
+  失败会重试原事件，而不是提前跳过它。
+
+### 去重与价格快照
+
+`responseIdentity.rs` 使用 `observationResponse:{SHA256(response_id)}` 作为跨来源标识，同时识别旧版两个官方主机的散列。
+`insertObservation` 在同一事务内复用请求主键：网络记录可补全客户端元数据，客户端也可补齐网络缺失的 usage；
+完整网络字段不被较弱来源覆盖，冲突计数拒绝合并。统计与费用快照不重复增加，已有扣费账目的记录不允许被观测器改写。
+缺失价格或未表达的缓存写入计费保持未知，绝不生成零价快照。
+
+### 验收结果
+
+- 已运行会话的第二轮：逐响应 ID、模型、输入/缓存/输出/总量/推理 Token 与 app-server 的 `rawResponse/completed` 独立通知匹配。
+  断言未回填第一轮；记录为客户端事件且 HTTP 字段均为空，费用快照 1 条，钱包扣费 0。
+  证据：`backend/target/observationEventAcceptance9b81fe7d62a84e0295d03218c263feec`。
+- 连续新 CLI 的 WebSocket 及 SSE 网络观测保持通过；最新 SSE 两次生成输入 40640、缓存 28288、输出 16，
+  费用快照 2 条、扣费 0，另有测试刻意触发的 14 次失败握手。
+  证据：`backend/target/observationEventAcceptance6c936b9ec82e478d94a8094c8f0116cc`。
+- 回归包含客户端先到/网络先到合并、历史标识迁移、未知价格、预热隔离、半条事件、提交失败重试、历史过滤及正文跳过。
+  前端 224 项测试和静态构建通过；Tauri 独立工作区检查通过。
+
+```powershell
+$env:OBSERVATION_TEST_CAPTURE_MODE='warm'
+# 保持现有 CLI 登录与 provider；仅在这个无工具探针进程内禁用其 MCP 启动，不写用户配置文件。
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
+```
+
+**仍待完整闭环**：事件源目前使用宿主解析的 CLI home，其他进程独立 CODEX_HOME 尚未自动注册；
+无持久化会话不产生这类文件，已建无持久化长连接仍需其他观测入口。
+文件读取位置当前在内存中，完整重启及异常退出边界、多目标并发加载、证书续期和实际安装更新仍需继续验证。
+网络测试与本节完成事件测试分别标明来源，不能据此宣称所有场景已完成。

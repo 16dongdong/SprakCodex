@@ -243,6 +243,7 @@ export function AccountKeyInfoCell({
   );
 }
 
+// 仅展示记录实际具备的路由字段；客户端完成事件没有网络来源时显示未知，不补造协议来源或地址。
 export function RequestRouteInfoCell({ log }: { log: RequestLog }) {
   const { t } = useI18n();
   const displayPath = resolveDisplayRequestPath(log) || "-";
@@ -262,7 +263,7 @@ export function RequestRouteInfoCell({ log }: { log: RequestLog }) {
         ? displayPathLabel
         : "";
   const requestType = normalizeRequestType(log.requestType);
-  const canonicalSource = String(log.canonicalSource || "native_codex").trim();
+  const canonicalSource = String(log.canonicalSource || (requestType === "client" ? "-" : "native_codex")).trim();
   const sizeRejectStage = String(log.sizeRejectStage || "-").trim();
   const routeStrategy = String(log.routeStrategy || "").trim();
   const routeSource = String(log.routeSource || "").trim();
@@ -304,7 +305,7 @@ export function RequestRouteInfoCell({ log }: { log: RequestLog }) {
         <div className="flex min-w-[280px] flex-col gap-2">
           <div className="space-y-0.5">
             <div className={logTooltipLabelClassName}>{t("请求类型")}</div>
-            <div className="font-mono text-[11px] uppercase">{requestType}</div>
+            <div className="font-mono text-[11px] uppercase">{requestType === "client" ? t("客户端事件") : requestType}</div>
           </div>
           {gatewayMode ? (
             <div className="space-y-0.5">
