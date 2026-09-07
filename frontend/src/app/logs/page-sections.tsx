@@ -33,7 +33,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buildStaticRouteUrl } from "@/lib/utils/static-routes";
 import { formatTsFromSeconds } from "@/lib/utils/usage";
 import { cn } from "@/lib/utils";
 import {
@@ -57,8 +56,8 @@ import {
 import type { AggregateApi, ApiKey, RequestLog, RequestLogFilterSummary } from "@/types";
 
 export function RequestLogsTabContent({
+  isDirectAccountMode: _isDirectAccountMode,
   t,
-  isDirectAccountMode,
   isAdminMode,
   serviceConnected,
   search,
@@ -93,8 +92,8 @@ export function RequestLogsTabContent({
   onNextPage,
   onJumpPage,
 }: {
-  t: TranslateFn;
   isDirectAccountMode: boolean;
+  t: TranslateFn;
   isAdminMode: boolean;
   serviceConnected: boolean;
   search: string;
@@ -147,27 +146,7 @@ export function RequestLogsTabContent({
 
   return (
     <div className="space-y-4">
-      {isDirectAccountMode ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-start gap-3">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-300" />
-            <div>
-              <div className="font-semibold text-amber-700 dark:text-amber-200">
-                {t("账号直连模式不会产生新的 CodexManager 请求日志")}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                {t("这里仅展示历史网关请求；如需记录请求，请切换到本地网关模式。")}
-              </div>
-            </div>
-          </div>
-          <a
-            href={buildStaticRouteUrl("/platform-mode")}
-            className="inline-flex h-8 w-fit items-center justify-center rounded-lg border border-amber-500/40 bg-background/70 px-3 text-xs font-medium text-foreground transition-colors hover:bg-background"
-          >
-            {t("去切换为本地网关")}
-          </a>
-        </div>
-      ) : null}
+
 
       <Card className="glass-card mission-panel overflow-hidden gap-0 py-0 shadow-sm">
         <CardContent className="p-0">
@@ -362,40 +341,28 @@ export function RequestLogsTabContent({
                 <SummaryCard
                   title={t("当前结果")}
                   value={`${summary.filteredCount}`}
-                  description={`${t("总日志")} ${summary.totalCount} ${t("条")}${isDirectAccountMode ? ` · ${t("仅网关流量")}` : ""}`}
+                  description={`${t("总日志")} ${summary.totalCount} ${t("条")}`}
                   icon={Zap}
                   toneClass="bg-primary/12 text-primary"
                 />
                 <SummaryCard
                   title={t("2XX 成功")}
                   value={`${summary.successCount}`}
-                  description={
-                    isDirectAccountMode
-                      ? `${t("状态码 200-299")} · ${t("仅网关流量")}`
-                      : t("状态码 200-299")
-                  }
+                  description={t("状态码 200-299")}
                   icon={CheckCircle2}
                   toneClass="bg-green-500/12 text-green-500"
                 />
                 <SummaryCard
                   title={t("异常请求")}
                   value={`${summary.errorCount}`}
-                  description={
-                    isDirectAccountMode
-                      ? `${t("4xx / 5xx 或显式错误")} · ${t("仅网关流量")}`
-                      : t("4xx / 5xx 或显式错误")
-                  }
+                  description={t("4xx / 5xx 或显式错误")}
                   icon={AlertTriangle}
                   toneClass="bg-red-500/12 text-red-500"
                 />
                 <SummaryCard
                   title={t("累计Token")}
                   value={formatCompactTokenAmount(summary.totalTokens)}
-                  description={
-                    isDirectAccountMode
-                      ? `${t("当前筛选结果中的总Token")} · ${t("仅网关流量")}`
-                      : t("当前筛选结果中的总Token")
-                  }
+                  description={t("当前筛选结果中的总Token")}
                   icon={Database}
                   toneClass="bg-amber-500/12 text-amber-500"
                 />
@@ -480,9 +447,7 @@ export function RequestLogsTabContent({
                     >
                       {!serviceConnected
                         ? t("服务未连接，无法获取日志")
-                        : isDirectAccountMode
-                          ? t("账号直连模式下不会产生请求日志，如需记录请求请切换到本地网关模式。")
-                          : t("暂无请求日志")}
+                        : t("暂无请求日志")}
                     </TableCell>
                   </TableRow>
                 ) : (

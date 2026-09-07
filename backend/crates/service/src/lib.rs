@@ -16,6 +16,8 @@ mod codex_skill_repositories;
 mod codex_skills;
 mod codex_skills_marketplace;
 mod dashboard;
+#[allow(non_snake_case, non_upper_case_globals)]
+pub mod directObservation;
 mod errors;
 mod gateway;
 mod http;

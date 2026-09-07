@@ -17,6 +17,8 @@ mod app_settings;
 mod codex_profile;
 mod codex_skills;
 mod dashboard;
+#[allow(non_snake_case)]
+mod directObservation;
 mod gateway;
 mod model_groups;
 mod quota;
@@ -264,6 +266,7 @@ pub(crate) fn handle_request(req: JsonRpcRequest) -> JsonRpcMessage {
 pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) -> JsonRpcMessage {
     if req.method == "initialize" {
         let _ = storage_helpers::initialize_storage();
+        crate::directObservation::restoreIfEnabled();
         if let Some(storage) = storage_helpers::open_storage() {
             let _ = storage.insert_event(&Event {
                 account_id: None,
@@ -302,6 +305,9 @@ pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) ->
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = codex_profile::try_handle(&req) {
+        return JsonRpcMessage::Response(resp);
+    }
+    if let Some(resp) = directObservation::dispatch(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = codex_skills::try_handle(&req) {

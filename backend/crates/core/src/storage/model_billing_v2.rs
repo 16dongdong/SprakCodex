@@ -284,8 +284,24 @@ impl Storage {
             .optional()
     }
 
+    // 网关入口保持原有独立事务与幂等语义；内部实现同时供直连观测的原子写入使用。
+    // input 包含价格模型、用量及可选钱包，失败不留下费用或余额变动。
     pub fn record_charge_snapshot_v2(
         &self,
+        input: &ChargeSnapshotInputV2,
+    ) -> Result<ChargeSnapshotV2> {
+        let transaction = self.conn.unchecked_transaction()?;
+        let snapshot = self.recordChargeSnapshotInTransaction(&transaction, input)?;
+        transaction.commit()?;
+        Ok(snapshot)
+    }
+
+    // 复用同一费用规则参与调用方事务；观测记录与价格快照必须同生共灭。
+    // input 决定是否关联钱包，tx 由调用方提交，任意 SQL 或价格校验错误向上传递。
+    #[allow(non_snake_case)]
+    pub(super) fn recordChargeSnapshotInTransaction(
+        &self,
+        tx: &rusqlite::Transaction<'_>,
         input: &ChargeSnapshotInputV2,
     ) -> Result<ChargeSnapshotV2> {
         if !matches!(input.usage_source.as_str(), "actual" | "estimated") {
@@ -293,7 +309,6 @@ impl Storage {
                 "usage_source must be actual or estimated".to_string(),
             ));
         }
-        let tx = self.conn.unchecked_transaction()?;
         if let Some(existing) = tx
             .query_row(
                 &format!("{SNAPSHOT_SELECT} WHERE request_log_id=?1"),
@@ -308,7 +323,6 @@ impl Storage {
                  WHERE request_log_id=?1",
                 params![input.request_log_id, existing.base_cost_microusd],
             )?;
-            tx.commit()?;
             return Ok(existing);
         }
         let pricing_model_slug = input
@@ -457,7 +471,6 @@ impl Storage {
                 ],
             )?;
         }
-        tx.commit()?;
         self.get_charge_snapshot_v2(input.request_log_id)?
             .ok_or(rusqlite::Error::QueryReturnedNoRows)
     }

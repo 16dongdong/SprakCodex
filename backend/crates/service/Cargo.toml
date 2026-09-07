@@ -11,7 +11,15 @@ base64 = "0.22"
 toml_edit = "0.22"
 rusqlite = { path = "../rusqlite", features = ["bundled", "backup"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls", "blocking", "stream", "socks"] }
-hyper-util = { version = "0.1", features = ["client-proxy", "client-proxy-system"] }
+hyper-util = { version = "0.1", features = ["client-proxy", "client-proxy-system", "server-auto", "tokio"] }
+# 内置观测复用现有协议栈；正文旁路解析不进入账号池或计费链。
+hyper = { version = "1", features = ["server", "http1", "http2"] }
+tokio-rustls = "0.26"
+rcgen = { version = "0.13", features = ["x509-parser"] }
+time = "0.3"
+http-body-util = "0.1"
+async-compression = { version = "0.4", features = ["tokio", "gzip", "zlib", "brotli", "zstd"] }
+tokio-util = { version = "0.7", features = ["io", "rt"] }
 bytes = "1"
 rand = "0.8"
 sha2 = "0.10"
@@ -40,8 +48,6 @@ rhai = "1"
 sysinfo = "0.30"
 zip = { version = "2.2", default-features = false, features = ["deflate"] }
 
-[dev-dependencies]
-rcgen = "0.13"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"

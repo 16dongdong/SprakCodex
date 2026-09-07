@@ -14,6 +14,9 @@ export type { InvokeParams, WebCommandDescriptor } from "./transport-web-command
 
 export function createWebCommandMap(postWebRpc: WebRpcCaller): Record<string, WebCommandDescriptor> {
   return {
+    service_observation_status: { rpcMethod: "directObservation/status" },
+    service_observation_start: { rpcMethod: "directObservation/start" },
+    service_observation_stop: { rpcMethod: "directObservation/stop" },
     ...createMiscWebCommands(),
     ...createCodexProfileWebCommands(),
     ...createCodexSkillsWebCommands(),

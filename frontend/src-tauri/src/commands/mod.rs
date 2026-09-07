@@ -9,6 +9,8 @@ pub mod codex_projects;
 pub mod codex_skills;
 pub mod dashboard;
 pub mod diagnostics;
+#[allow(non_snake_case)]
+pub mod directObservation;
 pub mod login;
 pub mod plugin;
 pub mod quota;

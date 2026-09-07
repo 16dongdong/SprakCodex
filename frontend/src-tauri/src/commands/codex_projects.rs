@@ -959,6 +959,7 @@ fn launch_codex_terminal(
     if let Some(codex_home) = codex_home {
         command.env("CODEX_HOME", codex_home);
     }
+    codexmanager_service::directObservation::configureChild(&mut command)?;
     spawn_and_reap(command, "打开 Codex 终端失败")
 }
 
@@ -1148,6 +1149,7 @@ fn launch_codex_terminal(
         if let Some(codex_home) = codex_home {
             command.env("CODEX_HOME", codex_home);
         }
+        codexmanager_service::directObservation::configureChild(&mut command)?;
         match command.spawn() {
             Ok(mut child) => {
                 std::thread::spawn(move || {

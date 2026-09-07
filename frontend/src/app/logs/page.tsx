@@ -23,9 +23,9 @@ import {
   useAppSession,
 } from "@/hooks/useAppSession";
 import { useLocalDayRange } from "@/hooks/useLocalDayRange";
+import { useCodexProfileModeStatus } from "@/hooks/useCodexProfileModeStatus";
 import { usePageTransitionReady } from "@/hooks/usePageTransitionReady";
 import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
-import { useCodexProfileModeStatus } from "@/hooks/useCodexProfileModeStatus";
 import { useI18n } from "@/lib/i18n/provider";
 import { useAppStore } from "@/lib/store/useAppStore";
 import { DASHBOARD_ADMIN_USAGE_QUERY_KEY } from "@/hooks/useDashboardAdminUsageSummary";
@@ -62,15 +62,15 @@ function LogsPageContent() {
   const searchParams = useSearchParams();
   const serviceStatus = useAppStore((state) => state.serviceStatus);
   const serviceAddr = serviceStatus.addr || null;
+  const { isDirectAccountMode } = useCodexProfileModeStatus({
+    enabled: isAdminMode && isPageActive,
+    refetchIntervalMs: 10_000,
+  });
   const { isDesktopRuntime } = useRuntimeCapabilities();
   const { data: session, isLoading: isSessionLoading } = useAppSession();
   const role = resolveSessionRole(session, isSessionLoading, isDesktopRuntime);
   const isAdminMode = isAdminRole(role);
   const isPageActive = useDesktopPageActive("/logs/");
-  const { isDirectAccountMode } = useCodexProfileModeStatus({
-    enabled: isAdminMode && isPageActive,
-    refetchIntervalMs: 10_000,
-  });
   const queryClient = useQueryClient();
   const areLogQueriesEnabled = useDeferredDesktopActivation(serviceStatus.connected);
   const routeQuery = searchParams.get("query") || "";
@@ -415,8 +415,8 @@ function LogsPageContent() {
     <div className="animate-in space-y-5 fade-in duration-500">
       <RequestLogsTabContent
         t={t}
-        isDirectAccountMode={isDirectAccountMode}
         isAdminMode={isAdminMode}
+        isDirectAccountMode={isDirectAccountMode}
         serviceConnected={serviceStatus.connected}
         search={searchInput}
         filter={filter}

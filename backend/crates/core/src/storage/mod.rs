@@ -26,6 +26,8 @@ mod model_groups;
 mod model_options;
 mod model_price_rules;
 mod model_sources;
+#[allow(non_snake_case)]
+mod observationRecords;
 mod plugins;
 mod proxy_profiles;
 mod proxy_tests;

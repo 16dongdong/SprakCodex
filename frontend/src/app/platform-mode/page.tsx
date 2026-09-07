@@ -8,6 +8,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { ObservationPanel } from "@/components/settings/observationPanel";
 import {
   AdvancedRecoveryPanel,
   CurrentModeCard,
@@ -97,6 +98,8 @@ export default function PlatformModePage() {
           </AlertDescription>
         </Alert>
       ) : null}
+
+      <ObservationPanel />
 
       {!state.isServiceReady ? (
         <Alert variant="destructive">
