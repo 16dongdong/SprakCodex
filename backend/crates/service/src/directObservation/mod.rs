@@ -1,5 +1,7 @@
 //! 直连观测宿主：线程、TLS 密钥与数据库消费者均在当前进程，不依赖独立程序。
 //! 开关默认关闭，用户启用后跨重启保留；服务退出只释放运行资源，不改变用户选择。
+#[cfg(windows)]
+mod authorityStore;
 mod certificateAuthority;
 #[cfg(windows)]
 mod nativeInjection;
@@ -30,6 +32,7 @@ static runningEngine: OnceLock<Mutex<Option<Running>>> = OnceLock::new();
 struct Running {
     address: String,
     certificate: PathBuf,
+    retainCertificate: bool,
     relayConfig: Option<PathBuf>,
     cancel: CancellationToken,
     thread: std::thread::JoinHandle<()>,
@@ -86,13 +89,10 @@ pub fn start() -> Result<ObservationStatus, String> {
         .map(runtimePaths::configPath)
         .transpose()?;
     crate::storage_helpers::initialize_storage()?;
-    let authority = certificateAuthority::Authority::create(observationHosts)?;
     let folder = crate::process_env::db_dir();
-    let certificate = folder.join(format!(
-        "observationCertificate{:032x}.pem",
-        rand::random::<u128>()
-    ));
-    std::fs::write(&certificate, &authority.pem).map_err(|_| "保存观测公开证书失败")?;
+    let authority = certificateAuthority::Authority::forRuntime(observationHosts, &folder)?;
+    let certificate = folder.join("observationAuthority.pem");
+    runtimePaths::writeAtomically(&certificate, authority.pem.as_bytes())?;
     let result = startRuntime(authority, certificate.clone(), injectionDll, relayConfig);
     match result {
         Ok(current) => {
@@ -123,7 +123,7 @@ pub fn start() -> Result<ObservationStatus, String> {
             Ok(statusOf(guard.as_ref()))
         }
         Err(error) => {
-            std::fs::remove_file(&certificate).map_err(|_| "观测启动失败且公开证书清理失败")?;
+            // 公开证书属于已发布的信任身份；启动失败也保留它，避免旧客户端重建 TLS 时读到缺失文件。
             Err(error)
         }
     }
@@ -244,6 +244,7 @@ fn startRuntime(
     Ok(Running {
         address,
         certificate,
+        retainCertificate: cfg!(windows),
         relayConfig,
         cancel,
         thread,
@@ -265,7 +266,7 @@ pub fn shutdownRuntime() -> Result<ObservationStatus, String> {
 fn cleanupRunning(current: Running) -> Result<(), String> {
     current.cancel.cancel();
     let joined = current.thread.join();
-    let certificateResult = if current.certificate.exists() {
+    let certificateResult = if !current.retainCertificate && current.certificate.exists() {
         std::fs::remove_file(&current.certificate).map_err(|_| "清理观测公开证书失败".to_string())
     } else {
         Ok(())

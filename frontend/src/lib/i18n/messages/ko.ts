@@ -18,6 +18,8 @@ import { KO_RUNTIME_UI_MESSAGES } from "./sections/ko-runtime-ui";
 import { KO_SKILLS_MESSAGES } from "./sections/ko-skills";
 
 export const KO_MESSAGES: MessageCatalog = {
+  "观测开关会保留；运行与记录状态以当前服务返回为准。": "관측 설정은 저장되며 실행 및 기록 상태는 현재 서비스 응답을 기준으로 합니다.",
+  "公开证书仅供客户端进程信任，不修改 auth.json、系统代理或系统证书库。Windows 签名密钥以当前用户 DPAPI 密文保留。": "공개 인증서는 클라이언트 프로세스에서만 신뢰하며 auth.json, 시스템 프록시 및 인증서 저장소는 변경하지 않습니다. Windows 서명 키는 현재 사용자 범위의 DPAPI 암호문으로 보관합니다.",
   "刷新接口返回 401，尚未确认授权过期": "갱신 요청이 401을 반환했습니다. 인증 만료는 확인되지 않았습니다.",
   ...KO_PROJECTS_MESSAGES,
   ...KO_SKILLS_MESSAGES,
@@ -1574,6 +1576,4 @@ export const KO_MESSAGES: MessageCatalog = {
   "状态：运行中 · 已写入 {written} 条 · 写入异常 {errors} 次": "실행 중 · {written}개 기록 · 쓰기 오류 {errors}개",
   "已启用直连观测时，CodexManager 会记录新启动 Codex 的请求日志和实际用量。": "직접 연결 관측을 활성화하면 새로 시작한 Codex 세션의 요청과 실제 사용량이 기록됩니다.",
   "保留 Codex 原有登录与上游，记录请求、实际 Token 用量和模型价格费用快照，不扣除平台钱包或密钥额度。": "Codex 로그인과 업스트림을 유지하며 요청, 실제 토큰 사용량과 비용 스냅샷을 기록합니다. 플랫폼 지갑이나 키 할당량은 차감하지 않습니다.",
-  "启用后，从本机「项目启动」打开新的 Codex 终端即可接入。已运行的终端不变；关闭观测前请结束接入的终端。每次重启需重新启用。": "활성화 후 이 컴퓨터의 프로젝트 시작에서 새 Codex 터미널을 여세요. 기존 터미널은 변경되지 않습니다. 관측 중지 전 연결된 터미널을 종료하세요. 재시작 후 다시 활성화해야 합니다.",
-  "仅在子进程内信任临时证书；不修改 auth.json、系统代理或系统证书库。独立服务模式需在服务主机为客户端设置此代理和 CODEX_CA_CERTIFICATE。": "자식 프로세스만 임시 인증서를 신뢰합니다. auth.json, 시스템 프록시와 인증서 저장소는 변경하지 않습니다. 독립 서비스 모드에서는 서비스 호스트의 클라이언트에 이 프록시와 CODEX_CA_CERTIFICATE를 설정하세요.",
 };

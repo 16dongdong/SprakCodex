@@ -18,6 +18,8 @@ import { EN_RUNTIME_UI_MESSAGES } from "./sections/en-runtime-ui";
 import { EN_SKILLS_MESSAGES } from "./sections/en-skills";
 
 export const EN_MESSAGES: MessageCatalog = {
+  "观测开关会保留；运行与记录状态以当前服务返回为准。": "The observation setting is saved; runtime and recorded-request status come from the current service.",
+  "公开证书仅供客户端进程信任，不修改 auth.json、系统代理或系统证书库。Windows 签名密钥以当前用户 DPAPI 密文保留。": "The public certificate is trusted only by client processes. auth.json, system proxy settings, and system certificate stores are unchanged. On Windows the signing key is stored as current-user DPAPI ciphertext.",
   ...EN_PROJECTS_MESSAGES,
   ...EN_SKILLS_MESSAGES,
   ...EN_DESKTOP_DIAGNOSTICS_MESSAGES,
@@ -1710,6 +1712,4 @@ export const EN_MESSAGES: MessageCatalog = {
   "状态：运行中 · 已写入 {written} 条 · 写入异常 {errors} 次": "Running · {written} records written · {errors} write errors",
   "已启用直连观测时，CodexManager 会记录新启动 Codex 的请求日志和实际用量。": "When direct observation is enabled, requests and actual usage from newly launched Codex sessions are recorded.",
   "保留 Codex 原有登录与上游，记录请求、实际 Token 用量和模型价格费用快照，不扣除平台钱包或密钥额度。": "Keeps the original Codex login and upstream, recording requests, actual token usage and price snapshots without charging platform wallets or key quotas.",
-  "启用后，从本机「项目启动」打开新的 Codex 终端即可接入。已运行的终端不变；关闭观测前请结束接入的终端。每次重启需重新启用。": "After enabling, launch a new Codex terminal from Project Launch on this machine. Existing terminals are unchanged. Close connected terminals before stopping observation. Enable again after each restart.",
-  "仅在子进程内信任临时证书；不修改 auth.json、系统代理或系统证书库。独立服务模式需在服务主机为客户端设置此代理和 CODEX_CA_CERTIFICATE。": "Only child processes trust the temporary certificate. auth.json, system proxy and certificate stores are unchanged. In standalone service mode, configure this proxy and CODEX_CA_CERTIFICATE for the client on the service host.",
 };

@@ -59,16 +59,21 @@ pub(super) fn writeRelayConfig(path: &Path, port: u16) -> Result<(), String> {
         "blocked_loopback_proxy_ports": []
     });
     let encoded = serde_json::to_vec(&configuration).map_err(|_| "生成注入配置失败")?;
+    writeAtomically(path, &encoded)
+}
+
+// 配置与公开证书都可能被其他进程读取；同目录写完再替换，失败只清理本次临时文件。
+pub(super) fn writeAtomically(path: &Path, encoded: &[u8]) -> Result<(), String> {
     // 同目录临时文件再原子替换，避免 DLL 在截断写入与写完之间读到残缺 JSON。
     let staging = path.with_extension(format!("{:032x}.pending", rand::random::<u128>()));
     let mut output = std::fs::OpenOptions::new()
         .write(true)
         .create_new(true)
         .open(&staging)
-        .map_err(|_| "创建注入配置临时文件失败")?;
+        .map_err(|_| "创建观测文件临时副本失败")?;
     let result = (|| {
         use std::io::Write;
-        output.write_all(&encoded)?;
+        output.write_all(encoded)?;
         output.sync_all()?;
         drop(output);
         std::fs::rename(&staging, path)
@@ -77,10 +82,10 @@ pub(super) fn writeRelayConfig(path: &Path, port: u16) -> Result<(), String> {
         match std::fs::remove_file(&staging) {
             Ok(()) => {}
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-            Err(_) => return Err("发布注入配置失败且临时文件清理失败".into()),
+            Err(_) => return Err("发布观测文件失败且临时副本清理失败".into()),
         }
     }
-    result.map_err(|_| "发布注入配置失败".into())
+    result.map_err(|_| "发布观测文件失败".into())
 }
 
 #[cfg(test)]

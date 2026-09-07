@@ -33,6 +33,9 @@
 *.db
 *.sqlite
 codexmanager.rpc-token
+observationAuthority.dpapi
+observationAuthority.pem
+observationAuthority.lock
 codex resume*.txt
 .tmp_stage_ps/
 .tmp_stage_sh/

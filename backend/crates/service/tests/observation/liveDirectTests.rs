@@ -1,6 +1,8 @@
 //! 显式运行的官方流量探针：只验 TLS/协议/入库边界，不把按进程配置代理当成自动进程接管验收。
 use super::*;
 use codexmanager_core::storage::Storage;
+#[path = "nativeUsageVerifier.rs"]
+mod nativeUsageVerifier;
 use std::{
     fs::File,
     process::{Command, Stdio},
@@ -85,7 +87,6 @@ fn officialTransportRecordsUsage() {
         .args([
             "exec",
             "--ignore-user-config",
-            "--ephemeral",
             "--json",
             "--skip-git-repo-check",
             "--sandbox",
@@ -129,15 +130,28 @@ fn officialTransportRecordsUsage() {
     databaseWorker.join().unwrap();
     std::fs::remove_file(certificate).unwrap();
     assert!(result, "官方 CLI 请求失败，检查隔离目录中的诊断文件");
+    assert_eq!(counters.errors.load(Ordering::Relaxed), 0);
     let stdout = std::fs::read_to_string(events).unwrap();
+    verifyCapturedRecords(&stdout, &storage, websocket);
+}
+
+// 用独立客户端事件核对每个网络响应及生成快照，失败握手与预热保留记录但不充当生成用量。
+fn verifyCapturedRecords(stdout: &str, storage: &Storage, websocket: bool) {
+    let protocol = if websocket { "websocket" } else { "sse" };
     let completion = stdout
         .lines()
         .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
         .find(|event| event["type"] == "turn.completed")
         .expect("缺少 CLI 完整终态");
+    let threadId = stdout
+        .lines()
+        .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
+        .find(|event| event["type"] == "thread.started")
+        .and_then(|event| event["thread_id"].as_str().map(str::to_owned))
+        .expect("缺少本次 CLI 线程标识");
+    let native = nativeUsageVerifier::readProbeUsage(&threadId).expect("独立逐请求核对失败");
     let records = storage.list_request_logs(None, 100).unwrap();
     assert!(!records.is_empty(), "官方请求成功但观测未入库");
-    assert_eq!(counters.errors.load(Ordering::Relaxed), 0);
     let mut input = 0;
     let mut output = 0;
     let mut cached = 0;
@@ -181,6 +195,36 @@ fn officialTransportRecordsUsage() {
     assert_eq!(completion["usage"]["output_tokens"], output);
     assert_eq!(completion["usage"]["cached_input_tokens"], cached);
     assert!(generationRequests > 0, "只有预热没有真实生成请求");
+    assert_eq!(
+        native.len(),
+        generationRequests,
+        "网络捕获与客户端逐请求数量不一致"
+    );
+    for reported in native {
+        use sha2::{Digest, Sha256};
+        let digest = Sha256::digest(format!("chatgpt.com:{}", reported.responseId));
+        let trace = format!("observation:{digest:x}");
+        let matched = records
+            .iter()
+            .find(|record| record.trace_id.as_deref() == Some(trace.as_str()))
+            .expect("网络记录没有对应的真实响应 ID");
+        assert_eq!(matched.input_tokens, Some(reported.usage.input_tokens));
+        assert_eq!(
+            matched.cached_input_tokens,
+            Some(reported.usage.cached_input_tokens)
+        );
+        assert_eq!(matched.output_tokens, Some(reported.usage.output_tokens));
+        assert_eq!(matched.total_tokens, Some(reported.usage.total_tokens));
+        assert_eq!(
+            matched.reasoning_output_tokens,
+            Some(reported.usage.reasoning_output_tokens)
+        );
+        assert_eq!(
+            reported.usage.cache_write_input_tokens, 0,
+            "当前观测存储尚未表达非零缓存写入，需补齐后再通过验收"
+        );
+        assert_eq!(matched.model.as_deref(), Some(reported.model.as_str()));
+    }
     // 独立数据库只包含本次观测记录；每个生成响应都应有快照，预热不按生成价格虚构费用。
     let snapshots = (1..=records.len() as i64)
         .filter(|id| storage.get_charge_snapshot_v2(*id).unwrap().is_some())
@@ -188,6 +232,22 @@ fn officialTransportRecordsUsage() {
     assert_eq!(snapshots, generationRequests);
     assert_eq!(storage.request_charge_ledger_entry_count().unwrap(), 0);
     println!("官方直连协议探针：协议={protocol}，请求={}，生成={generationRequests}，预热={prewarmRequests}，握手失败={failedHandshakes}，输入={input}，缓存={cached}，输出={output}，费用快照={snapshots}，钱包扣费=0；自动接管未由此探针验证", records.len());
+}
+
+// 回放本次探针已经保存的证据，验证新增断言而不重复消耗真实请求；不把回放计作一次新的网络测试。
+#[test]
+#[ignore = "需要 OBSERVATION_TEST_DIRECTORY 指向已完成的探针目录"]
+fn verifyPreviouslyCapturedRecords() {
+    let directory =
+        PathBuf::from(std::env::var_os("OBSERVATION_TEST_DIRECTORY").expect("缺少探针目录"));
+    let stdout = std::fs::read_to_string(directory.join("clientEvents.jsonl")).unwrap();
+    let database = directory.join("observation.db");
+    assert!(database.is_file(), "探针数据库缺失");
+    let storage = Storage::open(database).unwrap();
+    let websocket = std::env::var("OBSERVATION_TEST_PROTOCOL")
+        .unwrap_or_else(|_| "websocket".into())
+        == "websocket";
+    verifyCapturedRecords(&stdout, &storage, websocket);
 }
 
 // 只等待本测试创建的 CLI；超时终止该子进程并回收，避免测试永久挂起或遗留真实请求。

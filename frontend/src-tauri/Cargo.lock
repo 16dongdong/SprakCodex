@@ -997,6 +997,7 @@ dependencies = [
  "webpki-roots 1.0.6",
  "windows 0.58.0",
  "winres",
+ "zeroize",
  "zip",
  "zstd",
 ]
