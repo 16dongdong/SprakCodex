@@ -727,9 +727,11 @@ fn refresh_usage_for_token(
             if let Err(refresh_err) = refresh_and_persist_access_token(
                 storage,
                 &mut current,
-                &issuer,
-                &client_id,
-                token_refresh_ahead_secs(),
+                crate::usage_token_refresh::RefreshTokenOptions {
+                    issuer: &issuer,
+                    clientId: &client_id,
+                    aheadSecs: token_refresh_ahead_secs(),
+                },
             ) {
                 mark_usage_unreachable_if_needed(storage, &current.account_id, &refresh_err);
                 return Err(refresh_err);
@@ -1133,9 +1135,11 @@ fn run_token_refresh_task(
     match refresh_and_persist_access_token(
         storage,
         token,
-        issuer,
-        client_id,
-        token_refresh_ahead_secs(),
+        crate::usage_token_refresh::RefreshTokenOptions {
+            issuer: issuer,
+            clientId: client_id,
+            aheadSecs: token_refresh_ahead_secs(),
+        },
     ) {
         Ok(_) => true,
         Err(err) => {

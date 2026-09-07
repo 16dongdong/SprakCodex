@@ -160,9 +160,11 @@ fn refresh_and_persist_region_blocked_mock_suspends_account() {
     let err = refresh_and_persist_access_token(
         &storage,
         &mut token,
-        "https://auth.openai.com",
-        "client-id",
-        token_refresh_ahead_secs(),
+        crate::usage_token_refresh::RefreshTokenOptions {
+            issuer: "https://auth.openai.com",
+            clientId: "client-id",
+            aheadSecs: token_refresh_ahead_secs(),
+        },
     )
     .expect_err("region blocked refresh should fail");
     let body = rx

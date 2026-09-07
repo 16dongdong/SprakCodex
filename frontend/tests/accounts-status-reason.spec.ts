@@ -1,4 +1,21 @@
 import { expect, test } from "@playwright/test";
+import { installLayoutFixture } from "./support/layoutFixture.mjs";
+
+// 历史未知 401 记录仍可能存在；界面应展示待核验的刷新失败，而不是错误断言令牌已经过期。
+test("未知刷新 401 不被描述为授权已过期", async ({ page }) => {
+  await installLayoutFixture(page);
+  await page.route("**/api/rpc**", async route => {
+    const requestBody = route.request().postDataJSON();
+    if (requestBody.method !== "account/list") return route.fallback();
+    return route.fulfill({json:{jsonrpc:"2.0",id:requestBody.id,result:{items:[{
+      id:"layout-account",name:"fixture@example.test",label:"fixture@example.test",status:"unavailable",
+      statusReason:"refresh_token_invalid:refresh_token_unknown_401",sort:0,
+    }],total:1,page:1,pageSize:20}}});
+  });
+  await page.goto("/accounts/");
+  await expect(page.getByText("刷新接口返回 401，尚未确认授权过期", {exact:true})).toBeVisible();
+  await expect(page.getByText("Refresh Token 已过期，需要重新登录", {exact:true})).toHaveCount(0);
+});
 
 const SETTINGS_SNAPSHOT = {
   updateAutoCheck: true,

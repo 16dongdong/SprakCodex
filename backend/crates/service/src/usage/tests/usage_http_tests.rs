@@ -516,7 +516,7 @@ fn refresh_token_status_error_maps_unknown_401_to_official_message() {
             StatusCode::UNAUTHORIZED,
             "{\"error\":\"something_else\"}"
         ),
-        "refresh token failed with status 401 Unauthorized: Your access token could not be refreshed. Please log out and sign in again."
+        "refresh token failed with status 401 Unauthorized: 刷新接口返回 401，尚未确认授权过期，请检查网络、代理及会话状态。"
     );
 }
 
@@ -568,6 +568,7 @@ fn classify_refresh_token_auth_error_reason_maps_known_and_unknown_401() {
 /// # 返回
 /// 无
 #[test]
+// 缺少结构化失效代码时仍是未知 401；诊断头保留供排障使用，但不能把 HTML 或头部文字当成 RT 撤销证据。
 fn refresh_token_status_error_ignores_headers_for_401_reason_when_body_lacks_code() {
     let mut headers = HeaderMap::new();
     headers.insert(
@@ -578,14 +579,18 @@ fn refresh_token_status_error_ignores_headers_for_401_reason_when_body_lacks_cod
         "x-openai-authorization-error",
         HeaderValue::from_static("refresh_token_expired"),
     );
-
+    let message = super::format_refresh_token_status_error_with_headers(
+        StatusCode::UNAUTHORIZED,
+        Some(&headers),
+        "<html><title>Just a moment...</title></html>",
+    );
+    assert!(message.contains(super::REFRESH_TOKEN_UNKNOWN_MESSAGE));
+    assert!(message.contains("auth_error=refresh_token_expired"));
+    assert!(message.contains("identity_error_code=refresh_token_invalidated"));
+    assert!(!message.contains("<html>"));
     assert_eq!(
-        super::format_refresh_token_status_error_with_headers(
-            StatusCode::UNAUTHORIZED,
-            Some(&headers),
-            "<html><title>Just a moment...</title></html>"
-        ),
-        "refresh token failed with status 401 Unauthorized: Your access token could not be refreshed. Please log out and sign in again."
+        super::refresh_token_auth_error_reason_from_message(&message),
+        Some(super::RefreshTokenAuthErrorReason::Unknown401)
     );
 }
 

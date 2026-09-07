@@ -18,6 +18,7 @@ import { KO_RUNTIME_UI_MESSAGES } from "./sections/ko-runtime-ui";
 import { KO_SKILLS_MESSAGES } from "./sections/ko-skills";
 
 export const KO_MESSAGES: MessageCatalog = {
+  "刷新接口返回 401，尚未确认授权过期": "갱신 요청이 401을 반환했습니다. 인증 만료는 확인되지 않았습니다.",
   ...KO_PROJECTS_MESSAGES,
   ...KO_SKILLS_MESSAGES,
   ...KO_DESKTOP_DIAGNOSTICS_MESSAGES,

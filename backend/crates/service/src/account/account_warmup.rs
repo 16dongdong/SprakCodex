@@ -193,9 +193,11 @@ fn warmup_single_account(
             outcome = refresh_and_persist_access_token(
                 storage,
                 &mut token,
-                &issuer,
-                &client_id,
-                token_refresh_ahead_secs(),
+                crate::usage_token_refresh::RefreshTokenOptions {
+                    issuer: &issuer,
+                    clientId: &client_id,
+                    aheadSecs: token_refresh_ahead_secs(),
+                },
             )
             .and_then(|_| resolve_warmup_authorization(storage, client, &account, &token))
             .and_then(|authorization| {

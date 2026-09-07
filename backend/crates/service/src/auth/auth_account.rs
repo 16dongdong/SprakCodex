@@ -257,9 +257,11 @@ pub(crate) fn read_current_account(refresh_token: bool) -> Result<AccountReadRes
         if let Err(err) = refresh_and_persist_access_token(
             &storage,
             &mut token,
-            &issuer,
-            &client_id,
-            token_refresh_ahead_secs(),
+            crate::usage_token_refresh::RefreshTokenOptions {
+                issuer: &issuer,
+                clientId: &client_id,
+                aheadSecs: token_refresh_ahead_secs(),
+            },
         ) {
             let _ = mark_account_unavailable_for_auth_error(&storage, &account.id, &err);
             return Err(err);
@@ -306,9 +308,11 @@ pub(crate) fn refresh_current_chatgpt_auth_tokens(
     if let Err(err) = refresh_and_persist_access_token(
         &storage,
         &mut token,
-        &issuer,
-        &client_id,
-        token_refresh_ahead_secs(),
+        crate::usage_token_refresh::RefreshTokenOptions {
+            issuer: &issuer,
+            clientId: &client_id,
+            aheadSecs: token_refresh_ahead_secs(),
+        },
     ) {
         let _ = mark_account_unavailable_for_auth_error(&storage, &account.id, &err);
         return Err(err);
@@ -462,9 +466,11 @@ pub(crate) fn refresh_all_chatgpt_auth_tokens(
         match refresh_and_persist_access_token(
             &storage,
             &mut token,
-            issuer,
-            &client_id,
-            token_refresh_ahead_secs(),
+            crate::usage_token_refresh::RefreshTokenOptions {
+                issuer: issuer,
+                clientId: &client_id,
+                aheadSecs: token_refresh_ahead_secs(),
+            },
         ) {
             Ok(()) => {
                 succeeded = succeeded.saturating_add(1);

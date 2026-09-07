@@ -80,6 +80,7 @@
 - `codexmanager-start`：一键拉起 service + web
 
 ## 常用文档
+- 授权刷新：[令牌生命周期与排障说明](docs/authTokenLifecycle.md)
 - 版本历史：[CHANGELOG.md](docs/zh-CN/CHANGELOG.md)
 - 协作约定：[CONTRIBUTING.md](docs/zh-CN/CONTRIBUTING.md)
 - 架构说明：[ARCHITECTURE.md](docs/zh-CN/ARCHITECTURE.md)

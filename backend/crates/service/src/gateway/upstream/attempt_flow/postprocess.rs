@@ -82,9 +82,11 @@ fn try_refresh_chatgpt_access_token(
     crate::usage_token_refresh::refresh_and_persist_access_token(
         storage,
         token,
-        issuer.as_str(),
-        client_id.as_str(),
-        token_refresh_ahead_secs(),
+        crate::usage_token_refresh::RefreshTokenOptions {
+            issuer: issuer.as_str(),
+            clientId: client_id.as_str(),
+            aheadSecs: token_refresh_ahead_secs(),
+        },
     )?;
     let refreshed = token.access_token.trim();
     if refreshed.is_empty() {

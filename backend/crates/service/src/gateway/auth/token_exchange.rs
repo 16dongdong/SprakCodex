@@ -6,8 +6,9 @@ use codexmanager_core::storage::{now_ts, Account, Storage, Token};
 
 use crate::account_status::mark_account_unavailable_for_auth_error;
 use crate::auth_tokens;
-use crate::usage_http::{
-    log_account_data_route, refresh_access_token, refresh_access_token_with_explicit_proxy,
+use crate::usage_token_refresh::{
+    readLatestToken, refresh_and_persist_access_token, token_refresh_ahead_secs,
+    RefreshTokenOptions,
 };
 
 const ACCOUNT_TOKEN_EXCHANGE_LOCK_TTL_SECS: i64 = 30 * 60;
@@ -82,26 +83,6 @@ fn maybe_cleanup_exchange_locks(table: &mut AccountTokenExchangeLockTable, now: 
     });
 }
 
-/// 函数 `find_cached_api_key_access_token`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - storage: 参数 storage
-/// - account_id: 参数 account_id
-///
-/// # 返回
-/// 返回函数执行结果
-fn find_cached_api_key_access_token(storage: &Storage, account_id: &str) -> Option<String> {
-    storage
-        .find_token_by_account_id(account_id)
-        .ok()?
-        .and_then(|t| t.api_key_access_token)
-        .and_then(|value| usable_api_key_access_token(&value))
-}
-
 fn usable_api_key_access_token(value: &str) -> Option<String> {
     let token = value.trim();
     if token.is_empty() {
@@ -119,37 +100,26 @@ fn access_token_expires_within(token: &str, ahead_secs: i64) -> bool {
         .unwrap_or(false)
 }
 
-/// 函数 `exchange_and_persist_api_key_access_token`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - storage: 参数 storage
-/// - token: 参数 token
-/// - issuer: 参数 issuer
-/// - client_id: 参数 client_id
-///
-/// # 返回
-/// 返回函数执行结果
+// 兑换只更新派生缓存字段，不能用请求快照覆盖已轮换的 OAuth 令牌；数据库错误继续向上返回。
 fn exchange_and_persist_api_key_access_token(
     storage: &Storage,
     token: &mut Token,
     issuer: &str,
     client_id: &str,
 ) -> Result<String, String> {
-    let Some(subject_token) = api_key_exchange_subject_token(token) else {
-        return Err("id_token is unavailable for API key token exchange".to_string());
-    };
-    match auth_tokens::obtain_api_key(issuer, client_id, &subject_token) {
-        Ok(exchanged) => {
-            token.api_key_access_token = Some(exchanged.clone());
-            let _ = storage.insert_token(token);
-            Ok(exchanged)
-        }
-        Err(err) => Err(err),
-    }
+    let subject_token = api_key_exchange_subject_token(token)
+        .ok_or_else(|| "id_token is unavailable for API key token exchange".to_string())?;
+    let exchanged = auth_tokens::obtain_api_key(issuer, client_id, &subject_token)?;
+    storage
+        .updateApiTokenIfCurrent(token, Some(&exchanged))
+        .map_err(|error| format!("保存 API 令牌失败：{error}"))?;
+    *token = readLatestToken(storage, &token.account_id)?;
+    token
+        .api_key_access_token
+        .as_deref()
+        .and_then(usable_api_key_access_token)
+        .map(Ok)
+        .unwrap_or_else(|| fallback_to_access_token(token, "兑换期间登录态已更新"))
 }
 
 fn api_key_exchange_subject_token(token: &Token) -> Option<String> {
@@ -174,21 +144,10 @@ pub(crate) fn api_key_exchange_client_id(token: &Token, fallback_client_id: &str
         .unwrap_or_else(|| DEFAULT_CLIENT_ID.to_string())
 }
 
-/// 函数 `fallback_to_access_token`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - token: 参数 token
-/// - exchange_error: 参数 exchange_error
-///
-/// # 返回
-/// 返回函数执行结果
+// API 派生不可用时仅返回仍有效的 AT；空值或确定到期均返回原错误，不把过期凭据继续交给上游。
 fn fallback_to_access_token(token: &Token, exchange_error: &str) -> Result<String, String> {
     let fallback = token.access_token.trim();
-    if fallback.is_empty() {
+    if fallback.is_empty() || access_token_expires_within(fallback, 0) {
         return Err(exchange_error.to_string());
     }
     log::warn!(
@@ -212,17 +171,8 @@ fn should_mark_account_unavailable_after_refresh_failure_for_bearer_exchange(
     }
 }
 
-/// 函数 `resolve_openai_bearer_token`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - super: 参数 super
-///
-/// # 返回
-/// 返回函数执行结果
+// 网关与后台共用 RT 刷新入口；兑换锁只合并派生 API 令牌请求，锁内重读完整凭据，避免旧快照回写。
+// account/token 为同一候选账号，网络或持久化失败保留错误语义，只有仍有效的访问令牌可继续用于请求。
 pub(super) fn resolve_openai_bearer_token(
     storage: &Storage,
     account: &Account,
@@ -235,11 +185,10 @@ pub(super) fn resolve_openai_bearer_token(
     {
         return Ok(existing);
     }
-
     let exchange_lock = account_token_exchange_lock(&account.id);
     let _guard =
         crate::lock_utils::lock_recover(exchange_lock.as_ref(), "account_token_exchange_lock");
-
+    *token = readLatestToken(storage, &account.id)?;
     if let Some(existing) = token
         .api_key_access_token
         .as_deref()
@@ -247,95 +196,53 @@ pub(super) fn resolve_openai_bearer_token(
     {
         return Ok(existing);
     }
-
-    if let Some(cached) = find_cached_api_key_access_token(storage, &account.id) {
-        // 中文注释：并发下后到线程优先复用已落库的新 token，避免重复 token exchange 打上游。
-        token.api_key_access_token = Some(cached.clone());
-        return Ok(cached);
-    }
-
     let fallback_client_id = super::runtime_config::token_exchange_client_id();
     let client_id = api_key_exchange_client_id(token, &fallback_client_id);
-    let issuer_env = super::runtime_config::token_exchange_default_issuer();
     let issuer = if account.issuer.trim().is_empty() {
-        issuer_env
+        super::runtime_config::token_exchange_default_issuer()
     } else {
         account.issuer.clone()
     };
-
-    match exchange_and_persist_api_key_access_token(storage, token, &issuer, &client_id) {
-        Ok(token) => return Ok(token),
-        Err(exchange_err) => {
-            if !token.refresh_token.trim().is_empty() {
-                let proxy_mode =
-                    crate::account_proxy::resolve_account_proxy_mode(account.id.as_str());
-                log_account_data_route(
-                    "api_key_token_exchange",
-                    account.id.as_str(),
-                    &proxy_mode,
-                    "refresh_token",
-                    true,
-                );
-                let refresh_result = match &proxy_mode {
-                    crate::account_proxy::AccountProxyMode::Disabled => {
-                        refresh_access_token(&issuer, &client_id, &token.refresh_token)
-                    }
-                    crate::account_proxy::AccountProxyMode::Explicit { proxy_url, .. } => {
-                        refresh_access_token_with_explicit_proxy(
-                            &issuer,
-                            &client_id,
-                            &token.refresh_token,
-                            proxy_url,
-                        )
-                    }
-                    crate::account_proxy::AccountProxyMode::Invalid { error, .. } => {
-                        Err(error.clone())
-                    }
-                };
-                match refresh_result {
-                    Ok(refreshed) => {
-                        token.access_token = refreshed.access_token;
-                        if let Some(refresh_token) = refreshed.refresh_token {
-                            token.refresh_token = refresh_token;
-                        }
-                        if let Some(id_token) = refreshed.id_token {
-                            token.id_token = id_token;
-                        }
-                        let _ = storage.insert_token(token);
-
-                        if !token.id_token.trim().is_empty() {
-                            let refreshed_client_id = api_key_exchange_client_id(token, &client_id);
-                            if let Ok(exchanged) = exchange_and_persist_api_key_access_token(
-                                storage,
-                                token,
-                                &issuer,
-                                &refreshed_client_id,
-                            ) {
-                                return Ok(exchanged);
-                            }
-                        }
-                    }
-                    Err(refresh_err) => {
-                        if should_mark_account_unavailable_after_refresh_failure_for_bearer_exchange(
-                            token,
-                        ) && mark_account_unavailable_for_auth_error(
-                            storage,
-                            &account.id,
-                            &refresh_err,
-                        ) {
-                            return Err(refresh_err);
-                        }
-                        log::warn!(
-                            "refresh token before api_key_access_token exchange failed: {}",
-                            refresh_err
-                        );
-                    }
-                }
+    let exchange_error =
+        match exchange_and_persist_api_key_access_token(storage, token, &issuer, &client_id) {
+            Ok(bearer) => return Ok(bearer),
+            Err(error) => error,
+        };
+    if token.refresh_token.trim().is_empty() {
+        return fallback_to_access_token(token, &exchange_error);
+    }
+    let options = RefreshTokenOptions {
+        issuer: &issuer,
+        clientId: &fallback_client_id,
+        aheadSecs: token_refresh_ahead_secs(),
+    };
+    match refresh_and_persist_access_token(storage, token, options) {
+        Ok(()) => {
+            if let Some(cached) = token
+                .api_key_access_token
+                .as_deref()
+                .and_then(usable_api_key_access_token)
+            {
+                return Ok(cached);
             }
-
-            fallback_to_access_token(token, &exchange_err)
+            let client_id = api_key_exchange_client_id(token, &fallback_client_id);
+            if let Ok(bearer) =
+                exchange_and_persist_api_key_access_token(storage, token, &issuer, &client_id)
+            {
+                return Ok(bearer);
+            }
+        }
+        Err(error) => {
+            if should_mark_account_unavailable_after_refresh_failure_for_bearer_exchange(token)
+                && mark_account_unavailable_for_auth_error(storage, &account.id, &error)
+            {
+                return Err(error);
+            }
+            log::warn!("网关刷新令牌未完成：{}", error);
+            return fallback_to_access_token(token, &error);
         }
     }
+    fallback_to_access_token(token, &exchange_error)
 }
 
 /// 函数 `clear_account_token_exchange_locks_for_tests`

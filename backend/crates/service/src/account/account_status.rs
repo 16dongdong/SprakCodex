@@ -165,6 +165,24 @@ fn should_preserve_usage_limit_status(storage: &Storage, account_id: &str) -> bo
 /// # 返回
 /// 返回函数执行结果
 pub(crate) fn classify_account_availability_signal(err: &str) -> Option<AccountAvailabilitySignal> {
+    // 刷新端点的结构化停用代码仍是明确终止信号；仅匹配诊断字段，不把未知 401 或任意头部文本当作停用。
+    for field in err
+        .split(|character: char| character.is_whitespace() || matches!(character, '[' | ']' | ','))
+    {
+        match field {
+            "oauth_error=account_deactivated" => {
+                return Some(AccountAvailabilitySignal::Deactivation(
+                    "account_deactivated",
+                ))
+            }
+            "oauth_error=workspace_deactivated" => {
+                return Some(AccountAvailabilitySignal::Deactivation(
+                    "workspace_deactivated",
+                ))
+            }
+            _ => {}
+        }
+    }
     if crate::usage_http::is_refresh_token_region_blocked_error_message(err) {
         return Some(AccountAvailabilitySignal::RefreshTokenRegionBlocked);
     }
@@ -420,17 +438,7 @@ pub(crate) fn mark_account_unavailable_for_deactivation_error(
     set_account_banned_with_reason(storage, account_id, reason)
 }
 
-/// 函数 `mark_account_unavailable_for_auth_error`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - crate: 参数 crate
-///
-/// # 返回
-/// 返回函数执行结果
+// 依据已确认的身份失效更新账号状态；未知刷新 401 返回 false，保留调用错误但不停止整个账号的后续维护。
 pub(crate) fn mark_account_unavailable_for_auth_error(
     storage: &Storage,
     account_id: &str,
@@ -448,6 +456,10 @@ pub(crate) fn mark_account_unavailable_for_auth_error(
             )
         }
         AccountAvailabilitySignal::RefreshToken(reason) => {
+            // 401 只说明本次刷新未获授权；缺少明确失效代码时不把整个账号永久移出轮询。
+            if !reason.isPermanent() {
+                return false;
+            }
             let status_reason = format!("refresh_token_invalid:{}", reason.as_code());
             set_account_unavailable_with_reason(storage, account_id, &status_reason)
         }
@@ -458,17 +470,7 @@ pub(crate) fn mark_account_unavailable_for_auth_error(
     }
 }
 
-/// 函数 `mark_account_unavailable_for_refresh_token_error`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - crate: 参数 crate
-///
-/// # 返回
-/// 返回函数执行结果
+// 仅处理明确的刷新授权失效或地区限制；未知 401 不改变账号，状态写入和手动禁用保护沿用统一状态模块。
 pub(crate) fn mark_account_unavailable_for_refresh_token_error(
     storage: &Storage,
     account_id: &str,
@@ -483,6 +485,9 @@ pub(crate) fn mark_account_unavailable_for_refresh_token_error(
             )
         }
         Some(AccountAvailabilitySignal::RefreshToken(reason)) => {
+            if !reason.isPermanent() {
+                return false;
+            }
             let status_reason = format!("refresh_token_invalid:{}", reason.as_code());
             set_account_unavailable_with_reason(storage, account_id, &status_reason)
         }

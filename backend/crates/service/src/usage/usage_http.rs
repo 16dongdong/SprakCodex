@@ -31,7 +31,7 @@ const REFRESH_TOKEN_INVALID_GRANT_MESSAGE: &str =
 const REFRESH_TOKEN_SESSION_TERMINATED_MESSAGE: &str =
     "Your session has ended. Please log in again.";
 const REFRESH_TOKEN_UNKNOWN_MESSAGE: &str =
-    "Your access token could not be refreshed. Please log out and sign in again.";
+    "刷新接口返回 401，尚未确认授权过期，请检查网络、代理及会话状态。";
 const REFRESH_TOKEN_URL: &str = "https://auth.openai.com/oauth/token";
 const REFRESH_TOKEN_URL_OVERRIDE_ENV_VAR: &str = "CODEX_REFRESH_TOKEN_URL_OVERRIDE";
 const REFRESH_TOKEN_SCOPES: &str = "openid profile email";
@@ -73,6 +73,12 @@ pub(crate) enum RefreshTokenAuthErrorReason {
 }
 
 impl RefreshTokenAuthErrorReason {
+    // 只有明确的失效原因才能停止账号刷新；未知 401 保留诊断，不等同于 RT 已过期。
+    #[allow(non_snake_case)]
+    pub(crate) fn isPermanent(self) -> bool {
+        !matches!(self, Self::Unknown401)
+    }
+
     /// 函数 `as_code`
     ///
     /// 作者: gaohongshun
@@ -205,21 +211,16 @@ fn usage_http_runtime() -> &'static Runtime {
     })
 }
 
-/// 函数 `run_usage_future`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - future: 参数 future
-///
-/// # 返回
-/// 返回函数执行结果
+// 同步维护线程执行传入 future 并原样返回结果；首次客户端初始化必须留在同步上下文，避免异步内创建 blocking runtime。
 fn run_usage_future<F>(future: F) -> F::Output
 where
     F: Future,
 {
+    // 首次构建请求头会初始化网关的 blocking client，必须在进入 Tokio 前完成，否则冷启动刷新会 panic。
+    // 后续请求只检查已初始化的缓存，不重建客户端或改变连接池配置。
+    if USAGE_HTTP_CLIENT.get().is_none() {
+        let _ = usage_http_client();
+    }
     usage_http_runtime().block_on(future)
 }
 
@@ -494,46 +495,24 @@ fn format_refresh_token_status_error(status: reqwest::StatusCode, body: &str) ->
     format_refresh_token_status_error_with_headers(status, None, body)
 }
 
-/// 函数 `format_refresh_token_status_error_with_headers`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - status: 参数 status
-/// - headers: 参数 headers
-/// - body: 参数 body
-///
-/// # 返回
-/// 返回函数执行结果
+// 将刷新失败映射为稳定原因与脱敏诊断；未知 401 不推断过期，headers/body 只用于错误分类和请求追踪。
 fn format_refresh_token_status_error_with_headers(
     status: reqwest::StatusCode,
     headers: Option<&HeaderMap>,
     body: &str,
 ) -> String {
-    if let Some(reason) =
-        classify_refresh_token_auth_error_reason_with_headers(status, headers, body)
-    {
-        let message = reason.user_message();
-        return format!("refresh token failed with status {status}: {message}");
-    }
-
-    let body_hint =
-        crate::gateway::summarize_upstream_error_hint_from_body(status.as_u16(), body.as_bytes())
-            .or_else(|| {
-                let snippet = body
-                    .split_whitespace()
-                    .collect::<Vec<_>>()
-                    .join(" ")
-                    .chars()
-                    .take(256)
-                    .collect::<String>();
-                (!snippet.is_empty()).then_some(snippet)
-            });
     let debug_suffix = headers
         .map(|headers| {
             let mut details = Vec::new();
+            // 只记录受限字符集的错误代码，不回显刷新响应原文或令牌。
+            if let Some(code) = extract_refresh_token_error_code(body).filter(|code| {
+                code.len() <= 64
+                    && code
+                        .bytes()
+                        .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'-')
+            }) {
+                details.push(format!("oauth_error={code}"));
+            }
             let kind = classify_refresh_token_status_error_kind_with_headers(Some(headers), body);
             if kind != "json" {
                 details.push(format!("kind={kind}"));
@@ -561,6 +540,26 @@ fn format_refresh_token_status_error_with_headers(
             }
         })
         .unwrap_or_default();
+    if let Some(reason) =
+        classify_refresh_token_auth_error_reason_with_headers(status, headers, body)
+    {
+        // 未分类 401 保留响应类型与请求编号，但不回显响应原文，也不推断 RT 已经失效。
+        let message = reason.user_message();
+        return format!("refresh token failed with status {status}: {message}{debug_suffix}");
+    }
+
+    let body_hint =
+        crate::gateway::summarize_upstream_error_hint_from_body(status.as_u16(), body.as_bytes())
+            .or_else(|| {
+                let snippet = body
+                    .split_whitespace()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+                    .chars()
+                    .take(256)
+                    .collect::<String>();
+                (!snippet.is_empty()).then_some(snippet)
+            });
     if let Some(body_hint) = body_hint {
         format!("refresh token failed with status {status}: {body_hint}{debug_suffix}")
     } else if debug_suffix.is_empty() {
@@ -1648,19 +1647,7 @@ pub(crate) fn refresh_access_token_with_explicit_proxy(
     ))
 }
 
-/// 函数 `refresh_access_token_async`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - issuer: 参数 issuer
-/// - client_id: 参数 client_id
-/// - refresh_token: 参数 refresh_token
-///
-/// # 返回
-/// 返回函数执行结果
+// 在专用运行时发送刷新 grant；issuer/client_id/refresh_token 保持各自协议角色，失败返回诊断，已提交的请求不盲目重放。
 async fn refresh_access_token_async(
     issuer: &str,
     client_id: &str,
@@ -1679,6 +1666,18 @@ async fn refresh_access_token_async(
     let resp = match build_request(client).send().await {
         Ok(resp) => resp,
         Err(first_err) => {
+            // RT 轮换不是幂等操作；只有建立连接前的失败可重发，超时或连接重置可能已经消耗旧 RT。
+            if !first_err.is_connect() {
+                let failure_kind = if first_err.is_timeout() {
+                    "timeout"
+                } else {
+                    "transport"
+                };
+                return Err(format!(
+                    "refresh token request failed ({failure_kind}); 未重放可能已提交的令牌轮换：{}",
+                    first_err.without_url()
+                ));
+            }
             let retried = build_request(refresh_token_refresh_http_client_for_proxy(
                 explicit_proxy_url,
             )?)

@@ -344,8 +344,8 @@ export const EN_MESSAGES: MessageCatalog = {
   "Refresh Token 已过期，需要重新登录": "Refresh token expired; sign in again.",
   "Refresh Token 授权无效，需要重新登录":
     "Refresh token grant is invalid; sign in again.",
-  "刷新登录凭证返回 401，需要重新登录":
-    "Refreshing credentials returned 401; sign in again.",
+  "刷新接口返回 401，尚未确认授权过期":
+    "The refresh endpoint returned 401; authorization expiry is not confirmed.",
   "Refresh Token 失效，需要重新登录":
     "Refresh token is invalid; sign in again.",
   "用量接口返回 401，账号授权失效":

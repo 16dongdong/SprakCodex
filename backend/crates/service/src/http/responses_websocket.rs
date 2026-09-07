@@ -2774,14 +2774,19 @@ fn try_refresh_websocket_bearer(
     crate::usage_token_refresh::refresh_and_persist_access_token(
         storage,
         token,
-        issuer.as_str(),
-        client_id.as_str(),
-        crate::usage_token_refresh::token_refresh_ahead_secs(),
+        crate::usage_token_refresh::RefreshTokenOptions {
+            issuer: issuer.as_str(),
+            clientId: client_id.as_str(),
+            aheadSecs: crate::usage_token_refresh::token_refresh_ahead_secs(),
+        },
     )?;
 
     if token.api_key_access_token == previous_api_key_access_token {
-        token.api_key_access_token = None;
-        storage.insert_token(token).map_err(|err| err.to_string())?;
+        // 只清理当前版本的派生缓存；并发刷新或登录已经更新时读取新快照，不回写旧 AT/RT。
+        storage
+            .updateApiTokenIfCurrent(token, None)
+            .map_err(|err| err.to_string())?;
+        *token = crate::usage_token_refresh::readLatestToken(storage, &token.account_id)?;
     }
 
     let bearer = crate::gateway::gateway_resolve_openai_bearer_token(storage, account, token)?;

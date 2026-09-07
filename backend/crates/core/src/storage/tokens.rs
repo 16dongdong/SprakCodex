@@ -8,6 +8,60 @@ pub(super) fn delete_token_for_account_sql() -> &'static str {
 }
 
 impl Storage {
+    // 刷新结果只替换发起请求时的令牌版本；轮换与调度一次落库，避免晚到响应覆盖新登录或新 RT。
+    // previous/replacement 属于同一账号，schedule 为 AT 到期与下次刷新时间；竞争返回 false，数据库错误原样返回。
+    #[allow(non_snake_case)]
+    pub fn replaceTokenIfCurrent(
+        &self,
+        previous: &Token,
+        replacement: &Token,
+        schedule: (Option<i64>, Option<i64>),
+    ) -> Result<bool> {
+        if previous.account_id != replacement.account_id {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "令牌账号不一致".to_string(),
+            ));
+        }
+        let changed = self.conn.execute(
+            "UPDATE tokens SET id_token = ?1, access_token = ?2, refresh_token = ?3,
+                last_refresh = ?4, access_token_exp = ?5, next_refresh_at = ?6
+             WHERE account_id = ?7 AND refresh_token = ?8 AND access_token = ?9 AND id_token = ?10",
+            (
+                &replacement.id_token,
+                &replacement.access_token,
+                &replacement.refresh_token,
+                replacement.last_refresh,
+                schedule.0,
+                schedule.1,
+                &previous.account_id,
+                &previous.refresh_token,
+                &previous.access_token,
+                &previous.id_token,
+            ),
+        )?;
+        Ok(changed == 1)
+    }
+
+    // API 令牌缓存与 OAuth 轮换分开写入；仅更新匹配快照的缓存字段，不回写旧 AT/RT。
+    // value 为新缓存或清空指令；快照过期返回 false，调用方应重新读取，而不是覆盖另一线程的结果。
+    #[allow(non_snake_case)]
+    pub fn updateApiTokenIfCurrent(&self, snapshot: &Token, value: Option<&str>) -> Result<bool> {
+        let changed = self.conn.execute(
+            "UPDATE tokens SET api_key_access_token = ?1
+             WHERE account_id = ?2 AND id_token = ?3 AND access_token = ?4
+               AND refresh_token = ?5 AND api_key_access_token IS ?6",
+            (
+                value,
+                &snapshot.account_id,
+                &snapshot.id_token,
+                &snapshot.access_token,
+                &snapshot.refresh_token,
+                &snapshot.api_key_access_token,
+            ),
+        )?;
+        Ok(changed == 1)
+    }
+
     /// 函数 `insert_token`
     ///
     /// 作者: gaohongshun

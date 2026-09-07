@@ -71,9 +71,11 @@ fn refresh_token_for_reset(storage: &Storage, token: &mut Token) -> Result<(), S
     refresh_and_persist_access_token(
         storage,
         token,
-        &issuer,
-        &client_id,
-        token_refresh_ahead_secs(),
+        crate::usage_token_refresh::RefreshTokenOptions {
+            issuer: &issuer,
+            clientId: &client_id,
+            aheadSecs: token_refresh_ahead_secs(),
+        },
     )
 }
 

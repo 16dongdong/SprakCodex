@@ -373,6 +373,7 @@ export function getAccountStatusReasonCode(account: Account): string {
   return reason.toLowerCase() === "usage_ok" ? "" : reason;
 }
 
+// 将账号原因码转换为可见说明；缺少原因返回 null，未知刷新拒绝不等同于已确认过期。
 export function formatAccountStatusReasonLabel(
   account: Account,
   t: TranslateFn,
@@ -394,8 +395,9 @@ export function formatAccountStatusReasonLabel(
         return t("Refresh Token 已过期，需要重新登录");
       case "invalid_grant":
         return t("Refresh Token 授权无效，需要重新登录");
+      // 历史原因码不能再被描述为已过期，未知 401 只表明该次刷新未通过。
       case "refresh_token_unknown_401":
-        return t("刷新登录凭证返回 401，需要重新登录");
+        return t("刷新接口返回 401，尚未确认授权过期");
       default:
         return t("Refresh Token 失效，需要重新登录");
     }

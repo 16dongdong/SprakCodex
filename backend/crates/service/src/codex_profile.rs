@@ -302,6 +302,7 @@ fn usable_account_token_candidates_by_account(
         .collect()
 }
 
+// 为选定账号更新指定 Codex profile；有效 AT 不重复轮换，存储/授权/文件错误向调用方返回并保留备份机制。
 pub(crate) fn apply_direct_account(
     account_id: Option<&str>,
     codex_home: Option<&str>,
@@ -331,13 +332,19 @@ pub(crate) fn apply_direct_account(
     if issuer.is_empty() {
         return Err("account issuer is empty".to_string());
     }
-    crate::usage_token_refresh::refresh_and_persist_access_token(
-        &storage,
-        &mut token,
-        issuer,
-        DEFAULT_CLIENT_ID,
-        crate::usage_token_refresh::token_refresh_ahead_secs(),
-    )?;
+    // 导出登录态不等于强制轮换；仍有效的 AT 直接使用，减少与 Codex 同时消耗同一 RT 的机会。
+    let refresh_ahead = crate::usage_token_refresh::token_refresh_ahead_secs();
+    if crate::usage_token_refresh::accessTokenNeedsRefresh(&token, refresh_ahead) {
+        crate::usage_token_refresh::refresh_and_persist_access_token(
+            &storage,
+            &mut token,
+            crate::usage_token_refresh::RefreshTokenOptions {
+                issuer,
+                clientId: DEFAULT_CLIENT_ID,
+                aheadSecs: refresh_ahead,
+            },
+        )?;
+    }
     ensure_usable_token(&token)?;
 
     ensure_backup(&profile_dir)?;
@@ -1935,6 +1942,7 @@ fn profile_key(profile_dir: &Path) -> String {
     profile_dir.to_string_lossy().to_string()
 }
 
+// 生成直连登录文件内容，不实际写文件；last_refresh 使用令牌真实时间，非法时间返回错误而不伪装成刚刷新。
 fn build_direct_auth_json(
     account: &AccountDirectAuthProfile,
     token: &Token,
@@ -1945,6 +1953,11 @@ fn build_direct_auth_json(
         .map(str::trim)
         .filter(|value| !value.is_empty())
         .unwrap_or(account.id.as_str());
+    // last_refresh 表示实际令牌更新时间，而非文件导出时间；伪造“刚刷新”会推迟 Codex 自身的维护。
+    let last_refresh = chrono::Utc
+        .timestamp_opt(token.last_refresh, 0)
+        .single()
+        .ok_or_else(|| "令牌刷新时间无效".to_string())?;
     serde_json::to_string_pretty(&serde_json::json!({
         "OPENAI_API_KEY": null,
         "tokens": {
@@ -1953,7 +1966,7 @@ fn build_direct_auth_json(
             "refresh_token": token.refresh_token,
             "account_id": account_id,
         },
-        "last_refresh": chrono::Utc::now()
+        "last_refresh": last_refresh
             .format("%Y-%m-%dT%H:%M:%S%.6fZ")
             .to_string(),
     }))
@@ -2355,3 +2368,7 @@ fn temp_file_path(parent: &Path, target: &Path) -> PathBuf {
 #[cfg(test)]
 #[path = "codex_profile_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/auth/profileExportTests.rs"]
+mod profileExportTests;

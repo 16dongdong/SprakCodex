@@ -748,7 +748,7 @@ fn refresh_token_auth_error_marks_account_unavailable() {
     assert!(mark_account_unavailable_for_refresh_token_error(
         &storage,
         "acc-refresh-auth",
-        "refresh token failed with status 401 Unauthorized"
+        "refresh token failed with status 401 Unauthorized: Your access token could not be refreshed because your refresh token was revoked. Please log out and sign in again."
     ));
     let unavailable = storage
         .find_account_by_id("acc-refresh-auth")
@@ -958,7 +958,7 @@ fn refresh_token_app_session_terminated_on_bad_request_marks_account_unavailable
     );
 }
 
-/// 函数 `refresh_token_unknown_401_marks_account_unavailable`
+/// 未分类刷新拒绝不应改变账号状态
 ///
 /// 作者: gaohongshun
 ///
@@ -970,7 +970,7 @@ fn refresh_token_app_session_terminated_on_bad_request_marks_account_unavailable
 /// # 返回
 /// 无
 #[test]
-fn refresh_token_unknown_401_marks_account_unavailable() {
+fn refresh_token_unknown_401_preserves_account_state() {
     let storage = Storage::open_in_memory().expect("open");
     storage.init().expect("init");
     let account = Account {
@@ -987,7 +987,7 @@ fn refresh_token_unknown_401_marks_account_unavailable() {
     };
     storage.insert_account(&account).expect("insert");
 
-    assert!(mark_account_unavailable_for_refresh_token_error(
+    assert!(!mark_account_unavailable_for_refresh_token_error(
         &storage,
         "acc-refresh-unknown-401",
         "refresh token failed with status 401 Unauthorized: some_unknown_backend_code"
@@ -996,7 +996,7 @@ fn refresh_token_unknown_401_marks_account_unavailable() {
         .find_account_by_id("acc-refresh-unknown-401")
         .expect("find")
         .expect("exists");
-    assert_eq!(unavailable.status, "unavailable");
+    assert_eq!(unavailable.status, "active");
 }
 
 /// 函数 `deactivation_reason_detects_workspace_and_account_scope`
