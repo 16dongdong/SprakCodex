@@ -118,6 +118,7 @@ function secretPreview(secret: AggregateApiSecretResult): string {
   return secret.key;
 }
 
+// 聚合连接列表使用共享自适应表格；长名称与筛选区允许换行，所有连接操作只渲染一次。
 export default function AggregateApiPage() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
@@ -398,7 +399,7 @@ export default function AggregateApiPage() {
 
         <Card className="glass-card overflow-hidden py-0">
           <CardHeader className="border-b border-border/50 px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
               <div>
                 <CardTitle>{t("上游连接")}</CardTitle>
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -456,7 +457,7 @@ export default function AggregateApiPage() {
                       const testError = String(api.lastTestError || "").trim();
                       return (
                         <TableRow key={api.id}>
-                          <TableCell className="min-w-[240px]">
+                          <TableCell className="min-w-0">
                             <div className="font-medium">{api.supplierName || api.id}</div>
                             <div className="max-w-[360px] truncate font-mono text-[11px] text-muted-foreground">{api.url}</div>
                             <div className="mt-1 text-[10px] text-muted-foreground">

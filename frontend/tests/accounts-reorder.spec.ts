@@ -161,9 +161,10 @@ test("account row menu moves an account to the top of the pool", async ({
   const openMenuItem = (name: string) =>
     page.getByRole("menuitem", { name }).filter({ visible: true });
 
+  // 操作栏是独立分组而非第二张表；按真实行定位，仍验证重排后的首尾操作状态。
   const actionCells = page
-    .getByRole("table", { name: "账号操作" })
-    .getByRole("cell");
+    .getByRole("group", { name: "账号操作", exact: true })
+    .locator(".account-pool-action-rail-row");
   await expect(actionCells).toHaveCount(ACCOUNT_ITEMS.length);
   await actionCells.last().getByLabel("更多账号操作").click();
 

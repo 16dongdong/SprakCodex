@@ -116,6 +116,7 @@ NavItem.displayName = "NavItem";
  * # 返回
  * 返回函数执行结果
  */
+// 导航栏只占用阅读所需宽度，保持标题区与主栏同高；折叠状态仍由全局 store 管理。
 export function Sidebar() {
   const { t } = useI18n();
   const [logoFailed, setLogoFailed] = useState(false);
@@ -196,9 +197,10 @@ export function Sidebar() {
   return (
     <div
       data-slot="app-sidebar"
+      data-expanded={isSidebarOpen}
       className={cn(
         "relative z-20 flex shrink-0 flex-col glass-sidebar",
-        isSidebarOpen ? "w-[220px] xl:w-[280px]" : "w-[60px] xl:w-[72px]"
+        isSidebarOpen ? "w-[220px] 2xl:w-[248px]" : "w-[60px] 2xl:w-[64px]"
       )}
     >
       <div
@@ -207,14 +209,14 @@ export function Sidebar() {
         className={cn(
           "pointer-events-none absolute inset-y-0 left-0 z-20 w-px bg-border/70 transition-transform duration-300 ease-out will-change-transform motion-reduce:transition-none",
           isSidebarOpen
-            ? "translate-x-[calc(220px-1px)] xl:translate-x-[calc(280px-1px)]"
-            : "translate-x-[calc(60px-1px)] xl:translate-x-[calc(72px-1px)]",
+            ? "translate-x-[calc(220px-1px)] 2xl:translate-x-[calc(248px-1px)]"
+            : "translate-x-[calc(60px-1px)] 2xl:translate-x-[calc(64px-1px)]",
         )}
       />
       <div
         className={cn(
-          "flex h-[68px] items-center border-b border-border/55 shrink-0 xl:h-[96px] [@media(max-height:800px)]:h-[68px]",
-          isSidebarOpen ? "px-4 xl:px-6" : "px-2 xl:px-2.5"
+          "flex h-[72px] items-center border-b border-border/55 shrink-0",
+          isSidebarOpen ? "px-4" : "px-2 xl:px-2.5"
         )}
       >
         <Button
@@ -224,11 +226,11 @@ export function Sidebar() {
           title={brandTitle}
           aria-label={brandTitle}
           className={cn(
-            "flex h-auto w-full items-center gap-2.5 overflow-hidden rounded-xl px-0 py-1.5 transition-colors duration-200 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 xl:gap-3.5 xl:py-2",
+            "flex h-auto w-full items-center gap-2.5 overflow-hidden rounded-xl px-0 py-1.5 transition-colors duration-200 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 xl:gap-2.5 xl:py-2",
             isSidebarOpen ? "justify-start text-left" : "justify-center"
           )}
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-primary/20 bg-card text-primary shadow-[0_12px_24px_-18px_rgb(var(--primary-rgb)/0.8)] xl:h-12 xl:w-12 xl:rounded-xl [@media(max-height:800px)]:h-9 [@media(max-height:800px)]:w-9 [@media(max-height:800px)]:rounded-[10px]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-primary/20 bg-card text-primary shadow-[0_12px_24px_-18px_rgb(var(--primary-rgb)/0.8)] xl:h-10 xl:w-10 xl:rounded-xl [@media(max-height:800px)]:h-9 [@media(max-height:800px)]:w-9 [@media(max-height:800px)]:rounded-[10px]">
             {logoFailed ? (
               <span className="text-sm font-bold">CM</span>
             ) : (

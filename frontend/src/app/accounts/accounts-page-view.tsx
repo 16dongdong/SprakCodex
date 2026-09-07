@@ -330,6 +330,7 @@ export interface AccountsPageViewProps {
   ) => void;
 }
 
+// 账号页仅渲染一份可交互记录；工具栏与字段按内容宽度重排，操作列高度仍随真实数据行同步。
 export function AccountsPageView(props: AccountsPageViewProps) {
   const { t } = useI18n();
   const {
@@ -932,7 +933,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
       ) : null}
 
       <Card className="glass-card mission-panel shadow-sm">
-        <CardContent className="grid min-w-0 gap-3 pt-0 lg:grid-cols-[200px_auto_minmax(0,1fr)_auto] lg:items-center">
+        <CardContent className="accounts-toolbar grid min-w-0 gap-3 pt-0">
           <div className="min-w-0">
             <Input
               placeholder={t("搜索账号名 / 编号...")}
@@ -986,7 +987,6 @@ export function AccountsPageView(props: AccountsPageViewProps) {
             </Select>
           </div>
 
-          <div className="hidden min-w-0 lg:block" />
 
           <div className="flex min-w-0 flex-wrap items-center gap-2 sm:ml-auto sm:shrink-0 lg:ml-0 lg:justify-self-end">
             <ToggleGroup
@@ -1455,14 +1455,14 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                     onCheckedChange={toggleSelectAllVisible}
                   />
                 </TableHead>
-                <TableHead className="w-[360px] min-w-[320px] max-w-[360px] whitespace-normal">
+                <TableHead className="whitespace-normal">
                   {t("账号信息")}
                 </TableHead>
-                <TableHead className="min-w-[300px] text-center">
+                <TableHead className="text-center">
                   {t("额度详情")}
                 </TableHead>
-                <TableHead className="w-[168px]">{t("顺序")}</TableHead>
-                <TableHead className="min-w-[180px]">{t("账号代理")}</TableHead>
+                <TableHead className="account-pool-order-head">{t("顺序")}</TableHead>
+                <TableHead className="account-pool-proxy-head">{t("账号代理")}</TableHead>
                 <TableHead className="account-pool-status-head whitespace-normal">
                   {t("状态")}
                 </TableHead>
@@ -1499,7 +1499,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
               ) : visibleAccounts.length === 0 ? (
                 <TableRow data-account-pool-main-row>
                   <TableCell colSpan={6} className="h-48 text-center">
-                    <div className="flex w-[calc(100dvw-6rem)] flex-col items-center justify-center gap-2 text-muted-foreground sm:w-auto">
+                    <div className="flex w-full flex-col items-center justify-center gap-2 text-muted-foreground sm:w-auto">
                       <Search className="h-8 w-8 opacity-20" />
                       <p>{t("未找到符合条件的账号")}</p>
                     </div>
@@ -1527,7 +1527,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                           onCheckedChange={() => toggleSelect(account.id)}
                         />
                       </TableCell>
-                      <TableCell className="w-[360px] min-w-[320px] max-w-[360px] whitespace-normal align-top">
+                      <TableCell className="whitespace-normal align-top">
                         <AccountInfoCell
                           account={account}
                           isPreferred={account.preferred}
@@ -1570,7 +1570,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                         </div>
                       </TableCell>
                       <TableCell className="align-middle whitespace-nowrap">
-                        <div className="flex min-w-max flex-nowrap items-center gap-1">
+                        <div className="flex min-w-0 flex-wrap items-center gap-1">
                           <span className="min-w-8 rounded-md bg-muted/60 px-2 py-1 text-center font-mono text-xs font-semibold tabular-nums">
                             {account.priority}
                           </span>

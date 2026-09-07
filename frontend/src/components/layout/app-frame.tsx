@@ -7,6 +7,7 @@ import { PageKeepAliveViewport } from "@/components/layout/page-keep-alive-viewp
 import { RouteTransitionOverlay } from "@/components/layout/route-transition-overlay";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useAppStore } from "@/lib/store/useAppStore";
+import { useI18n } from "@/lib/i18n/provider";
 import { normalizeRoutePath } from "@/lib/utils/static-routes";
 
 const TRAY_PREVIEW_PATH = "/tray-preview";
@@ -16,10 +17,13 @@ export function isTrayPreviewPath(pathname: string): boolean {
   return normalizeRoutePath(pathname) === TRAY_PREVIEW_PATH;
 }
 
+// 管理主窗口的滚动与侧栏生命周期；children 为当前页面，使用真实布局尺寸保证浮层、表格和滚动区域同坐标系。
 export function AppFrame({ children }: { children: React.ReactNode }) {
+  const { t } = useI18n();
   const pathname = usePathname();
   const isTrayPreview = isTrayPreviewPath(pathname);
   const setSidebarOpen = useAppStore((state) => state.setSidebarOpen);
+  const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
 
   useEffect(() => {
     document.documentElement.classList.toggle("tray-preview-mode", isTrayPreview);
@@ -51,9 +55,17 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="console-shell flex h-screen overflow-hidden"
+      className="console-shell flex h-dvh min-w-0 overflow-hidden"
       data-command-center="true"
     >
+      {isSidebarOpen ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-50 bg-black/20 sm:hidden"
+          aria-label={t("收起侧边栏")}
+          onClick={() => setSidebarOpen(false)}
+        />
+      ) : null}
       <Sidebar />
       <div
         data-slot="app-main-column"
@@ -61,10 +73,10 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
       >
         <div
           data-slot="app-main-scale"
-          className="flex h-full w-full origin-top-left flex-col xl:h-[111.111111%] xl:w-[111.111111%] xl:scale-90"
+          className="flex h-full min-h-0 w-full min-w-0 flex-col"
         >
           <Header />
-          <main className="relative min-w-0 flex-1 overflow-y-auto px-4 pb-7 pt-4 no-scrollbar lg:px-5 lg:pt-5 xl:pb-10 xl:pl-[26px] xl:pr-[45px] xl:pt-[26px]">
+          <main data-slot="app-content" className="relative min-h-0 min-w-0 flex-1 overflow-y-auto px-4 pb-7 pt-4 lg:px-5 lg:pt-5">
             <RouteTransitionOverlay />
             <PageKeepAliveViewport initialChildren={children} />
           </main>

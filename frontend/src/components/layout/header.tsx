@@ -37,6 +37,7 @@ const DEFAULT_SERVICE_ADDR = "localhost:48760";
  * # 返回
  * 返回函数执行结果
  */
+// 统一窗口标题与控制区的高度和左右留白；服务行为不变，窄宽度由内容列容器查询调整显示密度。
 export function Header() {
   const appSettings = useAppStore((state) => state.appSettings);
   const serviceStatus = useAppStore((state) => state.serviceStatus);
@@ -178,10 +179,10 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex min-h-[68px] items-center justify-between gap-2 glass-header px-2 sm:gap-3 sm:px-4 xl:min-h-[96px] xl:gap-5 xl:pl-9 xl:pr-[45px]">
+      <header className="sticky top-0 z-30 flex min-h-[72px] shrink-0 items-center justify-between gap-2 glass-header px-2 sm:gap-3 sm:px-4 lg:px-5">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         <div className="header-title-group flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-4 xl:gap-5">
-          <h1 className="header-page-title min-w-0 truncate text-lg font-semibold tracking-[-0.015em] text-foreground sm:text-[21px] xl:text-[27px]">
+          <h1 className="header-page-title min-w-0 truncate text-lg font-semibold tracking-[-0.015em] text-foreground sm:text-[21px] xl:text-2xl">
             {getPageTitle()}
           </h1>
           <span className="header-page-date hidden shrink-0 items-center gap-2 whitespace-nowrap text-sm text-muted-foreground md:flex xl:text-[15px]" suppressHydrationWarning>

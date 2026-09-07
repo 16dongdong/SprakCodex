@@ -13,7 +13,7 @@ test("sidebar collapse avoids transitions that continuously reflow the active pa
 
   assert.match(
     source,
-    /isSidebarOpen \? "w-\[220px\] xl:w-\[280px\]" : "w-\[60px\] xl:w-\[72px\]"/,
+    /isSidebarOpen \? "w-\[220px\] 2xl:w-\[248px\]" : "w-\[60px\] 2xl:w-\[64px\]"/,
   );
   assert.match(
     source,
@@ -159,7 +159,7 @@ test("wide but short windows keep the complete sidebar discoverable", async () =
 
   assert.match(source, /\[@media\(max-height:800px\)\]:min-h-11/);
   assert.match(source, /\[@media\(max-height:800px\)\]:min-h-9/);
-  assert.match(source, /\[@media\(max-height:800px\)\]:h-\[68px\]/);
+  assert.match(source, /h-\[72px\]/);
   assert.match(source, /\[@media\(max-height:800px\)\]:py-2\.5/);
 });
 
@@ -177,6 +177,6 @@ test("page fallback stays aligned with both sidebar widths", async () => {
 
   assert.match(
     source,
-    /isSidebarOpen \? "left-\[220px\] xl:left-\[280px\]" : "left-\[60px\] xl:left-\[72px\]"/,
+    /isSidebarOpen \? "left-\[220px\] 2xl:left-\[248px\]" : "left-\[60px\] 2xl:left-\[64px\]"/,
   );
 });

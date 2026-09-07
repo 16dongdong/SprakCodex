@@ -52,6 +52,7 @@ const LAZY_PAGE_COMPONENTS: Record<
 
 const ROOT_PAGE_COMPONENT = lazy(() => import("@/app/page"));
 
+// 页面加载层沿用侧栏宽度断点，避免调整导航比例后遮罩覆盖导航或留下空隙。
 function PagePanelFallback({ title }: { title: string }) {
   const { t } = useI18n();
   const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
@@ -60,7 +61,7 @@ function PagePanelFallback({ title }: { title: string }) {
     <div
       className={cn(
         "fixed inset-y-0 right-0 z-40 overflow-hidden bg-background/70",
-        isSidebarOpen ? "left-[220px] xl:left-[280px]" : "left-[60px] xl:left-[72px]",
+        isSidebarOpen ? "left-[220px] 2xl:left-[248px]" : "left-[60px] 2xl:left-[64px]",
       )}
     >
       <div className="relative flex h-full w-full items-start justify-center px-8 pt-[31vh]">
@@ -105,6 +106,7 @@ function LazyPagePanel({
   );
 }
 
+// 缓存页签沿用真实内容宽度，隐藏页不参与布局；传入首屏保留原组件状态，避免切页时撑大父容器。
 export function PageKeepAliveViewport({
   initialChildren,
 }: {
@@ -170,8 +172,8 @@ export function PageKeepAliveViewport({
   ]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="relative min-h-0 flex-1">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="relative min-h-0 min-w-0 flex-1">
         {openShellTabs.map((path) => {
           if (!isTopLevelRouteAllowedForRole(path, routeAccess)) {
             return null;

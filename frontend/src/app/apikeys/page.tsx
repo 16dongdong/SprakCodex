@@ -157,6 +157,7 @@ function formatCompactTokenAmount(value: number | null | undefined): string {
   return formatCompactNumber(normalized, "0.00", 2, true);
 }
 
+// 平台密钥页按内容列宽度布局；空态不再按窗口宽度扩张，密钥操作与数据加载契约保持不变。
 export default function ApiKeysPage() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
@@ -657,7 +658,7 @@ export default function ApiKeysPage() {
 
       <WorkPanel>
         <CardContent className="p-0">
-          <Table className="min-w-[1160px]">
+          <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("密钥 / ID")}</TableHead>
@@ -697,7 +698,7 @@ export default function ApiKeysPage() {
               ) : apiKeys.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={showMemberOwnership ? 10 : 9} className="h-48 text-center">
-                    <div className="flex w-[calc(100dvw-6rem)] flex-col items-center justify-center gap-2 text-muted-foreground sm:w-auto">
+                    <div className="flex w-full flex-col items-center justify-center gap-2 text-muted-foreground sm:w-auto">
                       <Plus className="h-8 w-8 opacity-20" />
                       <p>{t("创建密钥")}</p>
                     </div>

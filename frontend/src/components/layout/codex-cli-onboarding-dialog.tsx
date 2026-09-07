@@ -199,7 +199,8 @@ export function CodexCliOnboardingDialog({
                       )}
                     >
                       <StepIcon className="mt-0.5 h-4 w-4 shrink-0" />
-                      <span className="min-w-0 text-sm leading-5 font-medium">
+                      {/* 独立标记步骤标题，用实际文本边界验证不同窗口下的换行与遮挡。 */}
+                      <span data-testid="codex-guide-step-title" className="min-w-0 text-sm leading-5 font-medium">
                         {t(step.title)}
                       </span>
                     </Button>

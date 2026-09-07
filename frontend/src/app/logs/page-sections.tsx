@@ -428,7 +428,8 @@ export function RequestLogsTabContent({
         </CardHeader>
         <CardContent className="px-0">
           <div className="overflow-x-auto">
-            <Table className="min-w-[1500px] table-fixed">
+            {/* 日志表复用内容宽度约束，不再以固定最小宽度撑开工作区。 */}
+            <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="h-12 w-[150px] px-4 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">

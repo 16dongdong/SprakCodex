@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/responsiveLayout.css";
 
 @plugin "tailwindcss-animate";
 
@@ -1094,30 +1095,31 @@ tr {
 .account-pool-main-table {
   table-layout: fixed;
   width: 100%;
-  min-width: 1206px;
+  min-width: 0;
 }
 
 .account-pool-col-select {
-  width: 48px;
+  width: 4%;
 }
 
 .account-pool-col-info {
-  width: 360px;
+  width: 27%;
 }
 
 .account-pool-col-quota {
-  width: 330px;
+  width: 30%;
 }
 
 .account-pool-col-order {
-  width: 168px;
+  width: 12%;
 }
 
 .account-pool-col-proxy {
+  width: 14%;
 }
 
 .account-pool-col-status {
-  width: 160px;
+  width: 13%;
 }
 
 .account-pool-quota-grid {

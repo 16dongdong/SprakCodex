@@ -41,11 +41,12 @@ const metricToneClassName = {
   slate: "border-slate-500/20 bg-slate-500/10 text-slate-600 shadow-sm",
 };
 
+// 页面容器允许在侧栏旁收缩，内容仍保留最大阅读宽度；传入样式只扩展布局，不依赖窗口缩放。
 export function PageWorkspace({ children, className }: PageWorkspaceProps) {
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-[1680px] flex-col gap-4",
+        "mx-auto flex w-full min-w-0 max-w-[1680px] flex-col gap-4",
         className,
       )}
     >

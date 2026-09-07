@@ -58,3 +58,6 @@ codexmanager-server.key
 # 前后端分层后的本地构建与发行产物
 /backend/portable/
 /backend/artifacts/
+
+# 浏览器回归产生的本地快照与日志
+/.playwright-cli/
