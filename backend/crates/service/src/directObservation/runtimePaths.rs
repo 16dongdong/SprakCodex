@@ -70,7 +70,6 @@ pub(super) fn writeRelayConfig(
     let configuration = cpcommon::relayContract::RelayConfig {
         relayPort: port,
         forceProxyTcp: port != 0,
-        loopbackProxyPorts: Vec::new(),
         owner,
         caCertificatePath: certificate.map(Path::to_owned),
     };

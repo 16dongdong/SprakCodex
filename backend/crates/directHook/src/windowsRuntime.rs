@@ -364,12 +364,12 @@ unsafe fn proxy_connect(
         return None;
     }
     let target = sockaddr_target(name, name_len)?;
-    // 回环连接:只接管“连本机已知代理端口”(目标自己配置的 HTTP 代理,如 Clash 7890)的连接——
-    // 把它改连到 relay 并以**透传模式**处理(目标会发 HTTP CONNECT,relay 解析真实目标后走内核),
-    // 从底层把目标“自己走代理”的流量也彻底重定向过来,而不是拒绝。其它回环(本地 IPC、
-    // devtools、本地服务)必须直连放行,否则会被错误塞进 relay。
+    // 回环只匹配目标自己的明文 HTTP 代理端点，CONNECT 由应用原样发送；普通 IPC 和本地服务保持原连接。
     let passthrough = if is_loopback_ip(target.ip) {
-        if runtime.loopbackProxyPorts.contains(&target.port) {
+        if super::proxyDiscovery::isPlainHttpProxy(std::net::SocketAddr::new(
+            target.ip,
+            target.port,
+        )) {
             true
         } else {
             return None;
@@ -393,7 +393,7 @@ unsafe fn proxy_connect(
             }
         }
         log(&format!(
-            "TCP 已接入观测 Relay, target={}:{} relay=127.0.0.1:{} passthrough={}",
+            "TCP 已接入观测 Relay, target={}:{} relay_port={} passthrough={}",
             target.ip, target.port, runtime.relayPort, passthrough
         ));
         return Some(0);
@@ -656,9 +656,7 @@ unsafe extern "system" fn hook_connect_ex(
     let (should_redirect, passthrough) = match target {
         Some(t) if runtime.is_some() && socket_is_tcp(socket) => {
             if is_loopback_ip(t.ip) {
-                if runtime
-                    .as_ref()
-                    .is_some_and(|settings| settings.loopbackProxyPorts.contains(&t.port))
+                if super::proxyDiscovery::isPlainHttpProxy(std::net::SocketAddr::new(t.ip, t.port))
                 {
                     (true, true)
                 } else {

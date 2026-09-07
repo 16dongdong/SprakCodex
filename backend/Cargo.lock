@@ -471,6 +471,7 @@ dependencies = [
  "retour",
  "rustls-pki-types",
  "serde_json",
+ "url",
  "windows 0.58.0",
 ]
 

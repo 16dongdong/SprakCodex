@@ -23,7 +23,7 @@ struct RoutingFixture {
 }
 impl RoutingFixture {
     // 显式接收新构建的生产 DLL，不从用户进程推断路径，也不启动生产自动扫描。
-    fn start() -> Self {
+    fn start(proxyAddress: SocketAddr) -> Self {
         let source =
             PathBuf::from(std::env::var_os("OBSERVATION_TEST_NETWORK_DLL").expect("指定生产 DLL"));
         assert!(source.is_absolute() && source.is_file());
@@ -45,6 +45,7 @@ impl RoutingFixture {
                 "--nocapture",
             ])
             .env("OBSERVATION_NETWORK_FIXTURE", "true")
+            .env("HTTPS_PROXY", format!("http://{proxyAddress}"))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
@@ -152,12 +153,22 @@ impl Drop for RoutingFixture {
 #[test]
 #[ignore = "需要显式指定 OBSERVATION_TEST_NETWORK_DLL，仅注入本测试创建的客户端"]
 fn productionModuleHonorsRuntimeLifetime() {
-    let original = TcpListener::bind("127.0.0.1:0").unwrap();
-    let relay = TcpListener::bind("127.0.0.1:0").unwrap();
+    for address in [
+        std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
+        std::net::IpAddr::V6(std::net::Ipv6Addr::LOCALHOST),
+    ] {
+        verifyAddressFamilyLifetime(address);
+    }
+}
+
+// 同一套实际 Winsock 往返分别验证两个地址族，代理端点来自夹具自身环境而不是宿主端口列表。
+fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
+    let original = TcpListener::bind((address, 0)).unwrap();
+    let relay = TcpListener::bind((address, 0)).unwrap();
     original.set_nonblocking(true).unwrap();
     relay.set_nonblocking(true).unwrap();
     let destination = original.local_addr().unwrap();
-    let mut fixture = RoutingFixture::start();
+    let mut fixture = RoutingFixture::start(destination);
     fixture.probe(destination, &original);
     let (identitySender, identityReceiver) = mpsc::channel();
     let (exitSender, exitReceiver) = mpsc::channel();
@@ -168,7 +179,6 @@ fn productionModuleHonorsRuntimeLifetime() {
     let mut settings = RelayConfig {
         relayPort: relay.local_addr().unwrap().port(),
         forceProxyTcp: true,
-        loopbackProxyPorts: vec![destination.port()],
         owner: Some(identityReceiver.recv().unwrap()),
         caCertificatePath: None,
     };

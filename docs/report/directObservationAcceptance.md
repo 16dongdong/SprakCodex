@@ -84,7 +84,7 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 - 进程身份使用原生创建时间，不把 PID 复用当成原进程；架构不同拒绝注入。
 - 按 `LoadLibraryW` 实际拥有模块的 RVA 查找目标入口，不复用宿主 ASLR 地址。
 - 参数内存和进程/线程句柄统一管理；超时任务继续持有内存，远程线程结束后再回收，并阻止重复加载。
-- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为要求运行实例校验与额外 CA 读取入口的 `ObservationHookReady4`。
+- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为包含运行实例校验、额外 CA 读取和代理自动发现的 `ObservationHookReady5`。
 - DLL 去掉画像、注册表、系统代理改写和子进程终止逻辑，网络入口拆分至 `windowsRuntime.rs`。
 - trampoline 先发布、入口后启用；全部网络入口完成前不改连 TCP；同一 socket 的私有头只提交一次。
 
@@ -185,8 +185,7 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 
 - 测试脚本不设置该 CLI 的 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY` 或 CA 环境变量；
   由生产 DLL 提供额外 CA 并改连。官方内置 provider 未覆盖，CLI 使用原登录，观测宿主只转发原认证。
-- `OBSERVATION_TEST_ORIGINAL_PROXY_PORTS=7890` 显式描述本机已有代理端口，不改变 CLI 的代理选择。
-  **这个列表目前由探针提供，生产自动发现原代理仍待补齐。**
+- 该阶段最初由探针显式提供已有代理端口；下面的代理自动发现阶段已移除此输入和对应配置字段。
 - 最新生产 DLL 的原生 WebSocket 实测：2 条记录（1 次生成、1 次预热），握手失败 0，输入 20314、缓存 11392、输出 8；
   原生 SSE 实测：输入 20314、缓存 11392、输出 8。两者每个响应 ID、模型和 Token 均与独立客户端记录核对通过，
   各生成费用快照 1 条，钱包扣费均为 0。
@@ -200,11 +199,42 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 ```powershell
 $env:OBSERVATION_TEST_CAPTURE_MODE='injected'
 $env:OBSERVATION_TEST_NETWORK_DLL=(Resolve-Path backend/target/observationBuild/release/cphook.dll).Path
-$env:OBSERVATION_TEST_ORIGINAL_PROXY_PORTS='7890'
 # 其余 CLI、独占目录、模型、上游和协议参数沿用本报告的官方流量探针说明。
 cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
 ```
 
 **总目标仍未完成**：stdin 边界验证不等同于常驻扫描及时接入所有新进程；已经建立的 TLS/WebSocket、
-快速启动首请求、原代理自动发现、完整 Manager 重启恢复、长时间运行的叶子证书续期和安装更新仍需实现或验收。
+快速启动首请求、其余代理传输边界、完整 Manager 重启恢复、长时间运行的叶子证书续期和安装更新仍需实现或验收。
 本阶段证明进程内 TLS 读取接入能完成真实官方请求，没有把显式设置代理/CA 当作原生接入结果。
+
+## 原代理自动识别与双地址族 Relay（2026-09-07）
+
+`proxyDiscovery.rs` 在目标进程的新本地连接上读取其 HTTP/HTTPS/ALL 代理变量，
+`systemProxy.rs` 通过只读的
+[`WinHttpGetIEProxyConfigForCurrentUser`](https://learn.microsoft.com/en-us/windows/win32/api/winhttp/nf-winhttp-winhttpgetieproxyconfigforcurrentuser)
+读取当前用户活动网络的静态代理配置，并按 API 契约释放三个返回字符串。
+没有端口扫描、系统设置写入或 PAC/WPAD 请求；不保存原代理 URL 或认证值。
+
+- 移除 `blocked_loopback_proxy_ports` 及测试端口输入：生产与真实 CLI 探针使用相同的自动发现路径。
+- 同时匹配 IP/localhost、端口与代理传输类型；`https=…` 是请求协议选择器，不误当作 TLS 到代理。
+- 使用 URL/Host 标准解析与哈希集合，处理非特殊协议中的 IP 规范化，避免大量候选项的二次复杂度去重。
+- 普通本地服务、远端地址、坏配置、SOCKS、HTTPS 代理、带认证或同端点协议冲突不加入本地明文接入集合。
+  这些未接入的代理边界继续属于完整观测的待实现项，不计作已覆盖。
+- 不使用过期端口缓存，每次本地新连接读取当前设置，逐包发送路径不查询代理。
+
+`loopbackListeners.rs` 在同一个端口绑定 `127.0.0.1` 和 `::1`，共同使用连接配额与任务组，
+全部绑定完成才发布配置。只对跨地址族端口碰撞重新选端口，其他绑定错误直接使启动失败；
+不监听通配地址。由此修复 IPv6 socket 改连 `::1`、宿主却仅监听 IPv4 的接口不一致。
+
+通过的验证：Common 7 项、DLL 17 项、服务观测 29 项、Tauri 独立工作区检查、Release DLL 构建；
+真实生产 DLL 的 IPv4/IPv6 × connect/ConnectEx 生命周期共 32 次 socket 往返，配置开启、退出、
+恢复、停用和损坏行为一致。独立 listener 测试确认两个地址族共用端口并一起释放。
+最新官方 CLI 的 WebSocket/SSE 测试均不再提供原代理端口列表，也不设置该 CLI 的代理或 CA 环境变量；
+两种协议生成成功，响应 ID、模型、Token 逐条对应，费用快照各 1 条，钱包扣费均为 0。
+最新 WebSocket 输入 20642、SSE 输入 20312，缓存输入均为 11392、输出均为 8。
+证据目录分别为 `backend/target/observationAutoProxy78208e21a4a445a1a6a0a2f7718f7223` 和
+`backend/target/observationAutoProxy229f9218a97b4e8299894072594fac43`；测试进程和公开证书残留数均为 0。
+
+**剩余边界**：自动发现目前覆盖目标环境和 Windows 静态设置中的本地明文 HTTP 代理；
+PAC 动态结果、其他代理协议及观测器上游路线的逐客户端保持仍未闭环。
+这些结果也不代替常驻进程扫描、已建立连接、完整重启恢复、证书续期和实际安装更新的验收。

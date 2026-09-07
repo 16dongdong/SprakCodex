@@ -17,8 +17,6 @@ pub struct RelayConfig {
     pub relayPort: u16,
     #[serde(rename = "force_proxy_tcp")]
     pub forceProxyTcp: bool,
-    #[serde(rename = "blocked_loopback_proxy_ports")]
-    pub loopbackProxyPorts: Vec<u16>,
     #[serde(rename = "runtime_owner")]
     pub owner: Option<RuntimeIdentity>,
     #[serde(rename = "ca_certificate_path")]

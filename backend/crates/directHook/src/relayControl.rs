@@ -10,7 +10,7 @@ pub(super) struct RelayControl {
     current: Option<ValidatedConfig>,
 }
 
-// 配置与其线程对象绑定为同一快照，端口与本地代理列表不得跨配置版本混用。
+// 配置与其线程对象绑定为同一快照，端口与公开证书位置不得跨配置版本混用。
 struct ValidatedConfig {
     encoded: Vec<u8>,
     settings: Arc<RelayConfig>,

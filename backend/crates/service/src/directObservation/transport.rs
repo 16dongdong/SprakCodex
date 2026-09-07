@@ -1,6 +1,7 @@
 //! HTTP CONNECT 与 TLS 位于独立监听端口；推理流量只旁路读取 usage，认证端点走不解密隧道。
 use super::{
     certificateAuthority::Authority,
+    loopbackListeners::LoopbackListeners,
     recordSink::{Exchange, RecordSink},
     streamObserver,
     usageParser::UsageParser,
@@ -17,7 +18,7 @@ use hyper_util::{
 use std::{convert::Infallible, io, sync::Arc, time::Duration};
 use tokio::{
     io::{AsyncRead, AsyncWrite},
-    net::{TcpListener, TcpStream},
+    net::TcpStream,
     sync::Semaphore,
 };
 use tokio_util::{sync::CancellationToken, task::TaskTracker};
@@ -108,11 +109,11 @@ impl Engine {
 }
 
 // 限制监听连接数；停止先取消网络任务，再给解码和持久化任务完成 EOF 处理的机会。
-pub(super) async fn serve(listener: TcpListener, engine: Arc<Engine>) {
+pub(super) async fn serve(listener: LoopbackListeners, engine: Arc<Engine>) {
     let permits = Arc::new(Semaphore::new(maxConnections));
     loop {
         let accepted = tokio::select! { _ = engine.cancel.cancelled() => break, accepted = listener.accept() => accepted };
-        let Ok((stream, _)) = accepted else {
+        let Ok(stream) = accepted else {
             engine.cancel.cancel();
             break;
         };

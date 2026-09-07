@@ -17,6 +17,14 @@ mod trustBundle;
 mod trustProvider;
 
 #[cfg(windows)]
+#[allow(non_snake_case, non_upper_case_globals)]
+mod proxyDiscovery;
+
+#[cfg(windows)]
+#[allow(non_snake_case)]
+mod systemProxy;
+
+#[cfg(windows)]
 #[path = "windowsRuntime.rs"]
 #[allow(non_snake_case, non_upper_case_globals)]
 mod imp;

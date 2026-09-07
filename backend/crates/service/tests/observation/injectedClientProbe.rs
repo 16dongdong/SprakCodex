@@ -53,16 +53,9 @@ pub(super) fn run(
     };
     let module = target.moduleDirectory.join("cphook.dll");
     std::fs::copy(source, &module).unwrap();
-    let loopbackProxyPorts = std::env::var("OBSERVATION_TEST_ORIGINAL_PROXY_PORTS")
-        .unwrap_or_default()
-        .split(',')
-        .filter(|part| !part.is_empty())
-        .map(|part| part.parse::<u16>().expect("代理端口必须为整数"))
-        .collect();
     let settings = RelayConfig {
         relayPort,
         forceProxyTcp: true,
-        loopbackProxyPorts,
         owner: Some(currentIdentity().unwrap()),
         caCertificatePath: Some(certificate.to_owned()),
     };

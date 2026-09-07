@@ -3,6 +3,7 @@
 #[cfg(windows)]
 mod authorityStore;
 mod certificateAuthority;
+mod loopbackListeners;
 #[cfg(windows)]
 mod nativeInjection;
 #[allow(non_snake_case)]
@@ -163,23 +164,17 @@ fn startRuntime(
                         }
                     };
                 let listener =
-                    match tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).await {
+                    match loopbackListeners::LoopbackListeners::bind().await {
                         Ok(listener) => listener,
                         Err(_) => {
                             let _ = ready.send(Err("绑定观测端口失败".into()));
                             return;
                         }
                     };
-                let localAddress = match listener.local_addr() {
-                    Ok(address) => address,
-                    Err(_) => {
-                        let _ = ready.send(Err("读取观测端口失败".into()));
-                        return;
-                    }
-                };
-                let address = format!("http://{localAddress}");
+                let port = listener.port();
+                let address = format!("http://127.0.0.1:{port}");
                 if let Some(configPath) = workerConfig.as_deref() {
-                    if let Err(error) = runtimePaths::writeRelayConfig(configPath, localAddress.port(), Some(&workerCertificate)) {
+                    if let Err(error) = runtimePaths::writeRelayConfig(configPath, port, Some(&workerCertificate)) {
                         let _ = ready.send(Err(error));
                         return;
                     }

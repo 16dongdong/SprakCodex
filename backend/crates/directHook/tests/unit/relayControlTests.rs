@@ -25,7 +25,6 @@ impl Fixture {
         RelayConfig {
             relayPort: 32123,
             forceProxyTcp: true,
-            loopbackProxyPorts: vec![7890],
             owner: Some(currentIdentity().unwrap()),
             caCertificatePath: None,
         }
@@ -61,7 +60,7 @@ fn missingConfigurationCanActivateLater() {
     assert!(Arc::ptr_eq(&first, &second));
 }
 
-// 原缓存只按 mtime 判断；保留相同时间仍必须读出更新后的端口和本地代理列表。
+// 原缓存只按 mtime 判断；保留相同时间仍必须读出更新后的端口和公开证书位置。
 #[test]
 fn sameTimestampUpdatesWholeSnapshot() {
     let fixture = Fixture::new();
@@ -71,7 +70,7 @@ fn sameTimestampUpdatesWholeSnapshot() {
     let first = control.read(&fixture.0).unwrap();
     let modified = std::fs::metadata(&fixture.0).unwrap().modified().unwrap();
     settings.relayPort += 1;
-    settings.loopbackProxyPorts = vec![7891];
+    settings.caCertificatePath = Some(fixture.0.with_extension("pem"));
     fixture.publish(&settings);
     std::fs::File::options()
         .write(true)
@@ -81,9 +80,9 @@ fn sameTimestampUpdatesWholeSnapshot() {
         .unwrap();
     let updated = control.read(&fixture.0).unwrap();
     assert_eq!(updated.relayPort, 32124);
-    assert_eq!(updated.loopbackProxyPorts, vec![7891]);
+    assert_eq!(updated.caCertificatePath, settings.caCertificatePath);
     assert_eq!(first.relayPort, 32123);
-    assert_eq!(first.loopbackProxyPorts, vec![7890]);
+    assert_eq!(first.caCertificatePath, None);
 }
 
 // 删除、格式损坏、缺少 owner、零端口和停用均须清掉旧配置，恢复有效文件后允许重新接入。

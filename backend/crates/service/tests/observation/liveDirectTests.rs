@@ -84,12 +84,10 @@ fn officialTransportRecordsUsage() {
             .with_no_client_auth();
             engine.websocketTls = Arc::new(strictTls);
         }
-        let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0))
-            .await
-            .unwrap();
+        let listener = loopbackListeners::LoopbackListeners::bind().await.unwrap();
         (listener, Arc::new(engine))
     });
-    let proxy = format!("http://{}", listener.local_addr().unwrap());
+    let proxy = format!("http://127.0.0.1:{}", listener.port());
     let serving = runtime.spawn(transport::serve(listener, engine));
     let events = directory.join("clientEvents.jsonl");
     let mut command = Command::new(cli);

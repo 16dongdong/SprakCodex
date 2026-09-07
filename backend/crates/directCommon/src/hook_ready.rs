@@ -14,8 +14,8 @@ pub fn event_name(pid: u32, module: &Path) -> String {
         .fold(0xcbf29ce484222325_u64, |hash, byte| {
             (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
         });
-    // 第四版要求运行实例校验和额外 CA 读取入口；旧版就绪事件不得冒充已经具备自动信任接入。
-    format!("Local\\ObservationHookReady4-{pid}-{hash:016x}")
+    // 第五版同时要求实例校验、额外 CA 读取和原代理发现；旧版端口列表配置不再决定本地连接接入。
+    format!("Local\\ObservationHookReady5-{pid}-{hash:016x}")
 }
 
 #[cfg(test)]
