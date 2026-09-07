@@ -62,11 +62,17 @@ fn explicitModuleSelectsItsOwnDirectory() {
     let resolved =
         resolveModule(&fixture.directory.join("debug/service.exe"), Some(&module)).unwrap();
     let config = configPath(&resolved).unwrap();
-    writeRelayConfig(&config, 32123).unwrap();
+    let certificate = fixture.directory.join("authority.pem");
+    std::fs::write(&certificate, b"public path fixture").unwrap();
+    writeRelayConfig(&config, 32123, Some(&certificate)).unwrap();
     let current: serde_json::Value =
         serde_json::from_slice(&std::fs::read(&config).unwrap()).unwrap();
     assert_eq!(current["proxy_relay_port"], 32123);
     assert_eq!(current["force_proxy_tcp"], true);
+    assert_eq!(
+        current["ca_certificate_path"],
+        certificate.to_str().unwrap()
+    );
     #[cfg(windows)]
     {
         let settings: cpcommon::relayContract::RelayConfig =
@@ -78,7 +84,7 @@ fn explicitModuleSelectsItsOwnDirectory() {
             .isActive());
     }
     assert!(!fixture.directory.join("debug/hook.json").exists());
-    writeRelayConfig(&config, 0).unwrap();
+    writeRelayConfig(&config, 0, None).unwrap();
     let stopped: serde_json::Value =
         serde_json::from_slice(&std::fs::read(&config).unwrap()).unwrap();
     assert_eq!(stopped["proxy_relay_port"], 0);
@@ -114,6 +120,6 @@ fn failedPublishRemovesStagingFile() {
     let fixture = Fixture::new();
     let target = fixture.directory.join(configFileName);
     std::fs::create_dir(&target).unwrap();
-    assert!(writeRelayConfig(&target, 32123).is_err());
+    assert!(writeRelayConfig(&target, 32123, None).is_err());
     assert_eq!(std::fs::read_dir(&fixture.directory).unwrap().count(), 1);
 }

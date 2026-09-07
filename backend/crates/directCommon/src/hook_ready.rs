@@ -14,8 +14,8 @@ pub fn event_name(pid: u32, module: &Path) -> String {
         .fold(0xcbf29ce484222325_u64, |hash, byte| {
             (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
         });
-    // 第三版要求模块验证 runtime_owner；旧版已加载事件不得被误判为具备宿主退出保护。
-    format!("Local\\ObservationHookReady3-{pid}-{hash:016x}")
+    // 第四版要求运行实例校验和额外 CA 读取入口；旧版就绪事件不得冒充已经具备自动信任接入。
+    format!("Local\\ObservationHookReady4-{pid}-{hash:016x}")
 }
 
 #[cfg(test)]

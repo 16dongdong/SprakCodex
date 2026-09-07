@@ -39,6 +39,19 @@ fn proxyRuntimeConfig() -> Option<Arc<RelayConfig>> {
     if !NETWORK_READY.load(Ordering::Acquire) {
         return None;
     }
+    let settings = relaySnapshot()?;
+    if settings
+        .caCertificatePath
+        .as_deref()
+        .is_some_and(|path| !super::trustProvider::providedFor(path))
+    {
+        return None;
+    }
+    Some(settings)
+}
+
+// TLS 读取入口与网络入口共用同一份活跃实例快照；证书初始化可先于 NETWORK_READY 完成。
+pub(super) fn relaySnapshot() -> Option<Arc<RelayConfig>> {
     static control: OnceLock<Mutex<RelayControl>> = OnceLock::new();
     let path = dll_dir()?.join("hook.json");
     control
@@ -65,7 +78,7 @@ fn dll_dir() -> Option<PathBuf> {
 }
 
 // 在目标进程写入短生命周期诊断，调用方仅传入状态和 API 名称，不传认证数据或请求正文。
-fn log(msg: &str) {
+pub(super) fn log(msg: &str) {
     use std::io::Write;
     if let Some(dir) = dll_dir() {
         if let Ok(mut f) = std::fs::OpenOptions::new()
@@ -863,7 +876,13 @@ unsafe fn install_connect_ex_hook() -> bool {
 // loader lock 外安装网络入口；ConnectEx 是实际客户端路径，必须成功才能发布模块就绪。
 unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
     // 入口可以先于配置就绪；缺少配置时保持原调用，后续启动 Relay 后无需重复加载 DLL。
-    let mut ready = true;
+    let mut ready = match super::trustProvider::install() {
+        Ok(()) => true,
+        Err(error) => {
+            log(&error);
+            false
+        }
+    };
     ready &= install(
         &CONNECT,
         s!("connect"),

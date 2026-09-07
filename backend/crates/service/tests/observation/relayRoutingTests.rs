@@ -170,6 +170,7 @@ fn productionModuleHonorsRuntimeLifetime() {
         forceProxyTcp: true,
         loopbackProxyPorts: vec![destination.port()],
         owner: Some(identityReceiver.recv().unwrap()),
+        caCertificatePath: None,
     };
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
@@ -180,7 +181,7 @@ fn productionModuleHonorsRuntimeLifetime() {
     settings.owner = Some(currentIdentity().unwrap());
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    runtimePaths::writeRelayConfig(&fixture.directory.join("hook.json"), 0).unwrap();
+    runtimePaths::writeRelayConfig(&fixture.directory.join("hook.json"), 0, None).unwrap();
     fixture.probe(destination, &original);
     fixture.publish(&settings);
     fixture.probe(destination, &relay);

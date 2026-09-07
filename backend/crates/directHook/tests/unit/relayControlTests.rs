@@ -27,6 +27,7 @@ impl Fixture {
             forceProxyTcp: true,
             loopbackProxyPorts: vec![7890],
             owner: Some(currentIdentity().unwrap()),
+            caCertificatePath: None,
         }
     }
 

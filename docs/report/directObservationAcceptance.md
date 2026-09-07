@@ -84,7 +84,7 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 - 进程身份使用原生创建时间，不把 PID 复用当成原进程；架构不同拒绝注入。
 - 按 `LoadLibraryW` 实际拥有模块的 RVA 查找目标入口，不复用宿主 ASLR 地址。
 - 参数内存和进程/线程句柄统一管理；超时任务继续持有内存，远程线程结束后再回收，并阻止重复加载。
-- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为要求运行实例校验的 `ObservationHookReady3`。
+- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为要求运行实例校验与额外 CA 读取入口的 `ObservationHookReady4`。
 - DLL 去掉画像、注册表、系统代理改写和子进程终止逻辑，网络入口拆分至 `windowsRuntime.rs`。
 - trampoline 先发布、入口后启用；全部网络入口完成前不改连 TCP；同一 socket 的私有头只提交一次。
 
@@ -130,7 +130,7 @@ Windows 运行期将 CA 签名密钥保存为当前用户范围的 `observationA
 `directCommon/relayContract.rs` 统一宿主和 DLL 配置，`runtime_owner` 包含进程 ID、
 实际 Relay 线程 ID 和原始 FILETIME 创建时间。`runtimeLease.rs` 只打开查询/同步权限的线程句柄，
 每次新连接决策进行零超时等待；线程退出、宿主硬退出或身份不匹配时停止新连接改连。
-就绪协议为 `ObservationHookReady3`，避免旧 DLL 的就绪事件冒充本版运行实例校验。
+运行实例校验最初使用 `ObservationHookReady3`，额外 CA 读取入口加入后升级为 `ObservationHookReady4`。
 
 `directHook/relayControl.rs` 删除永久启动缓存与 mtime 端口缓存：完整配置限制为 64 KiB，
 相同字节复用解析结果和线程句柄，读取失败、删除、损坏、无 owner 或显式停用均清除旧配置。
@@ -161,3 +161,50 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 实际 Winsock 调用之间仍存在执行时间窗口，已建立到 Relay 的连接也不会被迁移到另一服务器。
 官方 CLI 自动 TLS 信任接入、快速启动首请求、Manager 完整重启恢复以及安装更新仍未完成，
 本次测试不使用显式代理环境伪称自动官方流量验收通过。
+
+## 进程内额外 CA 与官方 CLI 真实请求（2026-09-07）
+
+依据本机 `codex-cli 0.153.4` 对应的官方标签 `rust-v0.153.4`，固定源码提交
+`3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`：
+
+- [`http-client/src/custom_ca.rs`](https://github.com/openai/codex/blob/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/http-client/src/custom_ca.rs)
+  在构造 TLS 客户端时读取 `CODEX_CA_CERTIFICATE`，未设置或为空时再读取 `SSL_CERT_FILE`；自定义根追加到原信任基础。
+- [`websocket-client/src/lib.rs`](https://github.com/openai/codex/blob/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/websocket-client/src/lib.rs)
+  在创建 WebSocket connector 时构建该 TLS 配置；已创建的 TLS 连接不会追溯改变。
+- `exec/src/lib.rs` 的无位置参数路径输出 stdin 等待标记；显式 `-` 静默等待。因此原生探针省略位置参数，
+  等待实际标记后加载生产 DLL，再交付固定无工具请求，不用猜测的 sleep 冒充初始化边界。
+
+`directHook/trustProvider.rs` 只接入 `GetEnvironmentVariableW` 对该固定 CA 变量的读取；
+其他名称调用原入口。`trustBundle.rs` 用标准 PEM 解析器提取并合并原自定义 CA 和观测 CA，
+不复制私钥块，不写原文件，不修改进程环境块、系统根证书、provider、base_url 或登录身份。
+公开文件以不可变内容缓存，单个源文件最多 1 MiB；原路径在客户端进程寿命内保持有效，
+多次证书内容更新不会因固定版本数上限停止接入。`FILE_FLAG_DELETE_ON_CLOSE` 负责正常及硬退出时清理。
+准备失败时清除新连接接入标记并记录静态诊断；已有 TLS 客户端不由这个读取入口强制重建。
+
+新增探针选择 `OBSERVATION_TEST_CAPTURE_MODE=injected`：
+
+- 测试脚本不设置该 CLI 的 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY` 或 CA 环境变量；
+  由生产 DLL 提供额外 CA 并改连。官方内置 provider 未覆盖，CLI 使用原登录，观测宿主只转发原认证。
+- `OBSERVATION_TEST_ORIGINAL_PROXY_PORTS=7890` 显式描述本机已有代理端口，不改变 CLI 的代理选择。
+  **这个列表目前由探针提供，生产自动发现原代理仍待补齐。**
+- 最新生产 DLL 的原生 WebSocket 实测：2 条记录（1 次生成、1 次预热），握手失败 0，输入 20314、缓存 11392、输出 8；
+  原生 SSE 实测：输入 20314、缓存 11392、输出 8。两者每个响应 ID、模型和 Token 均与独立客户端记录核对通过，
+  各生成费用快照 1 条，钱包扣费均为 0。
+- SSE 用例仅让探针的上游 WSS 校验失败，以触发官方 CLI 的协议回退；7 次失败握手均被区分记录，没有伪装成生成。
+- 单元覆盖名称匹配、UTF-16 缓冲区边界、原变量返回值/LastError、合并原 CA、排除私钥块、坏 PEM、大小限制、
+  32 次公开内容更新及旧路径寿命。真实 CLI 退出后核对公开文件已由内核删除，测试模块和配置也已回收。
+- 当前 Common 7 项、DLL 13 项、服务观测 28 项通过；生产 DLL 的 16 次 socket 路由回归及 Tauri 独立检查通过。
+  最新独立证据目录为 `backend/target/observationInjected0ee5f59b0de54551985409372a49a00e`（WebSocket）和
+  `backend/target/observationInjected8ca9fd26b63a44d98036055b20b70515`（SSE），均未加入 Git。
+
+```powershell
+$env:OBSERVATION_TEST_CAPTURE_MODE='injected'
+$env:OBSERVATION_TEST_NETWORK_DLL=(Resolve-Path backend/target/observationBuild/release/cphook.dll).Path
+$env:OBSERVATION_TEST_ORIGINAL_PROXY_PORTS='7890'
+# 其余 CLI、独占目录、模型、上游和协议参数沿用本报告的官方流量探针说明。
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
+```
+
+**总目标仍未完成**：stdin 边界验证不等同于常驻扫描及时接入所有新进程；已经建立的 TLS/WebSocket、
+快速启动首请求、原代理自动发现、完整 Manager 重启恢复、长时间运行的叶子证书续期和安装更新仍需实现或验收。
+本阶段证明进程内 TLS 读取接入能完成真实官方请求，没有把显式设置代理/CA 当作原生接入结果。

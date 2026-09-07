@@ -49,7 +49,15 @@ pub(super) fn configPath(module: &Path) -> Result<PathBuf, String> {
 }
 
 // 在 DLL 所在目录发布配置；端口为零明确关闭 TCP 改连，序列化和文件错误均向宿主返回。
-pub(super) fn writeRelayConfig(path: &Path, port: u16) -> Result<(), String> {
+pub(super) fn writeRelayConfig(
+    path: &Path,
+    port: u16,
+    certificate: Option<&Path>,
+) -> Result<(), String> {
+    // 配置会在另一个进程读取；相对路径会错误依赖目标工作目录，缺失证书也不应发布为可用状态。
+    if certificate.is_some_and(|path| !path.is_absolute() || !path.is_file()) {
+        return Err("观测公开证书必须为现有文件的绝对路径".into());
+    }
     // 非零配置必须由实际 serve 所在线程发布；宿主崩溃或该线程退出后，DLL 持有的线程对象立即失效。
     #[cfg(windows)]
     let owner = if port != 0 {
@@ -64,6 +72,7 @@ pub(super) fn writeRelayConfig(path: &Path, port: u16) -> Result<(), String> {
         forceProxyTcp: port != 0,
         loopbackProxyPorts: Vec::new(),
         owner,
+        caCertificatePath: certificate.map(Path::to_owned),
     };
     let encoded = serde_json::to_vec(&configuration).map_err(|_| "生成注入配置失败")?;
     writeAtomically(path, &encoded)

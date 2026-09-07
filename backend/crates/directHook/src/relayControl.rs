@@ -56,6 +56,13 @@ impl RelayControl {
         if !settings.forceProxyTcp || settings.relayPort == 0 {
             return Err(());
         }
+        if settings
+            .caCertificatePath
+            .as_ref()
+            .is_some_and(|path| !path.is_absolute())
+        {
+            return Err(());
+        }
         let owner = RuntimeLease::open(settings.owner.ok_or(())?).map_err(|_| ())?;
         let settings = Arc::new(settings);
         self.current = Some(ValidatedConfig {

@@ -149,6 +149,7 @@ fn startRuntime(
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
     let workerConfig = relayConfig.clone();
+    let workerCertificate = certificate.clone();
     let thread = std::thread::Builder::new()
         .name("directObservation".into())
         .spawn(move || {
@@ -178,7 +179,7 @@ fn startRuntime(
                 };
                 let address = format!("http://{localAddress}");
                 if let Some(configPath) = workerConfig.as_deref() {
-                    if let Err(error) = runtimePaths::writeRelayConfig(configPath, localAddress.port()) {
+                    if let Err(error) = runtimePaths::writeRelayConfig(configPath, localAddress.port(), Some(&workerCertificate)) {
                         let _ = ready.send(Err(error));
                         return;
                     }
@@ -236,7 +237,7 @@ fn startRuntime(
             // 接收启动失败后仍 join，让失败实例的数据库线程先退出，避免重试遗留工作线程。
             thread.join().map_err(|_| "观测启动失败且线程异常退出")?;
             if let Some(path) = relayConfig.as_deref() {
-                runtimePaths::writeRelayConfig(path, 0)?;
+                runtimePaths::writeRelayConfig(path, 0, None)?;
             }
             return Err(error);
         }
@@ -268,7 +269,7 @@ fn cleanupRunning(current: Running) -> Result<(), String> {
     let relayResult = current
         .relayConfig
         .as_deref()
-        .map(|path| runtimePaths::writeRelayConfig(path, 0))
+        .map(|path| runtimePaths::writeRelayConfig(path, 0, None))
         .transpose();
     current.cancel.cancel();
     let joined = current.thread.join();

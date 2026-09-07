@@ -21,4 +21,6 @@ pub struct RelayConfig {
     pub loopbackProxyPorts: Vec<u16>,
     #[serde(rename = "runtime_owner")]
     pub owner: Option<RuntimeIdentity>,
+    #[serde(rename = "ca_certificate_path")]
+    pub caCertificatePath: Option<std::path::PathBuf>,
 }
