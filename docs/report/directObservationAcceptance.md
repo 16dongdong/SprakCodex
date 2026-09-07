@@ -368,3 +368,54 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 - 四项原生加载/重复加载/错误身份/超时回收回归通过，Release DLL 构建和 Tauri 独立工作区检查通过。
 
 该阶段补齐目录发现，不代表无持久化会话、完整宿主重启恢复、并发加载、证书续期和安装更新已经验收。
+
+## 无持久化会话的原生完成事件 ABI 探针（2026-09-08）
+
+本阶段只增加 `tests/observation/runtimeUsageFixture.rs` 测试 DLL 与 `runtime` 验收模式，
+不替换生产 `directHook`，不把探针报告计入正式数据库或费用快照。
+目标是验证无会话文件、已有连接保持不变时，是否能读取实际完成用量。
+
+### 构建证据及读取边界
+
+- 本机 CLI 为 Windows x64 `0.153.4`，官方源码标签 `rust-v0.153.4`，提交
+  `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`。
+- 官方同版本发布中的 `codex-symbols-x86_64-pc-windows-msvc.tar.gz` 包含 `codex.pdb`。
+  其 GUID `{968E0C4A-097B-A80C-4C4C-44205044422E}`、age 1 与本机 EXE 的 CodeView 一致。
+  此匹配不等于整个 EXE 文件字节一致；探针另校验目标函数入口的 16 字节。
+- 源码 `core/src/state/session.rs::SessionState::record_token_usage` 在可选会话文件持久化前执行。
+  PDB 给出的函数 RVA 为 `0x063d91e0`，入口为
+  `55 41 57 41 56 41 55 41 54 56 57 53 48 81 ec 08`。
+- 每次从当前模块基址重新定位；只在 `OBSERVATION_TEST_CAPTURE_MODE=runtime` 且
+  PDB、age、入口字节全部匹配后安装。该布局只验证了此 Windows x64 构建，不推广到其他版本或架构。
+- Win64 参数依次为 sret、state、thread UUID、turn 字节指针、turn 长度、session、root-turn String、
+  response String、usage。回调保留原参数、返回值和 `system-unwind` ABI。
+- String 指针/长度偏移分别为 8/16；usage 的六个 i64 从 `0x18` 起依次为输入、缓存输入、
+  缓存写入、输出、推理输出、总量。模型指针/长度位于 state 的 `0x8f8`/`0x900`，
+  来自 `previous_turn_settings`，属于客户端上下文而非独立的服务端模型声明。
+- 只通过有界本进程读取复制这些字段，不读取认证或消息正文。所有计数必须非负、满足总量关系，
+  模型必须等于测试指定值，响应 ID 必须符合预期格式。无效字段不进入报告。
+
+### 真实验收
+
+`warmSessionProbe.rs` 先启动独立 app-server，并以 `ephemeral=true` 创建 thread，断言持久化路径为空。
+同一进程/thread 完成第一轮后，生产扫描器才加载测试 DLL，再进行第二轮；不重建 thread、不重登、不强制断开连接。
+独立 RPC `rawResponse/completed` 提供比较基准，逐项核对响应 ID、thread、模型与六个用量计数。
+
+首轮验证目录为 `backend/target/observationRuntimeAbi5060435c7c6f48f3a771785f915aca6e`。
+增加无持久化路径断言后的复核目录为
+`backend/target/observationRuntimeAbiFinal1b89dece20cb485fafdd2fb40c970ed9`：
+第二轮一条响应，输入 31095、缓存输入 30848、缓存写入 0、输出 8、推理输出 0、总量 31103，
+探针文件与独立 RPC 元数据完全一致。测试 stdout 明确区分“ABI 验证通过”与“生产接入仍需实现”。
+测试 DLL 构建通过，观测模块回归 37 项通过、10 项需显式环境的测试跳过；
+链接器仅有 MSVC 创建导入库的本地化提示。复核未发现该探针遗留的 CLI 子进程。
+
+```powershell
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --example runtimeUsageFixture
+$env:OBSERVATION_TEST_CAPTURE_MODE='runtime'
+$env:OBSERVATION_TEST_NETWORK_DLL=(Resolve-Path backend/target/debug/examples/runtimeUsageFixture.dll).Path
+# CLI、全新独占目录、模型、协议及上游参数沿用真实流量探针，不复制登录材料。
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
+```
+
+后续生产接入还需有界元数据传输、报告错误与生命周期管理、来源标记、数据库合并和费用验证；
+本测试 DLL 的同步文件输出不是生产实现，也不随正式应用部署。

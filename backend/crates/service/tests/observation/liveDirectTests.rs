@@ -50,13 +50,13 @@ fn officialTransportRecordsUsage() {
     assert!(
         matches!(
             captureMode.as_str(),
-            "explicit" | "injected" | "monitored" | "warm"
+            "explicit" | "injected" | "monitored" | "warm" | "runtime"
         ),
-        "抓取方式必须为 explicit、injected、monitored 或 warm"
+        "抓取方式必须为 explicit、injected、monitored、warm 或 runtime"
     );
     let injected = captureMode == "injected";
     let native = captureMode != "explicit";
-    let warm = captureMode == "warm";
+    let warm = matches!(captureMode.as_str(), "warm" | "runtime");
     assert!(directory.is_absolute(), "测试目录必须为绝对路径");
     std::fs::create_dir(&directory).expect("测试目录必须是本次新建目录");
     let database = directory.join("observation.db");
