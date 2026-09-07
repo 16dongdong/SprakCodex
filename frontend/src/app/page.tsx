@@ -349,6 +349,7 @@ function DashboardInitialSkeleton() {
   );
 }
 
+// 直连账号模式下遮罩仅支持本地网关的数据分析卡片，并保留跳转入口。
 function DirectModeUnavailable({
   active,
   children,
@@ -364,6 +365,7 @@ function DirectModeUnavailable({
       <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/45 p-4 backdrop-blur-sm">
         <div className="grid max-w-md justify-items-center gap-3 rounded-2xl border border-amber-500/40 bg-background/80 px-5 py-4 text-center shadow-lg">
           <div className="text-sm font-semibold text-amber-700 dark:text-amber-200">{t("账号直连模式下不可用")}</div>
+          <div className="text-xs text-muted-foreground">{t("切换到本地网关后可统计请求日志、Token 和费用")}</div>
           <a href={buildStaticRouteUrl("/platform-mode")} className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground">{t("管理直连观测")}</a>
         </div>
       </div>
@@ -951,7 +953,7 @@ function AdminDashboard() {
         isLoading={isLoading}
       />
 
-      <>
+      <DirectModeUnavailable active={isDirectAccountMode}>
         <AdminUsageAnalyticsCard
           summary={adminUsageSummary}
           isLoading={isLoading || isAdminUsageLoading}
@@ -996,7 +998,7 @@ function AdminDashboard() {
           granularity={adminUsageGranularity}
           onGranularityChange={setAdminUsageGranularity}
         />
-      </>
+      </DirectModeUnavailable>
 
     </div>
   );

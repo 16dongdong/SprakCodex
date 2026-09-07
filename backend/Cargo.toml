@@ -3,6 +3,8 @@ members = [
   "crates/core",
   "crates/rusqlite",
   "crates/service",
+  "crates/directCommon",
+  "crates/directHook",
   "crates/start",
   "crates/web"
 ]

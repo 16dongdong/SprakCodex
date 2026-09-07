@@ -1,5 +1,5 @@
 //! 直连观测宿主：线程、TLS 密钥与数据库消费者均在当前进程，不依赖独立程序。
-//! 开关默认关闭且不跨重启恢复；临时证书只通过子进程环境传递，不安装系统根证书。
+//! 开关默认关闭，用户启用后跨重启保留；服务退出只释放运行资源，不改变用户选择。
 mod certificateAuthority;
 #[allow(non_snake_case)]
 mod processInjector;
@@ -84,14 +84,28 @@ pub fn start() -> Result<ObservationStatus, String> {
     let result = startRuntime(authority, certificate.clone());
     match result {
         Ok(current) => {
-            if let Some(storage) = crate::storage_helpers::open_storage() {
-                storage
-                    .set_app_setting(
-                        enabledSettingKey,
-                        "true",
-                        codexmanager_core::storage::now_ts(),
-                    )
-                    .map_err(|_| "保存直连观测开关失败")?;
+            // 运行时已绑定端口后才写入开关；持久化失败必须回收已启动线程和证书，避免出现“界面关闭但端口仍监听”。
+            let storage = match crate::storage_helpers::open_storage() {
+                Some(storage) => storage,
+                None => {
+                    if let Err(error) = cleanupRunning(current) {
+                        log::error!("直连观测启动回滚失败：{error}");
+                    }
+                    return Err("打开观测设置失败".into());
+                }
+            };
+            if storage
+                .set_app_setting(
+                    enabledSettingKey,
+                    "true",
+                    codexmanager_core::storage::now_ts(),
+                )
+                .is_err()
+            {
+                if let Err(error) = cleanupRunning(current) {
+                    log::error!("直连观测启动回滚失败：{error}");
+                }
+                return Err("保存直连观测开关失败".into());
             }
             *guard = Some(current);
             Ok(statusOf(guard.as_ref()))
@@ -140,57 +154,64 @@ fn startRuntime(
                             return;
                         }
                     };
-            let address = match listener.local_addr() {
-                    Ok(address) => format!("http://{address}"),
+                let localAddress = match listener.local_addr() {
+                    Ok(address) => address,
                     Err(_) => {
                         let _ = ready.send(Err("读取观测端口失败".into()));
                         return;
                     }
-            };
-            if let Err(error) = writeRelayConfig(listener.local_addr().ok().map(|value| value.port()).unwrap_or_default()) {
-                let _ = ready.send(Err(error));
-                return;
-            }
-            if ready.send(Ok(address)).is_err() {
-                return;
-            }
-            let monitorEngine = engine.cancel.clone();
-            tokio::spawn(async move {
-                let dll = std::env::var_os("CODEXMANAGER_OBSERVATION_DLL")
-                    .map(PathBuf::from)
-                    .or_else(|| {
-                        std::env::current_exe().ok().and_then(|path| {
-                            let directory = path.parent()?;
-                            [directory.join("cphook.dll"), directory.join("resources/cphook.dll"), directory.join("Resources/cphook.dll")]
-                                .into_iter().find(|candidate| candidate.is_file())
-                        })
-                    });
-                let Some(dll) = dll else {
-                    log::error!("无法确定观测注入 DLL 路径");
-                    return;
                 };
-                let mut injected = HashSet::new();
-                let mut interval = tokio::time::interval(std::time::Duration::from_secs(2));
-                loop {
-                    tokio::select! {
-                        _ = monitorEngine.cancelled() => break,
-                        _ = interval.tick() => {
-                            for candidate in processInjector::findCandidates() {
-                                if injected.contains(&candidate.pid) { continue; }
-                                let pid = candidate.pid;
-                                let path = dll.clone();
-                                match tokio::task::spawn_blocking(move || processInjector::inject(pid, &path)).await {
-                                    Ok(Ok(())) => { injected.insert(pid); log::info!("已接管 Codex 进程 pid={pid}"); }
-                                    Ok(Err(error)) => log::debug!("Codex 进程 pid={pid} 接管失败：{error}"),
-                                    Err(error) => log::debug!("Codex 进程 pid={pid} 注入任务失败：{error}"),
+                let address = format!("http://{localAddress}");
+                if let Err(error) = writeRelayConfig(localAddress.port()) {
+                    let _ = ready.send(Err(error));
+                    return;
+                }
+                if ready.send(Ok(address)).is_err() {
+                    return;
+                }
+                let monitorEngine = engine.cancel.clone();
+                tokio::spawn(async move {
+                    let dll = std::env::var_os("CODEXMANAGER_OBSERVATION_DLL")
+                        .map(PathBuf::from)
+                        .or_else(|| {
+                            std::env::current_exe().ok().and_then(|path| {
+                                let directory = path.parent()?;
+                                [
+                                    directory.join("cphook.dll"),
+                                    directory.join("resources/cphook.dll"),
+                                    directory.join("Resources/cphook.dll"),
+                                ]
+                                .into_iter()
+                                .find(|candidate| candidate.is_file())
+                            })
+                        });
+                    let Some(dll) = dll else {
+                        log::error!("无法确定观测注入 DLL 路径");
+                        return;
+                    };
+                    let mut injected = HashSet::new();
+                    let mut interval = tokio::time::interval(std::time::Duration::from_secs(2));
+                    loop {
+                        tokio::select! {
+                            _ = monitorEngine.cancelled() => break,
+                            _ = interval.tick() => {
+                                for candidate in processInjector::findCandidates() {
+                                    if injected.contains(&candidate.pid) { continue; }
+                                    let pid = candidate.pid;
+                                    let path = dll.clone();
+                                    match tokio::task::spawn_blocking(move || processInjector::inject(pid, &path)).await {
+                                        Ok(Ok(())) => { injected.insert(pid); log::info!("已接管 Codex 进程 pid={pid}"); }
+                                        Ok(Err(error)) => log::debug!("Codex 进程 pid={pid} 接管失败：{error}"),
+                                        Err(error) => log::debug!("Codex 进程 pid={pid} 接管任务失败：{error}"),
+                                    }
                                 }
+                                let candidates = processInjector::findCandidates();
+                                injected.retain(|pid| candidates.iter().any(|candidate| candidate.pid == *pid));
                             }
-                            injected.retain(|pid| processInjector::findCandidates().iter().any(|candidate| candidate.pid == *pid));
                         }
                     }
-                }
-            });
-            transport::serve(listener, Arc::new(engine)).await;
+                });
+                transport::serve(listener, Arc::new(engine)).await;
             });
             // 网络任务先析构关闭发送端，数据库线程再排空队列，避免停止时漏掉已经完成的费用快照。
             runtime.shutdown_timeout(std::time::Duration::from_secs(5));
@@ -211,7 +232,9 @@ fn startRuntime(
 
 // 为已注入的 cphook 写入仅包含 Relay 端口的运行时配置；指纹和环境改写始终关闭。
 fn writeRelayConfig(port: u16) -> Result<(), String> {
-    let path = std::env::current_exe().map_err(|_| "读取观测配置目录失败")?.with_file_name("hook.json");
+    let path = std::env::current_exe()
+        .map_err(|_| "读取观测配置目录失败")?
+        .with_file_name("hook.json");
     let content = serde_json::json!({
         "enabled": false,
         "clear_proxy_env": false,
@@ -220,32 +243,63 @@ fn writeRelayConfig(port: u16) -> Result<(), String> {
         "block_udp": false,
         "blocked_loopback_proxy_ports": []
     });
-    std::fs::write(path, serde_json::to_vec_pretty(&content).map_err(|_| "生成注入配置失败")?)
-        .map_err(|_| "写入注入配置失败".to_string())
+    std::fs::write(
+        path,
+        serde_json::to_vec_pretty(&content).map_err(|_| "生成注入配置失败")?,
+    )
+    .map_err(|_| "写入注入配置失败".to_string())
 }
 
-// 停止先关闭监听及活动连接，再排空写库队列并清理公开证书；重复停止幂等。
+// 用户主动停用会持久化关闭状态；与服务退出区别开，避免正常重启丢失自动恢复配置。
 pub fn stop() -> Result<ObservationStatus, String> {
+    stopInternal(true)
+}
+
+// 服务关闭只释放本次运行的资源，保留用户启用选择；失败供宿主日志记录。
+pub fn shutdownRuntime() -> Result<ObservationStatus, String> {
+    stopInternal(false)
+}
+
+// 统一释放线程、证书和 Relay 配置；启动持久化失败时复用该路径，避免留下半启动状态。
+fn cleanupRunning(current: Running) -> Result<(), String> {
+    current.cancel.cancel();
+    let joined = current.thread.join();
+    let certificateResult = if current.certificate.exists() {
+        std::fs::remove_file(&current.certificate).map_err(|_| "清理观测公开证书失败".to_string())
+    } else {
+        Ok(())
+    };
+    let relayResult = writeRelayConfig(0);
+    joined.map_err(|_| "观测线程异常退出".to_string())?;
+    certificateResult?;
+    relayResult
+}
+
+// 同一锁内串行化开关写入和资源释放；disable 为 false 时绝不写入持久化设置。
+fn stopInternal(disable: bool) -> Result<ObservationStatus, String> {
     let mut guard = runningEngine
         .get_or_init(|| Mutex::new(None))
         .lock()
         .map_err(|_| "观测状态锁损坏")?;
-    if let Some(current) = guard.take() {
-        current.cancel.cancel();
-        let joined = current.thread.join();
-        std::fs::remove_file(&current.certificate).map_err(|_| "清理观测公开证书失败")?;
-        let _ = writeRelayConfig(0);
-        joined.map_err(|_| "观测线程异常退出")?;
-    }
-    if let Some(storage) = crate::storage_helpers::open_storage() {
-        storage
+    let storage = if disable {
+        Some(crate::storage_helpers::open_storage().ok_or("打开观测设置失败".to_string()))
+    } else {
+        None
+    };
+    let cleanupResult = guard.take().map(cleanupRunning).unwrap_or(Ok(()));
+    let persistResult = match storage {
+        Some(Ok(storage)) => storage
             .set_app_setting(
                 enabledSettingKey,
                 "false",
                 codexmanager_core::storage::now_ts(),
             )
-            .map_err(|_| "保存直连观测开关失败")?;
-    }
+            .map_err(|_| "保存直连观测开关失败".to_string()),
+        Some(Err(error)) => Err(error),
+        None => Ok(()),
+    };
+    cleanupResult?;
+    persistResult?;
     Ok(statusOf(None))
 }
 

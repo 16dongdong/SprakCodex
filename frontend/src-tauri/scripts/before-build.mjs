@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import net from "node:net";
+import { buildObservationHook } from "./buildObservationHook.mjs";
 import {
   findDesktopDevProcess,
   getDesktopDevProcessInfo,
@@ -391,6 +392,9 @@ if (!existsSync(resolve(frontendDir, "package.json"))) {
   console.error(`前端项目目录不存在，预期目录: ${frontendDir}`);
   process.exit(1);
 }
+
+// DLL 的源码依赖由 Cargo 判定增量，不能被前端 out/index.html 的复用条件跳过。
+buildObservationHook(resolve(frontendDir, ".."));
 
 if (task === "build:desktop" && hasBuiltFrontendDist(frontendDir)) {
   console.log(`前端产物已存在，跳过重复构建: ${resolve(frontendDir, "out", "index.html")}`);

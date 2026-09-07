@@ -105,6 +105,10 @@
 - `CODEXMANAGER_CODEX_IMAGE_MAIN_MODEL`: main conversation model used internally by Images API compatibility endpoints. Default `gpt-5.4-mini`.
 - `CODEXMANAGER_CODEX_IMAGE_TOOL_MODEL`: image tool model. Default `gpt-image-2`.
 
+### Direct observation injection
+
+- `CODEXMANAGER_OBSERVATION_DLL`: absolute path to the Windows desktop observation injector DLL. When unset, the service searches for `cphook.dll` beside the host executable, then under `resources/` and `Resources/`. This only selects the local injection binary and does not change upstream or authentication settings.
+
 Notes:
 
 - `/v1/images/generations` and `/v1/images/edits` are converted internally to `/v1/responses + image_generation tool`.

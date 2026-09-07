@@ -77,6 +77,7 @@ function StatusMetric({
   );
 }
 
+// 根据当前服务连接与账号模式展示网关状态；直连模式明确说明统计边界，避免误读卡片数据。
 export function DashboardGatewayStatus({
   connected,
   directMode,
@@ -94,13 +95,13 @@ export function DashboardGatewayStatus({
     : connected
       ? t("网关运行正常")
       : t("正在等待网关连接");
-    const description = directMode
-      ? t("已启用直连观测时，CodexManager 会记录新启动 Codex 的请求日志和实际用量。")
+  const description = directMode
+    ? t("CodexManager 无法统计 CLI 请求日志和用量。")
     : connected
       ? t("近期请求路由稳定，账号池可正常参与调度。")
       : t("正在等待服务连接。");
-    const actionHref = directMode ? "/platform-mode" : "/logs";
-    const actionLabel = directMode ? t("管理直连观测") : t("查看异常请求");
+  const actionHref = directMode ? "/platform-mode" : "/logs";
+  const actionLabel = directMode ? t("管理直连观测") : t("查看异常请求");
 
   return (
     <Card className="dashboard-primary-panel routing-command-card glass-card overflow-hidden rounded-xl border-border/60 py-0 xl:rounded-2xl">

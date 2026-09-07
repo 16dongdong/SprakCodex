@@ -1,0 +1,7 @@
+{
+  "bundle": {
+    "resources": {
+      "../../backend/target/release/cphook.dll": "cphook.dll"
+    }
+  }
+}
