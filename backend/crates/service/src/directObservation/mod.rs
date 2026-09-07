@@ -1,17 +1,18 @@
 //! 直连观测宿主：线程、TLS 密钥与数据库消费者均在当前进程，不依赖独立程序。
 //! 开关默认关闭且不跨重启恢复；临时证书只通过子进程环境传递，不安装系统根证书。
 mod certificateAuthority;
+#[allow(non_snake_case)]
+mod processInjector;
 mod recordSink;
 mod streamObserver;
 mod transport;
 mod usageParser;
 mod websocketRelay;
-#[allow(non_snake_case)]
-mod processInjector;
 
 use recordSink::Counters;
 use serde::Serialize;
 use std::{
+    collections::HashSet,
     path::PathBuf,
     sync::{atomic::Ordering, Arc, Mutex, OnceLock},
 };
@@ -139,17 +140,47 @@ fn startRuntime(
                             return;
                         }
                     };
-                let address = match listener.local_addr() {
+            let address = match listener.local_addr() {
                     Ok(address) => format!("http://{address}"),
                     Err(_) => {
                         let _ = ready.send(Err("读取观测端口失败".into()));
                         return;
                     }
                 };
-                if ready.send(Ok(address)).is_err() {
+            if ready.send(Ok(address)).is_err() {
+                return;
+            }
+            let monitorEngine = engine.cancel.clone();
+            tokio::spawn(async move {
+                let dll = std::env::var_os("CODEXMANAGER_OBSERVATION_DLL")
+                    .map(PathBuf::from)
+                    .or_else(|| std::env::current_exe().ok().and_then(|path| path.parent().map(|dir| dir.join("cphook.dll"))));
+                let Some(dll) = dll else {
+                    log::error!("无法确定观测注入 DLL 路径");
                     return;
+                };
+                let mut injected = HashSet::new();
+                let mut interval = tokio::time::interval(std::time::Duration::from_secs(2));
+                loop {
+                    tokio::select! {
+                        _ = monitorEngine.cancelled() => break,
+                        _ = interval.tick() => {
+                            for candidate in processInjector::findCandidates() {
+                                if injected.contains(&candidate.pid) { continue; }
+                                let pid = candidate.pid;
+                                let path = dll.clone();
+                                match tokio::task::spawn_blocking(move || processInjector::inject(pid, &path)).await {
+                                    Ok(Ok(())) => { injected.insert(pid); log::info!("已接管 Codex 进程 pid={pid}"); }
+                                    Ok(Err(error)) => log::debug!("Codex 进程 pid={pid} 接管失败：{error}"),
+                                    Err(error) => log::debug!("Codex 进程 pid={pid} 注入任务失败：{error}"),
+                                }
+                            }
+                            injected.retain(|pid| processInjector::findCandidates().iter().any(|candidate| candidate.pid == *pid));
+                        }
+                    }
                 }
-                transport::serve(listener, Arc::new(engine)).await;
+            });
+            transport::serve(listener, Arc::new(engine)).await;
             });
             // 网络任务先析构关闭发送端，数据库线程再排空队列，避免停止时漏掉已经完成的费用快照。
             runtime.shutdown_timeout(std::time::Duration::from_secs(5));

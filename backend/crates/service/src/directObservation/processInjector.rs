@@ -19,9 +19,15 @@ pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
         .iter()
         .filter_map(|(pid, process)| {
             let executable = process.exe()?.to_path_buf();
-            let name = executable.file_name()?.to_string_lossy().to_ascii_lowercase();
+            let name = executable
+                .file_name()?
+                .to_string_lossy()
+                .to_ascii_lowercase();
             if targetProcessNames.contains(&name.as_str()) || isAppServer(process.cmd()) {
-                Some(ProcessCandidate { pid: pid.as_u32(), executable })
+                Some(ProcessCandidate {
+                    pid: pid.as_u32(),
+                    executable,
+                })
             } else {
                 None
             }
@@ -30,7 +36,9 @@ pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
 }
 
 fn isAppServer(command: &[String]) -> bool {
-    command.iter().any(|argument| argument.eq_ignore_ascii_case("app-server"))
+    command
+        .iter()
+        .any(|argument| argument.eq_ignore_ascii_case("app-server"))
 }
 
 // 使用绝对 DLL 路径，并在注入前检查架构路径；失败返回可展示诊断，绝不报告假成功。
@@ -42,32 +50,74 @@ pub(super) fn inject(pid: u32, dll: &Path) -> Result<(), String> {
     use windows::Win32::Foundation::{CloseHandle, FALSE};
     use windows::Win32::System::Diagnostics::Debug::WriteProcessMemory;
     use windows::Win32::System::LibraryLoader::{GetModuleHandleA, GetProcAddress};
-    use windows::Win32::System::Memory::{VirtualAllocEx, VirtualFreeEx, MEM_COMMIT, MEM_RELEASE, MEM_RESERVE, PAGE_READWRITE};
-    use windows::Win32::System::Threading::{CreateRemoteThread, GetExitCodeThread, OpenProcess, WaitForSingleObject, PROCESS_CREATE_THREAD, PROCESS_QUERY_INFORMATION, PROCESS_VM_OPERATION, PROCESS_VM_READ, PROCESS_VM_WRITE};
+    use windows::Win32::System::Memory::{
+        VirtualAllocEx, VirtualFreeEx, MEM_COMMIT, MEM_RELEASE, MEM_RESERVE, PAGE_READWRITE,
+    };
+    use windows::Win32::System::Threading::{
+        CreateRemoteThread, GetExitCodeThread, OpenProcess, WaitForSingleObject,
+        PROCESS_CREATE_THREAD, PROCESS_QUERY_INFORMATION, PROCESS_VM_OPERATION, PROCESS_VM_READ,
+        PROCESS_VM_WRITE,
+    };
 
-    if !dll.is_file() { return Err(format!("注入 DLL 不存在: {}", dll.display())); }
-    let path: Vec<u16> = dll.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+    if !dll.is_file() {
+        return Err(format!("注入 DLL 不存在: {}", dll.display()));
+    }
+    let path: Vec<u16> = dll
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
     unsafe {
-        let access = PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ;
-        let process = OpenProcess(access, FALSE, pid).map_err(|error| format!("打开 Codex 进程失败 pid={pid}: {error}"))?;
+        let access = PROCESS_CREATE_THREAD
+            | PROCESS_QUERY_INFORMATION
+            | PROCESS_VM_OPERATION
+            | PROCESS_VM_WRITE
+            | PROCESS_VM_READ;
+        let process = OpenProcess(access, FALSE, pid)
+            .map_err(|error| format!("打开 Codex 进程失败 pid={pid}: {error}"))?;
         let result = (|| {
-            let remote = VirtualAllocEx(process, None, path.len() * 2, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-            if remote.is_null() { return Err("分配远程注入缓冲区失败".to_string()); }
-            if WriteProcessMemory(process, remote, path.as_ptr() as *const c_void, path.len() * 2, None).is_err() {
+            let remote = VirtualAllocEx(
+                process,
+                None,
+                path.len() * 2,
+                MEM_COMMIT | MEM_RESERVE,
+                PAGE_READWRITE,
+            );
+            if remote.is_null() {
+                return Err("分配远程注入缓冲区失败".to_string());
+            }
+            if WriteProcessMemory(
+                process,
+                remote,
+                path.as_ptr() as *const c_void,
+                path.len() * 2,
+                None,
+            )
+            .is_err()
+            {
                 let _ = VirtualFreeEx(process, remote, 0, MEM_RELEASE);
                 return Err("写入远程 DLL 路径失败".to_string());
             }
             let kernel = GetModuleHandleA(s!("kernel32.dll")).map_err(|error| error.to_string())?;
-            let loadLibrary = GetProcAddress(kernel, s!("LoadLibraryW")).ok_or("找不到 LoadLibraryW")?;
-            let start = Some(std::mem::transmute::<unsafe extern "system" fn() -> isize, unsafe extern "system" fn(*mut c_void) -> u32>(loadLibrary));
-            let thread = CreateRemoteThread(process, None, 0, start, Some(remote), 0, None).map_err(|error| format!("创建远程线程失败: {error}"))?;
+            let loadLibrary =
+                GetProcAddress(kernel, s!("LoadLibraryW")).ok_or("找不到 LoadLibraryW")?;
+            let start = Some(std::mem::transmute::<
+                unsafe extern "system" fn() -> isize,
+                unsafe extern "system" fn(*mut c_void) -> u32,
+            >(loadLibrary));
+            let thread = CreateRemoteThread(process, None, 0, start, Some(remote), 0, None)
+                .map_err(|error| format!("创建远程线程失败: {error}"))?;
             let wait = WaitForSingleObject(thread, 10_000);
             let mut exitCode = 0u32;
             let _ = GetExitCodeThread(thread, &mut exitCode);
             let _ = CloseHandle(thread);
             let _ = VirtualFreeEx(process, remote, 0, MEM_RELEASE);
-            if wait.0 == 0x00000102 { return Err("等待远程 DLL 加载超时".to_string()); }
-            if exitCode == 0 { return Err("目标进程拒绝加载观测 DLL".to_string()); }
+            if wait.0 == 0x00000102 {
+                return Err("等待远程 DLL 加载超时".to_string());
+            }
+            if exitCode == 0 {
+                return Err("目标进程拒绝加载观测 DLL".to_string());
+            }
             Ok(())
         })();
         let _ = CloseHandle(process);
