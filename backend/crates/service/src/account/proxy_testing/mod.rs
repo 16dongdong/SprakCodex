@@ -7,4 +7,5 @@ pub(crate) mod errors;
 pub(crate) mod jobs;
 pub(crate) mod latency;
 pub(crate) mod presets;
+mod throughput;
 pub(crate) mod upload;

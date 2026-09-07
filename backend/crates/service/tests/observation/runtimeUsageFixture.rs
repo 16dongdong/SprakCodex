@@ -30,6 +30,10 @@ const codeViewRva: usize = 0x0eb11620;
 const modelPointerOffset: usize = 0x8f8;
 const modelLengthOffset: usize = 0x900;
 const usageOffset: usize = 0x18;
+// 匹配 PDB 的 SessionState 构造将 SessionConfiguration 放在偏移 0；snapshot 函数读取配置 Arc 中的 provider ID。
+const configurationArcOffset: usize = 0x2f8;
+const providerPointerOffset: usize = 0x2b88;
+const providerLengthOffset: usize = 0x2b90;
 const readLimit: usize = 512;
 const textLimit: usize = 256;
 const pdbGuid: [u8; 16] = [
@@ -108,6 +112,15 @@ fn capture(arguments: CaptureArguments) -> Option<serde_json::Value> {
         response,
         usage,
     } = arguments;
+    let configuration = word(state + configurationArcOffset)?;
+    let provider = textAt(
+        word(configuration + providerPointerOffset)?,
+        word(configuration + providerLengthOffset)?,
+    )?;
+    // 来源来自生效配置而非命令行或模型名称猜测，与文件完成事件采用相同 provider 边界。
+    if provider != "openai" {
+        return None;
+    }
     let model = textAt(
         word(state + modelPointerOffset)?,
         word(state + modelLengthOffset)?,
@@ -143,7 +156,7 @@ fn capture(arguments: CaptureArguments) -> Option<serde_json::Value> {
         return None;
     }
     Some(
-        json!({"model":model,"threadId":thread,"turnId":turn,"responseId":response,
+        json!({"provider":provider,"model":model,"threadId":thread,"turnId":turn,"responseId":response,
         "timestampMillis":SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_millis() as u64,
         "usage":{"inputTokens":counts[0],"cachedInputTokens":counts[1],"cacheWriteInputTokens":counts[2],"outputTokens":counts[3],"reasoningOutputTokens":counts[4],"totalTokens":counts[5]}}),
     )

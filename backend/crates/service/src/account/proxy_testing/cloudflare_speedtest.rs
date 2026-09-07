@@ -9,6 +9,7 @@ use futures_util::StreamExt;
 
 use crate::account::proxy_testing::client::{build_proxy_test_client, ProxyTestRedirectPolicy};
 use crate::account::proxy_testing::jobs::{SpeedMetricSummary, SpeedSample};
+use super::cloudflare_style::stats::calculate_mbps;
 
 const CANCEL_POLL_INTERVAL: Duration = Duration::from_millis(100);
 const PAYLOADS: &[u64] = &[100_000, 1_000_000, 10_000_000, 25_000_000, 100_000_000];
@@ -411,6 +412,7 @@ where
     Ok((client_ip, country, colo))
 }
 
+// 执行一个下载采样并发布字节进度；速率直接使用传输 Duration，取消或网络失败返回错误，不把亚毫秒补成一毫秒。
 async fn run_download_sample<F, P>(
     client: &reqwest::Client,
     payload_bytes: u64,
@@ -460,9 +462,8 @@ where
                 }
                 bytes_read += bytes.len() as u64;
                 let active_start = transfer_started_at.unwrap();
-                let duration_ms = active_start.elapsed().as_millis().max(1) as f64;
-                let seconds = duration_ms / 1000.0;
-                let mbps = (bytes_read as f64 * 8.0) / seconds / 1_000_000.0;
+                // 进度测量使用同一高精度公式，不用补成一毫秒的耗时低估短传输速率。
+                let mbps = calculate_mbps(bytes_read, active_start.elapsed());
 
                 if last_update.elapsed() >= Duration::from_millis(150) {
                     on_progress(bytes_read, mbps);
@@ -475,9 +476,10 @@ where
     }
 
     let final_start = transfer_started_at.unwrap_or(started_at);
-    let duration_ms = final_start.elapsed().as_millis().max(1) as u64;
-    let seconds = duration_ms as f64 / 1000.0;
-    let mbps = (bytes_read as f64 * 8.0) / seconds / 1_000_000.0;
+    // 单次采样同时派生展示时长与速率，保留亚毫秒精度且不虚构最小传输时长。
+    let elapsed = final_start.elapsed();
+    let duration_ms = elapsed.as_millis() as u64;
+    let mbps = calculate_mbps(bytes_read, elapsed);
 
     // Репортим финальное состояние
     on_progress(bytes_read, mbps);
@@ -489,6 +491,7 @@ where
     })
 }
 
+// 执行指定大小的上传采样；进度和最终值共用高精度公式，展示毫秒与速率分离，失败保留原错误。
 async fn run_upload_sample<F, P>(
     client: &reqwest::Client,
     payload_bytes: u64,
@@ -536,9 +539,8 @@ where
                 let start_lock = upload_started_at_clone.lock().unwrap();
                 start_lock.unwrap_or(started_at)
             };
-            let duration_ms = start_time.elapsed().as_millis().max(1) as f64;
-            let seconds = duration_ms / 1000.0;
-            let mbps = (written as f64 * 8.0) / seconds / 1_000_000.0;
+            // 上传分块可能在一毫秒内完成，保持单调时钟精度而不是先截断再计算。
+            let mbps = calculate_mbps(written, start_time.elapsed());
 
             let mut last_up = last_update.lock().unwrap();
             if last_up.elapsed() >= Duration::from_millis(150) || written >= payload_bytes {
@@ -574,9 +576,10 @@ where
         let start_lock = upload_started_at.lock().unwrap();
         start_lock.unwrap_or(started_at)
     };
-    let duration_ms = final_start.elapsed().as_millis().max(1) as u64;
-    let seconds = duration_ms as f64 / 1000.0;
-    let mbps = (final_bytes as f64 * 8.0) / seconds / 1_000_000.0;
+    // 最终结果与下载共用同一计量口径；毫秒仅用于序列化展示，不参与吞吐量计算。
+    let elapsed = final_start.elapsed();
+    let duration_ms = elapsed.as_millis() as u64;
+    let mbps = calculate_mbps(final_bytes, elapsed);
 
     // Репортим финальное состояние
     on_progress(final_bytes, mbps);

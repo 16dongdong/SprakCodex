@@ -1,3 +1,4 @@
+use super::throughput::measuredMbps;
 use std::future::Future;
 use std::pin::pin;
 use std::sync::OnceLock;
@@ -43,6 +44,7 @@ pub(crate) fn run_proxy_download_test(
     run_proxy_download_test_with_cancel(proxy_url, target, || false, |_| {})
 }
 
+// 在独立测速运行时读取下载流，回调报告字节并支持取消；成功与中断都按原始耗时计算速率，失败保留错误状态。
 pub(crate) fn run_proxy_download_test_with_cancel<F, P>(
     proxy_url: &str,
     target: &ResolvedDownloadTestTarget,
@@ -175,7 +177,7 @@ where
             bytes_read,
             ttfb_ms,
             duration_ms,
-            download_mbps: compute_mbps(bytes_read, duration_ms),
+            download_mbps: measuredMbps(bytes_read, started_at.elapsed()),
             status_code,
             tested_at: codexmanager_core::storage::now_ts(),
             cancelled: false,
@@ -282,6 +284,7 @@ fn reqwest_error_to_outcome(
     }
 }
 
+// 流读取失败保留已收到的字节和真实时钟精度；毫秒字段只用于展示，不作为速率分母。
 fn reqwest_stream_error_to_outcome(
     proxy_url: &str,
     target: &ResolvedDownloadTestTarget,
@@ -303,7 +306,7 @@ fn reqwest_stream_error_to_outcome(
         bytes_read,
         ttfb_ms,
         duration_ms: elapsed_ms(started_at),
-        download_mbps: compute_mbps(bytes_read, elapsed_ms(started_at)),
+        download_mbps: measuredMbps(bytes_read, started_at.elapsed()),
         status_code,
         tested_at: codexmanager_core::storage::now_ts(),
         cancelled: false,
@@ -312,6 +315,7 @@ fn reqwest_stream_error_to_outcome(
     }
 }
 
+// 用户取消后保留已完成的测量，未取得有效字节或耗时时速率仍为未知。
 fn cancelled_outcome(
     target: &ResolvedDownloadTestTarget,
     status_code: Option<i64>,
@@ -331,7 +335,7 @@ fn cancelled_outcome(
         bytes_read,
         ttfb_ms,
         duration_ms,
-        download_mbps: compute_mbps(bytes_read, duration_ms),
+        download_mbps: measuredMbps(bytes_read, started_at.elapsed()),
         status_code,
         tested_at: codexmanager_core::storage::now_ts(),
         cancelled: true,
@@ -342,17 +346,6 @@ fn cancelled_outcome(
 
 fn elapsed_ms(started_at: Instant) -> i64 {
     started_at.elapsed().as_millis().min(i64::MAX as u128) as i64
-}
-
-fn compute_mbps(bytes_read: i64, duration_ms: i64) -> Option<f64> {
-    if bytes_read <= 0 || duration_ms <= 0 {
-        return None;
-    }
-    let seconds = duration_ms as f64 / 1000.0;
-    if seconds <= 0.0 {
-        return None;
-    }
-    Some((bytes_read as f64 * 8.0) / seconds / 1_000_000.0)
 }
 
 #[cfg(test)]

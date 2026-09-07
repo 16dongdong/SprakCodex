@@ -555,3 +555,51 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 单独复跑 `official_responses_websocket_reconnects_upstream_without_closing_client` 仍在
 `proxy_runtime_tests.rs:4302` 报 `upstream reconnect frame timeout: Elapsed(())`，不是仅在全套运行时出现。
 压缩用例另报告 `Handshake not finished`。这些失败尚未定因或修复，列入后续回归处理，不归因于本次修改或环境猜测。
+
+## WebSocket 回归环境别名冲突修复（2026-09-08）
+
+上述 11 项失败已定位到测试环境初始化，而非重连状态机或压缩协议本身：
+
+- 临时诊断确认目标仍是测试绑定的 `127.0.0.1` 端口，但连接选择了代理；夹具没有收到 TCP 连接。
+- 11 个测试都先 `EnvGuard::set("NO_PROXY", "127.0.0.1,localhost")`，随后
+  `EnvGuard::clear("no_proxy")`。Windows 环境变量名不区分大小写，后一步删除了刚设置的回环规则。
+- `gateway/core/runtime_config.rs::environment_proxy_url_for_target` 在没有环境代理时查询系统代理。
+  因回环规则已经丢失，测试请求进入本机系统代理，最终在收到首帧之前报 `Handshake not finished` 或等待超时。
+
+新增 `tests/websocket/proxyEnvironment.rs::LoopbackProxyEnvironment`，统一清理代理别名，
+最后发布回环 `NO_PROXY`，析构时明确逆序恢复。逆序恢复同样必要：Vec 默认正序析构会使后创建的
+同名别名覆盖最初保存的值。两个独立测试验证正常结束与 panic 时原环境完整恢复，且不打印代理原值。
+11 处重复环境初始化全部替换为这一事务；全项目检索未发现剩余的同序设置/清除模式。
+
+18 项官方 Responses WebSocket 本地协议回归全部通过，包括原失败的重连、心跳、连接限制、
+初次发送失败、输出后不重放、前导事件后恢复和压缩协商。超时与协议断言保持原样。
+两个环境事务测试通过。临时诊断代码全部移除，生产 `responses_websocket.rs` 无改动。
+这些是本地协议回归，不计作新的官方模型真实请求。
+
+## 亚毫秒测速计量与运行期 provider 边界（2026-09-08）
+
+继续执行工作区全测时，RPC 集成测试
+`rpc_account_proxy_speed_test_uses_custom_proxy_and_updates_latest_only_fields` 暴露另一处计量问题：
+固定 10 字节下载可能在 1 毫秒内完成，`download.rs` 先 `as_millis()` 再计算速率，得到 0 毫秒后返回未知。
+`upload.rs` 有相同实现。新增 `throughput.rs::measuredMbps`，复用现有高精度吞吐量公式，
+成功、失败和取消路径统一传入原始 `Duration`；没有有效字节或真正零耗时仍保持未知。
+相关采样实现 `cloudflare_speedtest.rs` 同步移除速率分母的毫秒截断与强制补 1 毫秒，展示字段仍用毫秒。
+没有扩大测试下载体或加入延时。59 项测速模块测试及该 RPC 集成用例通过，0.5 毫秒确定性用例验证速率为 0.16 Mbps。
+
+无持久化事件探针同时补齐真实 provider 字段，而非根据模型名称猜测来源：
+
+- 同一匹配 PDB 的 `SessionState::new_with_auto_compact_window_ids` 将 `SessionConfiguration` 复制到 state 偏移 0，大小 `0x328`。
+- `SessionConfiguration::thread_config_snapshot`（RVA `0x07437420`）从配置偏移 `0x2f8` 读取原配置 Arc，
+  其 provider ID 字符串指针/长度偏移为 `0x2b88`/`0x2b90`。这些字段只适用于此前验证的 Windows x64 构建。
+- `runtimeUsageFixture.rs` 在原有 PDB/入口字节门控之后读取这两个有界字段，仅接受 `openai`，
+  与客户端文件完成事件采用相同来源边界。未读取命令行、认证材料或无关配置。
+- 真实无持久化同进程/thread 的第二轮读到 provider `openai`，模型 `gpt-5.6-sol`，
+  输入 31109、缓存 30848、输出 8、总量 31117，与独立 RPC 完成事件核对通过。
+  证据目录：`backend/target/observationRuntimeProvider0dbd6520f5b74d0db94c2f5ed2f2d1d0`。
+
+该 provider 读取仍属于测试 DLL 的 ABI 验证，生产完成事件传输、数据库接入与离线恢复尚待实现。
+
+修复后的 `cargo test --manifest-path backend/Cargo.toml --workspace -- --test-threads=1` 完整退出码为 0：
+25 个测试/文档测试组累计 2269 项通过、0 项失败、18 项显式跳过；其中服务库 1589 项通过，RPC 集成 49 项通过。
+完整输出为 `backend/target/observationWorkspaceFinalTests.log`。新增环境事务的加强断言与真实 provider 探针另行通过，
+Tauri 独立工作区检查通过。无持久化探针的子进程、模块目录与公开证书已回收，保留脱敏用量证据。

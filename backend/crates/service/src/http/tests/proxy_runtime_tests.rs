@@ -28,6 +28,9 @@ use tokio_tungstenite::tungstenite::handshake::server::{Callback, Request, Respo
 use tokio_tungstenite::tungstenite::protocol::WebSocketConfig;
 use tokio_tungstenite::tungstenite::Message;
 
+#[path = "../../../tests/websocket/proxyEnvironment.rs"]
+mod proxyEnvironment;
+
 struct EnvGuard {
     key: &'static str,
     original: Option<std::ffi::OsString>,
@@ -2705,14 +2708,7 @@ async fn official_responses_websocket_proxies_frames_and_headers() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_retries_without_compression_after_upstream_rejection() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-compression-fallback");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3156,14 +3152,7 @@ async fn official_responses_websocket_accepts_large_image_context_frame() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_recovers_after_initial_upstream_send_failure() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-initial-send-recovery");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3275,14 +3264,7 @@ async fn official_responses_websocket_recovers_after_initial_upstream_send_failu
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_retries_when_reconnected_socket_breaks_before_send() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-double-initial-send-recovery");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3394,14 +3376,7 @@ async fn official_responses_websocket_retries_when_reconnected_socket_breaks_bef
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_switches_account_after_initial_send_reset() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-initial-send-account-switch");
     let mut storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3539,14 +3514,7 @@ async fn official_responses_websocket_switches_account_after_initial_send_reset(
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_keeps_idle_session_alive_with_heartbeat() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-heartbeat");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3651,14 +3619,7 @@ async fn official_responses_websocket_keeps_idle_session_alive_with_heartbeat() 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_replays_after_upstream_reset_after_preamble() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-reset-after-preamble");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3815,14 +3776,7 @@ async fn official_responses_websocket_replays_after_upstream_reset_after_preambl
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_recovers_after_repeated_preamble_disconnects() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-repeated-preamble-recovery");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -3940,14 +3894,7 @@ async fn official_responses_websocket_recovers_after_repeated_preamble_disconnec
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_recovers_after_connection_limit_error() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-connection-limit");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -4108,14 +4055,7 @@ async fn official_responses_websocket_recovers_after_connection_limit_error() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_does_not_replay_after_output_before_reset() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-reset-after-output");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -4236,14 +4176,7 @@ async fn official_responses_websocket_does_not_replay_after_output_before_reset(
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_reconnects_upstream_without_closing_client() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-reconnect");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());
@@ -4348,14 +4281,7 @@ async fn official_responses_websocket_reconnects_upstream_without_closing_client
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn official_responses_websocket_replays_follow_up_accepted_by_closing_upstream() {
     let _guard = crate::test_env_guard();
-    let _http_proxy = EnvGuard::clear("http_proxy");
-    let _https_proxy = EnvGuard::clear("https_proxy");
-    let _all_proxy = EnvGuard::clear("all_proxy");
-    let _upper_http_proxy = EnvGuard::clear("HTTP_PROXY");
-    let _upper_https_proxy = EnvGuard::clear("HTTPS_PROXY");
-    let _upper_all_proxy = EnvGuard::clear("ALL_PROXY");
-    let _no_proxy = EnvGuard::set("NO_PROXY", "127.0.0.1,localhost");
-    let _lower_no_proxy = EnvGuard::clear("no_proxy");
+    let _environment = proxyEnvironment::LoopbackProxyEnvironment::new();
     let db_path = new_test_db_path("codexmanager-proxy-runtime-ws-stale-follow-up");
     let storage = init_test_storage(&db_path);
     let _db_guard = EnvGuard::set("CODEXMANAGER_DB_PATH", db_path.to_string_lossy().as_ref());

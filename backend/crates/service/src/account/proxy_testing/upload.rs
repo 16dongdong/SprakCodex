@@ -1,3 +1,4 @@
+use super::throughput::measuredMbps;
 use std::future::Future;
 use std::pin::pin;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -37,6 +38,7 @@ pub(crate) fn run_proxy_upload_test(proxy_url: &str, upload_bytes: u64) -> Proxy
     run_proxy_upload_test_with_cancel(proxy_url, upload_bytes, || false, |_| {})
 }
 
+// 在测速运行时发送指定字节并报告进度；取消或发送失败保留部分测量，速率不使用截断后的展示毫秒。
 pub(crate) fn run_proxy_upload_test_with_cancel<F, P>(
     proxy_url: &str,
     upload_bytes: u64,
@@ -138,7 +140,7 @@ where
                     size_bytes: upload_bytes as i64,
                     bytes_written: final_bytes,
                     duration_ms,
-                    upload_mbps: compute_mbps(final_bytes, duration_ms),
+                    upload_mbps: measuredMbps(final_bytes, started_at.elapsed()),
                     status_code,
                     tested_at: codexmanager_core::storage::now_ts(),
                     cancelled: false,
@@ -227,6 +229,7 @@ fn builder_error_to_outcome(
     }
 }
 
+// 请求失败也保留实际写入的字节和高精度耗时，避免亚毫秒测量被转换成未知。
 fn reqwest_error_to_outcome(
     action: &str,
     proxy_url: &str,
@@ -244,7 +247,7 @@ fn reqwest_error_to_outcome(
         size_bytes,
         bytes_written,
         duration_ms,
-        upload_mbps: compute_mbps(bytes_written, duration_ms),
+        upload_mbps: measuredMbps(bytes_written, started_at.elapsed()),
         status_code: None,
         tested_at: codexmanager_core::storage::now_ts(),
         cancelled: false,
@@ -253,6 +256,7 @@ fn reqwest_error_to_outcome(
     }
 }
 
+// 取消只终止后续上传，已发送字节按原始耗时计量；真正没有有效测量才返回未知速率。
 fn cancelled_outcome(
     upload_url: &str,
     size_bytes: i64,
@@ -266,7 +270,7 @@ fn cancelled_outcome(
         size_bytes,
         bytes_written,
         duration_ms,
-        upload_mbps: compute_mbps(bytes_written, duration_ms),
+        upload_mbps: measuredMbps(bytes_written, started_at.elapsed()),
         status_code: None,
         tested_at: codexmanager_core::storage::now_ts(),
         cancelled: true,
@@ -277,17 +281,6 @@ fn cancelled_outcome(
 
 fn elapsed_ms(started_at: Instant) -> i64 {
     started_at.elapsed().as_millis().min(i64::MAX as u128) as i64
-}
-
-fn compute_mbps(bytes_written: i64, duration_ms: i64) -> Option<f64> {
-    if bytes_written <= 0 || duration_ms <= 0 {
-        return None;
-    }
-    let seconds = duration_ms as f64 / 1000.0;
-    if seconds <= 0.0 {
-        return None;
-    }
-    Some((bytes_written as f64 * 8.0) / seconds / 1_000_000.0)
 }
 
 #[cfg(test)]

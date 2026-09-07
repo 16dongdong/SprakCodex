@@ -239,6 +239,7 @@ fn verifyRuntime(directory: &Path, evidence: &Value) {
             .find(|record| record["responseId"] == response["responseId"])
             .expect("运行期响应 ID 不匹配");
         assert_eq!(record["threadId"], evidence["threadId"]);
+        assert_eq!(record["provider"], "openai");
         assert_eq!(record["model"], evidence["model"]);
         assert_eq!(record["usage"], response["usage"]);
     }
