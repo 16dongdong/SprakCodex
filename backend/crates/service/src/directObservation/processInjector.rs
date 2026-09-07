@@ -13,12 +13,25 @@ pub(super) struct ProcessCandidate {
 }
 
 // 过滤 Codex 主进程和 app-server，返回本次扫描的实时 PID；调用方不得缓存 PID 跨重启使用。
-pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
+#[cfg(windows)]
+pub(super) fn findCandidates() -> Result<Vec<ProcessCandidate>, String> {
+    Ok(super::processCatalog::targetPids()?
+        .into_iter()
+        .filter_map(|pid| {
+            let candidate = super::nativeInjection::candidate(pid).ok()?;
+            isTargetExecutable(&candidate.executable).then_some(candidate)
+        })
+        .collect())
+}
+
+// 非 Windows 保留平台目录实现；目前该平台没有原生加载器，不增加 Windows 专用查询依赖。
+#[cfg(not(windows))]
+pub(super) fn findCandidates() -> Result<Vec<ProcessCandidate>, String> {
     // 扫描只需要可执行路径，不采集全机环境变量、CPU、磁盘和内存统计。
     let processes = sysinfo::ProcessRefreshKind::new().with_exe(sysinfo::UpdateKind::OnlyIfNotSet);
     let system =
         sysinfo::System::new_with_specifics(sysinfo::RefreshKind::new().with_processes(processes));
-    system
+    Ok(system
         .processes()
         .iter()
         .filter_map(|(pid, process)| {
@@ -26,21 +39,24 @@ pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
             if !isTargetExecutable(&executable) {
                 return None;
             }
-            #[cfg(windows)]
-            {
-                let candidate = super::nativeInjection::candidate(pid.as_u32()).ok()?;
-                isTargetExecutable(&candidate.executable).then_some(candidate)
-            }
-            #[cfg(not(windows))]
-            {
-                Some(ProcessCandidate {
-                    pid: pid.as_u32(),
-                    createdAt: process.start_time(),
-                    executable,
-                })
-            }
+            Some(ProcessCandidate {
+                pid: pid.as_u32(),
+                createdAt: process.start_time(),
+                executable,
+            })
         })
-        .collect()
+        .collect())
+}
+
+// 系统目录中的名称不必分配 String；只接受完整 ASCII 目标文件名，Unicode 近似拼写不参与选择。
+#[cfg(windows)]
+pub(super) fn isTargetWideName(name: &[u16]) -> bool {
+    targetProcessNames.iter().any(|target| {
+        target.len() == name.len()
+            && target.bytes().zip(name).all(|(expected, &actual)| {
+                actual < 128 && (actual as u8).eq_ignore_ascii_case(&expected)
+            })
+    })
 }
 
 // app-server 是通用参数而不是进程身份；只接受指定可执行文件名，避免误接管其他本地服务。

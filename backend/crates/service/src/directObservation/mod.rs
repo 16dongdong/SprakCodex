@@ -5,9 +5,12 @@ mod authorityStore;
 mod certificateAuthority;
 mod loopbackListeners;
 #[cfg(windows)]
+mod processCatalog;
+#[cfg(windows)]
 mod nativeInjection;
 #[allow(non_snake_case)]
 mod processInjector;
+mod processMonitor;
 mod recordSink;
 mod relayIngress;
 mod runtimePaths;
@@ -20,7 +23,6 @@ mod websocketRelay;
 use recordSink::Counters;
 use serde::Serialize;
 use std::{
-    collections::HashSet,
     path::PathBuf,
     sync::{atomic::Ordering, Arc, Mutex, OnceLock},
 };
@@ -188,29 +190,7 @@ fn startRuntime(
                         log::error!("无法确定观测注入 DLL 路径");
                         return;
                     };
-                    let mut injected = HashSet::new();
-                    let mut interval = tokio::time::interval(std::time::Duration::from_secs(2));
-                    loop {
-                        tokio::select! {
-                            _ = monitorEngine.cancelled() => break,
-                            _ = interval.tick() => {
-                                let candidates = processInjector::findCandidates();
-                                injected.retain(|candidate| candidates.contains(candidate));
-                                for candidate in candidates {
-                                    if monitorEngine.is_cancelled() { break; }
-                                    if injected.contains(&candidate) { continue; }
-                                    let pid = candidate.pid;
-                                    let path = dll.clone();
-                                    let target = candidate.clone();
-                                    match tokio::task::spawn_blocking(move || processInjector::inject(&target, &path)).await {
-                                        Ok(Ok(())) => { injected.insert(candidate); log::info!("观测模块就绪 pid={pid}"); }
-                                        Ok(Err(error)) => log::debug!("Codex 进程 pid={pid} 接管失败：{error}"),
-                                        Err(error) => log::debug!("Codex 进程 pid={pid} 接管任务失败：{error}"),
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    processMonitor::run(dll, monitorEngine, processInjector::findCandidates).await;
                 });
                 transport::serve(listener, Arc::new(engine)).await;
             });

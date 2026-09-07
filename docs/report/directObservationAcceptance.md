@@ -19,7 +19,7 @@
 | 官方 SSE | `streamObserver.rs` / `streamObserverTests.rs` | WebSocket 故障后 CLI 回退 SSE，缺少 SSE Content-Type 时仍能从 framing 提取 usage |
 | 原子写库与价格快照 | `storage/observationRecords.rs` / `observationRecords.rs` 测试 | 去重、未知价格、非生成预热隔离、钱包账目不变 |
 | 展示 | `page.tsx` / `requestProtocol.ts` | 不再遮罩直连统计；WebSocket 与预热标签不误标为 HTTP |
-| 完整自动接管 | `processInjector.rs` / `directObservation/mod.rs` | **未验收**：DLL 就绪、已建连接、目标 TLS 信任和重启恢复仍需完整运行证据 |
+| 常驻发现与接入 | `processMonitor.rs` / `processInjector.rs` | 新 CLI 无 stdin 同步点的双协议真实请求通过；已建连接和完整重启恢复仍需运行证据 |
 
 ## 2026-09-07 真实请求证据
 
@@ -238,3 +238,61 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 **剩余边界**：自动发现目前覆盖目标环境和 Windows 静态设置中的本地明文 HTTP 代理；
 PAC 动态结果、其他代理协议及观测器上游路线的逐客户端保持仍未闭环。
 这些结果也不代替常驻进程扫描、已建立连接、完整重启恢复、证书续期和实际安装更新的验收。
+
+## 生产常驻扫描的无输入等待验证（2026-09-07）
+
+`processMonitor.rs` 从启动入口提取常驻发现/加载循环，生产与探针共用这一实现。
+同步系统目录枚举移到阻塞工作线程；已加载集合按完整进程实例维护，取消后不开始新枚举。
+首轮立即扫描；初始单进程测试仍使用两秒周期，随后连续进程测试复现遗漏，并按下节证据改为轻量目录与 50 ms 周期。
+
+`OBSERVATION_TEST_CAPTURE_MODE=monitored` 的执行顺序：先完成一轮真实目录扫描，再启动带完整位置提示词的 CLI；
+其 stdin 为关闭状态，不等待标记、不延迟提交提示词，也不直接调用注入函数。
+生产扫描器自行发现并加载模块。测试候选仅按自建进程的 PID、创建时间和可执行文件限定，
+不把用户其他 CLI 会话纳入测试；这一隔离选择不改变生产的全目录发现逻辑。
+
+- WebSocket：2 条记录（1 次预热、1 次生成），输入 20640、缓存 11392、输出 8，费用快照 1，扣费 0。
+  证据目录：`backend/target/observationMonitoredBaseline7613843fbf9b4117b9ea67bdbf0ffeb9`。
+- SSE：7 次失败握手后生成成功，输入 20642、缓存 11392、输出 8，费用快照 1，扣费 0。
+  证据目录：`backend/target/observationMonitoredSse0f7cd67e102c481ba7ddc6831d2f535e`。
+- 两例模块加载阶段均约 107 ms，生成响应 ID、模型和逐请求 Token 与客户端记录对应。
+当时单进程测试未复现首请求遗漏；它不证明所有启动时序与多进程竞争都已覆盖，下节连续用例随后复现了遗漏。
+- 单元覆盖首轮立即发现、预先取消不枚举，以及取消后及时退出；进程实例限定避免测试 PID 复用越界。
+
+本机普通用户令牌查询 `Win32_ProcessStartTrace` 返回 `PermissionDenied`，未修改系统权限或常驻订阅。
+只读 Toolhelp 快照基准 100 次平均约 9.64 ms，因此没有用高频全目录轮询掩盖事件能力限制。
+原会话明确允许技术方案变化，以请求数、Token 与费用快照为验收；后续既有长连接仍须独立取得证据，
+不能把本节新进程成功推广成现有连接已被完整观测。
+
+```powershell
+$env:OBSERVATION_TEST_CAPTURE_MODE='monitored'
+# CLI、独占目录、模型、上游与协议参数沿用真实流量探针；不设置 CLI 代理或 CA 环境变量。
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
+```
+
+## 连续进程首请求遗漏的复现与修复（2026-09-07）
+
+单个 CLI 成功不足以证明常驻观测。探针现复用同一个扫描任务，前一 CLI 退出后再启动第二个 CLI，
+合并两份 stdout 终态并逐个读取其独立 `response_id` 用量记录；只捕获其中一次将直接失败。
+两秒周期下真实复现“两次 CLI 都成功、两次 DLL 都就绪，但观测库为空”，证据位于
+`backend/target/observationContinuousaf7b394bf330404f99a21ed92eb502d7`。根因是发现晚于 TLS 客户端构造，
+而非模块加载失败；不能用就绪事件替代请求观测证据。
+
+`processCatalog.rs` 按
+[`SystemBasicProcessInformation` 的公开 ABI](https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation)
+读取基本目录，不获取线程资源统计、命令行或环境。只有系统明确返回信息类不支持时选择旧版 Toolhelp API；
+权限、内存和格式错误保留为错误，扫描器不把它们当空目录清掉已加载状态。
+缓冲区有 16 MiB 上限，校验记录推进、返回长度、Unicode 长度及指针范围，加载前仍核对实际进程创建时间与路径。
+本机基本目录查询 100 次共 7032 微秒，平均约 0.07 ms（不包含后续加载），扫描周期改为 50 ms；
+加载等待期间跳过旧 tick，避免积压后的突发补扫。
+
+修复后同一连续用例通过：
+
+| 协议 | 生成/预热/失败握手 | 输入 | 缓存 | 输出 | 费用快照/扣费 |
+| --- | --- | ---: | ---: | ---: | --- |
+| WebSocket | 2 / 2 / 0 | 40958 | 22784 | 16 | 2 / 0 |
+| SSE | 2 / 0 / 14 | 40954 | 22784 | 16 | 2 / 0 |
+
+证据目录为 `backend/target/observationContinuousFixed7700144d665a48b08e06c9ac4b2a3079` 和
+`backend/target/observationContinuousSsee06008cba1594cafa4c49bb5d415aee0`。
+SSE 失败握手仍是测试主动触发协议回退，不是生成请求。34 项服务观测单元测试、生命周期测试与 Tauri 检查通过。
+本节修复已复现的新进程启动问题；已有长连接、多目标加载竞争、完整重启和安装更新仍不由这些证据证明。

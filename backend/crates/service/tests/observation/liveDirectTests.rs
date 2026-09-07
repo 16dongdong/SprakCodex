@@ -42,10 +42,11 @@ fn officialTransportRecordsUsage() {
     let captureMode =
         std::env::var("OBSERVATION_TEST_CAPTURE_MODE").unwrap_or_else(|_| "explicit".into());
     assert!(
-        matches!(captureMode.as_str(), "explicit" | "injected"),
-        "抓取方式必须为 explicit 或 injected"
+        matches!(captureMode.as_str(), "explicit" | "injected" | "monitored"),
+        "抓取方式必须为 explicit、injected 或 monitored"
     );
     let injected = captureMode == "injected";
+    let native = captureMode != "explicit";
     assert!(directory.is_absolute(), "测试目录必须为绝对路径");
     std::fs::create_dir(&directory).expect("测试目录必须是本次新建目录");
     let database = directory.join("observation.db");
@@ -116,7 +117,7 @@ fn officialTransportRecordsUsage() {
         .stdout(File::create(&events).unwrap())
         .stderr(File::create(directory.join("clientDiagnostics.log")).unwrap());
     // 显式代理仅属于旧协议探针；原生注入模式原样继承代理与 CA 环境，禁止把改环境当自动捕获。
-    if !injected {
+    if !native {
         for variable in [
             "HTTP_PROXY",
             "HTTPS_PROXY",
@@ -139,7 +140,7 @@ fn officialTransportRecordsUsage() {
         const noWindow: u32 = 0x08000000;
         command.creation_flags(noWindow);
     }
-    let result = if injected {
+    let result = if native {
         #[cfg(windows)]
         {
             injectedClientProbe::run(&mut command, &directory, &certificate, listenerPort(&proxy))
@@ -165,18 +166,34 @@ fn officialTransportRecordsUsage() {
 // 用独立客户端事件核对每个网络响应及生成快照，失败握手与预热保留记录但不充当生成用量。
 fn verifyCapturedRecords(stdout: &str, storage: &Storage, websocket: bool) {
     let protocol = if websocket { "websocket" } else { "sse" };
-    let completion = stdout
+    let completions: Vec<_> = stdout
         .lines()
         .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
-        .find(|event| event["type"] == "turn.completed")
-        .expect("缺少 CLI 完整终态");
-    let threadId = stdout
+        .filter(|event| event["type"] == "turn.completed")
+        .collect();
+    assert!(!completions.is_empty(), "缺少 CLI 完整终态");
+    let threadIds: std::collections::HashSet<_> = stdout
         .lines()
         .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
-        .find(|event| event["type"] == "thread.started")
-        .and_then(|event| event["thread_id"].as_str().map(str::to_owned))
-        .expect("缺少本次 CLI 线程标识");
-    let native = nativeUsageVerifier::readProbeUsage(&threadId).expect("独立逐请求核对失败");
+        .filter(|event| event["type"] == "thread.started")
+        .map(|event| {
+            event["thread_id"]
+                .as_str()
+                .expect("缺少 CLI 线程标识")
+                .to_owned()
+        })
+        .collect();
+    assert_eq!(
+        threadIds.len(),
+        completions.len(),
+        "每个测试 CLI 应有独立完整终态"
+    );
+    let native: Vec<_> = threadIds
+        .iter()
+        .flat_map(|threadId| {
+            nativeUsageVerifier::readProbeUsage(threadId).expect("独立逐请求核对失败")
+        })
+        .collect();
     let records = storage.list_request_logs(None, 100).unwrap();
     assert!(!records.is_empty(), "官方请求成功但观测未入库");
     let mut input = 0;
@@ -218,9 +235,16 @@ fn verifyCapturedRecords(stdout: &str, storage: &Storage, websocket: bool) {
         output += record.output_tokens.expect("输出用量缺失");
         cached += record.cached_input_tokens.expect("缓存用量缺失");
     }
-    assert_eq!(completion["usage"]["input_tokens"], input);
-    assert_eq!(completion["usage"]["output_tokens"], output);
-    assert_eq!(completion["usage"]["cached_input_tokens"], cached);
+    // 常驻验收包含前后两个独立 CLI，累计值与每个 response_id 同时核对，不能只验证其中一次成功。
+    let reportedSum = |field: &str| {
+        completions
+            .iter()
+            .map(|event| event["usage"][field].as_i64().expect("终态用量缺失"))
+            .sum::<i64>()
+    };
+    assert_eq!(reportedSum("input_tokens"), input);
+    assert_eq!(reportedSum("output_tokens"), output);
+    assert_eq!(reportedSum("cached_input_tokens"), cached);
     assert!(generationRequests > 0, "只有预热没有真实生成请求");
     assert_eq!(
         native.len(),
