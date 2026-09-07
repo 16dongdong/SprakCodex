@@ -5,6 +5,10 @@
 mod hookInstall;
 
 #[cfg(windows)]
+#[allow(non_snake_case, non_upper_case_globals)]
+mod relayControl;
+
+#[cfg(windows)]
 #[path = "windowsRuntime.rs"]
-#[allow(non_snake_case)]
+#[allow(non_snake_case, non_upper_case_globals)]
 mod imp;

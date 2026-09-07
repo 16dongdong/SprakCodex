@@ -84,7 +84,7 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 - 进程身份使用原生创建时间，不把 PID 复用当成原进程；架构不同拒绝注入。
 - 按 `LoadLibraryW` 实际拥有模块的 RVA 查找目标入口，不复用宿主 ASLR 地址。
 - 参数内存和进程/线程句柄统一管理；超时任务继续持有内存，远程线程结束后再回收，并阻止重复加载。
-- 就绪事件升级为 `ObservationHookReady2`，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。
+- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为要求运行实例校验的 `ObservationHookReady3`。
 - DLL 去掉画像、注册表、系统代理改写和子进程终止逻辑，网络入口拆分至 `windowsRuntime.rs`。
 - trampoline 先发布、入口后启用；全部网络入口完成前不改连 TCP；同一 socket 的私有头只提交一次。
 
@@ -124,3 +124,40 @@ Windows 运行期将 CA 签名密钥保存为当前用户范围的 `observationA
 `nativeUsageVerifier.rs` **仅为测试验证器**，没有变更生产统计数据源。
 常规 CLI 的逐请求事件已验证可用；`--ephemeral` 不持久化会话文件，原生记录也不提供完整 HTTP 状态和连接细节。
 这些局限保留在总验收中，不能通过改用文件记录来宣称所有网络模式均已自动接管。
+
+## Relay 运行实例失效与新连接恢复（2026-09-07）
+
+`directCommon/relayContract.rs` 统一宿主和 DLL 配置，`runtime_owner` 包含进程 ID、
+实际 Relay 线程 ID 和原始 FILETIME 创建时间。`runtimeLease.rs` 只打开查询/同步权限的线程句柄，
+每次新连接决策进行零超时等待；线程退出、宿主硬退出或身份不匹配时停止新连接改连。
+就绪协议为 `ObservationHookReady3`，避免旧 DLL 的就绪事件冒充本版运行实例校验。
+
+`directHook/relayControl.rs` 删除永久启动缓存与 mtime 端口缓存：完整配置限制为 64 KiB，
+相同字节复用解析结果和线程句柄，读取失败、删除、损坏、无 owner 或显式停用均清除旧配置。
+DLL 可先于配置加载并保持原连接，配置随后生效；同一快照同时提供端口和本地代理列表。
+`cleanupRunning` 在取消 listener 前先发布停用配置；发布失败仍回收线程，由线程退出使旧配置失效。
+这些操作不修改客户端 provider、base_url、登录身份、系统代理或系统证书。
+
+已验证：
+
+- Common 7 项、DLL 7 项测试通过；包含独立宿主进程硬退出、线程 ID 身份错误、相同 mtime 更新、
+  缺失配置后启用、配置删除/损坏/超限、缓存线程退出和新实例重新启用。
+- 生产 Release DLL 通过 `productionModuleHonorsRuntimeLifetime`：注入**本测试创建的客户端**，
+  只访问两个本测试创建的回环 listener。同步 `connect` 与 Tokio 异步 `ConnectEx` 分别实测
+  无配置、启用、原线程退出、重新启用、停用、再次启用、配置损坏、配置删除，共 16 次真实 socket 往返，
+  由实际接收连接的 listener 和固定请求/响应字节确认路由，没有将就绪事件当作网络成功证据。
+- 测试结束回收客户端、输出线程、监听 socket、独占 DLL、配置和诊断文件。
+- 服务观测单元测试 28 项、启用选择持久化测试 1 项、四项独立加载/超时回收测试通过；
+  Tauri 独立工作区 `cargo check --manifest-path frontend/src-tauri/Cargo.toml --lib` 通过。
+
+```powershell
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-direct-common -p codexmanager-direct-hook
+cargo build --manifest-path backend/Cargo.toml -p codexmanager-direct-hook --release --target-dir backend/target/observationBuild
+$env:OBSERVATION_TEST_NETWORK_DLL=(Resolve-Path backend/target/observationBuild/release/cphook.dll).Path
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::relayRoutingTests::productionModuleHonorsRuntimeLifetime -- --exact --ignored --nocapture --test-threads=1
+```
+
+**范围边界**：这里验证的是新连接路由，不证明已建立 TLS 连接的解密或无损迁移；线程退出与
+实际 Winsock 调用之间仍存在执行时间窗口，已建立到 Relay 的连接也不会被迁移到另一服务器。
+官方 CLI 自动 TLS 信任接入、快速启动首请求、Manager 完整重启恢复以及安装更新仍未完成，
+本次测试不使用显式代理环境伪称自动官方流量验收通过。

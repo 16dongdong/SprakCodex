@@ -2,3 +2,10 @@
 
 pub mod hook_proxy;
 pub mod hook_ready;
+
+#[allow(non_snake_case)]
+pub mod relayContract;
+
+#[cfg(windows)]
+#[allow(non_snake_case)]
+pub mod runtimeLease;

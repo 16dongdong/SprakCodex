@@ -50,14 +50,21 @@ pub(super) fn configPath(module: &Path) -> Result<PathBuf, String> {
 
 // 在 DLL 所在目录发布配置；端口为零明确关闭 TCP 改连，序列化和文件错误均向宿主返回。
 pub(super) fn writeRelayConfig(path: &Path, port: u16) -> Result<(), String> {
-    let configuration = serde_json::json!({
-        "enabled": false,
-        "clear_proxy_env": false,
-        "proxy_relay_port": port,
-        "force_proxy_tcp": port != 0,
-        "block_udp": false,
-        "blocked_loopback_proxy_ports": []
-    });
+    // 非零配置必须由实际 serve 所在线程发布；宿主崩溃或该线程退出后，DLL 持有的线程对象立即失效。
+    #[cfg(windows)]
+    let owner = if port != 0 {
+        Some(cpcommon::runtimeLease::currentIdentity()?)
+    } else {
+        None
+    };
+    #[cfg(not(windows))]
+    let owner = None;
+    let configuration = cpcommon::relayContract::RelayConfig {
+        relayPort: port,
+        forceProxyTcp: port != 0,
+        loopbackProxyPorts: Vec::new(),
+        owner,
+    };
     let encoded = serde_json::to_vec(&configuration).map_err(|_| "生成注入配置失败")?;
     writeAtomically(path, &encoded)
 }

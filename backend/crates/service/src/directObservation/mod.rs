@@ -264,6 +264,12 @@ pub fn shutdownRuntime() -> Result<ObservationStatus, String> {
 
 // 统一释放线程、证书和 Relay 配置；启动持久化失败时复用该路径，避免留下半启动状态。
 fn cleanupRunning(current: Running) -> Result<(), String> {
+    // 先撤销新连接路由再取消 listener；即使文件发布失败也继续回收，运行线程退出会使缓存身份失效。
+    let relayResult = current
+        .relayConfig
+        .as_deref()
+        .map(|path| runtimePaths::writeRelayConfig(path, 0))
+        .transpose();
     current.cancel.cancel();
     let joined = current.thread.join();
     let certificateResult = if !current.retainCertificate && current.certificate.exists() {
@@ -271,11 +277,6 @@ fn cleanupRunning(current: Running) -> Result<(), String> {
     } else {
         Ok(())
     };
-    let relayResult = current
-        .relayConfig
-        .as_deref()
-        .map(|path| runtimePaths::writeRelayConfig(path, 0))
-        .transpose();
     joined.map_err(|_| "观测线程异常退出".to_string())?;
     certificateResult?;
     relayResult.map(|_| ())
@@ -350,3 +351,7 @@ pub fn configureChild(command: &mut std::process::Command) -> Result<(), String>
 #[cfg(test)]
 #[path = "../../tests/observation/liveDirectTests.rs"]
 mod liveDirectTests;
+
+#[cfg(all(test, windows))]
+#[path = "../../tests/observation/relayRoutingTests.rs"]
+mod relayRoutingTests;

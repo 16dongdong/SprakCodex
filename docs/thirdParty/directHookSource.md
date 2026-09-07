@@ -7,6 +7,8 @@
 这两个目录已成为本仓库源码，不在构建或运行时访问原仓库。
 本仓库保留 Relay 字节协议，并维护宿主与 DLL 的共享就绪协议；已移除画像、注册表与子进程控制逻辑。
 网络运行期和 trampoline 安装分别位于 `windowsRuntime.rs` 与 `hookInstall.rs`，测试位于独立的 `tests/unit/`。
+`relayControl.rs` 管理配置快照，和宿主共用 `directCommon/relayContract.rs`、`runtimeLease.rs`；
+有效改连配置必须绑定存活的 Relay 运行线程，就绪事件第三版要求该实例校验。
 原始源码许可为 Apache-2.0，完整许可见 `directHookApacheLicense.txt`。
 
 ## 构建

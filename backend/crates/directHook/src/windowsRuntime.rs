@@ -1,7 +1,8 @@
 //! Windows 网络回调与运行期配置；不修改原登录、时区、系统代理和子进程行为。
+use super::relayControl::RelayControl;
 use cpcommon::hook_proxy::{encode_header, HookProxyTarget};
+use cpcommon::relayContract::RelayConfig;
 use retour::GenericDetour;
-use serde::Deserialize;
 use std::collections::HashMap;
 use std::ffi::{c_void, OsString};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -9,7 +10,7 @@ use std::os::windows::ffi::OsStringExt;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
 use windows::core::{s, w, PCSTR, PCWSTR, PSTR};
 use windows::Win32::Foundation::{CloseHandle, BOOL, HMODULE, TRUE};
 use windows::Win32::Networking::WinSock::{
@@ -33,87 +34,18 @@ const WSAECONNRESET: i32 = 10054;
 const WSAEAFNOSUPPORT: i32 = 10047;
 const WSA_IO_PENDING: i32 = 997;
 
-// 配置只包含网络观测字段；未知的旧画像字段不参与行为，宿主停止时用零端口停用改连。
-#[derive(Deserialize, Default)]
-#[serde(default)]
-struct HookConfig {
-    proxy_relay_port: u16,
-    force_proxy_tcp: bool,
-    blocked_loopback_proxy_ports: Vec<u16>,
-}
-
-// 工作线程读取启动配置；缺失或格式错误返回 None，不安装入口。已安装后的端口变更由运行期缓存读取。
-fn config() -> &'static Option<HookConfig> {
-    static CFG: OnceLock<Option<HookConfig>> = OnceLock::new();
-    CFG.get_or_init(|| {
-        let path = dll_dir()?.join("hook.json");
-        let bytes = std::fs::read(path).ok()?;
-        let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(&bytes);
-        serde_json::from_slice::<HookConfig>(bytes).ok()
-    })
-}
-
-#[derive(Clone, Copy)]
-struct ProxyRuntimeConfig {
-    relay_port: u16,
-    force_proxy_tcp: bool,
-}
-
-struct RuntimeConfigCache {
-    modified: Option<SystemTime>,
-    config: ProxyRuntimeConfig,
-}
-
-// 网络回调按配置修改时间更新端口；初始化尚未完成时返回关闭状态，不提前改连连接。
-fn proxy_runtime_config() -> ProxyRuntimeConfig {
-    // 所有网络槽未安装前只调用原入口，防止 connect 先启用而 send trampoline 尚未发布时破坏连接。
+// 全部 trampoline 就绪后才读取当前运行实例；配置与内核线程寿命共同决定是否改连。
+fn proxyRuntimeConfig() -> Option<Arc<RelayConfig>> {
     if !NETWORK_READY.load(Ordering::Acquire) {
-        return ProxyRuntimeConfig {
-            relay_port: 0,
-            force_proxy_tcp: false,
-        };
+        return None;
     }
-    static CACHE: OnceLock<Mutex<RuntimeConfigCache>> = OnceLock::new();
-    let cache = CACHE.get_or_init(|| {
-        Mutex::new(RuntimeConfigCache {
-            modified: None,
-            config: ProxyRuntimeConfig {
-                relay_port: config()
-                    .as_ref()
-                    .map(|cfg| cfg.proxy_relay_port)
-                    .unwrap_or(0),
-                force_proxy_tcp: config()
-                    .as_ref()
-                    .map(|cfg| cfg.force_proxy_tcp)
-                    .unwrap_or(false),
-            },
-        })
-    });
-    let Ok(mut guard) = cache.lock() else {
-        return ProxyRuntimeConfig {
-            relay_port: 0,
-            force_proxy_tcp: false,
-        };
-    };
-    let Some(path) = dll_dir().map(|dir| dir.join("hook.json")) else {
-        return guard.config;
-    };
-    let modified = std::fs::metadata(&path)
-        .and_then(|metadata| metadata.modified())
-        .ok();
-    if modified != guard.modified {
-        if let Ok(bytes) = std::fs::read(&path) {
-            let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(&bytes);
-            if let Ok(cfg) = serde_json::from_slice::<HookConfig>(bytes) {
-                guard.config = ProxyRuntimeConfig {
-                    relay_port: cfg.proxy_relay_port,
-                    force_proxy_tcp: cfg.force_proxy_tcp && cfg.proxy_relay_port != 0,
-                };
-                guard.modified = modified;
-            }
-        }
-    }
-    guard.config
+    static control: OnceLock<Mutex<RelayControl>> = OnceLock::new();
+    let path = dll_dir()?.join("hook.json");
+    control
+        .get_or_init(|| Mutex::new(RelayControl::default()))
+        .lock()
+        .ok()?
+        .read(&path)
 }
 
 // 根据 DllMain 记录的模块句柄定位自身路径，供配置和就绪事件共用；查询失败返回 None。
@@ -172,14 +104,6 @@ fn signal_ready() {
             Err(e) => log(&format!("cphook ready 事件不存在: {e}")),
         }
     }
-}
-
-// 读取需要接入观测的本地代理端口白名单；其他 loopback 通信必须继续使用原连接。
-fn blocked_proxy_port(port: u16) -> bool {
-    config()
-        .as_ref()
-        .map(|cfg| cfg.blocked_loopback_proxy_ports.contains(&port))
-        .unwrap_or(false)
 }
 
 #[repr(C)]
@@ -422,10 +346,7 @@ unsafe fn proxy_connect(
     name_len: i32,
     original_connect: impl FnOnce(*const SOCKADDR, i32) -> i32,
 ) -> Option<i32> {
-    let runtime = proxy_runtime_config();
-    if !runtime.force_proxy_tcp {
-        return None;
-    }
+    let runtime = proxyRuntimeConfig()?;
     if !socket_is_tcp(socket) {
         return None;
     }
@@ -435,7 +356,7 @@ unsafe fn proxy_connect(
     // 从底层把目标“自己走代理”的流量也彻底重定向过来,而不是拒绝。其它回环(本地 IPC、
     // devtools、本地服务)必须直连放行,否则会被错误塞进 relay。
     let passthrough = if is_loopback_ip(target.ip) {
-        if blocked_proxy_port(target.port) {
+        if runtime.loopbackProxyPorts.contains(&target.port) {
             true
         } else {
             return None;
@@ -443,7 +364,7 @@ unsafe fn proxy_connect(
     } else {
         false
     };
-    let Some(relay) = relay_sockaddr_for(name, name_len, runtime.relay_port) else {
+    let Some(relay) = relay_sockaddr_for(name, name_len, runtime.relayPort) else {
         WSASetLastError(WSAEAFNOSUPPORT);
         return Some(-1);
     };
@@ -460,7 +381,7 @@ unsafe fn proxy_connect(
         }
         log(&format!(
             "TCP 已接入观测 Relay, target={}:{} relay=127.0.0.1:{} passthrough={}",
-            target.ip, target.port, runtime.relay_port, passthrough
+            target.ip, target.port, runtime.relayPort, passthrough
         ));
         return Some(0);
     }
@@ -713,16 +634,19 @@ unsafe extern "system" fn hook_connect_ex(
     bytes_sent: *mut u32,
     overlapped: *mut c_void,
 ) -> BOOL {
-    let runtime = proxy_runtime_config();
+    let runtime = proxyRuntimeConfig();
     // 是否改连 relay、以及是否透传(目标走本机已知代理端口):
     // - 外部目标:改连 relay,发私有头;
     // - 本机已知代理端口:改连 relay,透传(目标自己会发 HTTP CONNECT);
     // - 其它回环:直连放行。
     let target = sockaddr_target(name, name_len);
     let (should_redirect, passthrough) = match target {
-        Some(t) if runtime.force_proxy_tcp && socket_is_tcp(socket) => {
+        Some(t) if runtime.is_some() && socket_is_tcp(socket) => {
             if is_loopback_ip(t.ip) {
-                if blocked_proxy_port(t.port) {
+                if runtime
+                    .as_ref()
+                    .is_some_and(|settings| settings.loopbackProxyPorts.contains(&t.port))
+                {
                     (true, true)
                 } else {
                     (false, false)
@@ -734,6 +658,7 @@ unsafe extern "system" fn hook_connect_ex(
         _ => (false, false),
     };
     if should_redirect {
+        let runtime = runtime.expect("已校验运行实例有效");
         // ConnectEx 携带初始数据 + overlapped 的异步形态难以在改连后保证“头/握手在数据前”,
         // 直接拒绝,迫使调用方回退到 connect + send(同样被 hook 接管)。
         if send_data_len > 0 && !overlapped.is_null() {
@@ -741,7 +666,7 @@ unsafe extern "system" fn hook_connect_ex(
             return BOOL(0);
         }
         let target = target.expect("已校验目的地址有效");
-        let Some(relay) = relay_sockaddr_for(name, name_len, runtime.relay_port) else {
+        let Some(relay) = relay_sockaddr_for(name, name_len, runtime.relayPort) else {
             WSASetLastError(WSAEAFNOSUPPORT);
             return BOOL(0);
         };
@@ -937,10 +862,7 @@ unsafe fn install_connect_ex_hook() -> bool {
 
 // loader lock 外安装网络入口；ConnectEx 是实际客户端路径，必须成功才能发布模块就绪。
 unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
-    if config().is_none() {
-        log("观测配置缺失，模块未就绪");
-        return 1;
-    }
+    // 入口可以先于配置就绪；缺少配置时保持原调用，后续启动 Relay 后无需重复加载 DLL。
     let mut ready = true;
     ready &= install(
         &CONNECT,

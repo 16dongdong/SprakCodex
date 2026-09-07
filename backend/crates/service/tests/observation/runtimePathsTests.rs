@@ -67,12 +67,23 @@ fn explicitModuleSelectsItsOwnDirectory() {
         serde_json::from_slice(&std::fs::read(&config).unwrap()).unwrap();
     assert_eq!(current["proxy_relay_port"], 32123);
     assert_eq!(current["force_proxy_tcp"], true);
+    #[cfg(windows)]
+    {
+        let settings: cpcommon::relayContract::RelayConfig =
+            serde_json::from_value(current.clone()).unwrap();
+        let owner = settings.owner.expect("有效端口必须绑定运行线程");
+        assert_eq!(owner, cpcommon::runtimeLease::currentIdentity().unwrap());
+        assert!(cpcommon::runtimeLease::RuntimeLease::open(owner)
+            .unwrap()
+            .isActive());
+    }
     assert!(!fixture.directory.join("debug/hook.json").exists());
     writeRelayConfig(&config, 0).unwrap();
     let stopped: serde_json::Value =
         serde_json::from_slice(&std::fs::read(&config).unwrap()).unwrap();
     assert_eq!(stopped["proxy_relay_port"], 0);
     assert_eq!(stopped["force_proxy_tcp"], false);
+    assert!(stopped["runtime_owner"].is_null());
     assert_eq!(
         std::fs::read_dir(config.parent().unwrap()).unwrap().count(),
         2
