@@ -8,7 +8,9 @@ mod shared;
 mod store;
 mod ui;
 
-pub use api::{app_settings_get, app_settings_get_with_overrides, app_settings_set};
+pub use api::{
+    app_settings_get, app_settings_get_with_overrides, app_settings_set,
+};
 pub(crate) use codex_latest_sync::ensure_codex_latest_version_sync;
 pub(crate) use env_overrides::{
     apply_env_overrides_to_process, persisted_env_overrides_missing_process_env,
