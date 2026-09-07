@@ -55,7 +55,7 @@ pub(super) fn run(
     // 隔离选择绑定创建时间和可执行文件，避免测试子进程退出后 PID 复用误选用户其他会话。
     let selectedProcess = std::sync::Arc::new(std::sync::Mutex::new(None));
     if monitored {
-        target.monitor = Some(startMonitor(module.clone(), selectedProcess.clone()));
+        target.monitor = Some(startMonitor(module.clone(), selectedProcess.clone(), None));
     }
     target.child = Some(command.spawn().expect("启动独立测试 CLI"));
     let client = target.child.as_mut().unwrap();
@@ -150,6 +150,7 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
 pub(super) fn startMonitor(
     module: PathBuf,
     selectedProcess: std::sync::Arc<std::sync::Mutex<Option<processInjector::ProcessCandidate>>>,
+    homes: Option<super::super::clientEventMonitor::HomeRegistration>,
 ) -> (
     tokio_util::sync::CancellationToken,
     std::thread::JoinHandle<()>,
@@ -164,18 +165,28 @@ pub(super) fn startMonitor(
             .enable_all()
             .build()
             .unwrap();
-        runtime.block_on(processMonitor::run(module, workerCancel, move || {
-            let expected = selection.lock().unwrap().clone();
-            let candidates = processInjector::findCandidates()?
-                .into_iter()
-                .filter(|candidate| expected.as_ref() == Some(candidate))
-                .collect();
-            // 第一次目录扫描已发生后再让父测试启动 CLI，构造真实的跨扫描周期首请求边界。
-            if let Some(ready) = startup.lock().unwrap().take() {
-                ready.send(()).expect("通知首轮目录扫描完成");
-            }
-            Ok(candidates)
-        }));
+        runtime.block_on(processMonitor::run(
+            module,
+            workerCancel,
+            move || {
+                let expected = selection.lock().unwrap().clone();
+                let candidates = processInjector::findCandidates()?
+                    .into_iter()
+                    .filter(|candidate| expected.as_ref() == Some(candidate))
+                    .collect();
+                // 第一次目录扫描已发生后再让父测试启动 CLI，构造真实的跨扫描周期首请求边界。
+                if let Some(ready) = startup.lock().unwrap().take() {
+                    ready.send(()).expect("通知首轮目录扫描完成");
+                }
+                Ok(candidates)
+            },
+            move |candidate, module| {
+                if let Some(homes) = &homes {
+                    homes.register(processInjector::runtimeHome(candidate, module)?)?;
+                }
+                Ok(())
+            },
+        ));
     });
     started.recv_timeout(Duration::from_secs(10)).unwrap();
     (cancel, worker)

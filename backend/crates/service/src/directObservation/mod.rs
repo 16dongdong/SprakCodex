@@ -155,6 +155,7 @@ fn startRuntime(
     let clientEvents = clientEventMonitor::EventMonitor::start(clientEventMonitor::Settings {
         home: clientEventMonitor::defaultHome()?, since: chrono::Utc::now().timestamp_millis(), allow: Arc::new(|_| true),
     }, sink.clone(), cancel.clone())?;
+    let homes = clientEvents.registration();
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
     let workerConfig = relayConfig.clone();
@@ -196,7 +197,9 @@ fn startRuntime(
                         log::error!("无法确定观测注入 DLL 路径");
                         return;
                     };
-                    processMonitor::run(dll, monitorEngine, processInjector::findCandidates).await;
+                    processMonitor::run(dll, monitorEngine, processInjector::findCandidates, move |candidate, module| {
+                        homes.register(processInjector::runtimeHome(candidate, module)?)
+                    }).await;
                 });
                 transport::serve(listener, Arc::new(engine)).await;
             });

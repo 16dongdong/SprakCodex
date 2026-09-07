@@ -15,6 +15,7 @@ pub(super) async fn run(
     module: PathBuf,
     cancel: CancellationToken,
     select: impl Fn() -> Result<Vec<ProcessCandidate>, String> + Send + Sync + 'static,
+    onReady: impl Fn(&ProcessCandidate, &std::path::Path) -> Result<(), String> + Send + Sync + 'static,
 ) {
     let select = Arc::new(select);
     let mut injected = HashSet::new();
@@ -56,6 +57,13 @@ pub(super) async fn run(
             match tokio::task::spawn_blocking(move || processInjector::inject(&target, &path)).await
             {
                 Ok(Ok(())) => {
+                    if cancel.is_cancelled() {
+                        break;
+                    }
+                    if let Err(error) = onReady(&candidate, &module) {
+                        log::error!("观测运行目录接入失败 pid={pid}：{error}");
+                        continue;
+                    }
                     injected.insert(candidate);
                     log::info!(
                         "观测模块就绪 pid={pid} 加载耗时毫秒={}",

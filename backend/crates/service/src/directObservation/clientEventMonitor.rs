@@ -23,8 +23,28 @@ pub(super) struct Settings {
 pub(super) struct EventMonitor {
     stop: CancellationToken,
     thread: Option<std::thread::JoinHandle<()>>,
+    homes: HomeRegistration,
+}
+
+// 加载调度只提交已验证的公开目录；实际 watch 在读取线程执行，不阻塞网络工作线程。
+#[derive(Clone)]
+pub(super) struct HomeRegistration(mpsc::SyncSender<PathBuf>);
+impl HomeRegistration {
+    // 目录必须绝对定位；队列满或已关闭时向加载方返回错误，后续扫描可重试而不是丢失注册。
+    pub(super) fn register(&self, home: PathBuf) -> Result<(), String> {
+        if !home.is_absolute() {
+            return Err("客户端运行目录必须为绝对路径".into());
+        }
+        self.0
+            .try_send(home)
+            .map_err(|_| "客户端目录注册队列暂不可用".into())
+    }
 }
 impl EventMonitor {
+    // 返回轻量注册入口，生命周期仍由 EventMonitor 的停止令牌和线程持有。
+    pub(super) fn registration(&self) -> HomeRegistration {
+        self.homes.clone()
+    }
     // 目录是明确的本机 CLI home；初始扫描用于处理监听注册期间的写入，来源回调可限定目标范围。
     pub(super) fn start(
         settings: Settings,
@@ -33,6 +53,7 @@ impl EventMonitor {
     ) -> Result<Self, String> {
         let root = settings.home.join("sessions");
         std::fs::create_dir_all(&root).map_err(|_| "准备客户端事件目录失败")?;
+        let root = std::fs::canonicalize(root).map_err(|_| "解析客户端事件目录失败")?;
         let (sender, receiver) = mpsc::sync_channel(1024);
         let rescan = Arc::new(AtomicBool::new(false));
         let overflow = rescan.clone();
@@ -47,17 +68,60 @@ impl EventMonitor {
             .watch(&root, RecursiveMode::Recursive)
             .map_err(|_| "注册客户端事件目录失败")?;
         let workerStop = stop.clone();
+        let (homeSender, homeReceiver) = mpsc::sync_channel::<PathBuf>(64);
         let thread = std::thread::Builder::new()
             .name("clientObservation".into())
             .spawn(move || {
-                let _watcher = watcher;
+                let mut watcher = watcher;
+                let mut roots = HashSet::from([root.clone()]);
+                let mut waitingHomes = HashSet::new();
+                let mut failedHomes = HashMap::<PathBuf, std::time::Instant>::new();
                 let mut journals = HashMap::<PathBuf, Journal>::new();
                 let mut pending = HashSet::new();
                 let mut failures = HashMap::<PathBuf, (std::time::Instant, String)>::new();
                 collectFiles(&root, &settings, &mut pending);
                 while !workerStop.is_cancelled() {
+                    waitingHomes.extend(homeReceiver.try_iter());
+                    let mut retryHomes = Vec::new();
+                    for home in waitingHomes.drain() {
+                        if failedHomes
+                            .get(&home)
+                            .is_some_and(|time| time.elapsed() < Duration::from_secs(1))
+                        {
+                            retryHomes.push(home);
+                            continue;
+                        }
+                        let addedRoot = home.join("sessions");
+                        let registered = std::fs::create_dir_all(&addedRoot)
+                            .and_then(|_| std::fs::canonicalize(&addedRoot))
+                            .map_err(|_| ())
+                            .and_then(|root| {
+                                if !roots.contains(&root) {
+                                    watcher
+                                        .watch(&root, RecursiveMode::Recursive)
+                                        .map_err(|_| ())?;
+                                }
+                                Ok(root)
+                            });
+                        if let Ok(addedRoot) = registered {
+                            if roots.insert(addedRoot.clone()) {
+                                collectFiles(&addedRoot, &settings, &mut pending);
+                            }
+                            failedHomes.remove(&home);
+                        } else {
+                            if !failedHomes.contains_key(&home) {
+                                sink.counters.errors.fetch_add(1, Ordering::Relaxed);
+                                log::error!("注册客户端运行目录失败，保留待重试目录");
+                            }
+                            failedHomes.insert(home.clone(), std::time::Instant::now());
+                            retryHomes.push(home);
+                        }
+                    }
+                    waitingHomes.extend(retryHomes);
                     if rescan.swap(false, Ordering::AcqRel) {
-                        collectFiles(&root, &settings, &mut pending);
+                        for root in &roots {
+                            collectFiles(root, &settings, &mut pending);
+                        }
                     }
                     let mut retry = Vec::new();
                     for path in pending.drain() {
@@ -128,6 +192,7 @@ impl EventMonitor {
         Ok(Self {
             stop,
             thread: Some(thread),
+            homes: HomeRegistration(homeSender),
         })
     }
 }

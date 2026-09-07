@@ -84,7 +84,7 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 - 进程身份使用原生创建时间，不把 PID 复用当成原进程；架构不同拒绝注入。
 - 按 `LoadLibraryW` 实际拥有模块的 RVA 查找目标入口，不复用宿主 ASLR 地址。
 - 参数内存和进程/线程句柄统一管理；超时任务继续持有内存，远程线程结束后再回收，并阻止重复加载。
-- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为包含运行实例校验、额外 CA 读取和代理自动发现的 `ObservationHookReady5`。
+- 就绪事件使用版本化名称，同时绑定 PID 与 DLL 路径；旧事件不再被当作当前模块成功证据。当前版本为同时要求运行目录元数据发布的 `ObservationHookReady6`。
 - DLL 去掉画像、注册表、系统代理改写和子进程终止逻辑，网络入口拆分至 `windowsRuntime.rs`。
 - trampoline 先发布、入口后启用；全部网络入口完成前不改连 TCP；同一 socket 的私有头只提交一次。
 
@@ -339,7 +339,32 @@ $env:OBSERVATION_TEST_CAPTURE_MODE='warm'
 cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::liveDirectTests::officialTransportRecordsUsage -- --exact --ignored --nocapture --test-threads=1
 ```
 
-**仍待完整闭环**：事件源目前使用宿主解析的 CLI home，其他进程独立 CODEX_HOME 尚未自动注册；
+**该阶段后续工作**：当时事件源只使用宿主解析的 CLI home；下一节补齐独立目录的自动注册。
 无持久化会话不产生这类文件，已建无持久化长连接仍需其他观测入口。
 文件读取位置当前在内存中，完整重启及异常退出边界、多目标并发加载、证书续期和实际安装更新仍需继续验证。
 网络测试与本节完成事件测试分别标明来源，不能据此宣称所有场景已完成。
+
+## 运行目录自动发现（2026-09-08）
+
+`directHook/runtimeMetadata.rs` 在目标进程的初始化线程读取 `CODEX_HOME`，未设置时使用默认用户目录。
+不读取 `auth.json`，不复制凭据，不写环境或客户端配置。`directCommon/runtimeHome.rs` 用分页文件支持的
+只读消费映射发布目录，协议为固定小端头与有界 UTF-16 路径，保留中文及原路径编码。
+映射名同时绑定 PID、精确创建时间与模块路径；解码检查头部、身份、未知标志、长度与绝对路径。
+重复发布不覆盖已有对象，发布句柄由客户端进程持有，因此宿主重启后可重新读取，客户端退出后由内核回收。
+
+`processMonitor.rs` 在模块就绪后读取真实运行目录，通过 `HomeRegistration` 排入事件线程。
+`clientEventMonitor.rs` 按规范化路径去重、注册新目录，并沿用本次观测的起始时间处理其事件。
+目录注册失败保留重试并限速，不把入队失败标成已完成；读取和加载不会改写原登录或上游地址。
+就绪协议升级为第六版，避免旧模块缺少目录发布能力却被认为已经完成接入。
+
+验证：
+
+- Common 9 项、DLL 17 项测试通过；UTF-16 中文路径、错误进程身份、截断长度、重复发布及映射释放均覆盖。
+- 生产 DLL 的 32 次双地址族 socket 回归中，测试进程使用独立中文 `CODEX_HOME`，宿主读取值与该进程环境一致。
+- 真实 app-server 保留原登录和配置目录；观察器初始目录刻意指向另一个空目录。
+  只有生产扫描器读取进程映射并注册真实目录后，同一已运行会话的第二轮才完成用量与费用快照核对。
+  证据：`backend/target/observationHomeDiscovery645aa000d1634e30af58df289adef172`。
+  未复制或迁移登录材料；测试结束后空观察目录及进程已清理。
+- 四项原生加载/重复加载/错误身份/超时回收回归通过，Release DLL 构建和 Tauri 独立工作区检查通过。
+
+该阶段补齐目录发现，不代表无持久化会话、完整宿主重启恢复、并发加载、证书续期和安装更新已经验收。

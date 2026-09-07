@@ -45,6 +45,7 @@ impl RoutingFixture {
                 "--nocapture",
             ])
             .env("OBSERVATION_NETWORK_FIXTURE", "true")
+            .env("CODEX_HOME", fixture.directory.join("独立客户端目录"))
             .env("HTTPS_PROXY", format!("http://{proxyAddress}"))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -65,6 +66,15 @@ impl RoutingFixture {
         fixture.expect("CLIENT_READY");
         let identity = nativeInjection::candidate(fixture.child.as_ref().unwrap().id()).unwrap();
         nativeInjection::inject(&identity, &fixture.directory.join("cphook.dll")).unwrap();
+        assert_eq!(
+            cpcommon::runtimeHome::read(
+                &fixture.directory.join("cphook.dll"),
+                identity.pid,
+                identity.createdAt
+            )
+            .unwrap(),
+            fixture.directory.join("独立客户端目录")
+        );
         fixture
     }
 

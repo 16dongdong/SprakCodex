@@ -66,7 +66,7 @@ fn dll_path() -> Option<PathBuf> {
     let h = HMODULE(HINST.load(Ordering::SeqCst) as *mut c_void);
     let mut buf = [0u16; 1024];
     let n = unsafe { GetModuleFileNameW(h, &mut buf) };
-    if n == 0 {
+    if n == 0 || n as usize >= buf.len() {
         return None;
     }
     Some(PathBuf::from(OsString::from_wide(&buf[..n as usize])))
@@ -920,6 +920,13 @@ unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
         "shutdown",
     );
     ready &= install_connect_ex_hook();
+    if ready {
+        ready = dll_path()
+            .ok_or("读取运行模块路径失败")
+            .and_then(|path| super::runtimeMetadata::publish(&path))
+            .map_err(|error| log(error))
+            .is_ok();
+    }
     if ready {
         NETWORK_READY.store(true, Ordering::Release);
         signal_ready();

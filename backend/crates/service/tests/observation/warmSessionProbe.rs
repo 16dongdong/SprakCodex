@@ -83,7 +83,8 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     let suffix = format!("-{thread}.jsonl");
     let eventMonitor = clientEventMonitor::EventMonitor::start(
         clientEventMonitor::Settings {
-            home: clientEventMonitor::defaultHome().unwrap(),
+            // 观察器先监听空目录，实际 CLI 沿用原登录目录；必须靠进程元数据发现真正的来源。
+            home: directory.join("observerHome"),
             since: chrono::Utc::now().timestamp_millis(),
             allow: Arc::new(move |path| {
                 path.file_name()
@@ -98,6 +99,7 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     target.monitor = Some(injectedClientProbe::startMonitor(
         target.moduleDirectory.join("cphook.dll"),
         Arc::new(Mutex::new(Some(identity.clone()))),
+        Some(eventMonitor.registration()),
     ));
     waitReady(identity.pid, &target.moduleDirectory.join("cphook.dll"));
     let after = peer.turn(&thread);
@@ -125,6 +127,9 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     let success = super::waitClient(target.child.as_mut().unwrap());
     peer.joinReader();
     drop(eventMonitor);
+    // 初始观察目录刻意与客户端不同且没有写入事件；监听释放后删除这两个空测试目录。
+    std::fs::remove_dir(directory.join("observerHome/sessions")).unwrap();
+    std::fs::remove_dir(directory.join("observerHome")).unwrap();
     success
 }
 

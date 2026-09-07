@@ -25,6 +25,10 @@ mod proxyDiscovery;
 mod systemProxy;
 
 #[cfg(windows)]
+#[allow(non_snake_case, non_upper_case_globals)]
+mod runtimeMetadata;
+
+#[cfg(windows)]
 #[path = "windowsRuntime.rs"]
 #[allow(non_snake_case, non_upper_case_globals)]
 mod imp;

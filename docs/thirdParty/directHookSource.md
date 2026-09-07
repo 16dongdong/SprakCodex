@@ -10,7 +10,8 @@
 `relayControl.rs` 管理配置快照，和宿主共用 `directCommon/relayContract.rs`、`runtimeLease.rs`；
 有效改连配置必须绑定存活的 Relay 运行线程。`trustProvider.rs` 与 `trustBundle.rs` 只接入额外 CA 读取，
 合并公开证书并保留原登录与环境块。`proxyDiscovery.rs` 和 `systemProxy.rs` 只读目标代理元数据，
-代替手工端口列表；就绪事件第五版同时要求运行实例、CA 读取和代理自动发现实现。
+代替手工端口列表。`runtimeMetadata.rs` 通过共用的 `runtimeHome.rs` 发布公开运行目录，
+就绪事件第六版同时要求运行实例、CA 读取、代理发现与目录元数据发布完成。
 原始源码许可为 Apache-2.0，完整许可见 `directHookApacheLicense.txt`。
 
 ## 构建

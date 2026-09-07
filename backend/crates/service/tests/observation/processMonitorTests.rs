@@ -6,9 +6,12 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 async fn cancelledMonitorDoesNotEnumerate() {
     let cancelled = CancellationToken::new();
     cancelled.cancel();
-    run(PathBuf::from("unused.dll"), cancelled, || {
-        panic!("停用后不应枚举进程")
-    })
+    run(
+        PathBuf::from("unused.dll"),
+        cancelled,
+        || panic!("停用后不应枚举进程"),
+        |_, _| Ok(()),
+    )
     .await;
 }
 
@@ -21,11 +24,16 @@ async fn firstScanIsImmediateAndShutdownIsPrompt() {
     let observedScans = scans.clone();
     tokio::time::timeout(
         Duration::from_secs(1),
-        run(PathBuf::from("unused.dll"), cancelled, move || {
-            observedScans.fetch_add(1, Ordering::Relaxed);
-            stopAfterScan.cancel();
-            Ok(Vec::new())
-        }),
+        run(
+            PathBuf::from("unused.dll"),
+            cancelled,
+            move || {
+                observedScans.fetch_add(1, Ordering::Relaxed);
+                stopAfterScan.cancel();
+                Ok(Vec::new())
+            },
+            |_, _| Ok(()),
+        ),
     )
     .await
     .expect("停止扫描必须及时返回");

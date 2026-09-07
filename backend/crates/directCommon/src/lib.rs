@@ -9,3 +9,7 @@ pub mod relayContract;
 #[cfg(windows)]
 #[allow(non_snake_case)]
 pub mod runtimeLease;
+
+#[cfg(windows)]
+#[allow(non_snake_case, non_upper_case_globals)]
+pub mod runtimeHome;
