@@ -3,6 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { formatCompactNumber } from "@/lib/utils/usage";
+import { normalizeRequestType } from "@/lib/utils/requestProtocol";
+import { useI18n } from "@/lib/i18n/provider";
+export { normalizeRequestType } from "@/lib/utils/requestProtocol";
 import type { AggregateApi, ApiKey, RequestLog } from "@/types";
 
 export type StatusFilter = "all" | "2xx" | "4xx" | "5xx";
@@ -344,10 +347,6 @@ export function formatModelEffortDisplay(log: RequestLog): string {
   return model || displayedEffort || "-";
 }
 
-export function normalizeRequestType(value: string): "ws" | "http" {
-  return String(value || "").trim().toLowerCase() === "ws" ? "ws" : "http";
-}
-
 function normalizeDisplayServiceTier(value: string | null | undefined): string {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized || normalized === "auto") {
@@ -372,11 +371,13 @@ export function resolveDisplayServiceTier(
   return "auto";
 }
 
+// 两种来源共享传输标签；非生成预热明确标注，避免把它看成普通生成或错误标成 HTTP。
 export function RequestTypeBadge({ requestType }: { requestType: string }) {
+  const { t } = useI18n();
   const normalized = normalizeRequestType(requestType);
-  const label = normalized.toUpperCase();
+  const label = normalized === "wsPrewarm" ? `WS · ${t("预热")}` : normalized.toUpperCase();
   const toneClass =
-    normalized === "ws"
+    normalized !== "http"
       ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-500"
       : "border-slate-500/20 bg-slate-500/10 text-slate-500";
   return (

@@ -13,20 +13,17 @@ async function readSource(relativePath) {
   return fs.readFile(path.join(appsRoot, relativePath), "utf8");
 }
 
-test("账号直连模式在网关状态块内提示并遮罩用量分析", async () => {
+// 官方直连观测的记录也进入用量分析；验收不得回退到旧的“切换网关才可统计”行为。
+test("账号直连模式说明观测口径并保持用量分析可见", async () => {
   const source = await readDashboardSource();
   const gatewayStatusSource = await readSource("src/components/dashboard/dashboard-gateway-status.tsx");
   assert.match(source, /useCodexProfileModeStatus/);
-  assert.match(source, /function DirectModeUnavailable/);
-  assert.match(source, /账号直连模式下不可用/);
-  assert.match(source, /切换到本地网关后可统计请求日志、Token 和费用/);
-  assert.match(source, /buildStaticRouteUrl\("\/platform-mode"\)/);
+  assert.doesNotMatch(source, /DirectModeUnavailable/);
+  assert.doesNotMatch(source, /账号直连模式下不可用/);
   assert.match(gatewayStatusSource, /当前为账号直连模式/);
-  assert.match(gatewayStatusSource, /CodexManager 无法统计 CLI 请求日志和用量。/);
-  assert.match(
-    source,
-    /<DirectModeUnavailable active=\{isDirectAccountMode\}>\s*<AdminUsageAnalyticsCard/s,
-  );
+  assert.match(gatewayStatusSource, /保留 Codex 原有登录与上游/);
+  assert.match(gatewayStatusSource, /不扣除平台钱包或密钥额度/);
+  assert.match(source, /<AdminUsageAnalyticsCard/);
   assert.doesNotMatch(source, /当前活跃账号/);
   assert.doesNotMatch(source, /智能推荐/);
 });

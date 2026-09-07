@@ -4,7 +4,6 @@ import {
   useEffect,
   useMemo,
   useState,
-  type ReactNode,
   type WheelEvent as ReactWheelEvent,
 } from "react";
 import {
@@ -344,30 +343,6 @@ function DashboardInitialSkeleton() {
       <div className="grid gap-6 md:grid-cols-2">
         <Skeleton className="h-72 w-full rounded-xl" />
         <Skeleton className="h-72 w-full rounded-xl" />
-      </div>
-    </div>
-  );
-}
-
-// 直连账号模式下遮罩仅支持本地网关的数据分析卡片，并保留跳转入口。
-function DirectModeUnavailable({
-  active,
-  children,
-}: {
-  active: boolean;
-  children: ReactNode;
-}) {
-  const { t } = useI18n();
-  if (!active) return <>{children}</>;
-  return (
-    <div className="relative overflow-hidden rounded-xl">
-      <div className="pointer-events-none select-none opacity-60 blur-[1px] grayscale">{children}</div>
-      <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/45 p-4 backdrop-blur-sm">
-        <div className="grid max-w-md justify-items-center gap-3 rounded-2xl border border-amber-500/40 bg-background/80 px-5 py-4 text-center shadow-lg">
-          <div className="text-sm font-semibold text-amber-700 dark:text-amber-200">{t("账号直连模式下不可用")}</div>
-          <div className="text-xs text-muted-foreground">{t("切换到本地网关后可统计请求日志、Token 和费用")}</div>
-          <a href={buildStaticRouteUrl("/platform-mode")} className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground">{t("管理直连观测")}</a>
-        </div>
       </div>
     </div>
   );
@@ -844,6 +819,7 @@ function AdminUsageAnalyticsCard({
   );
 }
 
+// 管理员分析使用后端已入库记录；直连观测和网关共享统计，不以当前接入模式遮罩历史数据。
 function AdminDashboard() {
   const { stats, isLoading, isServiceReady } = useDashboardStats({
     requestLogLimit: 0,
@@ -953,7 +929,7 @@ function AdminDashboard() {
         isLoading={isLoading}
       />
 
-      <DirectModeUnavailable active={isDirectAccountMode}>
+      {/* 直连是请求来源而非统计禁用条件，已有观测数据也应支持时间筛选。 */}
         <AdminUsageAnalyticsCard
           summary={adminUsageSummary}
           isLoading={isLoading || isAdminUsageLoading}
@@ -998,7 +974,6 @@ function AdminDashboard() {
           granularity={adminUsageGranularity}
           onGranularityChange={setAdminUsageGranularity}
         />
-      </DirectModeUnavailable>
 
     </div>
   );

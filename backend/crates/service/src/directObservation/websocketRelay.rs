@@ -2,25 +2,25 @@
 use super::{
     recordSink::Exchange,
     transport::{connectTimeout, reply, Engine, ResponseBody},
-    usageParser::{maxEventBytes, UsageParser},
+    usageParser::UsageParser,
+    websocketObservation::{handshakeProtocol, Observation},
 };
 use bytes::Bytes;
 use futures_util::{SinkExt, StreamExt};
 use http_body_util::{BodyExt, Full};
 use hyper::{body::Incoming, Request, Response, StatusCode};
 use hyper_util::rt::TokioIo;
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 use tokio_tungstenite::{
     tungstenite::{
         self,
         extensions::{compression::deflate::DeflateConfig, ExtensionsConfig},
         protocol::{Role, WebSocketConfig},
-        Message,
     },
     WebSocketStream,
 };
 
-const maxPendingResponses: usize = 64;
+const connectionIdleTimeout: Duration = Duration::from_secs(300);
 
 // 先完成真实上游握手，再向客户端返回 101；拒绝、过期认证和限流状态不伪装成握手成功。
 pub(super) async fn upgrade(
@@ -31,7 +31,7 @@ pub(super) async fn upgrade(
 ) -> Response<ResponseBody> {
     let host = target.host_str().unwrap_or("").to_owned();
     let path = target.path().to_owned();
-    let handshake = Exchange::new(&host, &path, "websocket");
+    let handshake = Exchange::new(&host, &path, handshakeProtocol);
     let scheme = if target.scheme() == "https" {
         "wss"
     } else {
@@ -65,7 +65,14 @@ pub(super) async fn upgrade(
             .connect(&host, target.port_or_known_default().unwrap_or(443))
             .await
             .map_err(tungstenite::Error::Io)?;
-        tokio_tungstenite::client_async_tls_with_config(outgoing, stream, Some(config), None).await
+        let connector = tokio_tungstenite::Connector::Rustls(engine.websocketTls.clone());
+        tokio_tungstenite::client_async_tls_with_config(
+            outgoing,
+            stream,
+            Some(config),
+            Some(connector),
+        )
+        .await
     };
     let connected = tokio::time::timeout(connectTimeout, connection).await;
     let (mut upstream, handshakeResponse) = match connected {
@@ -104,26 +111,37 @@ pub(super) async fn upgrade(
         };
         // 下游不宣告 deflate，上游由成熟库独立解压；不伪称端到端压缩参数保持不变。
         let mut downstream = WebSocketStream::from_raw_socket(TokioIo::new(stream), Role::Server, None).await;
-        let mut pending = HashMap::<String, (Exchange, UsageParser)>::new();
+        let mut observation = Observation::default();
         loop {
             let transfer = tokio::select! {
                 _ = taskEngine.cancel.cancelled() => break,
-                _ = tokio::time::sleep(Duration::from_secs(300)) => break,
+                _ = tokio::time::sleep(connectionIdleTimeout) => break,
                 message = upstream.next() => match message {
                     Some(Ok(message)) => {
-                        if tracked { observeMessage(&message, &mut pending, &taskEngine, (&host, &path)).await; }
+                        if tracked {
+                            match observation.response(&message) {
+                                Ok(Some((exchange, parsed, status))) => taskEngine.sink.finish(exchange, parsed, status).await,
+                                Ok(None) => {},
+                                Err(()) => { taskEngine.sink.counters.errors.fetch_add(1, std::sync::atomic::Ordering::Relaxed); },
+                            }
+                        }
                         downstream.send(message).await
                     }
                     _ => break,
                 },
                 message = downstream.next() => match message {
-                    Some(Ok(message)) => upstream.send(message).await,
+                    Some(Ok(message)) => {
+                        if tracked && observation.request(&message, (&host, &path)).is_err() {
+                            taskEngine.sink.counters.errors.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        }
+                        upstream.send(message).await
+                    },
                     _ => break,
                 },
             };
             if transfer.is_err() { break; }
         }
-        for (_, (exchange, mut parsed)) in pending {
+        for (exchange, mut parsed) in observation.unfinished() {
             parsed.problem = Some("WebSocket 在响应完成之前关闭，用量可能缺失");
             taskEngine.sink.finish(exchange, parsed, 499).await;
         }
@@ -136,56 +154,4 @@ pub(super) async fn upgrade(
             .map_err(|never| match never {})
             .boxed_unsync(),
     )
-}
-
-// 连接可包含多个响应；按服务端 response.id 区分，终结事件只提交一次，重放由数据库去重。
-// 超大消息仍由网络库原样转发，旁路不再分配 JSON 树；无响应标识的消息不臆造归属。
-async fn observeMessage(
-    message: &Message,
-    pending: &mut HashMap<String, (Exchange, UsageParser)>,
-    engine: &Engine,
-    target: (&str, &str),
-) {
-    let bytes: &[u8] = match message {
-        Message::Text(text) => text.as_bytes(),
-        Message::Binary(bytes) => bytes,
-        _ => return,
-    };
-    if bytes.len() > maxEventBytes {
-        return;
-    }
-    let Ok(event) = serde_json::from_slice::<serde_json::Value>(bytes) else {
-        return;
-    };
-    let Some(response) = event.get("response") else {
-        return;
-    };
-    let Some(identity) = response
-        .get("id")
-        .and_then(|value| value.as_str())
-        .filter(|value| value.len() <= 256)
-    else {
-        return;
-    };
-    if !pending.contains_key(identity) && pending.len() >= maxPendingResponses {
-        engine
-            .sink
-            .counters
-            .errors
-            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        return;
-    }
-    let (_, parsed) = pending.entry(identity.into()).or_insert_with(|| {
-        (
-            Exchange::new(target.0, target.1, "websocket"),
-            UsageParser::default(),
-        )
-    });
-    parsed.message(&event);
-    if parsed.terminal {
-        if let Some((exchange, parsed)) = pending.remove(identity) {
-            let status = if parsed.problem.is_some() { 502 } else { 200 };
-            engine.sink.finish(exchange, parsed, status).await;
-        }
-    }
 }

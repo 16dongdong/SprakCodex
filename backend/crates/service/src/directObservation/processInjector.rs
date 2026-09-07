@@ -19,11 +19,7 @@ pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
         .iter()
         .filter_map(|(pid, process)| {
             let executable = process.exe()?.to_path_buf();
-            let name = executable
-                .file_name()?
-                .to_string_lossy()
-                .to_ascii_lowercase();
-            if targetProcessNames.contains(&name.as_str()) || isAppServer(process.cmd()) {
+            if isTargetExecutable(&executable) {
                 Some(ProcessCandidate {
                     pid: pid.as_u32(),
                     executable,
@@ -35,10 +31,12 @@ pub(super) fn findCandidates() -> Vec<ProcessCandidate> {
         .collect()
 }
 
-fn isAppServer(command: &[String]) -> bool {
-    command
-        .iter()
-        .any(|argument| argument.eq_ignore_ascii_case("app-server"))
+// app-server 是通用参数而不是进程身份；只接受指定可执行文件名，避免误接管其他本地服务。
+fn isTargetExecutable(executable: &Path) -> bool {
+    executable.file_name().is_some_and(|name| {
+        let name = name.to_string_lossy();
+        targetProcessNames.iter().any(|target| name.eq_ignore_ascii_case(target))
+    })
 }
 
 // 使用绝对 DLL 路径，并在注入前检查架构路径；失败返回可展示诊断，绝不报告假成功。
@@ -131,12 +129,5 @@ pub(super) fn inject(_pid: u32, _dll: &Path) -> Result<(), String> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::isAppServer;
-
-    #[test]
-    fn identifiesOnlyAppServerArgument() {
-        assert!(isAppServer(&["codex".into(), "app-server".into()]));
-        assert!(!isAppServer(&["codex".into(), "server".into()]));
-    }
-}
+#[path = "../../tests/observation/processSelectionTests.rs"]
+mod tests;

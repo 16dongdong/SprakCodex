@@ -4,9 +4,12 @@ mod certificateAuthority;
 #[allow(non_snake_case)]
 mod processInjector;
 mod recordSink;
+mod relayIngress;
+mod runtimePaths;
 mod streamObserver;
 mod transport;
 mod usageParser;
+mod websocketObservation;
 mod websocketRelay;
 
 use recordSink::Counters;
@@ -25,6 +28,7 @@ static runningEngine: OnceLock<Mutex<Option<Running>>> = OnceLock::new();
 struct Running {
     address: String,
     certificate: PathBuf,
+    relayConfig: Option<PathBuf>,
     cancel: CancellationToken,
     thread: std::thread::JoinHandle<()>,
     counters: Arc<Counters>,
@@ -73,6 +77,12 @@ pub fn start() -> Result<ObservationStatus, String> {
         }
         return Ok(statusOf(Some(current)));
     }
+    // 缺少 DLL 必须在发布监听前报错，避免 UI 的 running 掩盖完全没有接管目标进程的状态。
+    let injectionDll = runtimePaths::resolve()?;
+    let relayConfig = injectionDll
+        .as_deref()
+        .map(runtimePaths::configPath)
+        .transpose()?;
     crate::storage_helpers::initialize_storage()?;
     let authority = certificateAuthority::Authority::create(observationHosts)?;
     let folder = crate::process_env::db_dir();
@@ -81,7 +91,7 @@ pub fn start() -> Result<ObservationStatus, String> {
         rand::random::<u128>()
     ));
     std::fs::write(&certificate, &authority.pem).map_err(|_| "保存观测公开证书失败")?;
-    let result = startRuntime(authority, certificate.clone());
+    let result = startRuntime(authority, certificate.clone(), injectionDll, relayConfig);
     match result {
         Ok(current) => {
             // 运行时已绑定端口后才写入开关；持久化失败必须回收已启动线程和证书，避免出现“界面关闭但端口仍监听”。
@@ -121,6 +131,8 @@ pub fn start() -> Result<ObservationStatus, String> {
 fn startRuntime(
     authority: certificateAuthority::Authority,
     certificate: PathBuf,
+    injectionDll: Option<PathBuf>,
+    relayConfig: Option<PathBuf>,
 ) -> Result<Running, String> {
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
@@ -134,6 +146,7 @@ fn startRuntime(
         recordSink::RecordSink::start(crate::process_env::ensure_default_db_path())?;
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
+    let workerConfig = relayConfig.clone();
     let thread = std::thread::Builder::new()
         .name("directObservation".into())
         .spawn(move || {
@@ -162,30 +175,18 @@ fn startRuntime(
                     }
                 };
                 let address = format!("http://{localAddress}");
-                if let Err(error) = writeRelayConfig(localAddress.port()) {
-                    let _ = ready.send(Err(error));
-                    return;
+                if let Some(configPath) = workerConfig.as_deref() {
+                    if let Err(error) = runtimePaths::writeRelayConfig(configPath, localAddress.port()) {
+                        let _ = ready.send(Err(error));
+                        return;
+                    }
                 }
                 if ready.send(Ok(address)).is_err() {
                     return;
                 }
                 let monitorEngine = engine.cancel.clone();
                 tokio::spawn(async move {
-                    let dll = std::env::var_os("CODEXMANAGER_OBSERVATION_DLL")
-                        .map(PathBuf::from)
-                        .or_else(|| {
-                            std::env::current_exe().ok().and_then(|path| {
-                                let directory = path.parent()?;
-                                [
-                                    directory.join("cphook.dll"),
-                                    directory.join("resources/cphook.dll"),
-                                    directory.join("Resources/cphook.dll"),
-                                ]
-                                .into_iter()
-                                .find(|candidate| candidate.is_file())
-                            })
-                        });
-                    let Some(dll) = dll else {
+                    let Some(dll) = injectionDll else {
                         log::error!("无法确定观测注入 DLL 路径");
                         return;
                     };
@@ -220,34 +221,30 @@ fn startRuntime(
             }
         })
         .map_err(|_| "启动观测线程失败")?;
-    let address = started.recv().map_err(|_| "观测线程提前退出")??;
+    let address = match started
+        .recv()
+        .map_err(|_| "观测线程提前退出".to_string())
+        .and_then(|ready| ready)
+    {
+        Ok(address) => address,
+        Err(error) => {
+            cancel.cancel();
+            // 接收启动失败后仍 join，让失败实例的数据库线程先退出，避免重试遗留工作线程。
+            thread.join().map_err(|_| "观测启动失败且线程异常退出")?;
+            if let Some(path) = relayConfig.as_deref() {
+                runtimePaths::writeRelayConfig(path, 0)?;
+            }
+            return Err(error);
+        }
+    };
     Ok(Running {
         address,
         certificate,
+        relayConfig,
         cancel,
         thread,
         counters,
     })
-}
-
-// 为已注入的 cphook 写入仅包含 Relay 端口的运行时配置；指纹和环境改写始终关闭。
-fn writeRelayConfig(port: u16) -> Result<(), String> {
-    let path = std::env::current_exe()
-        .map_err(|_| "读取观测配置目录失败")?
-        .with_file_name("hook.json");
-    let content = serde_json::json!({
-        "enabled": false,
-        "clear_proxy_env": false,
-        "proxy_relay_port": port,
-        "force_proxy_tcp": true,
-        "block_udp": false,
-        "blocked_loopback_proxy_ports": []
-    });
-    std::fs::write(
-        path,
-        serde_json::to_vec_pretty(&content).map_err(|_| "生成注入配置失败")?,
-    )
-    .map_err(|_| "写入注入配置失败".to_string())
 }
 
 // 用户主动停用会持久化关闭状态；与服务退出区别开，避免正常重启丢失自动恢复配置。
@@ -269,10 +266,14 @@ fn cleanupRunning(current: Running) -> Result<(), String> {
     } else {
         Ok(())
     };
-    let relayResult = writeRelayConfig(0);
+    let relayResult = current
+        .relayConfig
+        .as_deref()
+        .map(|path| runtimePaths::writeRelayConfig(path, 0))
+        .transpose();
     joined.map_err(|_| "观测线程异常退出".to_string())?;
     certificateResult?;
-    relayResult
+    relayResult.map(|_| ())
 }
 
 // 同一锁内串行化开关写入和资源释放；disable 为 false 时绝不写入持久化设置。
@@ -340,3 +341,7 @@ pub fn configureChild(command: &mut std::process::Command) -> Result<(), String>
     command.env("CODEX_CA_CERTIFICATE", &certificate);
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "../../tests/observation/liveDirectTests.rs"]
+mod liveDirectTests;

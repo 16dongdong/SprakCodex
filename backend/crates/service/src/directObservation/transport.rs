@@ -16,7 +16,7 @@ use hyper_util::{
 };
 use std::{convert::Infallible, io, sync::Arc, time::Duration};
 use tokio::{
-    io::{AsyncRead, AsyncReadExt, AsyncWrite},
+    io::{AsyncRead, AsyncWrite},
     net::{TcpListener, TcpStream},
     sync::Semaphore,
 };
@@ -30,6 +30,7 @@ const maxConnections: usize = 128;
 pub(super) struct Engine {
     pub authority: Authority,
     pub client: reqwest::Client,
+    pub websocketTls: Arc<rustls::ClientConfig>,
     pub proxy: Option<ProxyConfig>,
     pub sink: RecordSink,
     pub cancel: CancellationToken,
@@ -44,6 +45,17 @@ impl Engine {
         proxy: Option<String>,
         cancel: CancellationToken,
     ) -> Result<Self, String> {
+        // 工作区同时编译 ring 与 aws-lc；显式选择 provider，避免 WebSocket 首次连接时全局选择歧义导致 panic。
+        // 根证书仍使用公共可信根，绝不把下游临时 CA 加入真实上游的信任集合。
+        let websocketTls = rustls::ClientConfig::builder_with_provider(Arc::new(
+            rustls::crypto::ring::default_provider(),
+        ))
+        .with_safe_default_protocol_versions()
+        .map_err(|_| "初始化上游 TLS 版本失败")?
+        .with_root_certificates(rustls::RootCertStore::from_iter(
+            webpki_roots::TLS_SERVER_ROOTS.iter().cloned(),
+        ))
+        .with_no_client_auth();
         let mut builder = reqwest::Client::builder()
             .no_proxy()
             .use_rustls_tls()
@@ -69,6 +81,7 @@ impl Engine {
         Ok(Self {
             authority,
             client,
+            websocketTls: Arc::new(websocketTls),
             proxy,
             sink,
             cancel,
@@ -123,77 +136,69 @@ pub(super) async fn serve(listener: TcpListener, engine: Arc<Engine>) {
     }
 }
 
-// 接受标准 HTTP 代理与 CProxy 私有 Relay 两种入口；Relay 头只携带目标地址，主机名从 TLS SNI 重获。
+// 先可靠读取入口类型，再交给 HTTP 或 Relay；握手探测有总时限且随服务停止取消。
 async fn serveAccepted(mut stream: TcpStream, engine: Arc<Engine>) {
-    let mut prefix = [0u8; 8];
-    if stream.peek(&mut prefix).await.is_err() {
-        return;
-    }
-    if prefix != *b"CPROXYH1" {
-        serveConnection(stream, engine, None).await;
-        return;
-    }
-    let mut header = [0u8; 32];
-    if stream.read_exact(&mut header).await.is_err() || header[..8] != *b"CPROXYH1" {
-        return;
-    }
-    let Some(sni) = readTlsSni(&stream).await else {
-        log::debug!("Relay 连接缺少有效 TLS SNI");
-        return;
+    use super::relayIngress::{self, Ingress};
+    let detected = tokio::select! {
+        _ = engine.cancel.cancelled() => return,
+        result = tokio::time::timeout(connectTimeout, relayIngress::readIngress(&mut stream)) => result,
     };
-    let Some(config) = engine.authority.hosts.get(&sni).cloned() else {
-        log::debug!("Relay 目标主机不在观测白名单: {sni}");
-        return;
-    };
-    let accepted = match tokio_rustls::TlsAcceptor::from(config).accept(stream).await {
-        Ok(accepted) => accepted,
-        Err(_) => return,
-    };
-    serveConnection(accepted, engine, Some(format!("{sni}:443"))).await;
-}
-
-// 从 TLS ClientHello 扩展读取 SNI；只查看握手头，不消费字节，后续 TLS 接收仍读取完整握手。
-async fn readTlsSni(stream: &TcpStream) -> Option<String> {
-    let mut bytes = vec![0u8; 16 * 1024];
-    let length = stream.peek(&mut bytes).await.ok()?;
-    if length < 5 || bytes[0] != 22 {
-        return None;
-    }
-    let recordLength = u16::from_be_bytes([bytes[3], bytes[4]]) as usize;
-    if recordLength + 5 > length || bytes[5] != 1 {
-        return None;
-    }
-    let mut cursor = 43usize;
-    let sessionLength = *bytes.get(cursor)? as usize;
-    cursor += 1 + sessionLength;
-    let cipherLength = u16::from_be_bytes([*bytes.get(cursor)?, *bytes.get(cursor + 1)?]) as usize;
-    cursor += 2 + cipherLength;
-    let compressionLength = *bytes.get(cursor)? as usize;
-    cursor += 1 + compressionLength;
-    let extensionsLength =
-        u16::from_be_bytes([*bytes.get(cursor)?, *bytes.get(cursor + 1)?]) as usize;
-    cursor += 2;
-    let end = cursor.checked_add(extensionsLength)?;
-    while cursor + 4 <= end && cursor + 4 <= length {
-        let kind = u16::from_be_bytes([bytes[cursor], bytes[cursor + 1]]);
-        let size = u16::from_be_bytes([bytes[cursor + 2], bytes[cursor + 3]]) as usize;
-        cursor += 4;
-        if kind == 0 && size >= 5 && cursor + size <= length {
-            let nameListLength = u16::from_be_bytes([bytes[cursor], bytes[cursor + 1]]) as usize;
-            if nameListLength + 2 > size {
-                return None;
-            }
-            let nameType = bytes[cursor + 2];
-            let nameLength = u16::from_be_bytes([bytes[cursor + 3], bytes[cursor + 4]]) as usize;
-            if nameType == 0 && nameLength > 0 && nameLength + 5 <= size {
-                return String::from_utf8(bytes[cursor + 5..cursor + 5 + nameLength].to_vec()).ok();
-            }
+    match detected {
+        Ok(Ok(Ingress::Http(prefix))) => {
+            serveConnection(relayIngress::replay(stream, prefix), engine, None).await;
         }
-        cursor += size;
+        Ok(Ok(Ingress::Relay(target))) => serveRelay(stream, engine, target).await,
+        _ => log::debug!("观测入口未收到完整有效的协议前缀"),
     }
-    None
 }
 
+// 原始 IP 和端口始终保留；白名单以外的域名、非 TLS 协议和非 443 端口全部原样隧道转发。
+async fn serveRelay(
+    mut stream: TcpStream,
+    engine: Arc<Engine>,
+    target: cpcommon::hook_proxy::HookProxyTarget,
+) {
+    use super::relayIngress;
+    let operation = async {
+        let (host, prefix) = if target.port == 443 {
+            tokio::time::timeout(connectTimeout, relayIngress::readHello(&mut stream))
+                .await
+                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "Relay 握手探测超时"))??
+        } else {
+            (None, Vec::new())
+        };
+        let config = host
+            .as_deref()
+            .and_then(|host| engine.authority.hosts.get(host))
+            .cloned();
+        let mut stream = relayIngress::replay(stream, prefix);
+        if let (Some(host), Some(config)) = (host, config) {
+            let accepted = tokio::time::timeout(
+                connectTimeout,
+                tokio_rustls::TlsAcceptor::from(config).accept(stream),
+            )
+            .await
+            .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "Relay TLS 握手超时"))??;
+            serveConnection(
+                accepted,
+                engine.clone(),
+                Some(format!("{host}:{}", target.port)),
+            )
+            .await;
+        } else {
+            let mut upstream = engine.connect(&target.ip.to_string(), target.port).await?;
+            tokio::io::copy_bidirectional(&mut stream, &mut upstream).await?;
+        }
+        Ok::<_, io::Error>(())
+    };
+    tokio::select! {
+        _ = engine.cancel.cancelled() => {},
+        result = operation => if result.is_err() {
+            // 日志只记录失败阶段，不输出握手字节、凭据或请求正文。
+            log::debug!("Relay TLS 或原目标隧道连接结束");
+        }
+    }
+}
 // 同一实现承载明文代理与解密后的 HTTP/1.1、HTTP/2；固定 tunnel 防止请求 authority 越界。
 pub(super) fn serveConnection<S>(
     stream: S,

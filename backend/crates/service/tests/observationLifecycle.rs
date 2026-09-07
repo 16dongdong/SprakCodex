@@ -1,17 +1,43 @@
-#![allow(non_snake_case)]
+#![allow(non_snake_case, non_upper_case_globals)]
 use codexmanager_core::storage::{now_ts, Storage};
 use codexmanager_service::directObservation;
 mod support;
 
-// 使用独立进程的隔离数据库验证服务退出与用户停用不同；不启动监听或注入真实进程。
+const fixtureVariable: &str = "OBSERVATION_LIFECYCLE_FIXTURE";
+
+// 数据库适配层的 SQLx 池可能延迟关闭文件，父进程在测试子进程退出后严格清理，而非吞掉 Windows 共享冲突。
 #[test]
 fn hostShutdownPreservesEnabledChoice() {
-    let _environmentLock = support::test_env_guard();
     let directory = std::env::temp_dir().join(format!(
         "observationLifecycle{:032x}",
         rand::random::<u128>()
     ));
     std::fs::create_dir(&directory).unwrap();
+    let result = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "lifecycleWorker", "--ignored", "--nocapture"])
+        .env(fixtureVariable, &directory)
+        .output()
+        .expect("启动生命周期测试子进程失败");
+    for entry in std::fs::read_dir(&directory).unwrap() {
+        let entry = entry.unwrap();
+        assert!(entry.file_type().unwrap().is_file());
+        std::fs::remove_file(entry.path()).expect("删除测试数据库文件失败");
+    }
+    std::fs::remove_dir(directory).expect("删除测试目录失败");
+    assert!(
+        result.status.success(),
+        "生命周期子进程失败：{}",
+        String::from_utf8_lossy(&result.stdout)
+    );
+}
+
+// 仅由父测试运行；断言关停不改启用设置、主动停用持久化关闭，重复调用幂等且不触及真实进程。
+#[test]
+#[ignore = "由父测试提供独立目录并负责进程退出后的清理"]
+fn lifecycleWorker() {
+    let _environmentLock = support::test_env_guard();
+    let directory =
+        std::path::PathBuf::from(std::env::var_os(fixtureVariable).expect("缺少父测试目录"));
     let database = directory.join("fixture.db");
     let _path = support::EnvGuard::set("CODEXMANAGER_DB_PATH", database.to_str().unwrap());
     let _idle = support::EnvGuard::set("CODEXMANAGER_STORAGE_MAX_IDLE_CONNECTIONS", "0");
@@ -26,34 +52,9 @@ fn hostShutdownPreservesEnabledChoice() {
         Some("true")
     );
     assert!(!directObservation::stop().unwrap().running);
+    assert!(!directObservation::stop().unwrap().running);
     assert_eq!(
         storage.get_app_setting(setting).unwrap().as_deref(),
         Some("false")
     );
-    drop(storage);
-    // 只删除本测试创建且位于唯一目录内的数据库文件，不递归删除任何外部路径。
-    for entry in std::fs::read_dir(&directory).unwrap() {
-        let entry = entry.unwrap();
-        assert!(entry.file_type().unwrap().is_file());
-        removeFixtureFile(entry.path());
-    }
-    let _ = std::fs::remove_dir(directory);
-}
-
-// Windows SQLite 的 WAL/SHM 句柄在连接释放后可能延迟关闭，短暂重试可避免清理阶段的竞态。
-fn removeFixtureFile(path: std::path::PathBuf) {
-    for _ in 0..40 {
-        match std::fs::remove_file(&path) {
-            Ok(()) => return,
-            Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {
-                std::thread::sleep(std::time::Duration::from_millis(25));
-            }
-            Err(error) => {
-                // SQLite 连接池可能在测试进程结束前仍持有句柄，交由临时目录清理器回收。
-                eprintln!("观测测试文件暂时无法删除 {}：{error}", path.display());
-                return;
-            }
-        }
-    }
-    eprintln!("观测测试文件删除延迟：{}", path.display());
 }

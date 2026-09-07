@@ -77,7 +77,7 @@ function StatusMetric({
   );
 }
 
-// 根据当前服务连接与账号模式展示网关状态；直连模式明确说明统计边界，避免误读卡片数据。
+// 状态卡区分官方直连与网关；统计是否存在以入库数据为准，不把直连模式描述为永远不支持统计。
 export function DashboardGatewayStatus({
   connected,
   directMode,
@@ -96,7 +96,7 @@ export function DashboardGatewayStatus({
       ? t("网关运行正常")
       : t("正在等待网关连接");
   const description = directMode
-    ? t("CodexManager 无法统计 CLI 请求日志和用量。")
+    ? t("保留 Codex 原有登录与上游，记录请求、实际 Token 用量和模型价格费用快照，不扣除平台钱包或密钥额度。")
     : connected
       ? t("近期请求路由稳定，账号池可正常参与调度。")
       : t("正在等待服务连接。");

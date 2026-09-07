@@ -2,6 +2,10 @@
 use super::{ChargeSnapshotInputV2, RequestLog, RequestTokenStat, Storage};
 use rusqlite::{params, Result};
 
+// 非生成预热是独立的网络请求，原始用量保留供核对，但不混入生成用量或按生成价格估算。
+#[allow(non_upper_case_globals)]
+pub const observationPrewarmRequestType: &str = "websocketPrewarm";
+
 #[allow(non_snake_case)]
 impl Storage {
     // 在数据库工作线程内原子写入观测结果。trace_id 必须由观测器生成；
@@ -28,16 +32,18 @@ impl Storage {
             return Ok(false);
         }
         let requestId = transaction.last_insert_rowid();
+        let prewarm = request.request_type.as_deref() == Some(observationPrewarmRequestType);
         transaction.execute(
             "INSERT INTO request_token_stats (request_log_id, model, actual_source_kind,
              input_tokens, cached_input_tokens, output_tokens, total_tokens, reasoning_output_tokens,
-             usage_included, created_at) VALUES (?1, ?2, 'directObservation', ?3, ?4, ?5, ?6, ?7, 1, ?8)",
+             usage_included, created_at) VALUES (?1, ?2, 'directObservation', ?3, ?4, ?5, ?6, ?7, ?9, ?8)",
             params![requestId, request.model, usage.input_tokens,
                 usage.cached_input_tokens, usage.output_tokens, usage.total_tokens,
-                usage.reasoning_output_tokens, request.created_at],
+                usage.reasoning_output_tokens, request.created_at, !prewarm],
         )?;
         // 未知用量或缺失价格不写零价快照；保留可见原因供补齐价格后核对。
         let pricing = pricingModel
+            .filter(|_| !prewarm)
             .zip(usage.input_tokens)
             .zip(usage.output_tokens)
             .zip(usage.cached_input_tokens);
@@ -63,9 +69,10 @@ impl Storage {
             }
             _ => false,
         };
-        if !priced {
-            transaction.execute("UPDATE request_logs SET error=CASE WHEN error IS NULL THEN ?2 ELSE error || '；' || ?2 END WHERE id=?1",
-                params![requestId, "费用未知：缺少完整用量或模型价格，未生成零价快照"])?;
+        if !priced && !prewarm {
+            // 中文分隔符也作为参数传递，避免 SQL 兼容层的字面量改写把 UTF-8 分隔符变成乱码。
+            transaction.execute("UPDATE request_logs SET error=CASE WHEN error IS NULL THEN ?2 ELSE error || ?3 || ?2 END WHERE id=?1",
+                params![requestId, "费用未知：缺少完整用量或模型价格，未生成零价快照", "；"])?;
         }
         transaction.commit()?;
         Ok(true)
