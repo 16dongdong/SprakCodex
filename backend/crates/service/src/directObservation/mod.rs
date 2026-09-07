@@ -146,7 +146,11 @@ fn startRuntime(
                         let _ = ready.send(Err("读取观测端口失败".into()));
                         return;
                     }
-                };
+            };
+            if let Err(error) = writeRelayConfig(listener.local_addr().ok().map(|value| value.port()).unwrap_or_default()) {
+                let _ = ready.send(Err(error));
+                return;
+            }
             if ready.send(Ok(address)).is_err() {
                 return;
             }
@@ -199,6 +203,21 @@ fn startRuntime(
     })
 }
 
+// 为已注入的 cphook 写入仅包含 Relay 端口的运行时配置；指纹和环境改写始终关闭。
+fn writeRelayConfig(port: u16) -> Result<(), String> {
+    let path = std::env::current_exe().map_err(|_| "读取观测配置目录失败")?.with_file_name("hook.json");
+    let content = serde_json::json!({
+        "enabled": false,
+        "clear_proxy_env": false,
+        "proxy_relay_port": port,
+        "force_proxy_tcp": true,
+        "block_udp": false,
+        "blocked_loopback_proxy_ports": []
+    });
+    std::fs::write(path, serde_json::to_vec_pretty(&content).map_err(|_| "生成注入配置失败")?)
+        .map_err(|_| "写入注入配置失败".to_string())
+}
+
 // 停止先关闭监听及活动连接，再排空写库队列并清理公开证书；重复停止幂等。
 pub fn stop() -> Result<ObservationStatus, String> {
     let mut guard = runningEngine
@@ -209,6 +228,7 @@ pub fn stop() -> Result<ObservationStatus, String> {
         current.cancel.cancel();
         let joined = current.thread.join();
         std::fs::remove_file(&current.certificate).map_err(|_| "清理观测公开证书失败")?;
+        let _ = writeRelayConfig(0);
         joined.map_err(|_| "观测线程异常退出")?;
     }
     if let Some(storage) = crate::storage_helpers::open_storage() {
