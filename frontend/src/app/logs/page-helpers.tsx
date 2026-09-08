@@ -258,16 +258,9 @@ export function resolveAccountDisplayNameById(
   );
 }
 
+// HTTP 状态只来自采集结果；费用未知等附加说明不是传输失败，禁止据此制造 502。
 export function resolveDisplayedStatusCode(log: RequestLog): number | null {
-  const statusCode = log.statusCode;
-  const hasError = Boolean(String(log.error || "").trim());
-  if (statusCode == null) {
-    return hasError ? 502 : null;
-  }
-  if (hasError && statusCode < 400) {
-    return 502;
-  }
-  return statusCode;
+  return log.statusCode;
 }
 
 export function resolveAggregateApiDisplayName(
