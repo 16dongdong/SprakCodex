@@ -89,8 +89,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">{t("系统设置")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("管理应用行为、网络出口、费用显示和技术诊断")}</p>
+        <p className="text-sm text-muted-foreground">{t("管理应用行为、网络出口、费用显示和技术诊断")}</p>
       </div>
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="glass-card mb-6 grid h-auto w-full grid-cols-2 gap-1 rounded-lg p-1 lg:flex lg:h-11 lg:w-fit">

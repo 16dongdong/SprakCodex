@@ -158,9 +158,6 @@ export function RequestLogsTabContent({
                     {t("实时网关观测")}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-lg font-semibold tracking-tight">
-                      {t("请求日志")}
-                    </div>
                     <span className="rounded-full border border-border/60 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                       {compactMetaText}
                     </span>

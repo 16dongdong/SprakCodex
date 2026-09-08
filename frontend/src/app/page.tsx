@@ -14,7 +14,7 @@ import { useAppStore } from "@/lib/store/useAppStore";
 
 const refreshIntervalMs = 15_000;
 
-// 首页只读取个人统计；缓存页隐藏或服务断开时停止轮询，失败显示错误而不是伪造零用量。
+// 页面标题由顶栏统一提供，内容区仅保留状态和刷新操作；首页只读取个人统计；缓存页隐藏或服务断开时停止轮询，失败显示错误而不是伪造零用量。
 export default function HomePage() {
   const { t } = useI18n();
   const service = useAppStore((state) => state.serviceStatus);
@@ -56,13 +56,12 @@ export default function HomePage() {
     <div className="mx-auto max-w-[1440px] space-y-6 pb-6" data-testid="personal-dashboard">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className={`size-2 rounded-full ${service.connected ? "bg-emerald-500" : "bg-muted-foreground"}`} />
             {t(service.connected ? "服务已连接" : "正在等待服务连接")}
             <span aria-hidden="true">·</span>
             <span>{new Date(dayStartTs * 1000).toLocaleDateString()}</span>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight">{t("仪表盘")}</h1>
         </div>
         <Button variant="outline" className="rounded-xl" disabled={!service.connected || overview.isFetching} onClick={() => void overview.refetch()}>
           <RefreshCw className={`mr-2 size-4 ${overview.isFetching ? "animate-spin motion-reduce:animate-none" : ""}`} />{t("刷新")}
