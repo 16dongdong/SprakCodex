@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
  * # 返回
  * 返回函数执行结果
  */
+// 点击命中范围与可见控件保持一致，移除外扩伪元素；焦点环和键盘交互不受影响。
 function Switch({
   className,
   size = "default",
@@ -29,7 +30,7 @@ function Switch({
       data-slot="switch"
       data-size={size}
       className={cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary/40 data-checked:bg-primary data-unchecked:border-foreground/20 data-unchecked:bg-foreground/18 dark:data-unchecked:border-foreground/30 dark:data-unchecked:bg-foreground/20 data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary/40 data-checked:bg-primary data-unchecked:border-foreground/20 data-unchecked:bg-foreground/18 dark:data-unchecked:border-foreground/30 dark:data-unchecked:bg-foreground/20 data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className
       )}
       {...props}

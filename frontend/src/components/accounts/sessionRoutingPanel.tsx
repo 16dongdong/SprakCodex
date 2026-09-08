@@ -17,7 +17,7 @@ interface SessionRoutingPanelProps {
   accounts: Account[];
 }
 
-/// 在账号页集中展示本机接入、总开关和账号参与状态；所有变更以后端返回快照为准。
+// 账号页仅保留接入和分流总开关；普通容器不扩大点击范围，按钮使用独立无障碍名称。
 export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
   const { t } = useI18n();
   const service = useAppStore((state) => state.serviceStatus);
@@ -50,11 +50,6 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
     mutationFn: sessionRoutingClient.setEnabled,
     onSuccess: updateSnapshot,
   });
-  const accountMutation = useMutation({
-    mutationFn: ({ accountId, enabled }: { accountId: string; enabled: boolean }) =>
-      sessionRoutingClient.setAccountEnabled(accountId, enabled),
-    onSuccess: updateSnapshot,
-  });
   const routing = routingQuery.data;
   const preferenceByAccount = new Map(
     (routing?.accounts ?? []).map((item) => [item.accountId, item]),
@@ -67,8 +62,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
     routingQuery.error ||
     observationQuery.error ||
     observationMutation.error ||
-    enabledMutation.error ||
-    accountMutation.error;
+    enabledMutation.error;
 
   return (
     <section
@@ -77,8 +71,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-          <label
-            htmlFor="local-access-enabled"
+          <div
             className="inline-flex items-center gap-2"
           >
             <Network className="size-4" />
@@ -88,6 +81,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
             )}
             <Switch
               id="local-access-enabled"
+              aria-label={t("本机接入")}
               checked={observationQuery.data?.running ?? false}
               disabled={
                 !service.connected ||
@@ -96,7 +90,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
               }
               onCheckedChange={(running) => observationMutation.mutate(running)}
             />
-          </label>
+          </div>
           <span>
             {t("可用账号：{available}/{total}", {
               available: availableCount,
@@ -107,8 +101,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
             {t("活跃绑定：{count}", { count: routing?.activeBindingCount ?? 0 })}
           </span>
         </div>
-        <label
-          htmlFor="session-routing-enabled"
+        <div
           className="flex items-center gap-3 text-sm font-medium"
         >
           <Route className="size-4" />
@@ -118,6 +111,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
           )}
           <Switch
             id="session-routing-enabled"
+            aria-label={t("会话账号分流")}
             checked={routing?.enabled ?? false}
             disabled={
               !service.connected ||
@@ -126,7 +120,7 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
             }
             onCheckedChange={(enabled) => enabledMutation.mutate(enabled)}
           />
-        </label>
+        </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
@@ -134,41 +128,6 @@ export function SessionRoutingPanel({ accounts }: SessionRoutingPanelProps) {
           "关闭时保留 Codex 原始凭据并记录；开启后仅为新会话均衡分配账号，同一会话保持固定绑定。",
         )}
       </p>
-
-      {routing?.enabled && accounts.length > 0 && (
-        <div className="grid gap-2 border-t border-border/60 pt-3 sm:grid-cols-2 xl:grid-cols-3">
-          {accounts.map((account) => {
-            const preference = preferenceByAccount.get(account.id);
-            const enabled = preference?.enabled ?? true;
-            return (
-              <label
-                key={account.id}
-                className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/35 px-3 py-2 text-sm"
-              >
-                <span className="min-w-0 truncate" title={account.label}>
-                  {account.label}
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {t("绑定 {count}", {
-                      count: preference?.activeBindingCount ?? 0,
-                    })}
-                  </span>
-                </span>
-                <Switch
-                  checked={enabled}
-                  disabled={accountMutation.isPending}
-                  aria-label={`${account.label}${t("参与分流")}`}
-                  onCheckedChange={(nextEnabled) =>
-                    accountMutation.mutate({
-                      accountId: account.id,
-                      enabled: nextEnabled,
-                    })
-                  }
-                />
-              </label>
-            );
-          })}
-        </div>
-      )}
 
       {error && (
         <p className="text-xs text-destructive">

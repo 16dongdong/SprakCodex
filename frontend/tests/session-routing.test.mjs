@@ -19,7 +19,8 @@ test("账号页同时提供本机接入和会话分流开关", async () => {
   assert.match(panelSource, /observationClient\.start\(\)/);
   assert.match(panelSource, /observationClient\.stop\(\)/);
   assert.match(panelSource, /sessionRoutingClient\.setEnabled/);
-  assert.match(panelSource, /sessionRoutingClient\.setAccountEnabled/);
+  assert.doesNotMatch(panelSource, /sessionRoutingClient\.setAccountEnabled/);
+  assert.doesNotMatch(panelSource, /<label/);
 });
 
 test("桌面与 Web 命令映射保持会话分流 RPC 名称一致", async () => {
