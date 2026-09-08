@@ -10,6 +10,14 @@ pub const observationPrewarmRequestType: &str = "websocketPrewarm";
 #[allow(non_upper_case_globals)]
 pub const observationClientRequestType: &str = "clientResponse";
 
+// 观测写入附属参数共用事务，详情为已脱敏序列化 JSON；缺省用于无正文的完成事件。
+#[allow(non_snake_case)]
+pub struct ObservationContext<'a> {
+    pub pricingModel: Option<&'a str>,
+    pub legacyTraces: &'a [String],
+    pub details: Option<&'a str>,
+}
+
 // 合并前的观测数据用于保留请求主键和既有价格；不包含钱包身份或认证信息。
 struct Previous {
     id: i64,
@@ -33,6 +41,29 @@ impl Storage {
         pricingModel: Option<&str>,
         legacyTraces: &[String],
     ) -> Result<bool> {
+        self.insertObservationDetails(
+            request,
+            usage,
+            ObservationContext {
+                pricingModel,
+                legacyTraces,
+                details: None,
+            },
+        )
+    }
+
+    // 请求、用量、费用快照和详情在同一事务确认；任一写入失败全量回滚，重放不会留下半条记录。
+    pub fn insertObservationDetails(
+        &self,
+        request: &RequestLog,
+        usage: &RequestTokenStat,
+        context: ObservationContext<'_>,
+    ) -> Result<bool> {
+        let ObservationContext {
+            pricingModel,
+            legacyTraces,
+            details,
+        } = context;
         let trace = request
             .trace_id
             .as_deref()
@@ -63,6 +94,7 @@ impl Storage {
                 "UPDATE request_logs SET trace_id=?2 WHERE id=?1",
                 params![old.id, trace],
             )?;
+            saveDetails(&transaction, old.id, details)?;
             transaction.commit()?;
             return Ok(false);
         }
@@ -88,7 +120,7 @@ impl Storage {
         {
             "client_context"
         } else {
-            "upstream"
+            request.model_source.as_deref().unwrap_or("upstream")
         };
         if let Some(old) = &previous {
             ensureConsistentUsage(&old.usage, &usage)?;
@@ -207,6 +239,7 @@ impl Storage {
                 params![requestId, diagnostic],
             )?;
         }
+        saveDetails(&transaction, requestId, details)?;
         transaction.commit()?;
         Ok(previous.is_none())
     }
@@ -285,20 +318,35 @@ fn writeRequest(
     tx.execute(
             "INSERT INTO request_logs (id, trace_id, request_path, original_path, method,
              request_type, gateway_mode, route_source, model, upstream_model, model_source,
-             actual_source_kind, upstream_url, status_code, duration_ms, first_response_ms, error, created_at)
+             actual_source_kind, upstream_url, status_code, duration_ms, first_response_ms, error, created_at, reasoning_effort, service_tier, account_id, key_id, client_model, effective_service_tier, account_label)
              VALUES (?12, ?1, ?2, ?2, ?3, ?4, 'directObservation', ?13, ?5, ?15,
-             ?14, ?13, ?6, ?7, ?8, ?9, ?10, ?11)
+             ?14, ?13, ?6, ?7, ?8, ?9, ?10, ?11, ?16, ?17, ?18, ?19, ?20, ?21, ?22)
              ON CONFLICT(id) DO UPDATE SET trace_id=excluded.trace_id,request_path=excluded.request_path,
              original_path=excluded.original_path,method=excluded.method,request_type=excluded.request_type,
              route_source=excluded.route_source,model=excluded.model,upstream_model=excluded.upstream_model,
              model_source=excluded.model_source,actual_source_kind=excluded.actual_source_kind,
              upstream_url=excluded.upstream_url,status_code=excluded.status_code,duration_ms=excluded.duration_ms,
-             first_response_ms=excluded.first_response_ms,error=excluded.error,created_at=excluded.created_at",
+             first_response_ms=excluded.first_response_ms,error=excluded.error,created_at=excluded.created_at,reasoning_effort=COALESCE(excluded.reasoning_effort,request_logs.reasoning_effort),service_tier=COALESCE(excluded.service_tier,request_logs.service_tier),account_id=COALESCE(excluded.account_id,request_logs.account_id),key_id=COALESCE(excluded.key_id,request_logs.key_id),client_model=COALESCE(excluded.client_model,request_logs.client_model),effective_service_tier=COALESCE(excluded.effective_service_tier,request_logs.effective_service_tier),account_label=COALESCE(excluded.account_label,request_logs.account_label)",
             params![request.trace_id, request.request_path, request.method, request.request_type,
                 request.model, request.upstream_url, request.status_code, request.duration_ms,
                 request.first_response_ms, request.error, request.created_at, id,
                 if client { "clientObservation" } else { "directObservation" }, modelSource,
-                if modelSource == "upstream" { request.model.as_deref() } else { None }],
+                if modelSource == "upstream" { request.model.as_deref() } else { None }, request.reasoning_effort, request.service_tier, request.account_id, request.key_id, request.client_model, request.effective_service_tier, request.account_label],
         )?;
-    Ok(id.unwrap_or_else(|| tx.last_insert_rowid()))
+    let requestId = id.unwrap_or_else(|| tx.last_insert_rowid());
+    // 同一账号且同一凭据指纹证明身份来源一致，可补齐旧网络记录名称；不猜测纯客户端事件的账号。
+    if let (Some(label), Some(key), Some(account)) =
+        (&request.account_label, &request.key_id, &request.account_id)
+    {
+        tx.execute("UPDATE request_logs SET account_label=?1 WHERE gateway_mode='directObservation' AND key_id=?2 AND account_id=?3 AND account_label IS NULL", params![label,key,account])?;
+    }
+    Ok(requestId)
+}
+
+// 只有网络采集提供新详情时才更新；客户端完成事件补录不清空原有正文。
+fn saveDetails(tx: &Transaction<'_>, id: i64, details: Option<&str>) -> Result<()> {
+    if let Some(details) = details {
+        tx.execute("INSERT INTO request_details(request_log_id,payload) VALUES(?1,?2) ON CONFLICT(request_log_id) DO UPDATE SET payload=excluded.payload", params![id,details])?;
+    }
+    Ok(())
 }

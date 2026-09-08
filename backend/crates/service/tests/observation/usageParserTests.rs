@@ -28,3 +28,16 @@ fn eventLimitDoesNotStoreBody() {
     assert!(parser.problem.is_some());
     assert!(parser.event.is_empty());
 }
+
+// 完整正文保留心跳和大响应，独立用量解析仍识别末尾终态。
+#[test]
+fn completeStreamKeepsBodyAndUsage() {
+    let mut parser = UsageParser::default();
+    parser.feed(b": heartbeat\n\n", true);
+    let event = serde_json::json!({"type":"response.completed","response":{"output":"x".repeat(512*1024),"usage":{"input_tokens":12,"output_tokens":1}}});
+    let body = format!("data: {event}\n\n");
+    parser.feed(body.as_bytes(), true);
+    parser.finish(true);
+    assert_eq!(parser.usage.total_tokens, Some(13));
+    assert!(parser.body.snapshot().as_str().unwrap().len() > 512 * 1024);
+}

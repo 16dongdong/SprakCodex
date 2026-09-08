@@ -248,8 +248,14 @@ fn official_status_500_with_more_candidates_keeps_upstream_response() {
     assert!(matches!(decision, UpstreamOutcomeDecision::RespondUpstream));
 }
 
+// 验证固定低配额策略下的 compact 502 换号判断，不读取其他并发测试的临时设置。
 #[test]
+#[allow(non_snake_case)]
 fn official_compact_502_with_low_quota_snapshot_triggers_failover() {
+    // 该断言依赖全局配额策略；与修改配置的测试共用互斥锁，固定本用例策略并在断言前恢复。
+    let _guard = crate::test_env_guard();
+    let previousConfig = crate::gateway::current_quota_guard_config();
+    crate::gateway::set_quota_guard_config(crate::gateway::QuotaGuardConfig::default());
     let storage = Storage::open_in_memory().expect("open");
     storage.init().expect("init");
     storage
@@ -264,6 +270,7 @@ fn official_compact_502_with_low_quota_snapshot_triggers_failover() {
         true,
         |_, _, _| {},
     );
+    crate::gateway::set_quota_guard_config(previousConfig);
     assert!(matches!(decision, UpstreamOutcomeDecision::Failover));
 }
 

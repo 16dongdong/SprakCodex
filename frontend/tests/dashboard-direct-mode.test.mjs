@@ -11,8 +11,9 @@ test("直连接入说明与完成事件恢复行为一致", async () => {
   const panel = await fs.readFile(path.join(appsRoot, "src/components/settings/observationPanel.tsx"), "utf8");
   assert.doesNotMatch(sections, /CodexManager 不记录|不会产生 CodexManager 请求日志|仪表盘用量统计不可用/);
   assert.match(sections, /启用观测后可记录/);
-  assert.match(panel, /本机观测入口：/);
-  assert.match(panel, /退出应用不等于关闭观测/);
+  assert.match(panel, /重启自动恢复/);
+  assert.match(panel, /<Switch/);
+  assert.doesNotMatch(panel, /<Card|公开证书：|本机观测入口：/);
 });
 
 // Windows 子进程由原生扫描器接入；禁止重新把宿主临时端口固化进终端代理环境。

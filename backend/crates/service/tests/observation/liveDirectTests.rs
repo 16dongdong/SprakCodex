@@ -319,8 +319,11 @@ fn verifyCapturedRecords(stdout: &str, storage: &Storage, websocket: bool) {
     for record in &records {
         assert_eq!(record.gateway_mode.as_deref(), Some("directObservation"));
         assert!(
-            record.key_id.is_none() && record.account_id.is_none(),
-            "观测不应绑定账号池或平台密钥"
+            record
+                .key_id
+                .as_deref()
+                .is_none_or(|key| key.starts_with("direct:")),
+            "观测身份只能为客户端不可逆指纹，不绑定平台密钥"
         );
         if record.request_type.as_deref() == Some(websocketObservation::handshakeProtocol) {
             assert!(!websocket, "正常 WebSocket 验收中出现了握手失败");

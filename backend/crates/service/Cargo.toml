@@ -4,6 +4,10 @@ version.workspace = true
 edition = "2021"
 
 [dependencies]
+# 请求详情文本中的凭据脱敏使用成熟正则解析器。
+regex = "1"
+# 完整报文使用自动删除的临时文件顺序写入，避免长响应占满常驻内存。
+tempfile = "3"
 codexmanager-core = { path = "../core" }
 cpcommon = { package = "codexmanager-direct-common", path = "../directCommon" }
 serde = { version = "1", features = ["derive"] }

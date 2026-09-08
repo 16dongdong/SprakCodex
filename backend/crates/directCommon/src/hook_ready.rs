@@ -14,8 +14,8 @@ pub fn event_name(pid: u32, module: &Path) -> String {
         .fold(0xcbf29ce484222325_u64, |hash, byte| {
             (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
         });
-    // 第八版保留原代理路由，旧版省略该信息，不能当作当前传输能力。
-    format!("Local\\ObservationHookReady8-{pid}-{hash:016x}")
+    // 第九版增加旧连接自动接入，旧版就绪事件不代表已具备该生命周期能力。
+    format!("Local\\ObservationHookReady9-{pid}-{hash:016x}")
 }
 
 #[cfg(test)]

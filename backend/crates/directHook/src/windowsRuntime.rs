@@ -35,7 +35,7 @@ const WSAEAFNOSUPPORT: i32 = 10047;
 const WSA_IO_PENDING: i32 = 997;
 
 // 全部 trampoline 就绪后才读取当前运行实例；配置与内核线程寿命共同决定是否改连。
-fn proxyRuntimeConfig() -> Option<Arc<RelayConfig>> {
+pub(super) fn proxyRuntimeConfig() -> Option<Arc<RelayConfig>> {
     if !NETWORK_READY.load(Ordering::Acquire) {
         return None;
     }
@@ -247,7 +247,7 @@ unsafe fn relay_sockaddr_for(
 }
 
 // 在连接入口读取 socket 类型，只注册 SOCK_STREAM；查询失败不把未知 socket 当成 TCP。
-unsafe fn socket_is_tcp(socket: SOCKET) -> bool {
+pub(super) unsafe fn socket_is_tcp(socket: SOCKET) -> bool {
     let mut socket_type = 0_i32;
     let mut socket_type_len = std::mem::size_of::<i32>() as i32;
     let ret = getsockopt(
@@ -292,7 +292,14 @@ unsafe fn send_header_bytes(socket: SOCKET, bytes: &[u8]) -> bool {
 
 // 编码共享的固定头并发送，失败设连接重置错误，不继续发送应用正文。
 unsafe fn send_proxy_header(socket: SOCKET, state: ProxySocketState) -> bool {
-    let header = encodeRoute(&state.target, if state.viaProxy { RouteKind::HttpProxy } else { RouteKind::Direct });
+    let header = encodeRoute(
+        &state.target,
+        if state.viaProxy {
+            RouteKind::HttpProxy
+        } else {
+            RouteKind::Direct
+        },
+    );
     if send_header_bytes(socket, &header) {
         true
     } else {
@@ -928,15 +935,22 @@ unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
     }
     if ready {
         #[cfg(target_arch = "x86_64")]
-        match dll_path().ok_or("读取完成入口模块路径失败").and_then(|path| super::nativeCompletion::install(&path)) {
+        match dll_path()
+            .ok_or("读取完成入口模块路径失败")
+            .and_then(|path| super::nativeCompletion::install(&path))
+        {
             Ok(true) => log("原生完成事件入口已安装"),
             Ok(false) => log("当前构建没有匹配的原生完成事件布局，保留网络与文件来源"),
-            Err(error) => { log(error); ready = false; }
+            Err(error) => {
+                log(error);
+                ready = false;
+            }
         }
     }
     if ready {
         NETWORK_READY.store(true, Ordering::Release);
         signal_ready();
+        super::warmConnections::start();
     } else {
         log("网络入口未全部安装，观测模块未就绪");
     }

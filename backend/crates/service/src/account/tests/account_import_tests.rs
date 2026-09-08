@@ -1480,3 +1480,28 @@ fn import_account_auth_json_handles_large_multi_batch_payload() {
 
     assert_eq!(storage.list_accounts().expect("list accounts").len(), 1000);
 }
+
+// 同一已验证主体重新导入会话访问令牌时保留刷新授权，后续显式新刷新令牌仍可轮换。
+#[test]
+#[allow(non_snake_case)]
+fn sessionImportPreservesRefreshAuthorization() {
+    let storage = Storage::open_in_memory().unwrap();
+    storage.init().unwrap();
+    let access = test_jwt(
+        json!({"sub":"session-refresh-subject","https://api.openai.com/auth":{"chatgpt_account_id":"session-refresh-account"}}),
+    );
+    let first = import_account_auth_json_with_storage(
+        &storage,
+        vec![json!({"accessToken":access,"refreshToken":"REFRESH_TOKEN"}).to_string()],
+        false,
+    )
+    .unwrap();
+    let second = import_account_auth_json_with_storage(&storage, vec![json!({"user":{"email":"fixture@example.com"},"accessToken":access,"expires":"2000-01-01T00:00:00Z"}).to_string()], false).unwrap();
+    assert_eq!(second.updated, 1);
+    assert_eq!(second.imported_account_ids, first.imported_account_ids);
+    let token = storage
+        .find_token_by_account_id(&first.imported_account_ids[0])
+        .unwrap()
+        .unwrap();
+    assert_eq!(token.refresh_token, "REFRESH_TOKEN");
+}

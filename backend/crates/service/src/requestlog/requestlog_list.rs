@@ -479,6 +479,7 @@ fn to_request_log_summary(item: RequestLog, include_route_details: bool) -> Requ
         trace_id: item.trace_id,
         key_id: item.key_id,
         account_id: item.account_id,
+        account_label: item.account_label,
         initial_account_id: item.initial_account_id,
         attempted_account_ids,
         initial_aggregate_api_id: item.initial_aggregate_api_id,

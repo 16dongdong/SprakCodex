@@ -120,3 +120,17 @@ pub async fn service_requestlog_today_summary(
 ) -> Result<serde_json::Value, String> {
     rpc_call_in_background("requestlog/today_summary", addr, None).await
 }
+
+// 使用列表提供的不透明 traceId 读取详情；禁止转换成数值行号，权限检查与错误由服务端统一处理。
+#[tauri::command]
+pub async fn service_requestlog_detail(
+    addr: Option<String>,
+    trace_id: String,
+) -> Result<serde_json::Value, String> {
+    rpc_call_in_background(
+        "requestlog/detail",
+        addr,
+        Some(serde_json::json!({"traceId": trace_id})),
+    )
+    .await
+}

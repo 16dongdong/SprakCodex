@@ -35,6 +35,10 @@ import {
 import { readInitializeResult } from "@/lib/utils/service";
 
 export const serviceClient = {
+  // 详情以列表 traceId 查询，保留完整字符串；返回 null 表示该记录没有报文，错误由传输层明确报告。
+  requestDetails: (traceId: string): Promise<{ request: { headers?: unknown; body?: unknown }; response: { headers?: unknown; body?: unknown; events?: unknown }; formatVersion?: number } | null> =>
+    invoke("service_requestlog_detail", withAddr({ traceId })),
+
   start: (addr?: string) => invoke("service_start", { addr }),
   stop: () => invoke("service_stop"),
   async initialize(addr?: string): Promise<ServiceInitializationResult> {

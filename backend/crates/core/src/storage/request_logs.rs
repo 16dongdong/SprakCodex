@@ -14,7 +14,7 @@ const REQUEST_LOG_LIST_SELECT_COLUMNS: &str = "r.trace_id, r.key_id, r.account_i
                 r.request_path, r.original_path, r.adapted_path,
                 r.method, r.request_type, r.gateway_mode, r.route_strategy, r.route_source, r.transparent_mode, r.enhanced_mode, r.client_model, r.model, r.model_source, r.upstream_model, r.actual_source_kind, r.actual_source_id, r.client_reasoning_effort, r.reasoning_effort, r.reasoning_source, r.service_tier, r.effective_service_tier, r.service_tier_source, r.response_adapter, r.upstream_url, r.aggregate_api_supplier_name, r.aggregate_api_url, r.status_code, r.duration_ms, r.first_response_ms,
                 t.input_tokens, t.cached_input_tokens, t.output_tokens, t.total_tokens, t.reasoning_output_tokens, t.estimated_cost_usd,
-                r.error, r.created_at";
+                r.error, r.created_at, r.account_label";
 
 fn request_log_retention_days() -> i64 {
     std::env::var(REQUEST_LOG_RETENTION_DAYS_ENV)
@@ -1171,6 +1171,7 @@ fn map_request_log_row(row: &Row<'_>) -> Result<RequestLog> {
         estimated_cost_usd: row.get(41)?,
         error: row.get(42)?,
         created_at: row.get(43)?,
+        account_label: row.get(44)?,
     })
 }
 

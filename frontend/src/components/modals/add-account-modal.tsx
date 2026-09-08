@@ -1117,10 +1117,13 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
                 <Info />
                 <AlertDescription className="text-xs leading-relaxed">
                   {t(
-                    "支持格式：ChatGPT 账号（Refresh Token）系统将自动识别格式并导入。",
+                    "支持整段导入 /api/auth/session JSON、auth.json 或 Refresh Token。有刷新凭据时自动续期；仅 Access Token 过期后需重新授权。",
                   )}
                 </AlertDescription>
               </Alert>
+              <Button variant="outline" onClick={() => setActiveTab("login")} disabled={!isServiceReady}>
+                <LogIn className="size-4" />{t("登录授权")}
+              </Button>
               <Button
                 onClick={handleBulkImport}
                 disabled={!isServiceReady || isLoading}

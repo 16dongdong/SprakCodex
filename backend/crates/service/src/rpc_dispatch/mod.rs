@@ -228,6 +228,7 @@ const MEMBER_METHOD_ALLOWLIST: &[&str] = &[
     "dashboard/memberSummary",
     "requestlog/list",
     "requestlog/list_with_summary",
+    "requestlog/detail",
     "requestlog/summary",
     "requestlog/today_summary",
     "startup/snapshot",

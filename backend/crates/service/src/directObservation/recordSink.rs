@@ -27,6 +27,13 @@ pub(super) struct Exchange {
     pub started: Instant,
     pub created: i64,
     pub identity: String,
+    pub requestBody: Arc<std::sync::Mutex<super::detailCapture::Capture>>,
+    pub requestHeaders: serde_json::Value,
+    pub responseHeaders: serde_json::Value,
+    pub firstResponseMs: Option<i64>,
+    pub account: Option<String>,
+    pub accountLabel: Option<String>,
+    pub keyFingerprint: Option<String>,
 }
 
 impl Exchange {
@@ -39,13 +46,56 @@ impl Exchange {
             protocol: protocol.into(),
             started: Instant::now(),
             created: now_ts(),
+            requestBody: Default::default(),
+            requestHeaders: serde_json::Value::Null,
+            responseHeaders: serde_json::Value::Null,
+            firstResponseMs: None,
+            account: None,
+            accountLabel: None,
+            keyFingerprint: None,
             identity: format!("{:032x}", rand::random::<u128>()),
         }
+    }
+    // 认证仅参与不可逆指纹，账号标识来自显式请求头；不借用 Manager 账号池身份。
+    pub fn captureHeaders(&mut self, headers: &hyper::HeaderMap) {
+        self.requestHeaders = super::detailCapture::headers(headers);
+        // JWT 只解码显示字段，不用于授权判断；访问凭据不写入日志或身份快照。
+        self.accountLabel = headers
+            .get("authorization")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.split_once(' '))
+            .filter(|(scheme, _)| scheme.eq_ignore_ascii_case("bearer"))
+            .and_then(|(_, token)| codexmanager_core::auth::parse_id_token_claims(token).ok())
+            .and_then(|claims| {
+                let email = claims.resolved_email();
+                let name = claims
+                    .profile
+                    .as_ref()
+                    .and_then(|profile| profile.name.as_deref())
+                    .map(str::trim)
+                    .filter(|name| !name.is_empty());
+                match (email, name) {
+                    (Some(email), Some(name)) if email != name => Some(format!("{name} <{email}>")),
+                    (Some(email), _) => Some(email.to_owned()),
+                    (_, Some(name)) => Some(name.to_owned()),
+                    _ => None,
+                }
+            })
+            .filter(|label| label.len() <= 512 && !label.chars().any(char::is_control));
+        self.account = headers
+            .get("chatgpt-account-id")
+            .and_then(|value| value.to_str().ok())
+            .filter(|value| value.len() <= 256)
+            .map(str::to_owned);
+        self.keyFingerprint = headers
+            .get("authorization")
+            .map(|value| format!("direct:{:x}", Sha256::digest(value.as_bytes())));
     }
 }
 
 pub(super) struct Record {
     request: RequestLog,
+    details: Option<String>,
     parsed: UsageParser,
     aliases: Vec<String>,
     pricingAllowed: bool,
@@ -79,16 +129,19 @@ impl RecordSink {
                     return;
                 }
                 while let Some(record) = receiver.blocking_recv() {
-                    let saved = storage.insertObservation(
+                    let saved = storage.insertObservationDetails(
                         &record.request,
                         &record.parsed.usage,
-                        record
-                            .parsed
-                            .model
-                            .as_deref()
-                            .filter(|_| record.pricingAllowed)
-                            .map(crate::models_v2::policy_catalog_slug),
-                        &record.aliases,
+                        codexmanager_core::storage::ObservationContext {
+                            pricingModel: record
+                                .parsed
+                                .model
+                                .as_deref()
+                                .filter(|_| record.pricingAllowed)
+                                .map(crate::models_v2::policy_catalog_slug),
+                            legacyTraces: &record.aliases,
+                            details: record.details.as_deref(),
+                        },
                     );
                     let success = saved.is_ok();
                     match saved {
@@ -116,6 +169,8 @@ impl RecordSink {
 
     // 完整响应以响应 ID 生成跨来源标识，同时识别旧主机散列；失败请求仍使用本次随机身份。
     pub async fn finish(&self, exchange: Exchange, parsed: UsageParser, status: u16) {
+        // 报文落库和脱敏耗时不计入客户端请求的网络耗时。
+        let duration = exchange.started.elapsed().as_millis().min(i64::MAX as u128) as i64;
         let (trace, aliases) = match parsed.responseId.as_deref() {
             Some(response) => super::responseIdentity::traces(response),
             None => (
@@ -126,16 +181,60 @@ impl RecordSink {
                 Vec::new(),
             ),
         };
+        let requestBody = exchange
+            .requestBody
+            .lock()
+            .map(|body| {
+                body.snapshotEncoded(
+                    exchange
+                        .requestHeaders
+                        .get("content-encoding")
+                        .and_then(serde_json::Value::as_str),
+                )
+            })
+            .unwrap_or_else(|_| serde_json::json!({"error":"请求详情锁损坏"}));
+        let requestModel = requestBody
+            .get("model")
+            .and_then(serde_json::Value::as_str)
+            .map(str::to_owned);
+        let requestReasoning = requestBody
+            .pointer("/reasoning/effort")
+            .and_then(serde_json::Value::as_str)
+            .map(str::to_owned);
+        let requestTier = requestBody
+            .get("service_tier")
+            .and_then(serde_json::Value::as_str)
+            .map(str::to_owned);
+        let details = serde_json::json!({"formatVersion":2,"request": {"headers":exchange.requestHeaders,"body":requestBody}, "response": {"headers":exchange.responseHeaders,"body":parsed.body.snapshot()}}).to_string();
         let request = RequestLog {
             trace_id: Some(trace),
             request_path: exchange.path.clone(),
             method: exchange.method,
             request_type: Some(exchange.protocol),
-            model: parsed.model.clone(),
+            model: parsed.model.clone().or(requestModel.clone()),
+            client_model: requestModel,
+            model_source: Some(
+                if parsed.model.is_some() {
+                    "upstream"
+                } else {
+                    "client"
+                }
+                .into(),
+            ),
+            account_id: exchange.account,
+            account_label: exchange.accountLabel,
+            key_id: exchange.keyFingerprint,
             upstream_url: Some(format!("https://{}{}", exchange.host, exchange.path)),
             status_code: Some(i64::from(status)),
-            duration_ms: Some(exchange.started.elapsed().as_millis().min(i64::MAX as u128) as i64),
-            error: parsed.problem.map(str::to_owned),
+            duration_ms: Some(duration),
+            first_response_ms: exchange.firstResponseMs,
+            reasoning_effort: parsed.reasoning.clone().or(requestReasoning),
+            service_tier: requestTier.or(parsed.tier.clone()),
+            effective_service_tier: parsed.tier.clone(),
+            error: parsed
+                .diagnostic
+                .clone()
+                .or_else(|| parsed.problem.map(str::to_owned)),
             created_at: exchange.created,
             ..Default::default()
         };
@@ -143,6 +242,7 @@ impl RecordSink {
             .sender
             .send(Record {
                 request,
+                details: Some(details),
                 parsed,
                 aliases,
                 pricingAllowed: true,
@@ -180,6 +280,7 @@ impl RecordSink {
         self.sender
             .blocking_send(Record {
                 request,
+                details: None,
                 parsed,
                 aliases,
                 pricingAllowed,
@@ -193,3 +294,7 @@ impl RecordSink {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../../tests/observation/identityLabelTests.rs"]
+mod identityLabelTests;

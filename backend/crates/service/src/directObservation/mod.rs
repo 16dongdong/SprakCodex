@@ -6,6 +6,7 @@ mod certificateAuthority;
 mod clientEventMonitor;
 mod clientEvents;
 mod completionMonitor;
+mod detailCapture;
 mod loopbackListeners;
 #[cfg(windows)]
 mod nativeInjection;
@@ -18,6 +19,7 @@ mod recordSink;
 mod relayIngress;
 mod responseIdentity;
 mod runtimePaths;
+pub(crate) mod sharedIngress;
 mod streamObserver;
 mod transport;
 mod usageParser;

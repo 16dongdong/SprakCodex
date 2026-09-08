@@ -11,7 +11,7 @@ test("观测 DLL 打包路径位于本仓库且不携带父目录层次", () => 
   const config = JSON.parse(readFileSync(resolve(configDirectory, "tauri.windows.conf.json"), "utf8"));
   const [[source, target]] = Object.entries(config.bundle.resources);
   assert.equal(resolve(configDirectory, source), resolve(repositoryRoot, "backend/target/observationBuild/release/cphook.dll"));
-  assert.equal(target, "observationHook8.dll");
+  assert.equal(target, "observationHook9.dll");
   for (const crate of ["directHook", "directCommon"]) {
     assert.ok(existsSync(resolve(repositoryRoot, `backend/crates/${crate}/src/lib.rs`)));
   }

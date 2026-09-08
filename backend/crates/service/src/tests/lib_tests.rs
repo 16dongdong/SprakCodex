@@ -556,18 +556,22 @@ fn plugin_logs_rpc_resolves_names_from_current_log_page() {
     let _ = std::fs::remove_file(db_path);
 }
 
+// 测试数据库先独占完成迁移，再发布进程级路径；后台任务只会看到已就绪数据库，避免并发建表争锁。
+// 随机目录身份不复用秒级同名文件，初始化失败直接终止夹具。
 fn setup_dashboard_test_db(name: &str) -> String {
     let db_path = std::env::temp_dir()
         .join(format!(
-            "{name}-{}-{}.sqlite",
+            "{name}-{}-{:032x}.sqlite",
             std::process::id(),
-            codexmanager_core::storage::now_ts()
+            rand::random::<u128>()
         ))
         .to_string_lossy()
         .to_string();
-    let _ = std::fs::remove_file(&db_path);
+    let storage = codexmanager_core::storage::Storage::open(&db_path).expect("打开测试数据库");
+    storage.init().expect("迁移测试数据库");
+    drop(storage);
     std::env::set_var("CODEXMANAGER_DB_PATH", &db_path);
-    storage_helpers::initialize_storage().expect("init storage");
+    storage_helpers::initialize_storage().expect("发布测试数据库");
     db_path
 }
 

@@ -1,4 +1,4 @@
-//! WebSocket 逐请求关联：预热与生成分开，原始帧不改写，仅保存非内容的请求类型和响应 usage。
+//! WebSocket 逐请求关联：预热与生成分开，完整记录请求帧、响应帧及握手头，不改写原始转发。
 use super::{
     recordSink::Exchange,
     usageParser::{maxEventBytes, UsageParser},
@@ -23,6 +23,8 @@ struct RequestShape {
 // 每个连接独占状态，按创建响应顺序绑定请求；最近终态 ID 防止重复响应消耗下一条请求的元数据。
 #[derive(Default)]
 pub(super) struct Observation {
+    pub headers: hyper::HeaderMap,
+    pub responseHeaders: hyper::HeaderMap,
     queued: VecDeque<Exchange>,
     pending: HashMap<String, (Exchange, UsageParser)>,
     completed: VecDeque<String>,
@@ -48,8 +50,12 @@ impl Observation {
         } else {
             generationProtocol
         };
-        self.queued
-            .push_back(Exchange::new(target.0, target.1, protocol));
+        let mut exchange = Exchange::new(target.0, target.1, protocol);
+        exchange.method = "GET".into();
+        exchange.captureHeaders(&self.headers);
+        exchange.responseHeaders = super::detailCapture::headers(&self.responseHeaders);
+        exchange.requestBody.lock().map_err(|_| ())?.feed(bytes);
+        self.queued.push_back(exchange);
         Ok(())
     }
 
@@ -77,33 +83,51 @@ impl Observation {
             return Ok(self.queued.pop_front().map(|exchange| {
                 (
                     exchange,
-                    UsageParser::failure("WebSocket 上游拒绝请求"),
+                    {
+                        let mut parsed = UsageParser::failure("WebSocket 上游拒绝请求");
+                        parsed.body.feed(bytes);
+                        parsed.message(&event);
+                        parsed
+                    },
                     status,
                 )
             }));
         }
-        let Some(identity) = event
-            .get("response")
-            .and_then(|response| response.get("id"))
+        let identity = event
+            .pointer("/response/id")
+            .or_else(|| event.get("response_id"))
             .and_then(|value| value.as_str())
             .filter(|value| !value.is_empty() && value.len() <= 256)
-        else {
+            .map(str::to_owned)
+            .or_else(|| {
+                (self.pending.len() == 1).then(|| self.pending.keys().next().unwrap().clone())
+            });
+        let Some(identity) = identity else {
             return Ok(None);
         };
-        if self.completed.iter().any(|completed| completed == identity) {
+        if self
+            .completed
+            .iter()
+            .any(|completed| completed == &identity)
+        {
             return Ok(None);
         }
-        if !self.pending.contains_key(identity) {
+        if !self.pending.contains_key(&identity) {
             let exchange = self.queued.pop_front().ok_or(())?;
             self.pending
-                .insert(identity.into(), (exchange, UsageParser::default()));
+                .insert(identity.clone(), (exchange, UsageParser::default()));
         }
-        let (_, parsed) = self.pending.get_mut(identity).ok_or(())?;
+        let (exchange, parsed) = self.pending.get_mut(&identity).ok_or(())?;
+        exchange.firstResponseMs.get_or_insert_with(|| {
+            exchange.started.elapsed().as_millis().min(i64::MAX as u128) as i64
+        });
+        parsed.body.feed(bytes);
+        parsed.body.feed(b"\n");
         parsed.message(&event);
         if !parsed.terminal {
             return Ok(None);
         }
-        let (exchange, parsed) = self.pending.remove(identity).ok_or(())?;
+        let (exchange, parsed) = self.pending.remove(&identity).ok_or(())?;
         if self.completed.len() == maxPendingResponses {
             self.completed.pop_front();
         }

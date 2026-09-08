@@ -28,7 +28,11 @@ mod model_price_rules;
 mod model_sources;
 #[allow(non_snake_case)]
 mod observationRecords;
-pub use observationRecords::{observationClientRequestType, observationPrewarmRequestType};
+#[allow(non_snake_case)]
+mod requestDetails;
+pub use observationRecords::{
+    observationClientRequestType, observationPrewarmRequestType, ObservationContext,
+};
 mod plugins;
 mod proxy_profiles;
 mod proxy_tests;
@@ -804,6 +808,7 @@ pub struct RequestLog {
     pub trace_id: Option<String>,
     pub key_id: Option<String>,
     pub account_id: Option<String>,
+    pub account_label: Option<String>,
     pub initial_account_id: Option<String>,
     pub attempted_account_ids_json: Option<String>,
     pub initial_aggregate_api_id: Option<String>,
@@ -2287,6 +2292,14 @@ impl Storage {
             "133_aggregate_api_user_agent",
             include_str!("../../migrations/133_aggregate_api_user_agent.sql"),
             |s| s.ensure_aggregate_apis_table(),
+        )?;
+        self.apply_sql_migration(
+            "134_requestDetails",
+            include_str!("../../migrations/134_requestDetails.sql"),
+        )?;
+        self.apply_sql_migration(
+            "135_requestAccountLabel",
+            include_str!("../../migrations/135_requestAccountLabel.sql"),
         )?;
         self.ensure_api_key_rotation_columns()?;
         self.ensure_api_key_account_group_filter_column()?;

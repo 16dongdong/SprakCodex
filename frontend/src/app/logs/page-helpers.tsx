@@ -237,21 +237,12 @@ export function resolveUpstreamDisplay(
   }
 }
 
+// 直连账号可能不在本地账号池；优先显示实际账号 ID，不能用密钥指纹冒充账号名称。
 export function resolveAccountDisplayName(
   log: RequestLog,
   accountNameMap: Map<string, string>,
 ): string {
-  if (log.accountId) {
-    const label = accountNameMap.get(log.accountId);
-    if (label) {
-      return label;
-    }
-    const fallbackName = fallbackAccountNameFromId(log.accountId);
-    if (fallbackName) {
-      return fallbackName;
-    }
-  }
-  return fallbackAccountDisplayFromKey(log.keyId);
+  return log.accountLabel?.trim() || resolveAccountDisplayNameById(log.accountId, accountNameMap) || fallbackAccountDisplayFromKey(log.keyId);
 }
 
 export function resolveAccountDisplayNameById(

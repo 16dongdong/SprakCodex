@@ -827,6 +827,7 @@ fn import_single_item(
         .map(|imported| imported.created)
 }
 
+#[allow(non_snake_case)]
 fn import_single_item_with_account_id(
     storage: &Storage,
     index: &mut ExistingAccountIndex,
@@ -981,11 +982,33 @@ fn import_single_item_with_account_id(
         (account_id.clone(), created, true)
     };
 
+    // 会话 JSON 只携带访问凭据时，保留已匹配账号的刷新授权；缺字段不是撤销授权。
+    // 身份匹配已在上方完成，禁止跨账号借用令牌；存储读取失败直接中止当前导入。
+    let previousToken = if !created && payload.refresh_token.is_empty() {
+        storage
+            .find_token_by_account_id(&account_id)
+            .map_err(|error| error.to_string())?
+    } else {
+        None
+    };
     let token = Token {
         account_id: account_id.clone(),
-        id_token: payload.id_token,
+        id_token: if payload.id_token.is_empty() {
+            previousToken
+                .as_ref()
+                .map(|token| token.id_token.clone())
+                .unwrap_or_default()
+        } else {
+            payload.id_token
+        },
         access_token: payload.access_token,
-        refresh_token: payload.refresh_token,
+        refresh_token: if payload.refresh_token.is_empty() {
+            previousToken
+                .map(|token| token.refresh_token)
+                .unwrap_or_default()
+        } else {
+            payload.refresh_token
+        },
         api_key_access_token: None,
         last_refresh: now,
     };

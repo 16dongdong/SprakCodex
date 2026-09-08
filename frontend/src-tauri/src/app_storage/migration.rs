@@ -148,7 +148,12 @@ pub(crate) fn create_pre_migration_backup(
     let file_name = current_db
         .file_name()
         .and_then(|value| value.to_str())
-        .ok_or_else(|| format!("database file name is not valid UTF-8: {}", current_db.display()))?;
+        .ok_or_else(|| {
+            format!(
+                "database file name is not valid UTF-8: {}",
+                current_db.display()
+            )
+        })?;
     let backup_path = current_db.with_file_name(format!("{file_name}.pre-{version}.bak"));
     if backup_path.is_file() {
         return Ok(Some(backup_path));
@@ -229,9 +234,11 @@ fn db_has_user_data(path: &Path) -> bool {
             .unwrap_or(false);
         exists
             && conn
-                .query_row(&format!("SELECT EXISTS(SELECT 1 FROM {table} LIMIT 1)"), [], |row| {
-                    row.get::<_, i64>(0)
-                })
+                .query_row(
+                    &format!("SELECT EXISTS(SELECT 1 FROM {table} LIMIT 1)"),
+                    [],
+                    |row| row.get::<_, i64>(0),
+                )
                 .map(|count| count > 0)
                 .unwrap_or(false)
     })
@@ -463,7 +470,8 @@ mod tests {
         let _ = std::fs::remove_dir_all(&root);
     }
 
-    // 用备份字节及可读账户记录验证不覆盖；文件修改时间的变化本身不证明数据库内容被改写。
+    // SQLx 连接池释放时可异步 checkpoint，SQLite 主文件字节变化不等于覆盖备份。
+    // 用原账户内容和损坏后的源文件验证复用路径，避免把正常 WAL 维护误报为数据改写。
     #[test]
     #[allow(non_snake_case)]
     fn pre_migration_backup_is_versioned_and_never_overwritten() {
@@ -481,18 +489,32 @@ mod tests {
             Some("codexmanager.db.pre-0.5.1.bak")
         );
 
-        let backupContents = std::fs::read(&backup_path).expect("读取备份字节");
+        let backup_storage = Storage::open(&backup_path).expect("open backup");
+        assert_eq!(
+            backup_storage
+                .find_account_by_id("acc-1")
+                .unwrap()
+                .unwrap()
+                .label,
+            "main"
+        );
         std::fs::write(&db_path, b"replaced after backup").expect("replace source db");
         let second_path = create_pre_migration_backup(&db_path, "0.5.1")
             .expect("reuse backup")
             .expect("backup path");
         assert_eq!(second_path, backup_path);
         assert_eq!(
-            std::fs::read(&backup_path).expect("读取复用后的备份字节"),
-            backupContents
+            std::fs::read(&db_path).expect("读取损坏源文件"),
+            b"replaced after backup"
         );
-
-        let backup_storage = Storage::open(&backup_path).expect("open backup");
+        assert_eq!(
+            backup_storage
+                .find_account_by_id("acc-1")
+                .unwrap()
+                .unwrap()
+                .label,
+            "main"
+        );
         assert_eq!(backup_storage.account_count().expect("count accounts"), 1);
         let _ = std::fs::remove_dir_all(&root);
     }

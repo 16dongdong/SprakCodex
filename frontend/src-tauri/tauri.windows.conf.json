@@ -1,7 +1,7 @@
 {
   "bundle": {
     "resources": {
-      "../../backend/target/observationBuild/release/cphook.dll": "observationHook8.dll"
+      "../../backend/target/observationBuild/release/cphook.dll": "observationHook9.dll"
     }
   }
 }

@@ -20,7 +20,6 @@ pub(super) use std::thread;
 pub(super) use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 pub(super) static TEST_DIR_SEQ: AtomicUsize = AtomicUsize::new(0);
-pub(super) static TEST_PORT_SEQ: AtomicUsize = AtomicUsize::new(41000);
 
 /// 函数 `new_test_dir`
 ///
@@ -51,30 +50,11 @@ pub(super) fn new_test_dir(prefix: &str) -> PathBuf {
     dir
 }
 
-/// 函数 `bind_test_listener`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - super: 参数 super
-///
-/// # 返回
-/// 返回函数执行结果
+// 测试监听由内核分配端口并持续持有 socket，避开 Windows 动态保留端口和手动枚举的竞争窗口。
+// label 仅用于失败定位；绑定错误立即终止夹具，不静默跳过测试。
 pub(super) fn bind_test_listener(label: &str) -> TcpListener {
-    // Базовый порт смещается в зависимости от PID процесса для предотвращения пересечения портов при параллельном запуске в nextest.
-    // Используем диапазон 15000-30000, чтобы не наткнуться на зарезервированные системой Windows порты (>49152).
-    let base_port = 15000 + (std::process::id() % 15000) as usize;
-    for _ in 0..1024 {
-        let port = (base_port + TEST_PORT_SEQ.fetch_add(1, Ordering::Relaxed) % 1000) as u16;
-        match TcpListener::bind(("127.0.0.1", port)) {
-            Ok(listener) => return listener,
-            Err(err) if err.kind() == std::io::ErrorKind::AddrInUse => continue,
-            Err(err) => panic!("bind {label} port {port} failed: {err}"),
-        }
-    }
-    panic!("exhausted test ports for {label}");
+    TcpListener::bind(("127.0.0.1", 0))
+        .unwrap_or_else(|error| panic!("绑定测试监听 {label} 失败：{error}"))
 }
 
 /// 函数 `decode_chunked_body_if_needed`

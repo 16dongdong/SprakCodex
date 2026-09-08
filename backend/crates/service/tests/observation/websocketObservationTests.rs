@@ -71,3 +71,40 @@ fn unmatchedAndOverCapacityMessagesAreErrors() {
         .request(&create(None), ("chatgpt.com", "/responses"))
         .is_err());
 }
+
+// 不携带 response.id 的增量帧仍属于唯一在途响应，必须保留，握手响应头随请求记录交接。
+#[test]
+fn keepsCompleteFramesAndResponseHeaders() {
+    let mut observation = Observation::default();
+    observation
+        .responseHeaders
+        .insert("x-request-id", "fixture-response".parse().unwrap());
+    observation
+        .request(
+            &Message::text(r#"{"type":"response.create","model":"fixture","input":"test"}"#),
+            ("api.openai.com", "/v1/responses"),
+        )
+        .unwrap();
+    observation
+        .response(&Message::text(
+            r#"{"type":"response.created","response":{"id":"response-fixture"}}"#,
+        ))
+        .unwrap();
+    observation
+        .response(&Message::text(
+            r#"{"type":"response.output_text.delta","delta":"complete-delta"}"#,
+        ))
+        .unwrap();
+    let (exchange, parsed, _) = observation
+        .response(&Message::text(
+            r#"{"type":"response.completed","response":{"id":"response-fixture"}}"#,
+        ))
+        .unwrap()
+        .unwrap();
+    assert_eq!(exchange.method, "GET");
+    assert_eq!(exchange.responseHeaders["x-request-id"], "fixture-response");
+    let body = parsed.body.snapshot();
+    let body = body.as_str().unwrap();
+    assert!(body.contains("complete-delta"));
+    assert!(body.contains("response.completed"));
+}

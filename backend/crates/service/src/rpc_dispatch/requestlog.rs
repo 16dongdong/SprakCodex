@@ -38,6 +38,27 @@ fn member_requestlog_scope(actor: &RpcActor) -> Result<(StorageHandle, Vec<Strin
 /// 返回函数执行结果
 pub(super) fn try_handle(req: &JsonRpcRequest, actor: &RpcActor) -> Option<JsonRpcResponse> {
     let result = match req.method.as_str() {
+        // 详情沿用列表的不透明 traceId，权限与列表同源；历史未采集返回 null，不把摘要当报文。
+        "requestlog/detail" => super::value_or_error((|| {
+            let trace = req
+                .params
+                .as_ref()
+                .and_then(|params| params.get("traceId"))
+                .and_then(|trace| trace.as_str())
+                .filter(|trace| !trace.is_empty() && trace.len() <= 256)
+                .ok_or("请求记录 ID 无效")?;
+            let storage = crate::storage_helpers::open_storage().ok_or("打开存储失败")?;
+            let keys = actor_key_ids_with_storage(&storage, actor)?;
+            let payload = storage
+                .readRequestDetails(trace, if actor.is_admin() { None } else { Some(&keys) })
+                .map_err(|error| error.to_string())?;
+            payload
+                .map(|text| {
+                    serde_json::from_str::<serde_json::Value>(&text)
+                        .map_err(|_| "请求详情格式无效".to_owned())
+                })
+                .transpose()
+        })()),
         "requestlog/list_with_summary" => {
             let params = req
                 .params

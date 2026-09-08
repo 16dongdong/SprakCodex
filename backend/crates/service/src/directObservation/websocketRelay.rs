@@ -31,7 +31,10 @@ pub(super) async fn upgrade(
 ) -> Response<ResponseBody> {
     let host = target.host_str().unwrap_or("").to_owned();
     let path = target.path().to_owned();
-    let handshake = Exchange::new(&host, &path, handshakeProtocol);
+    let mut handshake = Exchange::new(&host, &path, handshakeProtocol);
+    handshake.method = "GET".into();
+    handshake.captureHeaders(request.headers());
+    let observationHeaders = request.headers().clone();
     let scheme = if target.scheme() == "https" {
         "wss"
     } else {
@@ -79,8 +82,14 @@ pub(super) async fn upgrade(
         Ok(Ok(result)) => result,
         failure => {
             let mut response = reply(StatusCode::BAD_GATEWAY, "WebSocket 上游握手失败");
+            let mut parsed = UsageParser::failure("WebSocket 上游握手失败");
             if let Ok(Err(tungstenite::Error::Http(rejected))) = failure {
                 let (parts, body) = rejected.into_parts();
+                handshake.responseHeaders = super::detailCapture::headers(&parts.headers);
+                if let Some(bytes) = &body {
+                    parsed.body.feed(bytes);
+                    parsed.json(bytes);
+                }
                 response = Response::from_parts(
                     parts,
                     Full::new(Bytes::from(body.unwrap_or_default()))
@@ -92,16 +101,13 @@ pub(super) async fn upgrade(
             if tracked {
                 engine
                     .sink
-                    .finish(
-                        handshake,
-                        UsageParser::failure("WebSocket 上游握手失败"),
-                        response.status().as_u16(),
-                    )
+                    .finish(handshake, parsed, response.status().as_u16())
                     .await;
             }
             return response;
         }
     };
+    let observationResponseHeaders = handshakeResponse.headers().clone();
     let upgraded = hyper::upgrade::on(&mut request);
     let taskEngine = engine.clone();
     engine.tasks.spawn(async move {
@@ -112,6 +118,8 @@ pub(super) async fn upgrade(
         // 下游不宣告 deflate，上游由成熟库独立解压；不伪称端到端压缩参数保持不变。
         let mut downstream = WebSocketStream::from_raw_socket(TokioIo::new(stream), Role::Server, None).await;
         let mut observation = Observation::default();
+        observation.headers = observationHeaders;
+        observation.responseHeaders = observationResponseHeaders;
         loop {
             let transfer = tokio::select! {
                 _ = taskEngine.cancel.cancelled() => break,

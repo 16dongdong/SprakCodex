@@ -1,12 +1,16 @@
-//! 仅保留模型、响应标识与服务端 usage；正文、工具参数、认证字段不进入持久化对象。
+//! 完整响应正文与用量解析分离；事件解析限额不截断磁盘上的完整报文。
 use codexmanager_core::storage::RequestTokenStat;
 use serde_json::Value;
 
 pub(super) const maxEventBytes: usize = 16 * 1024 * 1024;
 
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub(super) struct UsageParser {
     pub model: Option<String>,
+    pub reasoning: Option<String>,
+    pub tier: Option<String>,
+    pub diagnostic: Option<String>,
+    pub body: super::detailCapture::Capture,
     pub responseId: Option<String>,
     pub usage: RequestTokenStat,
     pub problem: Option<&'static str>,
@@ -38,6 +42,7 @@ impl UsageParser {
     // 接收已解压字节；SSE 逐行装配，单事件限额而非整条流限额，尾部 usage 不受预览长度影响。
     // 超限仅标记该观测事件未知并继续寻找下一事件，不修改转发的原始字节。
     pub fn feed(&mut self, bytes: &[u8], sse: bool) {
+        self.body.feed(bytes);
         if !sse {
             if self.event.len().saturating_add(bytes.len()) > maxEventBytes {
                 self.event.clear();
@@ -101,6 +106,10 @@ impl UsageParser {
 
     // 读取 Responses、Chat Completions 与 WebSocket 消息的同一语义；非法 JSON 不产生虚构计数。
     pub fn json(&mut self, bytes: &[u8]) {
+        // SSE 心跳没有 data 内容，既不是错误也不是预览事件，避免零长度事件绕过字节配额。
+        if bytes.is_empty() {
+            return;
+        }
         if bytes == b"[DONE]" {
             self.terminal = true;
             return;
@@ -114,6 +123,27 @@ impl UsageParser {
     // usage 是累计快照，不累加 delta；缓存和推理是子集，不能再次计入 total。
     pub fn message(&mut self, message: &Value) {
         let response = message.get("response").unwrap_or(message);
+        self.reasoning = response
+            .pointer("/reasoning/effort")
+            .and_then(Value::as_str)
+            .filter(|value| validLabel(value))
+            .map(str::to_owned)
+            .or(self.reasoning.take());
+        self.tier = response
+            .get("service_tier")
+            .and_then(Value::as_str)
+            .filter(|value| validLabel(value))
+            .map(str::to_owned)
+            .or(self.tier.take());
+        if let Some(error) = response
+            .get("error")
+            .or_else(|| message.get("error"))
+            .filter(|value| !value.is_null())
+        {
+            let text = super::detailCapture::redact(error.clone()).to_string();
+            self.diagnostic = Some(text.chars().take(4096).collect());
+            self.problem = Some("上游返回错误");
+        }
         if let Some(model) = response
             .get("model")
             .and_then(Value::as_str)

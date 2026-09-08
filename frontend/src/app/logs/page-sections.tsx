@@ -13,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { RequestDetailsDialog } from "@/components/modals/requestDetailsDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -127,6 +128,7 @@ export function RequestLogsTabContent({
   onNextPage: () => void;
   onJumpPage: (page: number) => void;
 }) {
+  const [selectedLog, setSelectedLog] = useState<RequestLog | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [jumpPageInput, setJumpPageInput] = useState(String(currentPage));
 
@@ -420,6 +422,7 @@ export function RequestLogsTabContent({
                   <TableHead className="w-[240px] px-4 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                     {t("错误")}
                   </TableHead>
+                  <TableHead className="w-20 px-4">{t("详情")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -439,7 +442,7 @@ export function RequestLogsTabContent({
                 ) : logs.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={9}
                       className="h-52 px-4 text-center text-sm text-muted-foreground"
                     >
                       {!serviceConnected
@@ -482,15 +485,16 @@ export function RequestLogsTabContent({
                       <TableCell className="px-4 py-3 align-top">
                         <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
                           <span>{t("总")} {formatTableTokenAmount(log.totalTokens)}</span>
-                          <span>{t("输入")} {formatTableTokenAmount(log.inputTokens)}</span>
+                          <span>{t("输入")} {formatTableTokenAmount(log.inputTokens)} / {t("输出")} {formatTableTokenAmount(log.outputTokens)}</span>
                           <span className="opacity-60">
-                            {t("缓存")} {formatTableTokenAmount(log.cachedInputTokens)}
+                            {t("缓存")} {formatTableTokenAmount(log.cachedInputTokens)} / {t("推理")} {formatTableTokenAmount(log.reasoningOutputTokens)}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-left align-top">
                         <ErrorInfoCell error={log.error} />
                       </TableCell>
+                      <TableCell className="px-4 py-3 align-top"><Button variant="ghost" size="sm" onClick={() => setSelectedLog(log)}>{t("详情")}</Button></TableCell>
                     </TableRow>
                   ))
                 )}
@@ -598,6 +602,7 @@ export function RequestLogsTabContent({
           </form>
         </div>
       </div>
+      <RequestDetailsDialog log={selectedLog} onClose={() => setSelectedLog(null)} />
     </div>
   );
 }

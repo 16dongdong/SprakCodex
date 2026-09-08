@@ -440,6 +440,8 @@ pub(crate) fn write_request_log_with_attempts(
     // 记录请求最终结果（而非内部重试明细），保证 UI 一次请求只展示一条记录。
     let (request_log_id, token_stat_error) = match storage.insert_request_log_with_token_stat(
         &RequestLog {
+            // 网关账号名称仍由账号池解析；直连身份快照不参与网关授权或选路。
+            account_label: None,
             trace_id: trace_context.trace_id.map(|v| v.to_string()),
             key_id: key_id.map(|v| v.to_string()),
             account_id: account_id.map(|v| v.to_string()),

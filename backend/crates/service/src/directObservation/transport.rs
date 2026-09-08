@@ -1,4 +1,4 @@
-//! HTTP CONNECT 与 TLS 位于独立监听端口；推理流量只旁路读取 usage，认证端点走不解密隧道。
+//! HTTP CONNECT 与 TLS 经共享网关入口分流；推理流量只旁路读取 usage，认证端点走不解密隧道。
 use super::{
     certificateAuthority::Authority,
     loopbackListeners::LoopbackListeners,
@@ -312,6 +312,8 @@ async fn dispatch(
     }
     let mut exchange = Exchange::new(host, target.path(), "http");
     exchange.method = request.method().to_string();
+    exchange.captureHeaders(request.headers());
+    let capture = exchange.requestBody.clone();
     let headers = request.headers_mut();
     stripHopHeaders(headers);
     let (parts, body) = request.into_parts();
@@ -319,7 +321,18 @@ async fn dispatch(
         .client
         .request(parts.method, target)
         .headers(parts.headers)
-        .body(reqwest::Body::wrap_stream(body.into_data_stream()));
+        .body(reqwest::Body::wrap_stream(body.into_data_stream().map(
+            move |chunk| {
+                if tracked {
+                    if let Ok(bytes) = &chunk {
+                        if let Ok(mut preview) = capture.lock() {
+                            preview.feed(bytes);
+                        }
+                    }
+                }
+                chunk
+            },
+        )));
     match outgoing.send().await {
         Ok(response) => {
             let status = response.status();

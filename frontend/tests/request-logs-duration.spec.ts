@@ -125,6 +125,8 @@ test("request logs display total duration and first-response latency", async ({
         items: [
           {
             trace_id: "trace-duration-1",
+            account_id: "fixture-account",
+            account_label: "Fixture User <fixture@example.com>",
             key_id: "key-duration-1",
             request_path: "/v1/responses",
             original_path: "/v1/responses",
@@ -159,6 +161,11 @@ test("request logs display total duration and first-response latency", async ({
       });
       return;
     }
+    if (method === "requestlog/detail") {
+      expect(payload.params.traceId).toBe("trace-duration-1");
+      await ok({request: {headers: {authorization: "[已脱敏]"}, body: {model: "fixture-model"}}, response: {headers: {"content-type":"application/json"}, body: {error: {code: "fixture_error", message: "fixture diagnostic"}}}});
+      return;
+    }
     if (method === "requestlog/summary") {
       await ok({
         totalCount: 1,
@@ -188,6 +195,7 @@ test("request logs display total duration and first-response latency", async ({
 
   await expect(page.getByRole("columnheader", { name: "用时 / 首响" })).toBeVisible();
   await expect(page.getByText("2.3s/340ms")).toBeVisible();
+  await expect(page.getByText("Fixture User <fixture@example.com>", { exact: true })).toBeVisible();
   await expect(page.getByText("/v1/responses")).toBeVisible();
   await expect(page.getByText("压缩", { exact: true })).toBeVisible();
   await expect(page.getByText("-> /v1/chat/completions")).toBeVisible();
@@ -195,6 +203,17 @@ test("request logs display total duration and first-response latency", async ({
     page.getByText("=> chatgpt.com/backend-api/codex/responses"),
   ).toBeVisible();
   await expect(page.getByText("转发 gpt-5.4-openai-compact")).toBeVisible();
+
+  // 详情按需读取并在弹窗内显示请求和错误响应，关闭后保持列表筛选与分页状态。
+  await page.getByRole("button", { name: "详情", exact: true }).first().click();
+  const details = page.getByRole("dialog");
+  await expect(details.getByRole("heading", { name: "请求详情" })).toBeVisible();
+  for (const title of ["请求头", "请求体", "响应头", "响应体"]) { await expect(details.getByRole("heading", { name: title, exact: true })).toBeVisible(); }
+  await expect(details).toHaveCSS("max-width", /px$/);
+  await expect(details.getByText(/fixture diagnostic/)).toBeVisible();
+  await expect(details.getByText(/已脱敏/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(details).not.toBeVisible();
 
   await page.waitForTimeout(350);
   await page.getByLabel("跳至").fill("999");

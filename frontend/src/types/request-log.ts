@@ -3,6 +3,7 @@ export interface RequestLog {
   traceId: string;
   keyId: string;
   accountId: string;
+  accountLabel?: string;
   initialAccountId: string;
   attemptedAccountIds: string[];
   initialAggregateApiId: string;

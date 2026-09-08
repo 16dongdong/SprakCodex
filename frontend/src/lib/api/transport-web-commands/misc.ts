@@ -7,6 +7,7 @@ export function createMiscWebCommands(): Record<string, WebCommandDescriptor> {
     service_startup_snapshot: { rpcMethod: "startup/snapshot" },
     app_settings_get: { rpcMethod: "appSettings/get" },
     app_settings_set: { rpcMethod: "appSettings/set", mapParams: (params) => params && typeof params.patch === "object" && params.patch !== null ? (params.patch as Record<string, unknown>) : {} },
+    service_requestlog_detail: { rpcMethod: "requestlog/detail" },
     service_requestlog_list: { rpcMethod: "requestlog/list" },
     service_requestlog_list_with_summary: { rpcMethod: "requestlog/list_with_summary" },
     service_requestlog_summary: { rpcMethod: "requestlog/summary" },

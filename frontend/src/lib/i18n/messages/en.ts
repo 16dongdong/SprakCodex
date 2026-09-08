@@ -18,6 +18,23 @@ import { EN_RUNTIME_UI_MESSAGES } from "./sections/en-runtime-ui";
 import { EN_SKILLS_MESSAGES } from "./sections/en-skills";
 
 export const EN_MESSAGES: MessageCatalog = {
+  "请求头": "Request headers",
+  "响应头": "Response headers",
+  "请求体": "Request body",
+  "响应体": "Response body",
+  "未采集到该请求的网络报文": "Network message not captured for this request",
+  "仅收到客户端完成事件；该记录没有网络报文，需重新接入后采集新请求。": "Only a client completion event was received. This record has no network message; reconnect to capture new requests.",
+
+  "输出": "Output",
+  "保留原登录与上游，记录请求和用量；重启自动恢复。": "Keep original sign-in and upstream; record requests and usage, and resume after restart.",
+  "此记录未采集请求和响应正文。": "Request and response bodies were not captured for this record.",
+  "记录与诊断": "Record and diagnostics",
+  "客户端完成事件": "Client completion event",
+  "请求": "Request",
+  "响应": "Response",
+  "请求详情": "Request details",
+  "支持整段导入 /api/auth/session JSON、auth.json 或 Refresh Token。有刷新凭据时自动续期；仅 Access Token 过期后需重新授权。": "Paste the full /api/auth/session JSON, auth.json, or a Refresh Token. Refresh credentials enable renewal; an Access Token alone requires sign-in again after expiry.",
+
   客户端事件: "Client event",
   "Windows 自动接入已有和新启动的 Codex；已接入客户端的完成事件可在宿主恢复后补录。": "Windows automatically observes existing and newly launched Codex clients. Completion events from attached clients can be recovered after the host restarts.",
   "退出应用不等于关闭观测；需停止记录时，请先点击“关闭观测”。": "Exiting the app does not disable observation. Click Disable observation first to stop recording.",

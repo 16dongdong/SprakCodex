@@ -6,7 +6,7 @@ use super::*;
 fn readinessIsScopedToProcessAndModule() {
     let module = Path::new(r"D:\Fixture\cphook.dll");
     let event = event_name(42, module);
-    assert!(event.starts_with("Local\\ObservationHookReady8-42-"));
+    assert!(event.starts_with("Local\\ObservationHookReady9-42-"));
     assert_eq!(
         event,
         event_name(42, Path::new(r"\\?\d:\fixture\cphook.dll"))

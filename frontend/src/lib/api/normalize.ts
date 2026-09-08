@@ -1475,6 +1475,7 @@ export function normalizeRequestLog(item: unknown): RequestLog | null {
     traceId,
     keyId,
     accountId,
+    accountLabel: asString(source.accountLabel ?? source.account_label),
     initialAccountId: asString(source.initialAccountId ?? source.initial_account_id),
     attemptedAccountIds: asArray(source.attemptedAccountIds ?? source.attempted_account_ids)
       .map((value) => asString(value))

@@ -16,7 +16,7 @@ const formatProbeBytes: usize = 512;
 pub(super) fn observe(
     response: reqwest::Response,
     engine: Arc<Engine>,
-    exchange: Exchange,
+    mut exchange: Exchange,
 ) -> ResponseBody {
     let sse = response
         .headers()
@@ -37,6 +37,9 @@ pub(super) fn observe(
         .unwrap_or("")
         .to_lowercase();
     let status = response.status().as_u16();
+    exchange.responseHeaders = super::detailCapture::headers(response.headers());
+    exchange.firstResponseMs =
+        Some(exchange.started.elapsed().as_millis().min(i64::MAX as u128) as i64);
     let (writer, reader) = tokio::io::duplex(pipeCapacity);
     let taskEngine = engine.clone();
     engine.tasks.spawn(async move {
