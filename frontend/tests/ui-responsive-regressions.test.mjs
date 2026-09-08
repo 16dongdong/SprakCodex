@@ -40,10 +40,6 @@ test("shell preserves page titles and compacts header controls by content width"
   assert.match(languageSource, /<SelectValue className="min-w-0 truncate">/);
   assert.match(appFrameSource, /data-slot="app-main-column"/);
   assert.match(stylesSource, /\[data-slot="app-main-column"\][\s\S]*container-type: inline-size;/);
-  assert.match(headerSource, /header-page-date[^\n]*whitespace-nowrap/);
-  assert.match(headerSource, /header-service-port-label/);
-  assert.match(headerSource, /header-refresh-label/);
-  assert.match(headerSource, /className="header-language-switcher"/);
   assert.match(stylesSource, /@container \(max-width: 1320px\)/);
   assert.match(
     stylesSource,

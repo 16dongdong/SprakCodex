@@ -38,6 +38,19 @@ fn member_requestlog_scope(actor: &RpcActor) -> Result<(StorageHandle, Vec<Strin
 /// 返回函数执行结果
 pub(super) fn try_handle(req: &JsonRpcRequest, actor: &RpcActor) -> Option<JsonRpcResponse> {
     let result = match req.method.as_str() {
+        // 桶边界由浏览器本地日历生成；服务端限制数量和跨度，复用含归档数据的统计而非截断请求列表。
+        "requestlog/tokenSeries" => super::value_or_error((|| {
+            if !actor.is_admin() { return Err("permission_denied".to_string()); }
+            let boundaries: Vec<i64> = serde_json::from_value(req.params.as_ref().and_then(|p| p.get("boundaries")).cloned().ok_or("缺少时间边界")?).map_err(|_| "时间边界格式无效")?;
+            if boundaries.len() < 2 || boundaries.len() > 33 || boundaries[0] < 0 || boundaries.windows(2).any(|pair| pair[0] >= pair[1]) || boundaries[boundaries.len()-1].saturating_sub(boundaries[0]) > 32 * 86400 {
+                return Err("时间边界范围无效".to_string());
+            }
+            let storage = crate::storage_helpers::open_storage().ok_or("打开存储失败")?;
+            boundaries.windows(2).map(|pair| {
+                let usage = storage.summarize_request_logs_between(pair[0], pair[1]).map_err(|error| error.to_string())?;
+                Ok(serde_json::json!({"time":pair[0] * 1000,"tokens":usage.input_tokens.saturating_add(usage.output_tokens)}))
+            }).collect::<Result<Vec<_>, String>>()
+        })()),
         // 个人累计费用只向管理员开放，历史快照分项不通过客户端猜算。
         "requestlog/costBreakdown" => super::value_or_error((|| {
             if !actor.is_admin() { return Err("permission_denied".to_string()); }

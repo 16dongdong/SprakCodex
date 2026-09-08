@@ -180,6 +180,9 @@ export const serviceClient = {
   // 累计分项由历史价格快照生成，失败沿用 invoke 的结构化错误，不用零值代替。
   getCostBreakdown: (): Promise<{ input: number; output: number; cache: number; total: number; tokens: { input: number; output: number; cache: number; total: number } }> =>
     invoke("service_requestlog_cost_breakdown", withAddr()),
+  // 按本地时间桶读取全部用量，不受日志列表分页限制。
+  getTokenSeries: (boundaries: number[]): Promise<Array<{time: number; tokens: number}>> =>
+    invoke("service_requestlog_token_series", withAddr({ boundaries })),
   async getRequestLogSummary(params?: {
     query?: string;
     statusFilter?: string;

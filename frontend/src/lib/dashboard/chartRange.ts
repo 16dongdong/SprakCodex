@@ -16,3 +16,16 @@ export function getChartRange(period: ChartPeriod, dayStartTs: number) {
   }
   return { startTs: Math.floor(start.getTime() / 1000), endTs: Math.floor(end.getTime() / 1000) };
 }
+
+// 日视图按真实经过的一小时分桶，周/月按本地日历日分桶；包含周期终点供服务端使用半开区间。
+export function getChartBoundaries(period: ChartPeriod, dayStartTs: number): number[] {
+  const range = getChartRange(period, dayStartTs);
+  const boundaries = [range.startTs];
+  const cursor = new Date(range.startTs * 1000);
+  while (cursor.getTime() / 1000 < range.endTs) {
+    if (period === "day") cursor.setTime(cursor.getTime() + 3600_000);
+    else cursor.setDate(cursor.getDate() + 1);
+    boundaries.push(Math.min(range.endTs, cursor.getTime() / 1000));
+  }
+  return boundaries;
+}

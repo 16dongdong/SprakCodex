@@ -13,7 +13,6 @@ import { useI18n } from "@/lib/i18n/provider";
 import { useAppStore } from "@/lib/store/useAppStore";
 
 const refreshIntervalMs = 15_000;
-const recentRequestLimit = 100;
 
 // 首页只读取个人统计；缓存页隐藏或服务断开时停止轮询，失败显示错误而不是伪造零用量。
 export default function HomePage() {
@@ -26,26 +25,22 @@ export default function HomePage() {
     queryKey: ["personalDashboard", service.addr, dayStartTs, dayEndTs],
     enabled: service.connected && active,
     refetchInterval: active ? refreshIntervalMs : false,
-    // 统计使用本地日界限，最近列表只取固定条数；不加载平台密钥、模型或完整账号详情。
+    // 当日明细与累计卡片各自使用对应统计口径；曲线独立查询，不额外下载请求列表。
     queryFn: async () => {
-      const [snapshot, requests, cumulative, cost] = await Promise.all([
+      const [snapshot, cumulative, cost] = await Promise.all([
         serviceClient.getStartupSnapshot({
           requestLogLimit: 0, dayStartTs, dayEndTs,
           includeApiModels: false, includeApiKeys: false,
           includeAccountRuntime: false, includeAccountDetails: false,
           includeAccounts: false, includeUsageSnapshots: false,
         }),
-        serviceClient.listRequestLogsWithSummary({
-          page: 1, pageSize: recentRequestLimit, startTs: dayStartTs, endTs: dayEndTs,
-        }),
         serviceClient.getRequestLogSummary(),
         serviceClient.getCostBreakdown(),
       ]);
-      return { snapshot, requests, cumulative, cost };
+      return { snapshot, cumulative, cost };
     },
   });
   const snapshot = overview.data?.snapshot;
-  const requests = overview.data?.requests;
   const usage = snapshot?.requestLogTodaySummary;
   // 顶部累计指标不受本地日界限或曲线标签影响，直接使用无时间筛选的服务端汇总。
   const cumulative = overview.data?.cumulative;
@@ -112,7 +107,7 @@ export default function HomePage() {
           </div>
         </section>
       </div>
-      <DashboardRequests requests={requests} loading={overview.isPending && service.connected} />
+      <DashboardRequests />
     </div>
   );
 }

@@ -140,3 +140,9 @@ pub async fn service_requestlog_detail(
 pub async fn service_requestlog_cost_breakdown(addr: Option<String>) -> Result<serde_json::Value, String> {
     rpc_call_in_background("requestlog/costBreakdown", addr, None).await
 }
+
+// 时间桶以秒传递，不在桌面层改写时区；服务端负责验证范围与汇总全部请求。
+#[tauri::command]
+pub async fn service_requestlog_token_series(addr: Option<String>, boundaries: Vec<i64>) -> Result<serde_json::Value, String> {
+    rpc_call_in_background("requestlog/tokenSeries", addr, Some(serde_json::json!({"boundaries":boundaries}))).await
+}

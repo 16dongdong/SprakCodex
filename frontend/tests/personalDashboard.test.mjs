@@ -9,8 +9,8 @@ const panels = await fs.readFile(new URL("../src/components/dashboard/overviewPa
 test("个人仪表盘使用当天真实汇总并限制后台刷新和列表长度", () => {
   assert.match(page, /enabled: service.connected && active/);
   assert.match(page, /refetchInterval: active \? refreshIntervalMs : false/);
-  assert.match(page, /startTs: dayStartTs, endTs: dayEndTs/);
-  assert.match(page, /pageSize: recentRequestLimit/);
+  assert.match(page, /dayStartTs, dayEndTs/);
+  assert.doesNotMatch(page, /listRequestLogsWithSummary/);
   assert.match(page, /includeAccounts: false, includeUsageSnapshots: false/);
   assert.doesNotMatch(page, /navigateShellPath\("\/accounts"\)/);
   assert.match(page, /role="alert"/);
