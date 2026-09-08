@@ -140,6 +140,7 @@ pub(crate) fn read_request_logs_with_storage(
         .collect())
 }
 
+#[cfg(test)]
 pub(crate) fn read_request_logs_for_key_ids_with_storage(
     storage: &Storage,
     query: Option<String>,

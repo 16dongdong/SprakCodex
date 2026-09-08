@@ -30,7 +30,6 @@ import {
   buildAccountUsageListQueryKey,
 } from "@/lib/api/account-query-keys";
 import { appClient } from "@/lib/api/app-client";
-import { CODEX_PROFILE_CANDIDATES_QUERY_KEY } from "@/lib/api/codex-profile-client";
 import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
 import { useI18n } from "@/lib/i18n/provider";
 import { useAppStore } from "@/lib/store/useAppStore";
@@ -354,9 +353,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
         queryKey: buildAccountUsageListQueryKey(serviceStatus.addr),
       }),
       queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
-      queryClient.invalidateQueries({
-        queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY,
-      }),
     ]);
   };
 
@@ -818,9 +814,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
           queryKey: buildAccountUsageListQueryKey(serviceStatus.addr),
         }),
         queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
-        queryClient.invalidateQueries({
-          queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY,
-        }),
       ]);
       resetModalState();
       onOpenChange(false);

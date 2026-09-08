@@ -382,6 +382,12 @@ async fn responses_handler(
     State(state): State<ProxyState>,
     request: HttpRequest<Body>,
 ) -> Response<Body> {
+    if !cfg!(test) && !crate::sessionRouting::legacyGatewayEnabled() {
+        return Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(Body::from("not found"))
+            .unwrap_or_else(|_| Response::new(Body::empty()));
+    }
     if request.method() == axum::http::Method::GET
         && crate::http::responses_websocket::is_websocket_upgrade_request(request.headers())
     {

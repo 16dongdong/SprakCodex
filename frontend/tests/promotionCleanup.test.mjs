@@ -43,7 +43,6 @@ async function verifyRemovedPromotion() {
 async function verifyUpdateOwnership() {
   const sourcePaths = [
     "frontend/src-tauri/src/commands/updater/runtime.rs",
-    "frontend/src/app/settings/settings-page-helpers.ts",
     "frontend/src/components/layout/automatic-update-checker.tsx",
   ];
   for (const relativePath of sourcePaths) {

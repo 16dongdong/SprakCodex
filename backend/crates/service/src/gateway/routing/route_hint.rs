@@ -91,7 +91,8 @@ pub(crate) fn apply_route_strategy(
     key_id: &str,
     model: Option<&str>,
 ) {
-    let _ = apply_route_strategy_with_source(candidates, key_id, model);
+    let applied = apply_route_strategy_with_source(candidates, key_id, model);
+    let _ = (applied.strategy_label, applied.source);
 }
 
 pub(crate) struct RouteStrategyApplication {
@@ -345,6 +346,7 @@ pub(crate) fn get_manual_preferred_account() -> Option<String> {
 ///
 /// # 返回
 /// 返回函数执行结果
+#[cfg(test)]
 pub(crate) fn set_manual_preferred_account(account_id: &str) -> Result<(), String> {
     let id = account_id.trim();
     if id.is_empty() {
@@ -369,6 +371,7 @@ pub(crate) fn set_manual_preferred_account(account_id: &str) -> Result<(), Strin
 ///
 /// # 返回
 /// 无
+#[cfg(test)]
 pub(crate) fn clear_manual_preferred_account() {
     if let Some(mut storage) = crate::storage_helpers::open_storage() {
         let _ = storage.set_preferred_account(None);

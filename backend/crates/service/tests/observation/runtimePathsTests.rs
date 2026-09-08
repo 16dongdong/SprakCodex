@@ -83,7 +83,11 @@ fn explicitModuleSelectsItsOwnDirectory() {
             .unwrap()
             .isActive());
     }
-    assert!(!fixture.directory.join("debug").join(configFileName).exists());
+    assert!(!fixture
+        .directory
+        .join("debug")
+        .join(configFileName)
+        .exists());
     writeRelayConfig(&config, 0, None).unwrap();
     let stopped: serde_json::Value =
         serde_json::from_slice(&std::fs::read(&config).unwrap()).unwrap();

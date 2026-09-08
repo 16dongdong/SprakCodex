@@ -8,9 +8,8 @@ use std::time::Duration;
 use super::settings::{current_mutex_string, warmup_cron_signal_version};
 use super::{
     is_keepalive_error_ignorable, parse_interval_secs,
-    refresh_tokens_before_expiry_for_all_accounts,
-    refresh_usage_and_aggregate_balances_for_polling_cycle, run_gateway_keepalive_once,
-    COMMON_POLL_FAILURE_BACKOFF_MAX_ENV, COMMON_POLL_JITTER_ENV,
+    refresh_tokens_before_expiry_for_all_accounts, refresh_usage_for_polling_cycle,
+    run_gateway_keepalive_once, COMMON_POLL_FAILURE_BACKOFF_MAX_ENV, COMMON_POLL_JITTER_ENV,
     DEFAULT_GATEWAY_KEEPALIVE_FAILURE_BACKOFF_MAX_SECS, DEFAULT_GATEWAY_KEEPALIVE_JITTER_SECS,
     DEFAULT_USAGE_POLL_FAILURE_BACKOFF_MAX_SECS, DEFAULT_USAGE_POLL_JITTER_SECS,
     GATEWAY_KEEPALIVE_ENABLED, GATEWAY_KEEPALIVE_FAILURE_BACKOFF_MAX_ENV,
@@ -53,7 +52,7 @@ pub(super) fn usage_polling_loop() {
                 interval_secs,
             )
         },
-        refresh_usage_and_aggregate_balances_for_polling_cycle,
+        refresh_usage_for_polling_cycle,
         |_| true,
     );
 }

@@ -8,7 +8,6 @@ import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { accountClient } from "@/lib/api/account-client";
 import {
   buildAccountLookupQueryKey,
-  buildApiKeyLookupQueryKey,
 } from "@/lib/api/account-query-keys";
 import {
   buildStartupSnapshotQueryKey,
@@ -27,8 +26,6 @@ import { usePageTransitionReady } from "@/hooks/usePageTransitionReady";
 import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
 import { useI18n } from "@/lib/i18n/provider";
 import { useAppStore } from "@/lib/store/useAppStore";
-import { DASHBOARD_ADMIN_USAGE_QUERY_KEY } from "@/hooks/useDashboardAdminUsageSummary";
-import { MEMBER_DASHBOARD_SUMMARY_QUERY_KEY } from "@/hooks/useMemberDashboardSummary";
 import { RequestLogsTabContent } from "./page-sections";
 import {
   buildFixedTimePreset,
@@ -38,7 +35,7 @@ import {
   fromDateTimeLocalValue,
 } from "./page-helpers";
 import { buildSummaryPlaceholder } from "./page-cells";
-import { AccountListResult, ApiKey, RequestLogListWithSummaryResult, StartupSnapshot } from "@/types";
+import { AccountListResult, RequestLogListWithSummaryResult, StartupSnapshot } from "@/types";
 
 const LOG_SEARCH_DEBOUNCE_MS = 300;
 const LOG_REFRESH_ACTIVE_MS = 5_000;
@@ -97,7 +94,6 @@ function LogsPageContent() {
     )
   );
   const startupAccounts = startupSnapshot?.accounts || [];
-  const startupApiKeys = startupSnapshot?.apiKeys || [];
   const startupRequestLogs = startupSnapshot?.requestLogs || [];
   const canUseStartupLogsPlaceholder =
     !routeQuery.trim() &&
@@ -124,24 +120,6 @@ function LogsPageContent() {
             pageSize: startupAccounts.length,
           }
         : undefined,
-  });
-
-  const { data: apiKeysResult } = useQuery({
-    queryKey: buildApiKeyLookupQueryKey(serviceAddr),
-    queryFn: () => accountClient.listApiKeys(serviceAddr),
-    enabled: areLogQueriesEnabled && isPageActive,
-    staleTime: 60_000,
-    retry: 1,
-    placeholderData: (): ApiKey[] | undefined =>
-      startupApiKeys.length > 0 ? startupApiKeys : undefined,
-  });
-
-  const { data: aggregateApisResult } = useQuery({
-    queryKey: ["aggregate-apis", "lookup", serviceAddr],
-    queryFn: () => accountClient.listAggregateApis(serviceAddr),
-    enabled: areLogQueriesEnabled && isPageActive && isAdminMode,
-    staleTime: 60_000,
-    retry: 1,
   });
 
   const { data: logsResult, isLoading, isError: isLogsError } = useQuery({
@@ -232,8 +210,6 @@ function LogsPageContent() {
           queryKey: ["logs", "list-with-summary", serviceAddr],
         }),
         queryClient.invalidateQueries({ queryKey: ["today-summary"] }),
-        queryClient.invalidateQueries({ queryKey: DASHBOARD_ADMIN_USAGE_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: MEMBER_DASHBOARD_SUMMARY_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
       ]);
       toast.success(t("日志已清空"));
@@ -251,19 +227,6 @@ function LogsPageContent() {
       ]),
     );
   }, [accountsResult?.items]);
-
-  const apiKeyMap = useMemo(() => {
-    return new Map((apiKeysResult || []).map((apiKey) => [apiKey.id, apiKey]));
-  }, [apiKeysResult]);
-
-  const aggregateApiMap = useMemo(() => {
-    return new Map(
-      (aggregateApisResult || []).map((aggregateApi) => [
-        aggregateApi.id,
-        aggregateApi,
-      ]),
-    );
-  }, [aggregateApisResult]);
 
   const logs = logsResult?.items || [];
   const isLogsLoading =
@@ -428,8 +391,6 @@ function LogsPageContent() {
         currentPage={currentPage}
         totalPages={totalPages}
         accountNameMap={accountNameMap}
-        apiKeyMap={apiKeyMap}
-        aggregateApiMap={aggregateApiMap}
         clearMutationPending={clearMutation.isPending}
         onSearchChange={(value) => {
           setSearchInput(value);

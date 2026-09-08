@@ -33,13 +33,6 @@ pub(crate) fn normalize_reasoning_effort(value: &str) -> Option<&'static str> {
 ///
 /// # 返回
 /// 返回函数执行结果
-pub(crate) fn normalize_reasoning_effort_owned(value: Option<String>) -> Option<String> {
-    value
-        .as_deref()
-        .and_then(normalize_reasoning_effort)
-        .map(str::to_string)
-}
-
 /// Codex 的 Ultra 是客户端编排模式；上游单次模型请求使用 Max 推理强度。
 pub(crate) fn normalize_client_reasoning_effort_for_upstream(value: &str) -> Option<&'static str> {
     match value.trim().to_ascii_lowercase().as_str() {

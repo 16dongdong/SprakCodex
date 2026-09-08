@@ -312,7 +312,28 @@ async fn dispatch(
     }
     let mut exchange = Exchange::new(host, target.path(), "http");
     exchange.method = request.method().to_string();
+    let routeDecision = if tracked {
+        match crate::sessionRouting::resolveRequest(request.headers()).await {
+            Ok(decision) => decision,
+            Err(error) => {
+                log::warn!("会话分流拒绝 HTTP 请求：{error}");
+                return reply(StatusCode::SERVICE_UNAVAILABLE, "会话分流请求失败");
+            }
+        }
+    } else {
+        crate::sessionRouting::RouteDecision::Passthrough {
+            reason: "non_inference_request",
+            sessionId: None,
+            routeSource: None,
+        }
+    };
+    if let Err(error) = crate::sessionRouting::applyDecision(request.headers_mut(), &routeDecision)
+    {
+        log::warn!("会话分流身份字段无效：{error}");
+        return reply(StatusCode::SERVICE_UNAVAILABLE, "会话分流身份无效");
+    }
     exchange.captureHeaders(request.headers());
+    exchange.captureRouting(&routeDecision);
     let capture = exchange.requestBody.clone();
     let headers = request.headers_mut();
     stripHopHeaders(headers);

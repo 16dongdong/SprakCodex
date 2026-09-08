@@ -22,20 +22,19 @@ const configuredPaths = Array.from(
 );
 
 test("每个顶级功能路由同时接入菜单图标和页面缓存", () => {
-  assert.ok(configuredPaths.length > 10, "应读取完整顶级路由配置");
+  assert.deepEqual(configuredPaths, ["/", "/accounts", "/logs", "/settings"]);
   assert.equal(new Set(configuredPaths).size, configuredPaths.length);
 
   for (const routePath of configuredPaths) {
+    if (routePath === "/") {
+      assert.match(viewportSource, /ROOT_PAGE_COMPONENT/);
+      continue;
+    }
     assert.match(
       sidebarSource,
       new RegExp(`\\["${routePath.replaceAll("/", "\\/")}"\\s*,\\s*\\{\\s*icon:`),
       `${routePath} 缺少侧边栏图标接线`,
     );
-
-    if (routePath === "/") {
-      assert.match(viewportSource, /ROOT_PAGE_COMPONENT/);
-      continue;
-    }
 
     assert.match(
       viewportSource,

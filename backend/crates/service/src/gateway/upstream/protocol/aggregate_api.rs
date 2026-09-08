@@ -7,15 +7,31 @@ use std::time::Instant;
 use tiny_http::Request;
 
 use super::super::GatewayUpstreamResponse;
-use crate::aggregate_api::{
-    AGGREGATE_API_AUTH_APIKEY, AGGREGATE_API_AUTH_USERPASS, AGGREGATE_API_PROVIDER_CLAUDE,
-    AGGREGATE_API_PROVIDER_CODEX, AGGREGATE_API_PROVIDER_COMPATIBLE, AGGREGATE_API_PROVIDER_GEMINI,
-};
 use crate::gateway::protocol_adapter::adapt_openai_responses_to_anthropic_messages;
 use crate::gateway::request_log::RequestLogUsage;
 use serde_json::Value;
 
 const AGGREGATE_API_RETRY_ATTEMPTS_PER_CHANNEL: usize = 3;
+const AGGREGATE_API_PROVIDER_CODEX: &str = "codex";
+const AGGREGATE_API_PROVIDER_CLAUDE: &str = "claude";
+const AGGREGATE_API_PROVIDER_GEMINI: &str = "gemini";
+const AGGREGATE_API_PROVIDER_COMPATIBLE: &str = "compatible";
+const AGGREGATE_API_AUTH_APIKEY: &str = "apikey";
+const AGGREGATE_API_AUTH_USERPASS: &str = "userpass";
+
+/// 读取旧聚合路由记录的 User-Agent；该逻辑只服务历史数据库兼容，不再提供管理入口。
+fn resolved_aggregate_user_agent(api: &AggregateApi) -> Result<String, String> {
+    let value = api
+        .user_agent
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .unwrap_or_else(crate::gateway::current_gateway_user_agent);
+    HeaderValue::from_str(&value)
+        .map_err(|_| "aggregate api user agent is not a valid HTTP header value".to_string())?;
+    Ok(value)
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -1206,17 +1222,16 @@ pub(in super::super) fn proxy_aggregate_request(
                 continue;
             }
         };
-        let candidate_user_agent =
-            match crate::aggregate_api::resolved_aggregate_api_user_agent(&candidate) {
-                Ok(value) => value,
-                Err(err) => {
-                    last_attempt_url = Some(candidate_url.clone());
-                    last_attempt_supplier_name = candidate_supplier_name.clone();
-                    last_attempt_error = Some(err);
-                    last_failure_status = 502;
-                    continue;
-                }
-            };
+        let candidate_user_agent = match resolved_aggregate_user_agent(&candidate) {
+            Ok(value) => value,
+            Err(err) => {
+                last_attempt_url = Some(candidate_url.clone());
+                last_attempt_supplier_name = candidate_supplier_name.clone();
+                last_attempt_error = Some(err);
+                last_failure_status = 502;
+                continue;
+            }
+        };
 
         let base_upstream_url =
             match build_upstream_url(candidate_url.as_str(), effective_path.as_str()) {

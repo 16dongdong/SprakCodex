@@ -19,7 +19,6 @@ import {
   MoreVertical,
   Network,
   PencilLine,
-  PackageSearch,
   Pin,
   Plus,
   Power,
@@ -218,9 +217,6 @@ export interface AccountsPageViewProps {
   proxySettings: AccountProxySettings | null;
   proxyProfiles: ProxyProfile[];
   canTestAccounts: boolean;
-  canManageAccountModels: boolean;
-  fetchingModelsAccountId: string | null;
-  openModelAssociation: (account: Account) => Promise<void>;
   isProxySettingsLoading: boolean;
   proxyEnabledDraft: boolean;
   proxySourceDraft: AccountProxySource;
@@ -363,9 +359,6 @@ export function AccountsPageView(props: AccountsPageViewProps) {
     proxyDialogAccount,
     proxySettings,
     proxyProfiles,
-    canManageAccountModels,
-    fetchingModelsAccountId,
-    openModelAssociation,
     isProxySettingsLoading,
     proxyEnabledDraft,
     proxyProfileIdDraft,
@@ -560,23 +553,6 @@ export function AccountsPageView(props: AccountsPageViewProps) {
         >
           <BarChart3 className="h-4 w-4" />
         </Button>
-        {canManageAccountModels ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground transition-colors hover:text-primary"
-            disabled={!isServiceReady || Boolean(fetchingModelsAccountId)}
-            onClick={() => void openModelAssociation(account)}
-            title={t("获取账号模型")}
-            aria-label={t("获取账号模型")}
-          >
-            {fetchingModelsAccountId === account.id ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <PackageSearch className="h-4 w-4" />
-            )}
-          </Button>
-        ) : null}
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button

@@ -12,6 +12,13 @@ use tiny_http::{Request, Response};
 /// # 返回
 /// 返回函数执行结果
 pub(crate) fn handle_gateway_request(mut request: Request) -> Result<(), String> {
+    if !cfg!(test) && !crate::sessionRouting::legacyGatewayEnabled() {
+        let response = Response::from_string("not found").with_status_code(404);
+        request
+            .respond(response)
+            .map_err(|error| format!("返回个人版网关关闭响应失败：{error}"))?;
+        return Ok(());
+    }
     // 处理代理请求（鉴权后转发到上游）
     let debug = super::DEFAULT_GATEWAY_DEBUG;
     if request.method().as_str() == "OPTIONS" {

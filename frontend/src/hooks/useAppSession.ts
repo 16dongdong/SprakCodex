@@ -1,47 +1,43 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { appClient } from "@/lib/api/app-client";
-import { useAppStore } from "@/lib/store/useAppStore";
-import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
 import type { AppRole, AppSessionResult } from "@/types";
 
-export const APP_SESSION_QUERY_KEY = ["account-manager", "session", "current"] as const;
+export const APP_SESSION_QUERY_KEY = ["personal-session"] as const;
 
-interface UseAppSessionOptions {
-  enabled?: boolean;
-}
+const PERSONAL_SESSION = {
+  mode: "personal",
+  currentUser: null,
+  role: "system_admin",
+  permissions: ["system:admin", "requestlog:self", "profile:self"],
+  distributionEnabled: false,
+  billingModeLock: { accountModeLocked: true, distributionLocked: true, reasons: ["personal_mode"] },
+} satisfies AppSessionResult;
 
 export function isAdminRole(role: AppRole | string | null | undefined): boolean {
   return role === "admin" || role === "system_admin";
 }
 
+/// 涓汉鐗堝缁堣В鏋愪负鏈満绠＄悊鍛橈紝淇濈暀鍙傛暟浠呭吋瀹圭幇鏈夎皟鐢ㄧ鍚嶃€?
 export function resolveSessionRole(
-  session: AppSessionResult | null | undefined,
-  isLoading = false,
-  forceSystemAdmin = false,
+  _session: AppSessionResult | null | undefined,
+  _isLoading = false,
+  _forceSystemAdmin = false,
 ): AppRole {
-  if (forceSystemAdmin) return "system_admin";
-  return session?.role ?? (isLoading ? "system_admin" : "member");
+  void _session;
+  void _isLoading;
+  void _forceSystemAdmin;
+  return "system_admin";
 }
 
-export function useAppSession(options: UseAppSessionOptions = {}) {
-  const serviceStatus = useAppStore((state) => state.serviceStatus);
-  const { canAccessManagementRpc } = useRuntimeCapabilities();
-  const isServiceReady = canAccessManagementRpc && serviceStatus.connected;
-  const isQueryEnabled = (options.enabled ?? true) && isServiceReady;
-
-  const sessionQuery = useQuery<AppSessionResult>({
-    queryKey: [...APP_SESSION_QUERY_KEY, serviceStatus.addr],
-    queryFn: () => appClient.getCurrentSession(serviceStatus.addr),
-    enabled: isQueryEnabled,
-    staleTime: 30_000,
-    retry: 1,
-  });
-
+/// 杩斿洖涓嶅彲鍙樼殑鏈満韬唤蹇収锛屼笉鍐嶅悜鍚庣璇锋眰鐢ㄦ埛銆佽鑹层€侀挶鍖呮垨鎴愬憳浼氳瘽銆?
+export function useAppSession(_options: { enabled?: boolean } = {}) {
+  void _options;
   return {
-    ...sessionQuery,
-    isServiceReady,
-    isSessionQueryEnabled: isQueryEnabled,
+    data: PERSONAL_SESSION,
+    isLoading: false,
+    isError: false,
+    error: null,
+    isServiceReady: true,
+    isSessionQueryEnabled: false,
   };
 }

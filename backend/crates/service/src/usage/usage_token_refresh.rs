@@ -142,6 +142,7 @@ pub(crate) fn readLatestToken(storage: &Storage, accountId: &str) -> Result<Toke
 
 // 判断使用或导出前是否需要主动刷新；未知有效期不能假设已更新，明确有效的 AT 则避免无意义轮换。
 #[allow(non_snake_case)]
+#[cfg(test)]
 pub(crate) fn accessTokenNeedsRefresh(token: &Token, aheadSecs: i64) -> bool {
     extract_token_exp(&token.access_token)
         .map(|expiry| expiry <= now_ts().saturating_add(aheadSecs.max(0)))

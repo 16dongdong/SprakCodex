@@ -81,7 +81,7 @@ test("theme palettes and previews stay synchronized", async () => {
   const [cssSource, themeListSource, previewSource] = await Promise.all([
     fs.readFile(path.join(appsRoot, "src", "app", "globals.css"), "utf8"),
     fs.readFile(
-      path.join(appsRoot, "src", "app", "settings", "settings-page-helpers.ts"),
+      path.join(appsRoot, "src", "app", "settings", "appearanceThemes.ts"),
       "utf8",
     ),
     fs.readFile(

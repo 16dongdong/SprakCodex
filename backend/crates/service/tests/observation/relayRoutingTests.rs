@@ -132,11 +132,14 @@ impl RoutingFixture {
             stream.set_write_timeout(Some(waitLimit)).unwrap();
             if expected.local_addr().unwrap() != destination {
                 // 代理改连也包含原出口，不能继续用省略元数据的裸 HTTP 模式通过验收。
-                let mut header=[0u8;cpcommon::hook_proxy::HEADER_LEN];
+                let mut header = [0u8; cpcommon::hook_proxy::HEADER_LEN];
                 stream.read_exact(&mut header).unwrap();
-                let route=cpcommon::hook_proxy::decodeRoute(&header).unwrap();
-                assert_eq!(route.kind,cpcommon::hook_proxy::RouteKind::HttpProxy);
-                assert_eq!(std::net::SocketAddr::new(route.target.ip,route.target.port),destination);
+                let route = cpcommon::hook_proxy::decodeRoute(&header).unwrap();
+                assert_eq!(route.kind, cpcommon::hook_proxy::RouteKind::HttpProxy);
+                assert_eq!(
+                    std::net::SocketAddr::new(route.target.ip, route.target.port),
+                    destination
+                );
             }
             let mut request = [0u8; 5];
             stream.read_exact(&mut request).unwrap();
@@ -209,11 +212,20 @@ fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
     settings.owner = Some(currentIdentity().unwrap());
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    runtimePaths::writeRelayConfig(&fixture.directory.join(cpcommon::relayContract::configName), 0, None).unwrap();
+    runtimePaths::writeRelayConfig(
+        &fixture.directory.join(cpcommon::relayContract::configName),
+        0,
+        None,
+    )
+    .unwrap();
     fixture.probe(destination, &original);
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    std::fs::write(fixture.directory.join(cpcommon::relayContract::configName), b"{").unwrap();
+    std::fs::write(
+        fixture.directory.join(cpcommon::relayContract::configName),
+        b"{",
+    )
+    .unwrap();
     fixture.probe(destination, &original);
     std::fs::remove_file(fixture.directory.join(cpcommon::relayContract::configName)).unwrap();
     fixture.probe(destination, &original);

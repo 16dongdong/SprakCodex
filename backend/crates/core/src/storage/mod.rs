@@ -41,6 +41,8 @@ mod request_log_filters;
 mod request_log_query;
 mod request_logs;
 mod request_token_stats;
+#[allow(non_snake_case)]
+mod sessionRouting;
 mod settings;
 mod tokens;
 mod usage;
@@ -582,6 +584,32 @@ pub struct Token {
     pub refresh_token: String,
     pub api_key_access_token: Option<String>,
     pub last_refresh: i64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SessionRoutingCredential {
+    pub session_id: String,
+    pub route_source: String,
+    pub account_id: String,
+    pub account_label: String,
+    pub chatgpt_account_id: Option<String>,
+    pub workspace_id: Option<String>,
+    pub access_token: String,
+    pub active_binding_count: i64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SessionRoutingResolution {
+    Routed(SessionRoutingCredential),
+    NoAvailableAccount,
+    BoundAccountUnavailable { account_id: String, reason: String },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AccountRoutingPreference {
+    pub account_id: String,
+    pub enabled: bool,
+    pub active_binding_count: i64,
 }
 
 #[derive(Debug, Clone)]
@@ -2300,6 +2328,10 @@ impl Storage {
         self.apply_sql_migration(
             "135_requestAccountLabel",
             include_str!("../../migrations/135_requestAccountLabel.sql"),
+        )?;
+        self.apply_sql_migration(
+            "136_sessionRouting",
+            include_str!("../../migrations/136_sessionRouting.sql"),
         )?;
         self.ensure_api_key_rotation_columns()?;
         self.ensure_api_key_account_group_filter_column()?;

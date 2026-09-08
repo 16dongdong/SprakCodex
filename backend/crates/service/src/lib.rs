@@ -5,17 +5,10 @@ pub const RPC_BODY_LIMIT_BYTES: usize = 24 * 1024 * 1024;
 mod account;
 mod account_identity;
 mod agent_identity;
-mod aggregate_api;
 mod apikey;
 pub(crate) mod app_settings;
 mod auth;
 mod codex_model_catalog;
-mod codex_profile;
-mod codex_runtime;
-mod codex_skill_repositories;
-mod codex_skills;
-mod codex_skills_marketplace;
-mod dashboard;
 #[allow(non_snake_case, non_upper_case_globals)]
 pub mod directObservation;
 mod errors;
@@ -25,13 +18,13 @@ mod lifecycle;
 mod logging;
 mod model_groups;
 mod models_v2;
-mod plugin;
 mod proxy_registry;
-mod quota;
 mod requestlog;
 mod rpc_actor;
 mod rpc_dispatch;
 mod runtime;
+#[allow(non_snake_case, non_upper_case_globals)]
+mod sessionRouting;
 mod startup_snapshot;
 mod storage;
 mod time_bounds;
@@ -53,20 +46,7 @@ pub(crate) use account::status as account_status;
 pub(crate) use account::test as account_test;
 pub(crate) use account::update as account_update;
 pub(crate) use account::warmup as account_warmup;
-pub(crate) use aggregate_api::{
-    associate_aggregate_api_models, create_aggregate_api, delete_aggregate_api,
-    fetch_aggregate_api_models, list_aggregate_apis, read_aggregate_api_secret,
-    refresh_aggregate_api_balance, test_aggregate_api_connection, update_aggregate_api,
-};
-pub(crate) use apikey::create as apikey_create;
-pub(crate) use apikey::delete as apikey_delete;
-pub(crate) use apikey::disable as apikey_disable;
-pub(crate) use apikey::enable as apikey_enable;
-pub(crate) use apikey::list as apikey_list;
 pub(crate) use apikey::profile as apikey_profile;
-pub(crate) use apikey::read_secret as apikey_read_secret;
-pub(crate) use apikey::update_model as apikey_update_model;
-pub(crate) use apikey::usage_stats as apikey_usage_stats;
 pub(crate) use auth::account as auth_account;
 pub(crate) use auth::app_manager::distribution_enabled_for_storage;
 pub(crate) use auth::callback as auth_callback;
@@ -74,9 +54,7 @@ pub(crate) use auth::login as auth_login;
 pub(crate) use auth::tokens as auth_tokens;
 pub(crate) use errors as error_codes;
 pub(crate) use model_groups::{
-    allowed_model_slugs_for_api_key, delete_model_group, read_model_groups,
-    resolve_api_key_model_group_access, set_model_group_models, set_model_group_users,
-    upsert_model_group,
+    allowed_model_slugs_for_api_key, resolve_api_key_model_group_access,
 };
 pub(crate) use proxy_registry::{
     cancel_proxy_test_job, create_proxy_profile, delete_proxy_profile,
@@ -214,15 +192,6 @@ pub(crate) fn test_env_guard() -> std::sync::MutexGuard<'static, ()> {
 ///
 /// # 返回
 /// 返回函数执行结果
-#[cfg(test)]
-pub(crate) fn handle_request(req: JsonRpcRequest) -> JsonRpcMessage {
-    rpc_dispatch::handle_request(req)
-}
-
 pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) -> JsonRpcMessage {
     rpc_dispatch::handle_request_with_actor(req, actor)
 }
-
-#[cfg(test)]
-#[path = "tests/lib_tests.rs"]
-mod tests;

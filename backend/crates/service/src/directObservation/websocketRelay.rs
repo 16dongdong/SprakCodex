@@ -31,9 +31,30 @@ pub(super) async fn upgrade(
 ) -> Response<ResponseBody> {
     let host = target.host_str().unwrap_or("").to_owned();
     let path = target.path().to_owned();
+    let routeDecision = if tracked {
+        match crate::sessionRouting::resolveRequest(request.headers()).await {
+            Ok(decision) => decision,
+            Err(error) => {
+                log::warn!("会话分流拒绝 WebSocket 握手：{error}");
+                return reply(StatusCode::SERVICE_UNAVAILABLE, "会话分流请求失败");
+            }
+        }
+    } else {
+        crate::sessionRouting::RouteDecision::Passthrough {
+            reason: "non_inference_request",
+            sessionId: None,
+            routeSource: None,
+        }
+    };
+    if let Err(error) = crate::sessionRouting::applyDecision(request.headers_mut(), &routeDecision)
+    {
+        log::warn!("会话分流 WebSocket 身份字段无效：{error}");
+        return reply(StatusCode::SERVICE_UNAVAILABLE, "会话分流身份无效");
+    }
     let mut handshake = Exchange::new(&host, &path, handshakeProtocol);
     handshake.method = "GET".into();
     handshake.captureHeaders(request.headers());
+    handshake.captureRouting(&routeDecision);
     let observationHeaders = request.headers().clone();
     let scheme = if target.scheme() == "https" {
         "wss"

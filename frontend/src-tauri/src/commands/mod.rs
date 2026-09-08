@@ -1,22 +1,15 @@
 #![allow(dead_code)]
 
 pub mod account;
-pub mod account_manager;
-pub mod aggregate_api;
-pub mod apikey;
-pub mod codex_profile;
-pub mod codex_projects;
-pub mod codex_skills;
-pub mod dashboard;
 pub mod diagnostics;
 #[allow(non_snake_case)]
 pub mod directObservation;
 pub mod login;
-pub mod plugin;
-pub mod quota;
 mod registry;
 pub mod requestlog;
 pub mod service;
+#[allow(non_snake_case)]
+pub mod sessionRouting;
 pub mod settings;
 pub mod shared;
 pub mod startup;

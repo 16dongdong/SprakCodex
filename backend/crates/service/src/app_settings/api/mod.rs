@@ -32,8 +32,7 @@ pub(super) use super::gateway::{
 pub(super) use super::runtime_sync::sync_runtime_settings_from_storage;
 pub(super) use super::service::{
     current_saved_service_addr, current_service_bind_mode, set_saved_service_addr,
-    set_service_bind_mode, SERVICE_BIND_MODE_ALL_INTERFACES, SERVICE_BIND_MODE_LOOPBACK,
-    SERVICE_BIND_MODE_SETTING_KEY,
+    set_service_bind_mode, SERVICE_BIND_MODE_LOOPBACK, SERVICE_BIND_MODE_SETTING_KEY,
 };
 pub(super) use super::store::{save_persisted_app_setting, save_persisted_bool_setting};
 pub(super) use super::ui::{

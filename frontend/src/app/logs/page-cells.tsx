@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { Database, Shield, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -9,27 +9,17 @@ import {
 } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n/provider";
 import {
-  formatCompactKeyLabel,
   formatModelEffortDisplay,
-  normalizeAggregateApiUrl,
   normalizeRequestType,
   RequestTypeBadge,
   resolveAccountDisplayNameById,
-  resolveAggregateApiDisplayName,
-  resolveAggregateApiDisplayNameById,
-  resolveAggregateApiTooltipUrl,
   resolveDisplayRequestPath,
   resolveDisplayServiceTier,
   resolveFriendlyRequestPathLabel,
   resolveUpstreamDisplay,
   ServiceTierBadge,
 } from "./page-helpers";
-import type {
-  AggregateApi,
-  ApiKey,
-  RequestLog,
-  RequestLogFilterSummary,
-} from "@/types";
+import type { RequestLog, RequestLogFilterSummary } from "@/types";
 
 const logTooltipContentClassName = "logs-tooltip-content";
 const logTooltipLabelClassName = "text-[10px] font-medium text-muted-foreground";
@@ -38,205 +28,57 @@ export function AccountKeyInfoCell({
   log,
   accountLabel,
   accountNameMap,
-  apiKeyMap,
-  aggregateApiMap,
 }: {
   log: RequestLog;
   accountLabel: string;
   accountNameMap: Map<string, string>;
-  apiKeyMap: Map<string, ApiKey>;
-  aggregateApiMap: Map<string, AggregateApi>;
 }) {
   const { t } = useI18n();
   const displayAccount = accountLabel || log.accountId || "-";
-  const hasNamedAccount =
-    Boolean(accountLabel) &&
-    accountLabel.trim() !== "" &&
-    accountLabel !== log.accountId;
-  const attemptedAccountLabels = log.attemptedAccountIds
-    .map((accountId) => resolveAccountDisplayNameById(accountId, accountNameMap))
-    .filter((value) => value.trim().length > 0);
-  const initialAccountLabel = resolveAccountDisplayNameById(
-    log.initialAccountId,
-    accountNameMap,
-  );
-  const attemptedAggregateApiLabels = log.attemptedAggregateApiIds
-    .map((aggregateApiId) =>
-      resolveAggregateApiDisplayNameById(aggregateApiId, aggregateApiMap),
-    )
-    .filter((value) => value.trim().length > 0);
-  const initialAggregateApiLabel = resolveAggregateApiDisplayNameById(
-    log.initialAggregateApiId,
-    aggregateApiMap,
-  );
-  const apiKey = apiKeyMap.get(log.keyId) || null;
-  const apiKeyName = String(apiKey?.name || "").trim();
-  const apiKeyDisplayName = apiKeyName || formatCompactKeyLabel(log.keyId);
-  const aggregateApiById = apiKey?.aggregateApiId
-    ? aggregateApiMap.get(apiKey.aggregateApiId) || null
-    : null;
-  const actualAggregateApi =
-    log.actualSourceKind === "aggregate_api" && log.actualSourceId
-      ? aggregateApiMap.get(log.actualSourceId) || null
-      : null;
-  const aggregateApiByUrl = (() => {
-    const upstreamUrl = normalizeAggregateApiUrl(log.upstreamUrl);
-    if (!upstreamUrl) return null;
-    for (const aggregateApi of aggregateApiMap.values()) {
-      if (normalizeAggregateApiUrl(aggregateApi.url) === upstreamUrl) {
-        return aggregateApi;
-      }
-    }
-    return null;
-  })();
-  const aggregateApi = actualAggregateApi || aggregateApiById || aggregateApiByUrl;
-  const selectedAggregateApiId =
-    log.actualSourceKind === "aggregate_api" && log.actualSourceId
-      ? log.actualSourceId
-      : aggregateApi?.id || "";
-  const isAggregateApi = Boolean(
-    log.actualSourceKind === "aggregate_api" ||
-      log.aggregateApiSupplierName ||
-      log.aggregateApiUrl ||
-      aggregateApi,
-  );
-  const aggregateApiDisplayName = resolveAggregateApiDisplayName(log, aggregateApi, apiKey);
-  const aggregateApiDisplayUrl = resolveAggregateApiTooltipUrl(log, aggregateApi, apiKey);
-  const showAttemptHint =
-    attemptedAccountLabels.length > 1 &&
-    initialAccountLabel &&
-    initialAccountLabel !== displayAccount;
-  const showAggregateAttemptHint =
-    attemptedAggregateApiLabels.length > 1 &&
-    initialAggregateApiLabel &&
-    String(log.initialAggregateApiId || "").trim() !== selectedAggregateApiId;
-
-  if (isAggregateApi) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={<div />} className="block text-left">
-          <div className="flex max-w-[180px] flex-col gap-0.5 opacity-80">
-            <div className="flex items-center gap-1">
-              <Database className="h-3 w-3 text-primary" />
-              <span className="truncate text-[11px] font-medium">
-                {aggregateApiDisplayName}
-              </span>
-            </div>
-            <div className="truncate font-mono text-[10px] leading-4 text-muted-foreground">
-              {aggregateApiDisplayUrl}
-            </div>
-            <div className="flex items-center gap-1 text-[10px] leading-4 text-muted-foreground">
-              <Shield className="h-3 w-3" />
-              <span className={apiKeyName ? "truncate" : "font-mono"}>
-                {apiKeyDisplayName}
-              </span>
-            </div>
-            {showAggregateAttemptHint ? (
-              <div className="text-[10px] leading-4 text-amber-500">
-                {t("先试")} {initialAggregateApiLabel}
-              </div>
-            ) : null}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent className={`${logTooltipContentClassName} max-w-sm`}>
-          <div className="flex min-w-[240px] flex-col gap-2">
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>{t("供应商名称")}</div>
-              <div className="break-all font-mono text-[11px]">
-                {aggregateApiDisplayName}
-              </div>
-            </div>
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>URL</div>
-              <div className="break-all font-mono text-[11px]">
-                {aggregateApiDisplayUrl}
-              </div>
-            </div>
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>{t("密钥")}</div>
-              <div className="break-all text-[11px]">{apiKeyDisplayName || "-"}</div>
-            </div>
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>{t("密钥 ID")}</div>
-              <div className="break-all font-mono text-[11px]">{log.keyId || "-"}</div>
-            </div>
-            {attemptedAggregateApiLabels.length > 1 ? (
-              <div className="space-y-0.5">
-                <div className={logTooltipLabelClassName}>{t("尝试链路")}</div>
-                <div className="break-all font-mono text-[11px]">
-                  {attemptedAggregateApiLabels.join(" -> ")}
-                </div>
-              </div>
-            ) : null}
-            {initialAggregateApiLabel ? (
-              <div className="space-y-0.5">
-                <div className={logTooltipLabelClassName}>{t("首尝试渠道")}</div>
-                <div className="break-all font-mono text-[11px]">
-                  {initialAggregateApiLabel}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
+  const sessionId = log.actualSourceKind === "session" ? log.actualSourceId : "";
+  const routingMode = log.routeStrategy || "passthrough";
 
   return (
     <Tooltip>
       <TooltipTrigger render={<div />} className="block text-left">
-        <div className="flex flex-col gap-0.5 opacity-80">
+        <div className="flex max-w-[190px] flex-col gap-1">
           <div className="flex items-center gap-1">
             <Zap className="h-3 w-3 text-yellow-500" />
-            <span className="max-w-[140px] truncate">{displayAccount}</span>
+            <span className="truncate text-[11px] font-medium">{displayAccount}</span>
           </div>
-          <div className="flex items-center gap-1 text-[10px] leading-4 text-muted-foreground">
-            <Shield className="h-3 w-3" />
-            <span className={apiKeyName ? "max-w-[140px] truncate" : "font-mono"}>
-              {apiKeyDisplayName}
-            </span>
-          </div>
-          {showAttemptHint ? (
-            <div className="text-[10px] leading-4 text-amber-500">
-              {t("先试")} {initialAccountLabel}
-            </div>
-          ) : null}
+          <span className="truncate font-mono text-[10px] text-muted-foreground">
+            {routingMode}
+          </span>
         </div>
       </TooltipTrigger>
       <TooltipContent className={`${logTooltipContentClassName} max-w-sm`}>
         <div className="flex min-w-[240px] flex-col gap-2">
-          {initialAccountLabel ? (
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>{t("首尝试账号")}</div>
-              <div className="break-all font-mono text-[11px]">{initialAccountLabel}</div>
-            </div>
-          ) : null}
-          {attemptedAccountLabels.length > 1 ? (
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>{t("尝试链路")}</div>
-              <div className="break-all font-mono text-[11px]">
-                {attemptedAccountLabels.join(" -> ")}
-              </div>
-            </div>
-          ) : null}
-          {hasNamedAccount ? (
-            <div className="space-y-0.5">
-              <div className={logTooltipLabelClassName}>{t("邮箱 / 名称")}</div>
-              <div className="break-all font-mono text-[11px]">{accountLabel}</div>
-            </div>
-          ) : null}
+          <div className="space-y-0.5">
+            <div className={logTooltipLabelClassName}>{t("邮箱 / 名称")}</div>
+            <div className="break-all text-[11px]">{displayAccount}</div>
+          </div>
           <div className="space-y-0.5">
             <div className={logTooltipLabelClassName}>{t("账号 ID")}</div>
             <div className="break-all font-mono text-[11px]">{log.accountId || "-"}</div>
           </div>
           <div className="space-y-0.5">
-            <div className={logTooltipLabelClassName}>{t("密钥")}</div>
-            <div className="break-all text-[11px]">{apiKeyDisplayName || "-"}</div>
+            <div className={logTooltipLabelClassName}>{t("分流方式")}</div>
+            <div className="break-all font-mono text-[11px]">{routingMode}</div>
           </div>
-          <div className="space-y-0.5">
-            <div className={logTooltipLabelClassName}>{t("密钥 ID")}</div>
-            <div className="break-all font-mono text-[11px]">{log.keyId || "-"}</div>
-          </div>
+          {sessionId ? (
+            <div className="space-y-0.5">
+              <div className={logTooltipLabelClassName}>{t("会话标识")}</div>
+              <div className="break-all font-mono text-[11px]">{sessionId}</div>
+            </div>
+          ) : null}
+          {log.accountId ? (
+            <div className="space-y-0.5">
+              <div className={logTooltipLabelClassName}>{t("账号名称")}</div>
+              <div className="break-all text-[11px]">
+                {resolveAccountDisplayNameById(log.accountId, accountNameMap)}
+              </div>
+            </div>
+          ) : null}
         </div>
       </TooltipContent>
     </Tooltip>

@@ -54,7 +54,7 @@ import {
   resolveDisplayedStatusCode,
   SummaryCard,
 } from "./page-helpers";
-import type { AggregateApi, ApiKey, RequestLog, RequestLogFilterSummary } from "@/types";
+import type { RequestLog, RequestLogFilterSummary } from "@/types";
 
 // 展示已有请求与统计，不接收接入模式参数；移除旧提示后也移除无用的模式依赖，避免后台重复查询。
 export function RequestLogsTabContent({
@@ -76,8 +76,6 @@ export function RequestLogsTabContent({
   currentPage,
   totalPages,
   accountNameMap,
-  apiKeyMap,
-  aggregateApiMap,
   clearMutationPending,
   onSearchChange,
   onFilterChange,
@@ -111,8 +109,6 @@ export function RequestLogsTabContent({
   currentPage: number;
   totalPages: number;
   accountNameMap: Map<string, string>;
-  apiKeyMap: Map<string, ApiKey>;
-  aggregateApiMap: Map<string, AggregateApi>;
   clearMutationPending: boolean;
   onSearchChange: (value: string) => void;
   onFilterChange: (value: StatusFilter) => void;
@@ -405,7 +401,7 @@ export function RequestLogsTabContent({
                     {t("类型 / 方法 / 路径")}
                   </TableHead>
                   <TableHead className="w-[224px] px-4 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                    {t("账号 / 密钥")}
+                    {t("实际使用账号")}
                   </TableHead>
                   <TableHead className="w-[220px] px-4 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                     {t("模型 / 推理 / 等级")}
@@ -464,8 +460,6 @@ export function RequestLogsTabContent({
                           log={log}
                           accountLabel={resolveAccountDisplayName(log, accountNameMap)}
                           accountNameMap={accountNameMap}
-                          apiKeyMap={apiKeyMap}
-                          aggregateApiMap={aggregateApiMap}
                         />
                       </TableCell>
                       <TableCell className="px-4 py-3 align-top">

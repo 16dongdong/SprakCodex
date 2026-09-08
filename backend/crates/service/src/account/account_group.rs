@@ -1,5 +1,6 @@
 use codexmanager_core::storage::Account;
 
+#[cfg(test)]
 pub(crate) fn normalize_account_group_filter(value: Option<String>) -> Option<String> {
     value
         .map(|value| value.trim().to_string())

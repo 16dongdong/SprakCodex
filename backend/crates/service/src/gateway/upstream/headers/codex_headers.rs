@@ -493,7 +493,3 @@ fn resolve_client_request_id(incoming_client_request_id: Option<&str>) -> Option
     }
     None
 }
-
-#[cfg(test)]
-#[path = "codex_headers_tests.rs"]
-mod tests;

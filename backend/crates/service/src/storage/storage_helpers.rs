@@ -262,16 +262,6 @@ pub(crate) fn hash_platform_key(key: &str) -> String {
 ///
 /// # 返回
 /// 返回函数执行结果
-pub(crate) fn generate_platform_key() -> String {
-    // 生成随机平台 Key（十六进制）
-    let mut buf = [0u8; 32];
-    rand::rngs::OsRng.fill_bytes(&mut buf);
-    let mut out = String::with_capacity(buf.len() * 2);
-    for b in buf {
-        out.push_str(&format!("{:02x}", b));
-    }
-    out
-}
 
 /// 函数 `generate_key_id`
 ///
@@ -284,16 +274,6 @@ pub(crate) fn generate_platform_key() -> String {
 ///
 /// # 返回
 /// 返回函数执行结果
-pub(crate) fn generate_key_id() -> String {
-    // 生成短 ID 作为平台 Key 的展示标识
-    let mut buf = [0u8; 6];
-    rand::rngs::OsRng.fill_bytes(&mut buf);
-    let mut out = String::from("gk_");
-    for b in buf {
-        out.push_str(&format!("{:02x}", b));
-    }
-    out
-}
 
 /// 函数 `generate_aggregate_api_id`
 ///
@@ -306,15 +286,6 @@ pub(crate) fn generate_key_id() -> String {
 ///
 /// # 返回
 /// 返回函数执行结果
-pub(crate) fn generate_aggregate_api_id() -> String {
-    let mut buf = [0u8; 6];
-    rand::rngs::OsRng.fill_bytes(&mut buf);
-    let mut out = String::from("ag_");
-    for b in buf {
-        out.push_str(&format!("{:02x}", b));
-    }
-    out
-}
 
 pub(crate) fn generate_proxy_profile_id() -> String {
     let mut buf = [0u8; 6];

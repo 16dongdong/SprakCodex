@@ -3,151 +3,38 @@
 import { normalizeRoutePath } from "@/lib/utils/static-routes";
 import type { AppRole } from "@/types";
 
-type TopLevelRouteSectionId =
-  | "overview"
-  | "resources"
-  | "platform-config"
-  | "model-routing"
-  | "users-keys"
-  | "monitoring"
-  | "system"
-  | "member-overview"
-  | "member-keys"
-  | "member-models"
-  | "member-usage"
-  | "member-settings";
-
-const ADMIN_ROUTE_SECTIONS = [
-  "overview",
-  "resources",
-  "platform-config",
-  "model-routing",
-  "users-keys",
-  "monitoring",
-  "system",
-] as const;
-
-const MEMBER_ROUTE_SECTIONS = [
-  "member-overview",
-  "member-keys",
-  "member-models",
-  "member-usage",
-  "member-settings",
-] as const;
+type TopLevelRouteSectionId = "personal";
 
 const ROUTE_SECTION_LABELS: Record<TopLevelRouteSectionId, string> = {
-  overview: "概览",
-  resources: "资源接入",
-  "platform-config": "平台配置",
-  "model-routing": "模型路由",
-  "users-keys": "用户管理",
-  monitoring: "运行监控",
-  system: "系统设置",
-  "member-overview": "我的概览",
-  "member-keys": "我的密钥",
-  "member-models": "可用模型",
-  "member-usage": "使用记录",
-  "member-settings": "账号设置",
+  personal: "个人工具",
 };
 
-// 导航与页面缓存共享产品路由白名单，推广页不再注册，避免残留可访问入口。
+// 根路径只负责把旧安装和外部入口带到账号页，不再注册独立概览功能。
 export const TOP_LEVEL_ROUTE_CONFIG = [
   {
     path: "/",
-    label: "仪表盘",
-    memberLabel: "我的概览",
-    section: "overview",
-    memberSection: "member-overview",
+    label: "账号",
+    section: "personal",
+    navigationHidden: true,
     roles: ["system_admin", "admin", "member"],
   },
   {
     path: "/accounts",
-    label: "OpenAI 账号池",
-    section: "resources",
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/aggregate-api",
-    label: "聚合 API",
-    section: "resources",
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/platform-mode",
-    label: "Codex 接入方式",
-    section: "platform-config",
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/projects",
-    label: "项目启动",
-    section: "platform-config",
-    desktopOnly: true,
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/apikeys",
-    label: "平台密钥",
-    memberLabel: "我的密钥",
-    section: "platform-config",
-    memberSection: "member-keys",
+    label: "账号",
+    section: "personal",
     roles: ["system_admin", "admin", "member"],
-  },
-  {
-    path: "/models",
-    label: "模型与路由",
-    memberLabel: "可用模型",
-    section: "model-routing",
-    memberSection: "member-models",
-    roles: ["system_admin", "admin", "member"],
-  },
-  {
-    path: "/model-groups",
-    label: "模型组",
-    section: "model-routing",
-    accountSystemOnly: true,
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/account-manager",
-    label: "成员账号",
-    section: "users-keys",
-    accountSystemOnly: true,
-    roles: ["system_admin", "admin"],
   },
   {
     path: "/logs",
     label: "请求日志",
-    memberLabel: "使用记录",
-    section: "monitoring",
-    memberSection: "member-usage",
+    section: "personal",
     roles: ["system_admin", "admin", "member"],
   },
   {
     path: "/settings",
-    label: "系统设置",
-    memberLabel: "账号设置",
-    section: "system",
-    memberSection: "member-settings",
+    label: "设置",
+    section: "personal",
     roles: ["system_admin", "admin", "member"],
-  },
-  {
-    path: "/proxy-settings",
-    label: "代理设置",
-    section: "system",
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/plugins",
-    label: "插件中心",
-    section: "system",
-    roles: ["system_admin", "admin"],
-  },
-  {
-    path: "/skills",
-    label: "Skills 与插件",
-    section: "system",
-    roles: ["system_admin", "admin"],
   },
 ] as const;
 
@@ -169,8 +56,6 @@ export type TopLevelRouteAccess =
 
 interface NormalizedTopLevelRouteAccessContext {
   role: string;
-  mode: string | null;
-  isDesktopRuntime: boolean;
 }
 
 export interface TopLevelRouteSection {
@@ -187,61 +72,26 @@ function normalizeRole(role: AppRole | string | null | undefined): string {
   return role || "system_admin";
 }
 
-function normalizeMode(mode: string | null | undefined): string | null {
-  const normalizedMode = String(mode || "").trim().toLowerCase();
-  return normalizedMode || null;
-}
-
 function isTopLevelRouteAccessContext(
   access: TopLevelRouteAccess,
 ): access is TopLevelRouteAccessContext {
   return Boolean(access && typeof access === "object" && !Array.isArray(access));
 }
 
+/// 个人版三个页面对本机用户一致开放；保留角色读取只为兼容现有登录快照。
 function normalizeAccessContext(
   access: TopLevelRouteAccess,
-  mode?: string | null,
 ): NormalizedTopLevelRouteAccessContext {
-  if (isTopLevelRouteAccessContext(access)) {
-    return {
-      role: normalizeRole(access.role),
-      mode: normalizeMode(access.mode),
-      isDesktopRuntime: access.isDesktopRuntime === true,
-    };
-  }
   return {
-    role: normalizeRole(access),
-    mode: normalizeMode(mode),
-    isDesktopRuntime: false,
+    role: normalizeRole(isTopLevelRouteAccessContext(access) ? access.role : access),
   };
-}
-
-function isAccountSystemMode(mode: string | null): boolean {
-  return mode === "accounts";
-}
-
-function isAccountSystemOnlyRoute(route: TopLevelRouteConfig): boolean {
-  return "accountSystemOnly" in route && route.accountSystemOnly === true;
-}
-
-function isDesktopOnlyRoute(route: TopLevelRouteConfig): boolean {
-  return "desktopOnly" in route && route.desktopOnly === true;
 }
 
 function isRouteAllowedForAccess(
   route: TopLevelRouteConfig,
   access: NormalizedTopLevelRouteAccessContext,
 ): boolean {
-  if (!(route.roles as readonly string[]).includes(access.role)) {
-    return false;
-  }
-  if (isAccountSystemOnlyRoute(route) && !isAccountSystemMode(access.mode)) {
-    return false;
-  }
-  if (isDesktopOnlyRoute(route) && !access.isDesktopRuntime) {
-    return false;
-  }
-  return true;
+  return (route.roles as readonly string[]).includes(access.role);
 }
 
 export function isAdminTopLevelRole(
@@ -257,42 +107,38 @@ export function isTopLevelRoutePath(path: string): path is TopLevelRoutePath {
 
 export function toTopLevelRoutePath(path: string): TopLevelRoutePath {
   const normalizedPath = normalizeRoutePath(path);
-  if (isTopLevelRoutePath(normalizedPath)) {
-    return normalizedPath;
-  }
-  return "/";
+  return isTopLevelRoutePath(normalizedPath) ? normalizedPath : "/accounts";
 }
 
 export function getTopLevelRouteLabel(
   path: string,
-  access?: TopLevelRouteAccess,
+  _access?: TopLevelRouteAccess,
 ): string {
+  void _access;
   const normalizedPath = normalizeRoutePath(path);
-  const route = TOP_LEVEL_ROUTE_CONFIG.find((item) => item.path === normalizedPath);
-  if (!route) return "CodexManager";
-  const { role } = normalizeAccessContext(access);
-  if (!isAdminTopLevelRole(role) && "memberLabel" in route) {
-    return route.memberLabel;
-  }
-  return route.label;
+  return (
+    TOP_LEVEL_ROUTE_CONFIG.find((item) => item.path === normalizedPath)?.label ??
+    "CodexManager"
+  );
 }
 
 export function isTopLevelRouteAllowedForRole(
   path: string,
   access: TopLevelRouteAccess,
-  mode?: string | null,
+  _mode?: string | null,
 ): boolean {
+  void _mode;
   const normalizedPath = normalizeRoutePath(path);
   const route = TOP_LEVEL_ROUTE_CONFIG.find((item) => item.path === normalizedPath);
-  if (!route) return false;
-  return isRouteAllowedForAccess(route, normalizeAccessContext(access, mode));
+  return Boolean(route && isRouteAllowedForAccess(route, normalizeAccessContext(access)));
 }
 
 export function getAllowedTopLevelRoutes(
   access: TopLevelRouteAccess,
-  mode?: string | null,
+  _mode?: string | null,
 ) {
-  const normalizedAccess = normalizeAccessContext(access, mode);
+  void _mode;
+  const normalizedAccess = normalizeAccessContext(access);
   return TOP_LEVEL_ROUTE_CONFIG.filter((route) =>
     isRouteAllowedForAccess(route, normalizedAccess),
   );
@@ -300,35 +146,25 @@ export function getAllowedTopLevelRoutes(
 
 export function getAllowedTopLevelRouteSections(
   access: TopLevelRouteAccess,
-  mode?: string | null,
+  _mode?: string | null,
 ): TopLevelRouteSection[] {
-  const normalizedAccess = normalizeAccessContext(access, mode);
-  const adminRole = isAdminTopLevelRole(normalizedAccess.role);
-  const sectionOrder = adminRole ? ADMIN_ROUTE_SECTIONS : MEMBER_ROUTE_SECTIONS;
-  const sectionMap = new Map<TopLevelRouteSectionId, TopLevelRouteConfig[]>();
-  for (const route of getAllowedTopLevelRoutes(normalizedAccess)) {
-    const sectionId =
-      !adminRole && "memberSection" in route ? route.memberSection : route.section;
-    const current = sectionMap.get(sectionId) ?? [];
-    current.push(route);
-    sectionMap.set(sectionId, current);
-  }
-  return sectionOrder.flatMap((sectionId) => {
-    const routes = sectionMap.get(sectionId) ?? [];
-    if (routes.length === 0) return [];
-    return [
-      {
-        id: sectionId,
-        label: ROUTE_SECTION_LABELS[sectionId],
-        routes,
-      },
-    ];
-  });
+  void _mode;
+  const routes = getAllowedTopLevelRoutes(access).filter(
+    (route) => !("navigationHidden" in route && route.navigationHidden),
+  );
+  return routes.length === 0
+    ? []
+    : [{ id: "personal", label: ROUTE_SECTION_LABELS.personal, routes }];
 }
 
 export function getFirstAllowedTopLevelRoutePath(
   access: TopLevelRouteAccess,
-  mode?: string | null,
+  _mode?: string | null,
 ): TopLevelRoutePath {
-  return getAllowedTopLevelRoutes(access, mode)[0]?.path ?? "/";
+  void _mode;
+  return (
+    getAllowedTopLevelRoutes(access).find(
+      (route) => !("navigationHidden" in route && route.navigationHidden),
+    )?.path ?? "/accounts"
+  );
 }

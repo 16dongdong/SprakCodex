@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { MessageCatalog } from "./types";
 import { KO_ACCESS_CONTROL_MESSAGES } from "./sections/ko-access-control";
@@ -18,6 +18,26 @@ import { KO_RUNTIME_UI_MESSAGES } from "./sections/ko-runtime-ui";
 import { KO_SKILLS_MESSAGES } from "./sections/ko-skills";
 
 export const KO_MESSAGES: MessageCatalog = {
+  "分流方式": "라우팅 방식",
+  "会话标识": "세션 식별자",
+  "实际使用账号": "실제 사용 계정",
+  "个人工具": "개인 도구",
+  "本机接入": "로컬 연결",
+  "可用账号：{available}/{total}": "사용 가능한 계정: {available}/{total}",
+  "活跃绑定：{count}": "활성 바인딩: {count}",
+  "会话账号分流": "세션 계정 라우팅",
+  "关闭时保留 Codex 原始凭据并记录；开启后仅为新会话均衡分配账号，同一会话保持固定绑定。": "끄면 Codex 원래 자격 증명을 유지하고 기록합니다. 켜면 새 세션만 균등 배정하며 같은 세션은 한 계정에 고정합니다.",
+  "绑定 {count}": "바인딩 {count}",
+  "参与分流": " 라우팅 참여",
+  "读取会话分流状态失败": "세션 라우팅 상태를 읽지 못했습니다",
+  "管理应用行为、网络出口、费用显示和技术诊断": "앱 동작, 네트워크 연결, 비용 표시 및 진단 관리",
+  "个人 Codex 账号管理与会话分流工具": "개인 Codex 계정 및 세션 라우팅 도구",
+  "账号和会话分流由 CM 处理，会话、项目、模型、Skills 与插件继续由 Codex 管理。": "CM은 계정과 세션 라우팅을 처리하고, 세션·프로젝트·모델·Skills·플러그인은 Codex가 계속 관리합니다.",
+  "设置已保存": "설정이 저장되었습니다",
+  "启动完成后在后台检查更新": "시작 후 백그라운드에서 업데이트 확인",
+  "系统登录后自动启动桌面端": "시스템 로그인 후 데스크톱 앱 자동 시작",
+  "关闭后从托盘按需打开主界面": "필요할 때 트레이에서 기본 창 열기",
+  "保留本机接入和会话分流后台运行": "로컬 연결과 세션 라우팅을 백그라운드에서 유지",
   "请求头": "요청 헤더",
   "响应头": "응답 헤더",
   "请求体": "요청 본문",

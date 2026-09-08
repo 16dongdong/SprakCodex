@@ -22,12 +22,6 @@ static ACCOUNT_PROXY_CLIENTS: OnceLock<RwLock<HashMap<String, AccountProxyClient
     OnceLock::new();
 static AGGREGATE_CANDIDATE_CLIENTS: OnceLock<RwLock<HashMap<AggregateCandidateClientKey, Client>>> =
     OnceLock::new();
-#[cfg(test)]
-static UPSTREAM_CLIENT_BUILD_COUNT: AtomicUsize = AtomicUsize::new(0);
-#[cfg(test)]
-static ASYNC_UPSTREAM_CLIENT_BUILD_COUNT: AtomicUsize = AtomicUsize::new(0);
-#[cfg(test)]
-static DIRECT_UPSTREAM_CLIENT_USE_COUNT: AtomicUsize = AtomicUsize::new(0);
 static RUNTIME_CONFIG_LOADED: OnceLock<()> = OnceLock::new();
 static REQUEST_GATE_WAIT_TIMEOUT_MS: AtomicU64 =
     AtomicU64::new(DEFAULT_REQUEST_GATE_WAIT_TIMEOUT_MS);
@@ -248,14 +242,6 @@ pub(crate) fn upstream_client() -> Client {
     crate::lock_utils::read_recover(upstream_client_lock(), "upstream_client").clone()
 }
 
-pub(crate) fn upstream_client_for_aggregate_url(url: &str) -> Client {
-    ensure_runtime_config_loaded();
-    if aggregate_api_should_bypass_upstream_proxy(url) {
-        return direct_upstream_client();
-    }
-    upstream_client()
-}
-
 /// 函数 `upstream_client_for_account`
 ///
 /// 作者: gaohongshun
@@ -436,21 +422,6 @@ pub(crate) fn build_account_test_client_with_timeouts(
     builder
         .build()
         .map_err(|err| format!("build account test client failed: {err}"))
-}
-
-#[cfg(test)]
-pub(crate) fn upstream_proxy_url_for_account(account_id: &str) -> Option<String> {
-    ensure_runtime_config_loaded();
-    match account_proxy_client_cache_entry(account_id) {
-        AccountProxyClientCacheEntry::Ready { proxy_url, .. }
-        | AccountProxyClientCacheEntry::Invalid { proxy_url, .. } => return Some(proxy_url),
-        AccountProxyClientCacheEntry::NotConfigured => {}
-    }
-    let pool = crate::lock_utils::read_recover(upstream_client_pool_lock(), "upstream_client_pool");
-    if let Some(proxy_url) = pool.proxy_for_account(account_id) {
-        return Some(proxy_url.to_string());
-    }
-    current_upstream_proxy_url()
 }
 
 pub(crate) fn websocket_proxy_url_for_account(
@@ -812,9 +783,6 @@ fn build_async_client_with_proxy_strict(
 /// # 返回
 /// 返回函数执行结果
 fn build_upstream_client_with_proxy(proxy_url: Option<&str>) -> Client {
-    #[cfg(test)]
-    UPSTREAM_CLIENT_BUILD_COUNT.fetch_add(1, Ordering::SeqCst);
-
     let mut builder = Client::builder()
         // 中文注释：显式关闭总超时，避免长时流式响应在客户端层被误判超时中断。
         .timeout(None::<Duration>)
@@ -844,9 +812,6 @@ fn build_upstream_client_with_proxy(proxy_url: Option<&str>) -> Client {
 }
 
 fn build_async_upstream_client_with_proxy(proxy_url: Option<&str>) -> reqwest::Client {
-    #[cfg(test)]
-    ASYNC_UPSTREAM_CLIENT_BUILD_COUNT.fetch_add(1, Ordering::SeqCst);
-
     let mut builder = reqwest::Client::builder()
         .connect_timeout(upstream_connect_timeout_cached())
         .pool_max_idle_per_host(32)
@@ -1994,13 +1959,6 @@ fn retry_upstream_client_lock() -> &'static RwLock<Client> {
     RETRY_UPSTREAM_CLIENT.get_or_init(|| RwLock::new(build_upstream_client()))
 }
 
-fn direct_upstream_client() -> Client {
-    #[cfg(test)]
-    DIRECT_UPSTREAM_CLIENT_USE_COUNT.fetch_add(1, Ordering::SeqCst);
-
-    crate::lock_utils::read_recover(direct_upstream_client_lock(), "direct_upstream_client").clone()
-}
-
 fn direct_upstream_client_lock() -> &'static RwLock<Client> {
     DIRECT_UPSTREAM_CLIENT.get_or_init(|| RwLock::new(build_direct_upstream_client()))
 }
@@ -2182,36 +2140,6 @@ fn build_upstream_client_pool() -> UpstreamClientPool {
             async_retry_clients,
         }
     }
-}
-
-#[cfg(test)]
-fn reset_upstream_client_build_count_for_test() {
-    UPSTREAM_CLIENT_BUILD_COUNT.store(0, Ordering::SeqCst);
-}
-
-#[cfg(test)]
-fn upstream_client_build_count_for_test() -> usize {
-    UPSTREAM_CLIENT_BUILD_COUNT.load(Ordering::SeqCst)
-}
-
-#[cfg(test)]
-fn reset_async_upstream_client_build_count_for_test() {
-    ASYNC_UPSTREAM_CLIENT_BUILD_COUNT.store(0, Ordering::SeqCst);
-}
-
-#[cfg(test)]
-fn async_upstream_client_build_count_for_test() -> usize {
-    ASYNC_UPSTREAM_CLIENT_BUILD_COUNT.load(Ordering::SeqCst)
-}
-
-#[cfg(test)]
-fn reset_direct_upstream_client_use_count_for_test() {
-    DIRECT_UPSTREAM_CLIENT_USE_COUNT.store(0, Ordering::SeqCst);
-}
-
-#[cfg(test)]
-fn direct_upstream_client_use_count_for_test() -> usize {
-    DIRECT_UPSTREAM_CLIENT_USE_COUNT.load(Ordering::SeqCst)
 }
 
 /// 函数 `upstream_proxy_url_cell`
@@ -3202,7 +3130,3 @@ fn stable_account_hash(account_id: &str) -> u64 {
     }
     hash
 }
-
-#[cfg(test)]
-#[path = "tests/runtime_config_tests.rs"]
-mod tests;

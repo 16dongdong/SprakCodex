@@ -10,20 +10,12 @@ use crate::storage_helpers;
 use crate::RpcActor;
 
 mod account;
-mod account_manager;
-mod aggregate_api;
-mod apikey;
 mod app_settings;
-mod codex_profile;
-mod codex_skills;
-mod dashboard;
 #[allow(non_snake_case)]
 mod directObservation;
-mod gateway;
-mod model_groups;
-mod quota;
 mod requestlog;
-mod service_config;
+#[allow(non_snake_case)]
+mod sessionRouting;
 mod startup;
 mod system;
 mod usage;
@@ -259,11 +251,6 @@ fn ensure_method_allowed(actor: &RpcActor, method: &str) -> Result<(), String> {
 ///
 /// # 返回
 /// 返回函数执行结果
-#[cfg(test)]
-pub(crate) fn handle_request(req: JsonRpcRequest) -> JsonRpcMessage {
-    handle_request_with_actor(req, RpcActor::system_admin())
-}
-
 pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) -> JsonRpcMessage {
     if req.method == "initialize" {
         let _ = storage_helpers::initialize_storage();
@@ -293,52 +280,22 @@ pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) ->
     if let Some(resp) = account::try_handle(&req, &actor) {
         return JsonRpcMessage::Response(resp);
     }
-    if let Some(resp) = account_manager::try_handle(&req, &actor) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = aggregate_api::try_handle(&req, &actor) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = apikey::try_handle(&req, &actor) {
-        return JsonRpcMessage::Response(resp);
-    }
     if let Some(resp) = app_settings::try_handle(&req) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = codex_profile::try_handle(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = directObservation::dispatch(&req) {
         return JsonRpcMessage::Response(resp);
     }
-    if let Some(resp) = codex_skills::try_handle(&req) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = dashboard::try_handle(&req, &actor) {
+    if let Some(resp) = sessionRouting::dispatch(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = usage::try_handle(&req) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = service_config::try_handle(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = system::try_handle(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = startup::try_handle(&req, &actor) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = gateway::try_handle(&req) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = model_groups::try_handle(&req, &actor) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = quota::try_handle(&req) {
-        return JsonRpcMessage::Response(resp);
-    }
-    if let Some(resp) = crate::plugin::try_handle(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = requestlog::try_handle(&req, &actor) {

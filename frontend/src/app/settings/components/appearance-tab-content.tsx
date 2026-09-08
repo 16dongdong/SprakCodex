@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { THEMES } from "@/app/settings/settings-page-helpers";
+import { THEMES } from "@/app/settings/appearanceThemes";
 import { ThemePreviewSwatch } from "@/app/settings/components/theme-preview-swatch";
 
 type TranslateFn = (key: string) => string;
@@ -147,6 +147,7 @@ export function AppearanceTabContent({
                 <Button
                   key={item.id}
                   type="button"
+                  aria-pressed={isActive}
                   variant="outline"
                   onClick={() => onAppearancePresetChange(item.id)}
                   className={cn(
@@ -222,6 +223,7 @@ export function AppearanceTabContent({
                 <Button
                   key={item.id}
                   type="button"
+                  aria-pressed={isActive}
                   variant="outline"
                   onClick={() => onThemeChange(item.id)}
                   className={cn(

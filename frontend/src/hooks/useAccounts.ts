@@ -8,7 +8,6 @@ import {
   buildAccountListQueryKey,
   buildAccountUsageListQueryKey,
 } from "@/lib/api/account-query-keys";
-import { CODEX_PROFILE_CANDIDATES_QUERY_KEY } from "@/lib/api/codex-profile-client";
 import { attachUsagesToAccounts } from "@/lib/api/normalize";
 import { serviceClient } from "@/lib/api/service-client";
 import {
@@ -469,7 +468,6 @@ export function useAccounts() {
         queryClient.invalidateQueries({ queryKey: ["usage-aggregate"] }),
         queryClient.invalidateQueries({ queryKey: ["today-summary"] }),
         queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
-        queryClient.invalidateQueries({ queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY }),
       ]);
     };
 
@@ -509,7 +507,6 @@ export function useAccounts() {
       queryClient.invalidateQueries({ queryKey: ["usage-aggregate"] }),
       queryClient.invalidateQueries({ queryKey: ["today-summary"] }),
       queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
-      queryClient.invalidateQueries({ queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY }),
     ]);
   }, [
     areAccountQueriesEnabled,
@@ -594,7 +591,6 @@ export function useAccounts() {
       queryClient.invalidateQueries({ queryKey: ["today-summary"] }),
       queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
       queryClient.invalidateQueries({ queryKey: ["logs"] }),
-      queryClient.invalidateQueries({ queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY }),
     ]);
   };
 

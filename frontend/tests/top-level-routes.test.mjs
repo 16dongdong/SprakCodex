@@ -6,22 +6,23 @@ import test from "node:test";
 import { pathToFileURL } from "node:url";
 import ts from "../node_modules/typescript/lib/typescript.js";
 
-const appsRoot = path.resolve(import.meta.dirname, "..");
-const sourcePath = path.join(
-  appsRoot,
+const sourcePath = path.resolve(
+  import.meta.dirname,
+  "..",
   "src",
   "lib",
   "app-shell",
-  "top-level-routes.ts"
+  "top-level-routes.ts",
 );
 
+/// 将 TypeScript 路由配置编译成隔离模块，直接验证实际导出行为而不是复制配置。
 async function loadTopLevelRoutesModule() {
   const source = await fs.readFile(sourcePath, "utf8");
   const testableSource = source
     .replace('"use client";', "")
     .replace(
       'import { normalizeRoutePath } from "@/lib/utils/static-routes";',
-      "function normalizeRoutePath(path: string): string { return !path || path === '/' ? '/' : path.replace(/\\/+$/, ''); }"
+      "function normalizeRoutePath(value: string): string { return !value || value === '/' ? '/' : value.replace(/\\/+$/, ''); }",
     )
     .replace('import type { AppRole } from "@/types";', "type AppRole = string;");
   const compiled = ts.transpileModule(testableSource, {
@@ -31,132 +32,48 @@ async function loadTopLevelRoutesModule() {
     },
     fileName: sourcePath,
   });
-
-  const tempDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), "codexmanager-top-level-routes-")
+  const tempDirectory = await fs.mkdtemp(
+    path.join(os.tmpdir(), "codexmanager-personal-routes-"),
   );
-  const tempFile = path.join(tempDir, "top-level-routes.mjs");
-  await fs.writeFile(tempFile, compiled.outputText, "utf8");
-  return import(pathToFileURL(tempFile).href);
+  const modulePath = path.join(tempDirectory, "top-level-routes.mjs");
+  await fs.writeFile(modulePath, compiled.outputText, "utf8");
+  return import(pathToFileURL(modulePath).href);
 }
 
 const routes = await loadTopLevelRoutesModule();
 
-test("accounts 模式管理员菜单按任务域分组并保留账号体系入口", () => {
-  const access = { role: "admin", mode: "accounts" };
-  const sections = routes.getAllowedTopLevelRouteSections(access);
-  assert.deepEqual(
-    sections.map((section) => section.label),
-    ["概览", "资源接入", "平台配置", "模型路由", "用户管理", "运行监控", "系统设置"]
-  );
-  assert.deepEqual(
-    sections.map((section) => section.routes.map((route) => route.path)),
-    [
-      ["/"],
-      ["/accounts", "/aggregate-api"],
-      ["/platform-mode", "/apikeys"],
-      ["/models", "/model-groups"],
-      ["/account-manager"],
-      ["/logs"],
-      ["/settings", "/proxy-settings", "/plugins", "/skills"],
-    ]
-  );
-  assert.equal(
-    routes.isTopLevelRouteAllowedForRole("/account-manager", access),
-    true
-  );
-  assert.equal(routes.isTopLevelRouteAllowedForRole("/model-groups", access), true);
-  assert.equal(routes.getTopLevelRouteLabel("/account-manager", access), "成员账号");
-  assert.equal(routes.getTopLevelRouteLabel("/model-groups", access), "模型组");
-  assert.equal(routes.getTopLevelRouteLabel("/platform-mode", access), "Codex 接入方式");
-  assert.equal(routes.getTopLevelRouteLabel("/models", access), "模型与路由");
-  assert.equal(routes.getTopLevelRouteLabel("/skills", access), "Skills 与插件");
-});
-
-test("none/password 单人管理员模式隐藏账号体系入口但保留单人管理入口", () => {
-  for (const mode of ["none", "password"]) {
-    for (const role of ["system_admin", "admin"]) {
-      const access = { role, mode };
-      const paths = routes
-        .getAllowedTopLevelRoutes(access)
-        .map((route) => route.path);
-      assert.deepEqual(paths, [
-        "/",
-        "/accounts",
-        "/aggregate-api",
-        "/platform-mode",
-        "/apikeys",
-        "/models",
-        "/logs",
-        "/settings",
-        "/proxy-settings",
-        "/plugins",
-        "/skills",
-      ]);
-      assert.equal(
-        routes.isTopLevelRouteAllowedForRole("/account-manager", access),
-        false
-      );
-      assert.equal(
-        routes.isTopLevelRouteAllowedForRole("/model-groups", access),
-        false
-      );
-      assert.equal(routes.isTopLevelRouteAllowedForRole("/accounts", access), true);
-      assert.equal(routes.isTopLevelRouteAllowedForRole("/apikeys", access), true);
-      assert.equal(routes.getFirstAllowedTopLevelRoutePath(access), "/");
-    }
+test("个人版所有角色只开放账号、请求日志和设置", () => {
+  for (const role of ["system_admin", "admin", "member"]) {
+    const access = { role, mode: "accounts", isDesktopRuntime: true };
+    assert.deepEqual(
+      routes.getAllowedTopLevelRouteSections(access).flatMap((section) =>
+        section.routes.map((route) => route.path),
+      ),
+      ["/accounts", "/logs", "/settings"],
+    );
+    assert.equal(routes.getFirstAllowedTopLevelRoutePath(access), "/accounts");
   }
 });
 
-test("未解析 session mode 时不会闪现账号体系专属入口", () => {
-  const access = { role: "system_admin", mode: null };
-  const paths = routes.getAllowedTopLevelRoutes(access).map((route) => route.path);
-  assert.equal(paths.includes("/account-manager"), false);
-  assert.equal(paths.includes("/model-groups"), false);
-  assert.equal(paths.includes("/accounts"), true);
-  assert.equal(paths.includes("/apikeys"), true);
+test("旧平台路由不再属于顶级功能", () => {
+  const access = { role: "system_admin", mode: "accounts" };
+  for (const pathValue of [
+    "/account-manager",
+    "/aggregate-api",
+    "/apikeys",
+    "/models",
+    "/model-groups",
+    "/platform-mode",
+    "/plugins",
+    "/projects",
+    "/skills",
+  ]) {
+    assert.equal(routes.isTopLevelRouteAllowedForRole(pathValue, access), false);
+  }
 });
 
-test("项目启动入口只在 Tauri 桌面运行时出现", () => {
-  const webAccess = {
-    role: "system_admin",
-    mode: "accounts",
-    isDesktopRuntime: false,
-  };
-  const desktopAccess = { ...webAccess, isDesktopRuntime: true };
-
-  assert.equal(
-    routes.getAllowedTopLevelRoutes(webAccess).some((route) => route.path === "/projects"),
-    false,
-  );
-  assert.equal(
-    routes.getAllowedTopLevelRoutes(desktopAccess).some((route) => route.path === "/projects"),
-    true,
-  );
-  assert.equal(
-    routes.isTopLevelRouteAllowedForRole("/projects", desktopAccess),
-    true,
-  );
-  assert.equal(routes.isTopLevelRouteAllowedForRole("/projects", webAccess), false);
-});
-
-test("accounts 模式成员菜单只保留自助入口", () => {
-  const access = { role: "member", mode: "accounts" };
-  const sections = routes.getAllowedTopLevelRouteSections(access);
-  assert.deepEqual(
-    sections.map((section) => section.label),
-    ["我的概览", "我的密钥", "可用模型", "使用记录", "账号设置"]
-  );
-  assert.deepEqual(
-    sections.map((section) => section.routes.map((route) => route.path)),
-    [["/"], ["/apikeys"], ["/models"], ["/logs"], ["/settings"]]
-  );
-  assert.equal(routes.getTopLevelRouteLabel("/apikeys", access), "我的密钥");
-  assert.equal(routes.getTopLevelRouteLabel("/models", access), "可用模型");
-  assert.equal(routes.getTopLevelRouteLabel("/settings", access), "账号设置");
-  assert.equal(
-    routes.isTopLevelRouteAllowedForRole("/account-manager", access),
-    false
-  );
-  assert.equal(routes.isTopLevelRouteAllowedForRole("/model-groups", access), false);
+test("未知路径回到账号页，根路径保留为迁移入口", () => {
+  assert.equal(routes.toTopLevelRoutePath("/removed"), "/accounts");
+  assert.equal(routes.toTopLevelRoutePath("/"), "/");
+  assert.equal(routes.getTopLevelRouteLabel("/accounts"), "账号");
 });

@@ -34,6 +34,10 @@ pub(super) struct Exchange {
     pub account: Option<String>,
     pub accountLabel: Option<String>,
     pub keyFingerprint: Option<String>,
+    pub routingMode: String,
+    pub routingSessionId: Option<String>,
+    pub routingSource: Option<String>,
+    pub routingReason: String,
 }
 
 impl Exchange {
@@ -53,7 +57,23 @@ impl Exchange {
             account: None,
             accountLabel: None,
             keyFingerprint: None,
+            routingMode: "passthrough".to_string(),
+            routingSessionId: None,
+            routingSource: None,
+            routingReason: "routing_not_evaluated".to_string(),
             identity: format!("{:032x}", rand::random::<u128>()),
+        }
+    }
+
+    /// 保存本次请求最终采用的分流决策；只记录会话标识和原因，不复制访问令牌。
+    pub fn captureRouting(&mut self, decision: &crate::sessionRouting::RouteDecision) {
+        let (mode, sessionId, source, reason) = crate::sessionRouting::decisionMetadata(decision);
+        self.routingMode = mode.to_string();
+        self.routingSessionId = sessionId.map(str::to_string);
+        self.routingSource = source.map(str::to_string);
+        self.routingReason = reason.to_string();
+        if let Some(label) = crate::sessionRouting::routedAccountLabel(decision) {
+            self.accountLabel = Some(label.to_string());
         }
     }
     // 认证仅参与不可逆指纹，账号标识来自显式请求头；不借用 Manager 账号池身份。
@@ -205,7 +225,18 @@ impl RecordSink {
             .get("service_tier")
             .and_then(serde_json::Value::as_str)
             .map(str::to_owned);
-        let details = serde_json::json!({"formatVersion":2,"request": {"headers":exchange.requestHeaders,"body":requestBody}, "response": {"headers":exchange.responseHeaders,"body":parsed.body.snapshot()}}).to_string();
+        let details = serde_json::json!({
+            "formatVersion": 3,
+            "routing": {
+                "mode": exchange.routingMode,
+                "sessionId": exchange.routingSessionId,
+                "source": exchange.routingSource,
+                "reason": exchange.routingReason,
+            },
+            "request": {"headers":exchange.requestHeaders,"body":requestBody},
+            "response": {"headers":exchange.responseHeaders,"body":parsed.body.snapshot()}
+        })
+        .to_string();
         let request = RequestLog {
             trace_id: Some(trace),
             request_path: exchange.path.clone(),
@@ -228,6 +259,13 @@ impl RecordSink {
             status_code: Some(i64::from(status)),
             duration_ms: Some(duration),
             first_response_ms: exchange.firstResponseMs,
+            route_strategy: Some(exchange.routingMode),
+            route_source: exchange.routingSource,
+            actual_source_kind: exchange
+                .routingSessionId
+                .as_ref()
+                .map(|_| "session".to_string()),
+            actual_source_id: exchange.routingSessionId,
             reasoning_effort: parsed.reasoning.clone().or(requestReasoning),
             service_tier: requestTier.or(parsed.tier.clone()),
             effective_service_tier: parsed.tier.clone(),

@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/tooltip";
 import { resetCreditClient } from "@/lib/api/reset-credit-client";
 import { getAppErrorMessage } from "@/lib/api/transport";
-import { CODEX_PROFILE_CANDIDATES_QUERY_KEY } from "@/lib/api/codex-profile-client";
 import { useI18n } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
 import {
@@ -130,7 +129,6 @@ export function AccountResetCreditControl({
         queryClient.invalidateQueries({ queryKey: ["usage"] }),
         queryClient.invalidateQueries({ queryKey: ["usage-aggregate"] }),
         queryClient.invalidateQueries({ queryKey: ["startup-snapshot"] }),
-        queryClient.invalidateQueries({ queryKey: CODEX_PROFILE_CANDIDATES_QUERY_KEY }),
       ]);
       if (result.warning) {
         toast.warning(t("额度已重置，但最新用量同步失败，请稍后手动刷新"));

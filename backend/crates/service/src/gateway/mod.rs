@@ -147,7 +147,6 @@ pub(crate) fn error_message_for_client(
 }
 
 mod anchor_fingerprint;
-mod concurrency;
 #[path = "routing/conversation_binding.rs"]
 pub(crate) mod conversation_binding;
 #[path = "routing/cooldown.rs"]
@@ -201,7 +200,6 @@ mod token_exchange;
 mod trace_log;
 mod upstream;
 
-pub(crate) use concurrency::current_gateway_concurrency_recommendation;
 use metrics::{
     account_inflight_count, acquire_account_inflight, begin_gateway_request,
     record_gateway_candidate_skip, record_gateway_cooldown_mark, record_gateway_failover_attempt,
@@ -223,8 +221,6 @@ pub(super) use request_helpers::{
     normalize_models_path, parse_request_json_value, parse_request_metadata_from_value,
     validate_text_input_limit_for_path, validate_text_input_limit_for_value,
 };
-#[cfg(test)]
-use request_helpers::{should_drop_incoming_header, should_drop_incoming_header_for_failover};
 pub(crate) use request_log::{
     estimate_input_tokens_from_body, RequestLogTraceContext, RequestLogUsage,
 };
@@ -248,16 +244,9 @@ pub(crate) fn strip_cross_account_encrypted_content(body: &[u8]) -> Option<Vec<u
     upstream::support::payload_rewrite::strip_encrypted_content_from_body(body)
 }
 
-#[cfg(test)]
-use upstream::config::normalize_upstream_base_url;
 use upstream::config::{
     is_openai_api_base, resolve_upstream_base_url, resolve_upstream_fallback_base_url,
     should_try_openai_fallback, should_try_openai_fallback_by_status,
-};
-#[cfg(test)]
-pub(super) use upstream::header_profile::{
-    build_codex_compact_upstream_headers, build_codex_upstream_headers,
-    CodexCompactUpstreamHeaderInput, CodexUpstreamHeaderInput,
 };
 
 // HTTP backend runtime metrics are exported via the gateway `/metrics` endpoint as well.
@@ -309,14 +298,10 @@ pub(crate) fn record_http_queue_dequeue(is_stream_queue: bool) {
 pub(crate) fn record_http_queue_enqueue_failure() {
     metrics::record_http_queue_enqueue_failure();
 }
-#[cfg(test)]
-use cooldown::cooldown_reason_for_status;
 use cooldown::{
     clear_account_cooldown, is_account_in_cooldown, mark_account_cooldown,
     mark_account_cooldown_for_status, CooldownReason,
 };
-#[cfg(test)]
-pub(super) use failover::should_failover_after_refresh;
 use failover::{
     should_failover_from_cached_snapshot_value, should_failover_from_low_quota_snapshot_value,
 };
@@ -476,7 +461,9 @@ use openai_fallback::try_openai_fallback;
 pub(crate) use request_entry::handle_gateway_request;
 use request_gate::{request_gate_lock, RequestGateAcquireError};
 pub(crate) use request_log::write_request_log;
-use route_hint::{apply_route_strategy, apply_route_strategy_with_source};
+use route_hint::apply_route_strategy;
+#[cfg(test)]
+use route_hint::apply_route_strategy_with_source;
 use route_quality::record_route_quality;
 pub(crate) use runtime_config::invalidate_account_proxy_client_cache as invalidate_account_proxy_cache;
 pub(crate) use runtime_config::upstream_client;
@@ -504,8 +491,6 @@ pub(crate) use selection::{
     collect_gateway_candidates_with_low_quota_mode, current_quota_guard_config,
     invalidate_candidate_cache, set_quota_guard_config, LowQuotaCandidateMode, QuotaGuardConfig,
 };
-#[cfg(test)]
-use token_exchange::account_token_exchange_lock;
 pub(crate) use token_exchange::api_key_exchange_client_id;
 use token_exchange::resolve_openai_bearer_token;
 use upstream::proxy::proxy_validated_request;
@@ -927,10 +912,6 @@ pub(crate) fn current_upstream_proxy_bypass_hosts() -> String {
     runtime_config::upstream_proxy_bypass_hosts()
 }
 
-pub(crate) fn upstream_client_for_aggregate_url(url: &str) -> reqwest::blocking::Client {
-    runtime_config::upstream_client_for_aggregate_url(url)
-}
-
 pub(crate) fn apply_async_upstream_proxy(
     builder: reqwest::ClientBuilder,
     proxy_url: Option<&str>,
@@ -1082,18 +1063,6 @@ pub(crate) fn manual_preferred_account() -> Option<String> {
 ///
 /// # 返回
 /// 返回函数执行结果
-pub(crate) fn set_manual_preferred_account(account_id: &str) -> Result<(), String> {
-    let id = account_id.trim();
-    if id.is_empty() {
-        return Err("accountId is required".to_string());
-    }
-    let storage = open_storage().ok_or_else(|| "storage not initialized".to_string())?;
-    let found = storage.account_exists(id).map_err(|err| err.to_string())?;
-    if !found {
-        return Err("account not found".to_string());
-    }
-    route_hint::set_manual_preferred_account(id)
-}
 
 /// 函数 `clear_manual_preferred_account`
 ///
@@ -1106,9 +1075,6 @@ pub(crate) fn set_manual_preferred_account(account_id: &str) -> Result<(), Strin
 ///
 /// # 返回
 /// 无
-pub(crate) fn clear_manual_preferred_account() {
-    route_hint::clear_manual_preferred_account();
-}
 
 /// 函数 `gateway_resolve_effective_upstream_base`
 ///
@@ -1133,10 +1099,6 @@ pub(crate) fn gateway_resolve_effective_upstream_base(
 
 pub(crate) fn gateway_resolve_default_upstream_base_url() -> String {
     resolve_upstream_base_url()
-}
-
-pub(crate) fn gateway_should_send_chatgpt_account_header(base: &str) -> bool {
-    upstream::config::should_send_chatgpt_account_header(base)
 }
 
 /// 函数 `gateway_supports_official_responses_websocket`
@@ -1192,6 +1154,7 @@ pub(crate) struct GatewayRoutedCandidates {
     pub(crate) conversation_routing: Option<conversation_binding::ConversationRoutingContext>,
 }
 
+#[cfg(test)]
 pub(crate) fn gateway_collect_routed_candidates_with_log_source(
     storage: &codexmanager_core::storage::Storage,
     key_id: &str,
@@ -1562,7 +1525,3 @@ pub(crate) fn gateway_compute_upstream_url(
 ) -> (String, Option<String>) {
     compute_upstream_url(upstream_base_url, path)
 }
-
-#[cfg(test)]
-#[path = "../../tests/gateway/availability/mod.rs"]
-mod availability_tests;

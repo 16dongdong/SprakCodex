@@ -1,6 +1,4 @@
-pub(crate) mod gateway;
 pub(crate) mod proxy_profiles;
-pub(crate) mod service_listen;
 pub(crate) mod tray_state;
 pub(crate) mod ui;
 

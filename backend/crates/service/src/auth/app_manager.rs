@@ -971,10 +971,38 @@ fn billing_model_matches(rule_pattern: Option<&str>, model: Option<&str>) -> boo
     let pattern = pattern.to_ascii_lowercase();
     let model = model.to_ascii_lowercase();
     if pattern.contains('*') {
-        crate::quota::model_pricing::wildcard_matches(&pattern, &model)
+        wildcard_matches(&pattern, &model)
     } else {
         model.starts_with(&pattern)
     }
+}
+
+/// 匹配历史计费规则中的星号模式；该函数只保留数据库兼容所需的线性扫描语义。
+fn wildcard_matches(pattern: &str, value: &str) -> bool {
+    if pattern == "*" {
+        return true;
+    }
+    if !pattern.contains('*') {
+        return pattern == value;
+    }
+    let mut remainder = value;
+    let mut first = true;
+    for part in pattern.split('*').filter(|part| !part.is_empty()) {
+        if first && !pattern.starts_with('*') {
+            let Some(stripped) = remainder.strip_prefix(part) else {
+                return false;
+            };
+            remainder = stripped;
+            first = false;
+            continue;
+        }
+        first = false;
+        let Some(index) = remainder.find(part) else {
+            return false;
+        };
+        remainder = &remainder[index + part.len()..];
+    }
+    pattern.ends_with('*') || remainder.is_empty()
 }
 
 fn billing_rule_scope_score(rule: &BillingRule) -> i64 {

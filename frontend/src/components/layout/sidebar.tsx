@@ -2,20 +2,9 @@
 
 import Image from "next/image";
 import {
-  Cable,
-  House,
   Users,
-  UserCog,
-  Key,
-  Boxes,
-  Database,
-  Puzzle,
-  WandSparkles,
   FileText,
-  FolderKanban,
-  Route,
   Settings,
-  Globe,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -41,20 +30,9 @@ import {
 } from "react";
 
 const NAV_ITEM_BY_PATH = new Map<TopLevelRoutePath, { icon: LucideIcon }>([
-  ["/", { icon: House }],
   ["/accounts", { icon: Users }],
-  ["/account-manager", { icon: UserCog }],
-  ["/aggregate-api", { icon: Database }],
-  ["/apikeys", { icon: Key }],
-  ["/platform-mode", { icon: Cable }],
-  ["/projects", { icon: FolderKanban }],
-  ["/models", { icon: Boxes }],
-  ["/model-groups", { icon: Route }],
-  ["/plugins", { icon: Puzzle }],
-  ["/skills", { icon: WandSparkles }],
   ["/logs", { icon: FileText }],
   ["/settings", { icon: Settings }],
-  ["/proxy-settings", { icon: Globe }],
 ]);
 
 type SidebarNavItem = {

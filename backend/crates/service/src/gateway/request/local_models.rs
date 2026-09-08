@@ -73,12 +73,8 @@ fn filter_models_for_catalog_policy(
     models: ModelsResponse,
     policy: crate::codex_model_catalog::GatewayCatalogPolicy,
 ) -> Result<(ModelsResponse, bool), String> {
-    match policy {
-        crate::codex_model_catalog::GatewayCatalogPolicy::OfficialAccountPool => Ok((models, true)),
-        crate::codex_model_catalog::GatewayCatalogPolicy::Managed => {
-            filter_models_for_key(storage, key_id, models)
-        }
-    }
+    let _ = policy;
+    filter_models_for_key(storage, key_id, models)
 }
 
 fn models_etag_header(models: &ModelsResponse) -> Result<Option<tiny_http::Header>, String> {
@@ -184,7 +180,3 @@ pub(super) fn maybe_respond_local_models(
     )?;
     Ok(None)
 }
-
-#[cfg(test)]
-#[path = "tests/local_models_tests.rs"]
-mod tests;

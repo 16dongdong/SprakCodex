@@ -7,9 +7,9 @@ use std::time::{Duration, Instant};
 use futures_util::stream::unfold;
 use futures_util::StreamExt;
 
+use super::cloudflare_style::stats::calculate_mbps;
 use crate::account::proxy_testing::client::{build_proxy_test_client, ProxyTestRedirectPolicy};
 use crate::account::proxy_testing::jobs::{SpeedMetricSummary, SpeedSample};
-use super::cloudflare_style::stats::calculate_mbps;
 
 const CANCEL_POLL_INTERVAL: Duration = Duration::from_millis(100);
 const PAYLOADS: &[u64] = &[100_000, 1_000_000, 10_000_000, 25_000_000, 100_000_000];

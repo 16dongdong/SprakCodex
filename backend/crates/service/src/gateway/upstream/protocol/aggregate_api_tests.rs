@@ -6,7 +6,7 @@ use super::{
     resolve_passthrough_sse_protocol, responses_to_anthropic_messages_action_path,
     rewrite_body_model_override, should_bridge_responses_to_anthropic, AggregateApiAuthConfig,
 };
-use crate::aggregate_api::{
+use super::{
     AGGREGATE_API_AUTH_APIKEY, AGGREGATE_API_PROVIDER_CLAUDE, AGGREGATE_API_PROVIDER_CODEX,
     AGGREGATE_API_PROVIDER_COMPATIBLE, AGGREGATE_API_PROVIDER_GEMINI,
 };

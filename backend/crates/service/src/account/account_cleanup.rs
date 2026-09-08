@@ -23,16 +23,6 @@ pub(crate) struct DeleteUnavailableFreeResult {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct DeleteBannedResult {
-    scanned: usize,
-    deleted: usize,
-    skipped_disabled: usize,
-    skipped_not_banned: usize,
-    deleted_account_ids: Vec<String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub(crate) struct DeleteAccountsByStatusesResult {
     scanned: usize,
     deleted: usize,
@@ -169,85 +159,7 @@ pub(crate) fn delete_unavailable_free_accounts() -> Result<DeleteUnavailableFree
     Ok(result)
 }
 
-/// 函数 `delete_banned_accounts`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-04-02
-///
-/// # 参数
-/// - crate: 参数 crate
-///
-/// # 返回
-/// 返回函数执行结果
-pub(crate) fn delete_banned_accounts() -> Result<DeleteBannedResult, String> {
-    let mut storage = open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    let scanned = storage.account_count().map_err(|err| err.to_string())? as usize;
-    let accounts = storage
-        .list_account_cleanup_candidates_by_statuses(&[
-            "banned".to_string(),
-            "disabled".to_string(),
-        ])
-        .map_err(|err| err.to_string())?;
-
-    let mut result = DeleteBannedResult {
-        scanned,
-        deleted: 0,
-        skipped_disabled: 0,
-        skipped_not_banned: 0,
-        deleted_account_ids: Vec::new(),
-    };
-
-    let mut pending_ids = Vec::new();
-    for account in accounts {
-        let normalized_status = account.status.trim().to_ascii_lowercase();
-        if normalized_status == "disabled" {
-            result.skipped_disabled += 1;
-            continue;
-        }
-        if normalized_status != "banned" {
-            result.skipped_not_banned += 1;
-            continue;
-        }
-
-        pending_ids.push(account.id);
-    }
-
-    if !pending_ids.is_empty() {
-        storage
-            .delete_accounts(&pending_ids)
-            .map_err(|err| err.to_string())?;
-        for account_id in pending_ids {
-            let _ = storage.insert_event(&Event {
-                account_id: Some(account_id.clone()),
-                event_type: "account_bulk_delete_banned".to_string(),
-                message: "bulk delete banned account".to_string(),
-                created_at: now_ts(),
-            });
-
-            result.deleted += 1;
-            result.deleted_account_ids.push(account_id);
-        }
-    }
-    result.skipped_not_banned = result
-        .scanned
-        .saturating_sub(result.deleted)
-        .saturating_sub(result.skipped_disabled);
-
-    Ok(result)
-}
-
-/// 函数 `delete_accounts_by_statuses`
-///
-/// 作者: gaohongshun
-///
-/// 时间: 2026-05-04
-///
-/// # 参数
-/// - statuses: 参数 statuses
-///
-/// # 返回
-/// 返回函数执行结果
+/// 按用户明确选择的状态批量删除账号；未知状态在写库前拒绝，删除失败不提交部分结果。
 pub(crate) fn delete_accounts_by_statuses(
     statuses: Vec<String>,
 ) -> Result<DeleteAccountsByStatusesResult, String> {
@@ -380,7 +292,3 @@ fn plan_label_for_event(plan: Option<&ResolvedAccountPlan>) -> Option<&str> {
         }
     })
 }
-
-#[cfg(test)]
-#[path = "account_cleanup_tests.rs"]
-mod tests;

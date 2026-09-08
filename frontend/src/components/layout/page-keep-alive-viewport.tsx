@@ -36,18 +36,8 @@ const LAZY_PAGE_COMPONENTS: Record<
   LazyExoticComponent<ComponentType>
 > = {
   "/accounts": lazy(() => import("@/app/accounts/page")),
-  "/account-manager": lazy(() => import("@/app/account-manager/page")),
-  "/aggregate-api": lazy(() => import("@/app/aggregate-api/page")),
-  "/apikeys": lazy(() => import("@/app/apikeys/page")),
-  "/platform-mode": lazy(() => import("@/app/platform-mode/page")),
-  "/projects": lazy(() => import("@/app/projects/page")),
-  "/models": lazy(() => import("@/app/models/page")),
-  "/model-groups": lazy(() => import("@/app/model-groups/page")),
-  "/plugins": lazy(() => import("@/app/plugins/page")),
-  "/skills": lazy(() => import("@/app/skills/page")),
   "/logs": lazy(() => import("@/app/logs/page")),
   "/settings": lazy(() => import("@/app/settings/page")),
-  "/proxy-settings": lazy(() => import("@/app/proxy-settings/page")),
 };
 
 const ROOT_PAGE_COMPONENT = lazy(() => import("@/app/page"));

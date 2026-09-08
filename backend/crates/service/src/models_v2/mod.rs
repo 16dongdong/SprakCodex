@@ -1,107 +1,11 @@
-pub(crate) mod fast_policy;
-mod import;
+﻿pub(crate) mod fast_policy;
 pub(crate) mod instructions;
 
 use codexmanager_core::rpc::types::{
     ModelInfo, ModelReasoningLevel, ModelServiceTier, ModelTruncationPolicy, ModelsResponse,
 };
-use codexmanager_core::storage::{
-    ManagedModelBatchStateV2Update, ManagedModelStateV2Update, ManagedModelV2,
-    ManagedModelV2Upsert, ModelCatalogV2Stats,
-};
-use serde::{Deserialize, Serialize};
+use codexmanager_core::storage::ManagedModelV2;
 use serde_json::Value;
-
-pub(crate) use import::{
-    commit_import, preview_import, ManagedModelImportCommitV2Params,
-    ManagedModelImportPreviewV2Params, ManagedModelImportPreviewV2Result,
-};
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct ManagedModelListV2Result {
-    pub items: Vec<ManagedModelV2>,
-    pub stats: ModelCatalogV2Stats,
-}
-
-pub(crate) fn list(include_hidden: bool) -> Result<ManagedModelListV2Result, String> {
-    let storage =
-        crate::storage_helpers::open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    list_with_storage(&storage, include_hidden)
-}
-
-pub(crate) fn list_with_storage(
-    storage: &codexmanager_core::storage::Storage,
-    include_hidden: bool,
-) -> Result<ManagedModelListV2Result, String> {
-    Ok(ManagedModelListV2Result {
-        items: storage
-            .list_managed_models_v2(include_hidden)
-            .map_err(|err| format!("list managed models V2 failed: {err}"))?,
-        stats: storage
-            .model_catalog_v2_stats()
-            .map_err(|err| format!("read model catalog V2 stats failed: {err}"))?,
-    })
-}
-
-pub(crate) fn get(slug: &str) -> Result<ManagedModelV2, String> {
-    let storage =
-        crate::storage_helpers::open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    storage
-        .get_managed_model_v2(slug)
-        .map_err(|err| format!("read managed model V2 failed: {err}"))?
-        .ok_or_else(|| "model_not_found".to_string())
-}
-
-pub(crate) fn upsert(input: ManagedModelV2Upsert) -> Result<ManagedModelV2, String> {
-    let storage =
-        crate::storage_helpers::open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    let model = storage
-        .upsert_managed_model_v2(&input)
-        .map_err(|err| format!("save managed model V2 failed: {err}"))?;
-    sync_active_gateway_catalog_best_effort(&storage);
-    Ok(model)
-}
-
-pub(crate) fn update_state(input: ManagedModelStateV2Update) -> Result<ManagedModelV2, String> {
-    let storage =
-        crate::storage_helpers::open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    let model = storage
-        .update_managed_model_state_v2(&input)
-        .map_err(|err| format!("update managed model V2 state failed: {err}"))?;
-    sync_active_gateway_catalog_best_effort(&storage);
-    Ok(model)
-}
-
-pub(crate) fn batch_update_state(
-    input: ManagedModelBatchStateV2Update,
-) -> Result<Vec<ManagedModelV2>, String> {
-    let storage =
-        crate::storage_helpers::open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    let models = storage
-        .update_managed_models_state_v2(&input)
-        .map_err(|err| format!("batch update managed model V2 state failed: {err}"))?;
-    sync_active_gateway_catalog_best_effort(&storage);
-    Ok(models)
-}
-
-pub(crate) fn delete(slug: &str) -> Result<(), String> {
-    let storage =
-        crate::storage_helpers::open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    storage
-        .delete_managed_model_v2(slug)
-        .map_err(|err| format!("delete managed model V2 failed: {err}"))?;
-    sync_active_gateway_catalog_best_effort(&storage);
-    Ok(())
-}
-
-pub(super) fn sync_active_gateway_catalog_best_effort(
-    storage: &codexmanager_core::storage::Storage,
-) {
-    if let Err(err) = crate::codex_profile::sync_active_gateway_profile_from_storage(storage) {
-        log::warn!("event=sync_active_gateway_profile_failed error={err}");
-    }
-}
 
 fn capability<'a>(model: &'a ManagedModelV2, keys: &[&str]) -> Option<&'a Value> {
     keys.iter().find_map(|key| model.capabilities.get(*key))
@@ -150,6 +54,7 @@ pub(crate) fn supports_image_generation(model: &ManagedModelV2) -> bool {
     .unwrap_or(false)
 }
 
+#[cfg(test)]
 pub(crate) fn ensure_text_generation_model(
     storage: &codexmanager_core::storage::Storage,
     slug: Option<&str>,
@@ -419,6 +324,7 @@ pub(crate) fn models_response_with_storage(
     })
 }
 
+#[cfg(test)]
 pub(crate) fn text_generation_models_response_with_storage(
     storage: &codexmanager_core::storage::Storage,
 ) -> Result<ModelsResponse, String> {

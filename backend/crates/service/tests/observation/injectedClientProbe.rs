@@ -216,7 +216,9 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
         caCertificatePath: Some(certificate.to_owned()),
     };
     runtimePaths::writeAtomically(
-        &target.moduleDirectory.join(cpcommon::relayContract::configName),
+        &target
+            .moduleDirectory
+            .join(cpcommon::relayContract::configName),
         &serde_json::to_vec(&settings).unwrap(),
     )
     .unwrap();

@@ -73,31 +73,6 @@ pub(crate) fn is_free_plan_from_credits_json(raw_credits_json: Option<&str>) -> 
     is_free_plan_type(extract_plan_type_from_credits_json(raw_credits_json).as_deref())
 }
 
-pub(crate) fn normalize_account_plan_filter(
-    value: Option<String>,
-) -> Result<Option<String>, String> {
-    let trimmed = value.as_deref().map(str::trim).unwrap_or_default();
-    if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("all") || trimmed == "全部" {
-        return Ok(None);
-    }
-
-    let normalized = trimmed.to_ascii_lowercase();
-    let canonical = match normalized.as_str() {
-        "free" => "free",
-        "go" => "go",
-        "plus" => "plus",
-        "pro" => "pro",
-        "team" => "team",
-        "business" => "business",
-        "enterprise" => "enterprise",
-        "edu" | "education" => "edu",
-        "unknown" => "unknown",
-        _ => return Err(format!("unsupported account plan filter: {trimmed}")),
-    };
-
-    Ok(Some(canonical.to_string()))
-}
-
 /// 函数 `resolve_account_plan`
 ///
 /// 作者: gaohongshun

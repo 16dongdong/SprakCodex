@@ -105,69 +105,8 @@ pub(crate) fn refresh_usage_for_polling_batch() -> Result<(), String> {
     Ok(())
 }
 
-pub(crate) fn refresh_usage_and_aggregate_balances_for_polling_cycle() -> Result<(), String> {
-    let usage_result = refresh_usage_for_polling_batch();
-    let aggregate_result = refresh_aggregate_api_balances_for_polling_cycle();
-
-    match (usage_result, aggregate_result) {
-        (Ok(()), Ok(())) => Ok(()),
-        (Err(err), Ok(())) => Err(err),
-        (Ok(()), Err(err)) => Err(err),
-        (Err(usage_err), Err(aggregate_err)) => Err(format!(
-            "{usage_err}; aggregate api balance polling failed: {aggregate_err}"
-        )),
-    }
-}
-
-fn refresh_aggregate_api_balances_for_polling_cycle() -> Result<(), String> {
-    let storage = open_storage().ok_or_else(|| "storage unavailable".to_string())?;
-    let api_ids = storage
-        .list_active_balance_query_aggregate_api_ids()
-        .map_err(|err| format!("list aggregate API balance query IDs failed: {err}"))?;
-    drop(storage);
-
-    if api_ids.is_empty() {
-        return Ok(());
-    }
-
-    let total = api_ids.len();
-    let mut success_count = 0usize;
-    let mut failed_count = 0usize;
-
-    for api_id in api_ids {
-        match crate::refresh_aggregate_api_balance(api_id.as_str()) {
-            Ok(result) if result.ok => {
-                success_count = success_count.saturating_add(1);
-            }
-            Ok(result) => {
-                failed_count = failed_count.saturating_add(1);
-                log::warn!(
-                    "aggregate api balance polling failed: api_id={} message={}",
-                    result.id,
-                    result
-                        .message
-                        .unwrap_or_else(|| "balance query returned unsuccessful result".to_string())
-                );
-            }
-            Err(err) => {
-                failed_count = failed_count.saturating_add(1);
-                log::warn!(
-                    "aggregate api balance polling errored: api_id={} err={}",
-                    api_id,
-                    err
-                );
-            }
-        }
-    }
-
-    log::info!(
-        "aggregate api balance polling completed: total={} success={} failed={}",
-        total,
-        success_count,
-        failed_count
-    );
-
-    Ok(())
+pub(crate) fn refresh_usage_for_polling_cycle() -> Result<(), String> {
+    refresh_usage_for_polling_batch()
 }
 
 #[cfg(test)]

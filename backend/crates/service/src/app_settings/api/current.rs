@@ -38,8 +38,8 @@ use super::{
     APP_SETTING_SERVICE_ADDR_KEY, APP_SETTING_SHOW_MAIN_WINDOW_ON_STARTUP_KEY,
     APP_SETTING_UI_APPEARANCE_PRESET_KEY, APP_SETTING_UI_CODEX_CLI_GUIDE_DISMISSED_KEY,
     APP_SETTING_UI_LOCALE_KEY, APP_SETTING_UI_LOW_TRANSPARENCY_KEY, APP_SETTING_UI_THEME_KEY,
-    APP_SETTING_UI_ZOOM_FACTOR_KEY, APP_SETTING_UPDATE_AUTO_CHECK_KEY,
-    SERVICE_BIND_MODE_ALL_INTERFACES, SERVICE_BIND_MODE_LOOPBACK, SERVICE_BIND_MODE_SETTING_KEY,
+    APP_SETTING_UI_ZOOM_FACTOR_KEY, APP_SETTING_UPDATE_AUTO_CHECK_KEY, SERVICE_BIND_MODE_LOOPBACK,
+    SERVICE_BIND_MODE_SETTING_KEY,
 };
 
 const DEFAULT_FREE_ACCOUNT_MAX_MODEL_OPTIONS: &[&str] = &[
@@ -70,14 +70,8 @@ const DEFAULT_FREE_ACCOUNT_MAX_MODEL_OPTIONS: &[&str] = &[
 /// # 返回
 /// 返回函数执行结果
 fn normalize_service_bind_mode_value(raw: Option<&str>) -> &'static str {
-    let Some(value) = raw else {
-        return SERVICE_BIND_MODE_LOOPBACK;
-    };
-    let normalized = value.trim().to_ascii_lowercase();
-    match normalized.as_str() {
-        "all_interfaces" | "all-interfaces" | "all" | "0.0.0.0" => SERVICE_BIND_MODE_ALL_INTERFACES,
-        _ => SERVICE_BIND_MODE_LOOPBACK,
-    }
+    let _ = raw;
+    SERVICE_BIND_MODE_LOOPBACK
 }
 
 fn setting_bool(settings: &HashMap<String, String>, key: &str, default: bool) -> bool {
@@ -338,10 +332,7 @@ fn current_app_settings_value_inner(
         "localeOptions": ["zh-CN", "en", "ru", "ko"],
         "serviceAddr": service_addr,
         "serviceListenMode": service_listen_mode,
-        "serviceListenModeOptions": [
-            SERVICE_BIND_MODE_LOOPBACK,
-            SERVICE_BIND_MODE_ALL_INTERFACES
-        ],
+        "serviceListenModeOptions": [SERVICE_BIND_MODE_LOOPBACK],
         "routeStrategy": route_strategy,
         "routeStrategyOptions": ["ordered", "balanced"],
         "freeAccountMaxModel": free_account_max_model,

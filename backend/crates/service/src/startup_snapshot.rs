@@ -1,13 +1,11 @@
 use codexmanager_core::{
-    rpc::types::{
-        QuotaOpenAiAccountOverviewResult, StartupSnapshotResult, UsageAggregateSummaryResult,
-    },
+    rpc::types::{QuotaOpenAiAccountOverviewResult, StartupSnapshotResult},
     storage::{AccountQuotaOverviewStats, AccountSummaryStorageSnapshotOptions},
 };
 
 use crate::{
-    account_list, apikey_list, gateway, requestlog_list, requestlog_today_summary, storage_helpers,
-    usage_aggregate, RpcActor,
+    account_list, requestlog_list, requestlog_today_summary, storage_helpers, usage_aggregate,
+    RpcActor,
 };
 
 const STARTUP_REQUEST_LOG_DEFAULT_LIMIT: i64 = 24;
@@ -36,8 +34,8 @@ pub(crate) fn read_startup_snapshot(
     request_log_limit: Option<i64>,
     day_start_ts: Option<i64>,
     day_end_ts: Option<i64>,
-    include_api_models: bool,
-    include_api_keys: bool,
+    _include_api_models: bool,
+    _include_api_keys: bool,
     include_accounts: bool,
     include_usage_snapshots: bool,
     include_account_runtime: bool,
@@ -115,17 +113,9 @@ pub(crate) fn read_startup_snapshot(
         include_accounts,
         include_usage_snapshots
     );
-    let api_keys = if include_api_keys {
-        apikey_list::read_api_keys_with_storage(&storage)?
-    } else {
-        Vec::new()
-    };
-    let api_models = if include_api_models {
-        crate::models_v2::models_response_with_storage(&storage)?
-    } else {
-        Default::default()
-    };
-    let manual_preferred_account_id = gateway::manual_preferred_account();
+    let api_keys = Vec::new();
+    let api_models = Default::default();
+    let manual_preferred_account_id = None;
     let request_log_today_summary =
         requestlog_today_summary::read_requestlog_today_summary_with_storage(
             &storage,
@@ -160,64 +150,18 @@ pub(crate) fn read_startup_snapshot_for_actor(
     include_account_runtime: bool,
     include_account_details: bool,
 ) -> Result<StartupSnapshotResult, String> {
-    if actor.is_admin() {
-        return read_startup_snapshot(
-            request_log_limit,
-            day_start_ts,
-            day_end_ts,
-            include_api_models,
-            include_api_keys,
-            include_accounts,
-            include_usage_snapshots,
-            include_account_runtime,
-            include_account_details,
-        );
-    }
-    let request_log_limit = normalize_startup_request_log_limit(request_log_limit);
-    let user_id = actor
-        .user_id
-        .as_deref()
-        .ok_or_else(|| "permission_denied: startup requires user session".to_string())?;
-    let storage =
-        storage_helpers::open_storage().ok_or_else(|| "open storage failed".to_string())?;
-    let key_ids = storage
-        .list_api_key_ids_for_user(user_id)
-        .map_err(|err| format!("list api key ids for user failed: {err}"))?;
-    let api_keys = if include_api_keys {
-        apikey_list::read_api_keys_for_ids_with_storage(&storage, &key_ids)?
-    } else {
-        Vec::new()
-    };
-    let api_models = if include_api_models {
-        crate::models_v2::models_response_with_storage(&storage)?
-    } else {
-        Default::default()
-    };
-    let request_log_today_summary =
-        requestlog_today_summary::read_requestlog_today_summary_for_key_ids_with_storage(
-            &storage,
-            day_start_ts,
-            day_end_ts,
-            &key_ids,
-        )?;
-    let request_logs = requestlog_list::read_request_logs_for_key_ids_with_storage(
-        &storage,
-        None,
-        Some(request_log_limit),
-        &key_ids,
-    )?;
-
-    Ok(StartupSnapshotResult {
-        accounts: Vec::new(),
-        account_summary: QuotaOpenAiAccountOverviewResult::default(),
-        usage_snapshots: Vec::new(),
-        usage_aggregate_summary: UsageAggregateSummaryResult::default(),
-        api_keys,
-        api_models,
-        manual_preferred_account_id: None,
-        request_log_today_summary,
-        request_logs,
-    })
+    let _ = actor;
+    read_startup_snapshot(
+        request_log_limit,
+        day_start_ts,
+        day_end_ts,
+        include_api_models,
+        include_api_keys,
+        include_accounts,
+        include_usage_snapshots,
+        include_account_runtime,
+        include_account_details,
+    )
 }
 
 fn startup_account_summary(stats: AccountQuotaOverviewStats) -> QuotaOpenAiAccountOverviewResult {

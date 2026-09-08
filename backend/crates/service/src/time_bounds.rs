@@ -24,23 +24,6 @@ pub(crate) fn local_day_bounds_ts() -> Result<(i64, i64), String> {
     Ok((start, end.max(start)))
 }
 
-pub(crate) fn resolve_optional_utc_day_bounds_ts(
-    day_start_ts: Option<i64>,
-    day_end_ts: Option<i64>,
-    now_ts: i64,
-) -> (i64, i64) {
-    match (
-        day_start_ts.filter(|value| *value > 0),
-        day_end_ts.filter(|value| *value > 0),
-    ) {
-        (Some(start), Some(end)) if end > start => (start, end),
-        _ => {
-            let start = now_ts - now_ts.rem_euclid(DAY_SECONDS);
-            (start, start + DAY_SECONDS)
-        }
-    }
-}
-
 pub(crate) fn resolve_bounded_local_day_bounds_ts(
     day_start_ts: Option<i64>,
     day_end_ts: Option<i64>,
