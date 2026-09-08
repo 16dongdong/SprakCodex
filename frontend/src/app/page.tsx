@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCompactTokenAmount } from "@/lib/dashboard/format";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, ArrowUpRight, Coins, Layers3, RefreshCw, Users } from "lucide-react";
 import { DashboardQuota, DashboardRequests } from "@/components/dashboard/overviewPanels";
@@ -12,7 +13,7 @@ import { useI18n } from "@/lib/i18n/provider";
 import { useAppStore } from "@/lib/store/useAppStore";
 
 const refreshIntervalMs = 15_000;
-const recentRequestLimit = 10;
+const recentRequestLimit = 100;
 
 // 首页只读取个人统计；缓存页隐藏或服务断开时停止轮询，失败显示错误而不是伪造零用量。
 export default function HomePage() {
@@ -45,8 +46,8 @@ export default function HomePage() {
   const requests = overview.data?.requests;
   const usage = snapshot?.requestLogTodaySummary;
   const metrics = [
-    { label: "今日Token", value: usage?.todayTokens, icon: Layers3, detail: "输入 + 输出合计" },
-    { label: "预计费用", value: usage ? `$${usage.estimatedCost.toFixed(4)}` : undefined, icon: Coins, detail: "按官价估算" },
+    { label: "今日Token", value: formatCompactTokenAmount(usage?.todayTokens), icon: Layers3, detail: "输入 + 输出合计" },
+    { label: "预计费用", value: usage ? `$${usage.estimatedCost.toFixed(4)}` : undefined, icon: Coins, detail: "按本地价格表估算，非实际账单" },
     { label: "成功请求", value: requests?.summary.successCount, icon: Activity, detail: "成功请求" },
     { label: "可用账号", value: snapshot ? `${snapshot.accountSummary.availableCount} / ${snapshot.accountSummary.accountCount}` : undefined, icon: Users, detail: "当前健康可调用的账号" },
   ];
@@ -83,12 +84,12 @@ export default function HomePage() {
       <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
         <section className="glass-card rounded-2xl border border-border/60 p-5 sm:p-6">
           <h2 className="font-semibold">{t("今日Token")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("输入 + 输出合计")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("包含每次请求的历史上下文；缓存属于输入，推理属于输出，不重复相加。")}</p>
           <div className="mt-6 grid grid-cols-2 gap-6">
-            {([["缓存Token", usage?.cachedInputTokens], ["推理Token", usage?.reasoningOutputTokens]] as const).map(([label, value]) => (
+            {([["非缓存输入", usage ? Math.max(0, usage.inputTokens - usage.cachedInputTokens) : undefined], ["缓存Token", usage?.cachedInputTokens], ["输出 Token", usage?.outputTokens], ["推理Token", usage?.reasoningOutputTokens]] as const).map(([label, value]) => (
               <div key={label} className="border-l-2 border-primary/30 pl-4">
                 <p className="text-xs text-muted-foreground">{t(label)}</p>
-                <p className="mt-2 text-xl font-semibold tabular-nums">{value?.toLocaleString() ?? "—"}</p>
+                <p className="mt-2 text-xl font-semibold tabular-nums">{formatCompactTokenAmount(value)}</p>
               </div>
             ))}
           </div>

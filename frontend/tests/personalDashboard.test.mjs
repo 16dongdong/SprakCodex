@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import test from "node:test";
 
@@ -20,7 +20,8 @@ test("个人仪表盘使用当天真实汇总并限制后台刷新和列表长�
 test("仪表盘区分未知额度、空日志和单次请求指标", () => {
   assert.match(panels, /Number.isFinite\(value\)/);
   assert.match(panels, /暂无请求日志/);
-  assert.match(panels, /总使用 Token/);
+  assert.match(panels, /AreaChart/);
+  assert.doesNotMatch(panels, /<table/);
   assert.doesNotMatch(panels, /今日Token/);
-  assert.match(panels, /overflow-x-auto/);
+  assert.match(panels, /active && points.length/);
 });

@@ -1,50 +1,54 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { NetworkBodyViewer, NetworkHeaders } from "./networkDetailViews";
 import { serviceClient } from "@/lib/api/service-client";
 import { useAppStore } from "@/lib/store/useAppStore";
 import { useI18n } from "@/lib/i18n/provider";
 import type { RequestLog } from "@/types";
 
-// 原始文本不再次 JSON 转义；对象格式化后完整显示，空正文与未采集状态分开表达。
-function formatBody(value: unknown, missing: string): string {
-  if (value === undefined || value === null) return missing;
-  return typeof value === "string" ? value : JSON.stringify(value, null, 2);
-}
-
-// 四个报文区域始终独立呈现；用量摘要不冒充网络详情，查询失败保留明确错误。
+// 请求标识作为标签树的重建键，切换记录时清理筛选和格式状态；查询仍按服务及记录隔离缓存。
 export function RequestDetailsDialog({ log, onClose }: { log: RequestLog | null; onClose: () => void }) {
   const { t } = useI18n();
   const address = useAppStore((state) => state.serviceStatus.addr);
   const details = useQuery({
-    queryKey: ["request-details", address, log?.id],
+    queryKey: ["request-details", address, log?.id, log?.traceId],
     queryFn: () => serviceClient.requestDetails(log!.traceId),
     enabled: Boolean(log?.traceId),
     retry: 1,
   });
-  const missing = t("未采集到该请求的网络报文");
-  const sections = [
-    { title: t("请求头"), value: details.data?.request.headers },
-    { title: t("响应头"), value: details.data?.response.headers },
-    { title: t("请求体"), value: details.data?.request.body },
-    { title: t("响应体"), value: details.data?.response.body },
-  ];
+  const general = log ? {
+    URL: log.upstreamUrl || log.path || log.requestPath,
+    Method: log.method,
+    Status: log.statusCode ?? "—",
+    Protocol: log.requestType || "—",
+    Duration: log.durationMs == null ? "—" : `${log.durationMs} ms`,
+    TTFB: log.firstResponseMs == null ? "—" : `${log.firstResponseMs} ms`,
+  } : undefined;
   return <Dialog open={Boolean(log)} onOpenChange={(open) => { if (!open) onClose(); }}>
-    <DialogContent className="max-h-[94dvh] overflow-y-auto sm:max-w-[94vw] md:max-w-[min(94vw,1280px)]">
-      <DialogHeader>
-        <DialogTitle>{t("请求详情")}</DialogTitle>
-        <DialogDescription>{log?.method} {log?.path || log?.requestPath || t("客户端完成事件")}</DialogDescription>
+    <DialogContent className="flex h-[86dvh] max-h-[94dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[94vw] md:max-w-[min(94vw,1280px)]">
+      <DialogHeader className="border-b border-border bg-muted/20 px-5 py-4 pr-14">
+        <DialogTitle className="flex items-center gap-3 text-sm"><span className="rounded border border-primary/20 bg-primary/5 px-2 py-1 font-mono text-xs text-primary">{log?.method}</span>{t("请求详情")}<span className={`text-xs tabular-nums ${log?.statusCode && log.statusCode >= 400 ? "text-destructive" : "text-muted-foreground"}`}>{log?.statusCode ?? "—"}</span></DialogTitle>
+        <DialogDescription className="truncate font-mono text-xs" title={log?.upstreamUrl || log?.path}>{log?.upstreamUrl || log?.path || log?.requestPath || t("客户端完成事件")}</DialogDescription>
       </DialogHeader>
-      {details.isFetching && log ? <p role="status">{t("加载中...")}</p> : details.isError ? <p role="alert" className="text-destructive">{details.error.message}</p> : <>
-        {!details.data && <p role="status" className="text-sm text-amber-600">{t("仅收到客户端完成事件；该记录没有网络报文，需重新接入后采集新请求。")}</p>}
-        {log?.error && <p className="break-words text-xs text-destructive">{log.error}</p>}
-        <div className="grid min-w-0 gap-3 md:grid-cols-2">
-          {sections.map((section, index) => <section key={section.title} className="min-w-0 space-y-2">
-            <h3 className="text-sm font-medium">{section.title}</h3>
-            <pre className={`${index < 2 ? "h-[18vh]" : "h-[36vh]"} overflow-auto whitespace-pre-wrap break-all rounded-lg border bg-muted/50 p-3 font-mono text-xs`}>{formatBody(section.value, missing)}</pre>
-          </section>)}
-        </div>
+      {details.isPending && log?.traceId ? <p role="status" className="p-5 text-sm">{t("加载中...")}</p> : details.isError ? <p role="alert" className="p-5 text-sm text-destructive">{details.error.message}</p> : <>
+        {!details.data && <p role="status" className="border-b border-border bg-amber-500/5 px-5 py-3 text-xs text-muted-foreground">{t("仅收到客户端完成事件；该记录没有网络报文，需重新接入后采集新请求。")}</p>}
+        {log?.error && <p className="max-h-20 overflow-auto break-words border-b border-destructive/20 bg-destructive/5 px-5 py-2 text-xs text-destructive">{log.error}</p>}
+        <Tabs key={`${address}:${log?.id}`} defaultValue="headers" className="min-h-0 flex-1 gap-0">
+          <TabsList variant="line" className="h-11 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b border-border px-3">
+            <TabsTrigger value="headers">{t("标头")}</TabsTrigger><TabsTrigger value="payload">{t("请求体")}</TabsTrigger><TabsTrigger value="response">{t("响应体")}</TabsTrigger><TabsTrigger value="events">{t("事件流")}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="headers" className="min-h-0 flex-1 overflow-auto">
+            <NetworkHeaders title={t("概览")} value={general} />
+            <NetworkHeaders title={t("响应头")} value={details.data?.response.headers} />
+            <NetworkHeaders title={t("请求头")} value={details.data?.request.headers} />
+          </TabsContent>
+          <TabsContent value="payload" className="flex min-h-0 flex-1 flex-col overflow-hidden"><NetworkBodyViewer value={details.data?.request.body} /></TabsContent>
+          <TabsContent value="response" className="flex min-h-0 flex-1 flex-col overflow-hidden"><NetworkBodyViewer value={details.data?.response.body} /></TabsContent>
+          <TabsContent value="events" className="flex min-h-0 flex-1 flex-col overflow-hidden"><NetworkBodyViewer value={details.data?.response.events} /></TabsContent>
+        </Tabs>
       </>}
     </DialogContent>
   </Dialog>;
