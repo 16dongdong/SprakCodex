@@ -1535,9 +1535,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                                 : "7d --"}
                             </span>
                           ) : (
-                            <span className="inline-flex min-h-5 max-w-full items-center rounded-full border border-border/50 bg-background/40 px-2 py-0.5 leading-none break-words [overflow-wrap:anywhere]">
-                              {t("未设置账号容量覆盖")}
-                            </span>
+null
                           )}
                           <AccountResetCreditControl
                             account={account}
@@ -1545,7 +1543,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="align-middle whitespace-nowrap">
+                      <TableCell className="align-top whitespace-nowrap">
                         <div className="flex min-w-0 flex-wrap items-center gap-1">
                           <span className="min-w-8 rounded-md bg-muted/60 px-2 py-1 text-center font-mono text-xs font-semibold tabular-nums">
                             {account.priority}

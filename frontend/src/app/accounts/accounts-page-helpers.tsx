@@ -5,7 +5,6 @@ import { Power, PowerOff, RefreshCw, Zap } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
 import {
-  formatRemainingDurationFromSeconds,
   formatTsFromSeconds,
   getExtraUsageDisplayRows,
   getUsageDisplayBuckets,
@@ -216,118 +215,23 @@ function QuotaProgress({
   );
 }
 
+// 账号列表首屏只显示两个主额度；额外额度按需展开，避免多层卡片把每个账号撑成数百像素。
 export function QuotaOverviewCell({ items }: { items: QuotaSummaryItem[] }) {
   const { t } = useI18n();
-
-  return (
-    <Tooltip>
-      <TooltipTrigger render={<div />} className="block min-w-0 cursor-help">
-        <div className="rounded-xl border border-primary/5 bg-accent/10 px-3 py-2.5">
-          <div className="account-pool-quota-grid">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="account-pool-quota-item min-w-0 rounded-lg border border-border/40 bg-background/20 p-2"
-              >
-                <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-1 text-[11px] leading-4">
-                  <span
-                    className={fitLongTextClassName(
-                      item.label,
-                      "min-w-0 break-words text-muted-foreground [overflow-wrap:anywhere]",
-                      "text-[11px]",
-                    )}
-                    title={item.label}
-                  >
-                    {item.label}
-                  </span>
-                  <span className="shrink-0 whitespace-nowrap font-medium text-foreground/80">
-                    {item.remainPercent == null
-                      ? (item.emptyText ?? "--")
-                      : `${item.remainPercent}%`}
-                  </span>
-                </div>
-                <Progress
-                  value={item.remainPercent ?? 0}
-                  trackClassName={
-                    item.tone === "blue"
-                      ? "bg-blue-500/20"
-                      : item.tone === "amber"
-                        ? "bg-amber-500/20"
-                        : "bg-green-500/20"
-                  }
-                  indicatorClassName={
-                    item.tone === "blue"
-                      ? "bg-blue-500"
-                      : item.tone === "amber"
-                        ? "bg-amber-500"
-                        : "bg-green-500"
-                  }
-                />
-                <div className="mt-1.5 space-y-0.5 text-[11px] text-muted-foreground">
-                  <span
-                    className={fitLongTextClassName(
-                      formatTsFromSeconds(
-                        item.resetsAt,
-                        item.emptyResetText ?? t("未知"),
-                      ),
-                      "block min-w-0 max-w-full break-all leading-tight [overflow-wrap:anywhere]",
-                      "text-[10px]",
-                    )}
-                  >
-                    {formatTsFromSeconds(
-                      item.resetsAt,
-                      item.emptyResetText ?? t("未知"),
-                    )}
-                  </span>
-                  <span className="block min-w-0 max-w-full break-words whitespace-normal leading-tight text-foreground/70 [overflow-wrap:anywhere]">
-                    {formatRemainingDurationFromSeconds(
-                      item.resetsAt,
-                      item.resetDurationMode ??
-                        (item.id.endsWith("-primary") ? "hours" : "days"),
-                      item.emptyResetText ?? t("未知"),
-                    )}
-                    {t("后刷新")}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        sideOffset={10}
-        className="max-w-[340px] rounded-lg bg-popover p-3 text-popover-foreground shadow-md"
-      >
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold">
-              {t("额度详情（悬停查看所有额度）")}
-            </p>
-            <p className="text-[11px] leading-4 text-muted-foreground">
-              {t("标准额度与专属额度统一在这里查看。")}
-            </p>
-          </div>
-          <div className="space-y-2">
-            {items.map((item) => (
-              <QuotaProgress
-                key={item.id}
-                label={item.label}
-                remainPercent={item.remainPercent}
-                resetsAt={item.resetsAt}
-                icon={item.icon}
-                tone={item.tone}
-                caption={item.caption}
-                emptyText={item.emptyText}
-                emptyResetText={item.emptyResetText}
-              />
-            ))}
-          </div>
-        </div>
-      </TooltipContent>
-    </Tooltip>
-  );
+  return <div className="min-w-0 space-y-2">
+    <div className="account-pool-quota-grid">
+      {items.slice(0, 2).map((item) => <div key={item.id} className="min-w-0 space-y-1.5" title={formatTsFromSeconds(item.resetsAt, item.emptyResetText ?? t("未知"))}>
+        <div className="flex items-center justify-between gap-2 text-xs"><span className="truncate text-muted-foreground">{item.label}</span><span className="shrink-0 font-medium tabular-nums">{item.remainPercent == null ? item.emptyText ?? "—" : `${item.remainPercent}%`}</span></div>
+        <Progress value={item.remainPercent ?? 0} className="h-1.5" />
+      </div>)}
+    </div>
+    <details className="group text-xs">
+      <summary className="w-fit cursor-pointer select-none py-1 text-muted-foreground hover:text-primary">{t("额度详情")}</summary>
+      <div className="mt-2 space-y-3 border-l-2 border-border pl-3">
+        {items.map((item) => <QuotaProgress key={item.id} label={item.label} remainPercent={item.remainPercent} resetsAt={item.resetsAt} icon={item.icon} tone={item.tone} caption={item.caption} emptyText={item.emptyText} emptyResetText={item.emptyResetText} />)}
+      </div>
+    </details>
+  </div>;
 }
 
 export function getAccountStatusActionType(account: Account): AccountStatusAction {

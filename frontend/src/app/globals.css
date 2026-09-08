@@ -1103,11 +1103,11 @@ tr {
 }
 
 .account-pool-col-info {
-  width: 27%;
+  width: 29%;
 }
 
 .account-pool-col-quota {
-  width: 30%;
+  width: 35%;
 }
 
 .account-pool-col-order {
@@ -1115,7 +1115,7 @@ tr {
 }
 
 .account-pool-col-proxy {
-  width: 14%;
+  width: 8%;
 }
 
 .account-pool-col-status {
