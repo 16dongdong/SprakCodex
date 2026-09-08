@@ -9,13 +9,12 @@ const ROUTE_SECTION_LABELS: Record<TopLevelRouteSectionId, string> = {
   personal: "个人工具",
 };
 
-// 根路径只负责把旧安装和外部入口带到账号页，不再注册独立概览功能。
+// 根路径恢复个人仪表盘，与账号、日志和设置共享页面缓存及本机访问范围。
 export const TOP_LEVEL_ROUTE_CONFIG = [
   {
     path: "/",
-    label: "账号",
+    label: "仪表盘",
     section: "personal",
-    navigationHidden: true,
     roles: ["system_admin", "admin", "member"],
   },
   {
@@ -78,7 +77,7 @@ function isTopLevelRouteAccessContext(
   return Boolean(access && typeof access === "object" && !Array.isArray(access));
 }
 
-/// 个人版三个页面对本机用户一致开放；保留角色读取只为兼容现有登录快照。
+/// 个人版四个页面对本机用户一致开放；保留角色读取只为兼容现有登录快照。
 function normalizeAccessContext(
   access: TopLevelRouteAccess,
 ): NormalizedTopLevelRouteAccessContext {

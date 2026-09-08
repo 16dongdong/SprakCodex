@@ -42,16 +42,16 @@ async function loadTopLevelRoutesModule() {
 
 const routes = await loadTopLevelRoutesModule();
 
-test("个人版所有角色只开放账号、请求日志和设置", () => {
+test("个人版所有角色开放仪表盘、账号、请求日志和设置", () => {
   for (const role of ["system_admin", "admin", "member"]) {
     const access = { role, mode: "accounts", isDesktopRuntime: true };
     assert.deepEqual(
       routes.getAllowedTopLevelRouteSections(access).flatMap((section) =>
         section.routes.map((route) => route.path),
       ),
-      ["/accounts", "/logs", "/settings"],
+      ["/", "/accounts", "/logs", "/settings"],
     );
-    assert.equal(routes.getFirstAllowedTopLevelRoutePath(access), "/accounts");
+    assert.equal(routes.getFirstAllowedTopLevelRoutePath(access), "/");
   }
 });
 
@@ -72,7 +72,7 @@ test("旧平台路由不再属于顶级功能", () => {
   }
 });
 
-test("未知路径回到账号页，根路径保留为迁移入口", () => {
+test("未知路径回到账号页，根路径恢复仪表盘", () => {
   assert.equal(routes.toTopLevelRoutePath("/removed"), "/accounts");
   assert.equal(routes.toTopLevelRoutePath("/"), "/");
   assert.equal(routes.getTopLevelRouteLabel("/accounts"), "账号");
