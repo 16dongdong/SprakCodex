@@ -28,7 +28,7 @@ export default function HomePage() {
     refetchInterval: active ? refreshIntervalMs : false,
     // 统计使用本地日界限，最近列表只取固定条数；不加载平台密钥、模型或完整账号详情。
     queryFn: async () => {
-      const [snapshot, requests] = await Promise.all([
+      const [snapshot, requests, cumulative] = await Promise.all([
         serviceClient.getStartupSnapshot({
           requestLogLimit: 0, dayStartTs, dayEndTs,
           includeApiModels: false, includeApiKeys: false,
@@ -38,17 +38,20 @@ export default function HomePage() {
         serviceClient.listRequestLogsWithSummary({
           page: 1, pageSize: recentRequestLimit, startTs: dayStartTs, endTs: dayEndTs,
         }),
+        serviceClient.getRequestLogSummary(),
       ]);
-      return { snapshot, requests };
+      return { snapshot, requests, cumulative };
     },
   });
   const snapshot = overview.data?.snapshot;
   const requests = overview.data?.requests;
   const usage = snapshot?.requestLogTodaySummary;
+  // 顶部累计指标不受本地日界限或曲线标签影响，直接使用无时间筛选的服务端汇总。
+  const cumulative = overview.data?.cumulative;
   const metrics = [
-    { label: "今日Token", value: formatCompactTokenAmount(usage?.todayTokens), icon: Layers3, detail: "输入 + 输出合计" },
-    { label: "预计费用", value: usage ? `$${usage.estimatedCost.toFixed(4)}` : undefined, icon: Coins, detail: "按本地价格表估算，非实际账单" },
-    { label: "成功请求", value: requests?.summary.successCount, icon: Activity, detail: "成功请求" },
+    { label: "累计 Token", value: formatCompactTokenAmount(cumulative?.totalTokens), icon: Layers3, detail: "输入 + 输出合计" },
+    { label: "累计费用", value: cumulative ? `$${cumulative.totalCostUsd.toFixed(4)}` : undefined, icon: Coins, detail: "按本地价格表估算，非实际账单" },
+    { label: "累计成功请求", value: cumulative?.successCount, icon: Activity, detail: "成功请求" },
     { label: "可用账号", value: snapshot ? `${snapshot.accountSummary.availableCount} / ${snapshot.accountSummary.accountCount}` : undefined, icon: Users, detail: "当前健康可调用的账号" },
   ];
 
@@ -77,7 +80,7 @@ export default function HomePage() {
               <span className="rounded-xl bg-primary/8 p-2 text-primary"><Icon className="size-4" /></span>
             </div>
             <p className="mt-5 truncate text-3xl font-semibold tracking-tight tabular-nums" title={String(value ?? "—")}>{typeof value === "number" ? value.toLocaleString() : value ?? "—"}</p>
-            <p className="mt-3 text-xs text-muted-foreground">{index === 2 ? `${t("异常请求")} · ${requests?.summary.errorCount ?? "—"}` : t(detail)}</p>
+            <p className="mt-3 text-xs text-muted-foreground">{index === 2 ? `${t("异常请求")} · ${cumulative?.errorCount ?? "—"}` : t(detail)}</p>
           </section>
         ))}
       </div>
