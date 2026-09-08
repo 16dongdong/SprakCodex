@@ -119,6 +119,7 @@ export const EN_MESSAGES: MessageCatalog = {
   "网络": "Network",
   "诊断": "Diagnostics",
   "关于": "About",
+  "语言": "Language",
   仪表盘: "Dashboard",
   概览: "Overview",
   平台接入: "Platform Access",

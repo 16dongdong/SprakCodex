@@ -27,16 +27,10 @@ test("shell preserves page titles and compacts header controls by content width"
       readSource("src/components/layout/disclaimer-ticker.tsx"),
     ]);
 
-  assert.match(
-    headerSource,
-    /gap-2 glass-header px-2[\s\S]*sm:gap-3 sm:px-4/,
-  );
-  assert.match(headerSource, /flex min-w-0 flex-1[\s\S]*overflow-hidden/);
-  assert.match(headerSource, /truncate text-lg[\s\S]*sm:text-\[21px\]/);
-  assert.match(
-    headerSource,
-    /triggerClassName="w-\[124px\] min-w-\[124px\] gap-2 px-2\.5"/,
-  );
+  assert.match(headerSource, /glass-header px-4 lg:px-5/);
+  assert.match(headerSource, /header-title-group min-w-0 flex-1/);
+  assert.match(headerSource, /truncate text-lg/);
+  assert.doesNotMatch(headerSource, /header-action-cluster/);
   assert.match(
     languageSource,
     /flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden/,

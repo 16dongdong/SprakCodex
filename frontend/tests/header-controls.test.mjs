@@ -14,16 +14,12 @@ const headerPath = path.join(
   "header.tsx",
 );
 
-test("管理员仪表盘保留服务开关和语言选择", async () => {
+// 顶栏不再拥有操作入口，迁移后设置页负责语言和免责声明。
+test("顶部仅保留标题，设置承接语言与声明", async () => {
   const source = await fs.readFile(headerPath, "utf8");
-
-  assert.match(source, /<Switch[\s\S]*?onCheckedChange=\{handleToggleService\}/);
-  assert.match(
-    source,
-    /<LanguageSwitcher[\s\S]*?compact[\s\S]*?triggerClassName="w-\[124px\] min-w-\[124px\] gap-2 px-2\.5"/,
-  );
-  assert.match(source, /<DisclaimerTicker compact \/>/);
-  assert.match(source, /v\{serviceStatus\.version\}/);
-  assert.doesNotMatch(source, /!isCommandCenter\s*\?\s*\(\s*<Switch/);
-  assert.doesNotMatch(source, /!isCommandCenter\s*\?\s*<LanguageSwitcher/);
+  const settings = await fs.readFile(path.join(testDir, "..", "src", "app", "settings", "page.tsx"), "utf8");
+  assert.doesNotMatch(source, /LanguageSwitcher|DisclaimerTicker|serviceClient|<Switch/);
+  assert.match(settings, /<LanguageSwitcher/);
+  assert.match(settings, /<DisclaimerTicker/);
+  assert.match(source, /getTopLevelRouteLabel/);
 });

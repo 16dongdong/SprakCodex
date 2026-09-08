@@ -119,6 +119,7 @@ export const RU_MESSAGES: MessageCatalog = {
   "网络": "Сеть",
   "诊断": "Диагностика",
   "关于": "О программе",
+  "语言": "Язык",
   仪表盘: "Обзор",
   概览: "Обзор",
   ...RU_ACCESS_CONTROL_MESSAGES,

@@ -24,5 +24,5 @@ test("service initialize version reaches the shell status", async () => {
   assert.match(serviceUtils, /const version = typeof source\.version === "string"/);
   assert.match(serviceUtils, /return \{ version, userAgent, codexHome, platformFamily, platformOs \}/);
   assert.match(bootstrap, /initializeResult\.version/);
-  assert.match(header, /version: initResult\.version/);
+  assert.doesNotMatch(header, /serviceClient|initResult/);
 });

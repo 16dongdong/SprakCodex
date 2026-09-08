@@ -1,5 +1,7 @@
 "use client";
 
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { DisclaimerTicker } from "@/components/layout/disclaimer-ticker";
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
@@ -102,6 +104,10 @@ export default function SettingsPage() {
           <Card className="glass-card shadow-sm">
             <CardHeader><CardTitle className="text-base">{t("基础设置")}</CardTitle></CardHeader>
             <CardContent>
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 py-4">
+                <Label>{t("语言")}</Label>
+                <LanguageSwitcher />
+              </div>
               <SettingSwitchRow label={t("自动检查更新")} description={t("启动完成后在后台检查更新")} checked={snapshot.updateAutoCheck} onChange={(value) => change({ updateAutoCheck: value })} />
               <SettingSwitchRow label={t("开机自动启动")} description={t("系统登录后自动启动桌面端")} checked={snapshot.autoStartEnabled} disabled={!snapshot.autoStartSupported} onChange={(value) => change({ autoStartEnabled: value })} />
               <SettingSwitchRow label={t("启动时显示主界面")} description={t("关闭后从托盘按需打开主界面")} checked={snapshot.showMainWindowOnStartup} onChange={(value) => change({ showMainWindowOnStartup: value })} />
@@ -111,7 +117,7 @@ export default function SettingsPage() {
         </TabsContent>
         <TabsContent value="network"><ProxySettingsCard canManage={canAccessManagementRpc} /></TabsContent>
         {isDesktopRuntime && <TabsContent value="diagnostics"><DesktopDiagnosticsCard t={t} /></TabsContent>}
-        <TabsContent value="about"><AboutCodexManagerCard t={t} /></TabsContent>
+        <TabsContent value="about" className="space-y-4"><AboutCodexManagerCard t={t} /><div className="glass-card rounded-xl border border-border/60 p-5"><DisclaimerTicker compact /></div></TabsContent>
         <TabsContent value="appearance">
           <AppearanceTabContent
             t={t}
