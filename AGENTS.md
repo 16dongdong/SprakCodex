@@ -100,6 +100,13 @@ Tauri rules.
 - Root governance docs describe repository-level boundaries. App-specific
   frontend rules belong in `frontend/AGENTS.md`.
 
+## 9. 安装包交付
+- 后续桌面应用代码任务完成并通过验证后，默认生成包含本次修改的 Windows 安装包；除非用户明确要求跳过，否则安装包属于交付闭环的必需产物。
+- 最终交付必须执行启用 bundle 的 Tauri 打包流程，生成项目配置支持的 NSIS 安装程序或 MSI 安装包；`--no-bundle` 仅用于中间验证，普通程序 EXE 或直接覆盖安装目录不等同于安装包交付。
+- 打包前确保前端静态资源、桌面程序和所需 DLL 均来自本次构建；打包后核验安装包存在、生成时间、版本及必要资源，避免交付旧产物。
+- 完成报告必须提供安装包的完整路径及验证结果；打包失败时如实记录失败命令和阻塞原因，不得将程序文件称为安装包或宣称交付闭环完成。
+- 仅修改文档或约束、不改变应用产物的任务不要求重新打包。
+
 # 编码规范
 
 ## 语言
