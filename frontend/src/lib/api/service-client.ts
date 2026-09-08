@@ -178,7 +178,7 @@ export const serviceClient = {
     return normalizeRequestLogListWithSummaryResult(result);
   },
   // 累计分项由历史价格快照生成，失败沿用 invoke 的结构化错误，不用零值代替。
-  getCostBreakdown: (): Promise<{ input: number; output: number; cache: number; total: number }> =>
+  getCostBreakdown: (): Promise<{ input: number; output: number; cache: number; total: number; tokens: { input: number; output: number; cache: number; total: number } }> =>
     invoke("service_requestlog_cost_breakdown", withAddr()),
   async getRequestLogSummary(params?: {
     query?: string;

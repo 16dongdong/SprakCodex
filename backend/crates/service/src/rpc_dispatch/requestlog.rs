@@ -42,7 +42,15 @@ pub(super) fn try_handle(req: &JsonRpcRequest, actor: &RpcActor) -> Option<JsonR
         "requestlog/costBreakdown" => super::value_or_error((|| {
             if !actor.is_admin() { return Err("permission_denied".to_string()); }
             let storage = crate::storage_helpers::open_storage().ok_or("打开存储失败")?;
-            storage.cumulativeCostBreakdown().map_err(|error| error.to_string())
+            let cost = storage.cumulativeCostBreakdown().map_err(|error| error.to_string())?;
+            // 用量从累计统计读取，包含归档汇总；缓存是输入子集，拆分时只扣除一次。
+            let usage = storage.summarize_request_logs_between(0, i64::MAX).map_err(|error| error.to_string())?;
+            let cache = usage.cached_input_tokens.min(usage.input_tokens).max(0);
+            let input = usage.input_tokens.saturating_sub(cache).max(0);
+            let output = usage.output_tokens.max(0);
+            let mut result = serde_json::to_value(cost).map_err(|error| error.to_string())?;
+            result["tokens"] = serde_json::json!({"input":input,"output":output,"cache":cache,"total":input.saturating_add(cache).saturating_add(output)});
+            Ok(result)
         })()),
         // 详情沿用列表的不透明 traceId，权限与列表同源；历史未采集返回 null，不把摘要当报文。
         "requestlog/detail" => super::value_or_error((|| {

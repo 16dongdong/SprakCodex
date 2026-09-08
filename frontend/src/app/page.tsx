@@ -51,7 +51,7 @@ export default function HomePage() {
   const cumulative = overview.data?.cumulative;
   const cost = overview.data?.cost;
   const metrics = [
-    { label: "累计 Token", value: formatCompactTokenAmount(cumulative?.totalTokens), icon: Layers3, detail: "输入 + 输出合计" },
+    { label: "累计 Token", value: formatCompactTokenAmount(cost?.tokens.total), icon: Layers3, detail: "输入 + 输出合计" },
     { label: "累计费用", value: cost ? `$${cost.total.toFixed(4)}` : undefined, icon: Coins, detail: "按本地价格表估算，非实际账单" },
     { label: "累计成功请求", value: cumulative?.successCount, icon: Activity, detail: "成功请求" },
     { label: "可用账号", value: snapshot ? `${snapshot.accountSummary.availableCount} / ${snapshot.accountSummary.accountCount}` : undefined, icon: Users, detail: "当前健康可调用的账号" },
@@ -82,6 +82,7 @@ export default function HomePage() {
               <span className="rounded-xl bg-primary/8 p-2 text-primary"><Icon className="size-4" /></span>
             </div>
             <p className="mt-5 truncate text-3xl font-semibold tracking-tight tabular-nums" title={String(value ?? "—")}>{typeof value === "number" ? value.toLocaleString() : value ?? "—"}</p>
+            {index === 0 && <dl className="mt-3 space-y-1 text-xs tabular-nums">{([["输入", cost?.tokens.input], ["输出", cost?.tokens.output], ["缓存", cost?.tokens.cache], ["总计", cost?.tokens.total]] as const).map(([name, amount]) => <div key={name} className="flex justify-between gap-2"><dt className="text-muted-foreground">{t(name)}</dt><dd>{formatCompactTokenAmount(amount)}</dd></div>)}</dl>}
             {index === 1 && <dl className="mt-3 space-y-1 text-xs tabular-nums">{([["输入", cost?.input], ["输出", cost?.output], ["缓存", cost?.cache], ["总计", cost?.total]] as const).map(([name, amount]) => <div key={name} className="flex justify-between gap-2"><dt className="text-muted-foreground">{t(name)}</dt><dd>{amount == null ? "—" : `$${amount.toFixed(4)}`}</dd></div>)}</dl>}
             <p className="mt-3 text-xs text-muted-foreground">{index === 2 ? `${t("异常请求")} · ${cumulative?.errorCount ?? "—"}` : t(detail)}</p>
           </section>
