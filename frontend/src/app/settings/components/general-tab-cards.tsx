@@ -22,13 +22,13 @@ export function AboutCodexManagerCard({
       <CardHeader>
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-primary" />
-          <CardTitle className="text-base">{t("关于 CodexManager")}</CardTitle>
+          <CardTitle className="text-base">{t("关于 SprakCodex")}</CardTitle>
         </div>
         <CardDescription>{t("个人 Codex 账号管理与会话分流工具")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-background/35 px-4 py-3">
-          <span className="font-semibold">CodexManager</span>
+          <span className="font-semibold">SprakCodex</span>
           <Badge variant="secondary" className="font-mono">
             v{APP_VERSION}
           </Badge>

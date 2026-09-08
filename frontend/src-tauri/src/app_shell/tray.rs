@@ -30,7 +30,7 @@ pub(crate) fn setup_tray(app: &tauri::AppHandle) -> Result<(), tauri::Error> {
     TRAY_AVAILABLE.store(false, std::sync::atomic::Ordering::Relaxed);
     let menu = build_tray_menu(app)?;
     let mut tray = TrayIconBuilder::with_id("main-tray")
-        .tooltip("Codex Manager")
+        .tooltip("SprakCodex")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {
@@ -71,13 +71,9 @@ pub(crate) fn setup_tray(app: &tauri::AppHandle) -> Result<(), tauri::Error> {
                 toggle_tray_preview_window(tray.app_handle(), position, rect);
             }
         });
-    if let Ok(icon) =
-        tauri::image::Image::from_bytes(include_bytes!("../../icons/tray-template.png"))
-    {
-        tray = tray.icon(icon).icon_as_template(true);
-    } else if let Some(icon) = app.default_window_icon() {
-        tray = tray.icon(icon.clone());
-    }
+    // 托盘直接使用原图生成的彩色小图标；解码失败显式返回，不切换为旧品牌模板。
+    let icon = tauri::image::Image::from_bytes(include_bytes!("../../icons/32x32.png"))?;
+    tray = tray.icon(icon).icon_as_template(false);
     tray.build(app)?;
     TRAY_AVAILABLE.store(true, std::sync::atomic::Ordering::Relaxed);
     Ok(())

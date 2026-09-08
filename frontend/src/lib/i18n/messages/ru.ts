@@ -122,6 +122,7 @@ export const RU_MESSAGES: MessageCatalog = {
   "语言": "Язык",
   "本日按小时汇总全部请求": "Все запросы сегодня по часам",
   "本周期按天汇总全部请求": "Все запросы периода по дням",
+  "关于 SprakCodex": "О SprakCodex",
   仪表盘: "Обзор",
   概览: "Обзор",
   ...RU_ACCESS_CONTROL_MESSAGES,

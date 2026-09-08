@@ -122,6 +122,7 @@ export const EN_MESSAGES: MessageCatalog = {
   "语言": "Language",
   "本日按小时汇总全部请求": "All requests today, grouped hourly",
   "本周期按天汇总全部请求": "All requests in this period, grouped daily",
+  "关于 SprakCodex": "About SprakCodex",
   仪表盘: "Dashboard",
   概览: "Overview",
   平台接入: "Platform Access",

@@ -1,6 +1,6 @@
-# CodexManager
+# SprakCodex
 
-CodexManager 是面向个人使用的 Codex 多账号管理与会话分流工具。
+SprakCodex 是面向个人使用的 Codex 多账号管理与会话分流工具。
 
 ## 核心能力
 
@@ -40,3 +40,5 @@ pwsh -File backend/scripts/rebuild.ps1 -Bundle nsis
 ```
 
 详细会话分流设计见 [`docs/sessionRouting.md`](docs/sessionRouting.md)。
+
+应用显示名称为 SprakCodex；为兼容升级，内部应用标识、数据库目录和程序文件名保持不变。

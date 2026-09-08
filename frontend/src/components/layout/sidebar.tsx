@@ -108,7 +108,7 @@ export function Sidebar() {
   const { isDesktopRuntime } = useRuntimeCapabilities();
   const { data: session, isLoading: isSessionLoading } = useAppSession();
   const role = resolveSessionRole(session, isSessionLoading, isDesktopRuntime);
-  const brandTitle = isSidebarOpen ? t("重新打开 Codex 引导") : "CodexManager";
+  const brandTitle = isSidebarOpen ? t("重新打开 Codex 引导") : "SprakCodex";
   const toggleTitle = isSidebarOpen ? t("收起侧边栏") : t("展开侧边栏");
   const routeAccess = useMemo(
     () => ({ role, mode: session?.mode ?? null, isDesktopRuntime }),
@@ -216,7 +216,7 @@ export function Sidebar() {
             ) : (
               <Image
                 src="/logo.png"
-                alt="CodexManager"
+                alt="SprakCodex"
                 width={48}
                 height={48}
                 className="h-full w-full object-cover"
@@ -226,7 +226,7 @@ export function Sidebar() {
           </div>
           {isSidebarOpen && (
             <div className="flex flex-col overflow-hidden animate-in fade-in slide-in-from-left-1 duration-200 motion-reduce:animate-none">
-              <span className="truncate text-lg font-semibold tracking-[-0.02em] text-foreground">CodexManager</span>
+              <span className="truncate text-lg font-semibold tracking-[-0.02em] text-foreground">SprakCodex</span>
               <span className="truncate text-compact text-muted-foreground xl:mt-0.5">
                 {t("账号池 · 路由管理")}
               </span>

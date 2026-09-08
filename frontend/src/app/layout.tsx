@@ -9,7 +9,7 @@ import {
 } from "@/lib/appearance";
 
 export const metadata: Metadata = {
-  title: "CodexManager",
+  title: "SprakCodex",
   description: "Account pool and usage management for Codex",
 };
 

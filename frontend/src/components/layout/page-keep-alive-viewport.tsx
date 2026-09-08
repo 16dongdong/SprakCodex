@@ -141,7 +141,7 @@ export function PageKeepAliveViewport({
   }, [syncShellPathFromLocation]);
 
   useEffect(() => {
-    document.title = `${t(getTopLevelRouteLabel(currentShellPath, routeAccess))} - CodexManager`;
+    document.title = `${t(getTopLevelRouteLabel(currentShellPath, routeAccess))} - SprakCodex`;
   }, [currentShellPath, routeAccess, t]);
 
   useEffect(() => {
