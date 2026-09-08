@@ -25,6 +25,7 @@ struct RequestShape {
 pub(super) struct Observation {
     pub headers: hyper::HeaderMap,
     pub responseHeaders: hyper::HeaderMap,
+    pub routing: Option<super::recordSink::RoutingSnapshot>,
     queued: VecDeque<Exchange>,
     pending: HashMap<String, (Exchange, UsageParser)>,
     completed: VecDeque<String>,
@@ -53,6 +54,8 @@ impl Observation {
         let mut exchange = Exchange::new(target.0, target.1, protocol);
         exchange.method = "GET".into();
         exchange.captureHeaders(&self.headers);
+        // 每条消息继承握手时已经应用到上游的路由决策，不在记录阶段重新分配账号。
+        if let Some(routing) = &self.routing { exchange.inheritRouting(routing); }
         exchange.responseHeaders = super::detailCapture::headers(&self.responseHeaders);
         exchange.requestBody.lock().map_err(|_| ())?.feed(bytes);
         self.queued.push_back(exchange);

@@ -19,6 +19,16 @@ pub(super) struct Counters {
     pub nativeAccepted: AtomicU64,
 }
 
+// 连接级路由快照只保存可展示的元数据，不延长访问令牌的存活时间。
+#[derive(Clone)]
+pub(super) struct RoutingSnapshot {
+    pub mode: String,
+    pub sessionId: Option<String>,
+    pub source: Option<String>,
+    pub reason: String,
+    pub accountLabel: Option<String>,
+}
+
 pub(super) struct Exchange {
     pub host: String,
     pub path: String,
@@ -76,6 +86,20 @@ impl Exchange {
             self.accountLabel = Some(label.to_string());
         }
     }
+    // 握手与逐帧请求共用一个路由结果；复制的快照不含密钥或请求正文。
+    pub fn routingSnapshot(&self) -> RoutingSnapshot {
+        RoutingSnapshot { mode: self.routingMode.clone(), sessionId: self.routingSessionId.clone(), source: self.routingSource.clone(), reason: self.routingReason.clone(), accountLabel: self.accountLabel.clone() }
+    }
+
+    // WebSocket response.create 创建独立记录时继承连接身份，避免默认透传标签掩盖实际分流。
+    pub fn inheritRouting(&mut self, snapshot: &RoutingSnapshot) {
+        self.routingMode.clone_from(&snapshot.mode);
+        self.routingSessionId.clone_from(&snapshot.sessionId);
+        self.routingSource.clone_from(&snapshot.source);
+        self.routingReason.clone_from(&snapshot.reason);
+        self.accountLabel.clone_from(&snapshot.accountLabel);
+    }
+
     // 认证仅参与不可逆指纹，账号标识来自显式请求头；不借用 Manager 账号池身份。
     pub fn captureHeaders(&mut self, headers: &hyper::HeaderMap) {
         self.requestHeaders = super::detailCapture::headers(headers);

@@ -108,3 +108,23 @@ fn keepsCompleteFramesAndResponseHeaders() {
     assert!(body.contains("complete-delta"));
     assert!(body.contains("response.completed"));
 }
+
+// 握手身份已分配后，多条生成记录必须保持同一分流标记和账号显示名，不回落到默认透传。
+#[test]
+fn generationInheritsHandshakeRouting() {
+    let mut handshake = Exchange::new("fixture", "/responses", handshakeProtocol);
+    handshake.routingMode = "sessionRouting".into();
+    handshake.routingSessionId = Some("thread-fixture".into());
+    handshake.routingSource = Some("thread-id".into());
+    handshake.routingReason = "bound_account".into();
+    handshake.accountLabel = Some("测试账号".into());
+    let mut observer = Observation { routing: Some(handshake.routingSnapshot()), ..Default::default() };
+    for identity in ["first", "second"] {
+        observer.request(&create(None), ("fixture", "/responses")).unwrap();
+        let (record, _, _) = observer.response(&complete(identity)).unwrap().unwrap();
+        assert_eq!(record.routingMode, "sessionRouting");
+        assert_eq!(record.routingSessionId.as_deref(), Some("thread-fixture"));
+        assert_eq!(record.accountLabel.as_deref(), Some("测试账号"));
+        assert_eq!(record.routingReason, "bound_account");
+    }
+}

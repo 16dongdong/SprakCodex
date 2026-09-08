@@ -141,6 +141,7 @@ pub(super) async fn upgrade(
         let mut observation = Observation::default();
         observation.headers = observationHeaders;
         observation.responseHeaders = observationResponseHeaders;
+        observation.routing = Some(handshake.routingSnapshot());
         loop {
             let transfer = tokio::select! {
                 _ = taskEngine.cancel.cancelled() => break,
