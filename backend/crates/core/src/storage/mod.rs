@@ -43,6 +43,9 @@ mod request_logs;
 mod request_token_stats;
 #[allow(non_snake_case)]
 mod sessionRouting;
+#[allow(non_snake_case)]
+mod costBreakdown;
+pub use costBreakdown::CostBreakdown;
 mod settings;
 mod tokens;
 mod usage;

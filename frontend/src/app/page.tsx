@@ -28,7 +28,7 @@ export default function HomePage() {
     refetchInterval: active ? refreshIntervalMs : false,
     // 统计使用本地日界限，最近列表只取固定条数；不加载平台密钥、模型或完整账号详情。
     queryFn: async () => {
-      const [snapshot, requests, cumulative] = await Promise.all([
+      const [snapshot, requests, cumulative, cost] = await Promise.all([
         serviceClient.getStartupSnapshot({
           requestLogLimit: 0, dayStartTs, dayEndTs,
           includeApiModels: false, includeApiKeys: false,
@@ -39,8 +39,9 @@ export default function HomePage() {
           page: 1, pageSize: recentRequestLimit, startTs: dayStartTs, endTs: dayEndTs,
         }),
         serviceClient.getRequestLogSummary(),
+        serviceClient.getCostBreakdown(),
       ]);
-      return { snapshot, requests, cumulative };
+      return { snapshot, requests, cumulative, cost };
     },
   });
   const snapshot = overview.data?.snapshot;
@@ -48,9 +49,10 @@ export default function HomePage() {
   const usage = snapshot?.requestLogTodaySummary;
   // 顶部累计指标不受本地日界限或曲线标签影响，直接使用无时间筛选的服务端汇总。
   const cumulative = overview.data?.cumulative;
+  const cost = overview.data?.cost;
   const metrics = [
     { label: "累计 Token", value: formatCompactTokenAmount(cumulative?.totalTokens), icon: Layers3, detail: "输入 + 输出合计" },
-    { label: "累计费用", value: cumulative ? `$${cumulative.totalCostUsd.toFixed(4)}` : undefined, icon: Coins, detail: "按本地价格表估算，非实际账单" },
+    { label: "累计费用", value: cost ? `$${cost.total.toFixed(4)}` : undefined, icon: Coins, detail: "按本地价格表估算，非实际账单" },
     { label: "累计成功请求", value: cumulative?.successCount, icon: Activity, detail: "成功请求" },
     { label: "可用账号", value: snapshot ? `${snapshot.accountSummary.availableCount} / ${snapshot.accountSummary.accountCount}` : undefined, icon: Users, detail: "当前健康可调用的账号" },
   ];
@@ -80,6 +82,7 @@ export default function HomePage() {
               <span className="rounded-xl bg-primary/8 p-2 text-primary"><Icon className="size-4" /></span>
             </div>
             <p className="mt-5 truncate text-3xl font-semibold tracking-tight tabular-nums" title={String(value ?? "—")}>{typeof value === "number" ? value.toLocaleString() : value ?? "—"}</p>
+            {index === 1 && <dl className="mt-3 space-y-1 text-xs tabular-nums">{([["输入", cost?.input], ["输出", cost?.output], ["缓存", cost?.cache], ["总计", cost?.total]] as const).map(([name, amount]) => <div key={name} className="flex justify-between gap-2"><dt className="text-muted-foreground">{t(name)}</dt><dd>{amount == null ? "—" : `$${amount.toFixed(4)}`}</dd></div>)}</dl>}
             <p className="mt-3 text-xs text-muted-foreground">{index === 2 ? `${t("异常请求")} · ${cumulative?.errorCount ?? "—"}` : t(detail)}</p>
           </section>
         ))}

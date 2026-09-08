@@ -267,3 +267,32 @@ fn clientCompletionFillsMissingNetworkUsage() {
     assert!(storage.get_charge_snapshot_v2(1).unwrap().is_some());
     assert_eq!(storage.request_charge_ledger_entry_count().unwrap(), 0);
 }
+
+// 累计费用从已落库价格快照拆分；同一请求重复上报不增加分项，三项合计与总额一致。
+#[test]
+fn cumulativeCostUsesSnapshotAndDoesNotDoubleCountCache() {
+    let storage = Storage::open_in_memory().unwrap();
+    storage.init().unwrap();
+    let request = RequestLog {
+        trace_id: Some("observation:cost-parts".into()),
+        model: Some("gpt-5.4-mini".into()),
+        created_at: 1,
+        ..Default::default()
+    };
+    let usage = RequestTokenStat {
+        input_tokens: Some(100), cached_input_tokens: Some(40),
+        output_tokens: Some(20), total_tokens: Some(120), ..Default::default()
+    };
+    storage.insertObservation(&request, &usage, Some("gpt-5.4-mini"), &[]).unwrap();
+    storage.insertObservation(&request, &usage, Some("gpt-5.4-mini"), &[]).unwrap();
+    let price = storage.get_charge_snapshot_v2(1).unwrap().unwrap();
+    let parts = serde_json::to_value(storage.cumulativeCostBreakdown().unwrap()).unwrap();
+    let input = parts["input"].as_f64().unwrap();
+    let output = parts["output"].as_f64().unwrap();
+    let cache = parts["cache"].as_f64().unwrap();
+    let total = parts["total"].as_f64().unwrap();
+    assert!((cache - 40.0 * price.cached_input_microusd_per_1m as f64 / 1e12).abs() < 1e-12);
+    assert!((output - 20.0 * price.output_microusd_per_1m as f64 / 1e12).abs() < 1e-12);
+    assert!((input + output + cache - total).abs() < 1e-12);
+    assert!((total - price.base_cost_microusd as f64 / 1e6).abs() < 1e-12);
+}

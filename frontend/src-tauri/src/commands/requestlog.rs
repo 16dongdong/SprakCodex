@@ -134,3 +134,9 @@ pub async fn service_requestlog_detail(
     )
     .await
 }
+
+// 桌面累计费用与 Web 端复用同一 RPC；网络或数据库失败由统一传输返回。
+#[tauri::command]
+pub async fn service_requestlog_cost_breakdown(addr: Option<String>) -> Result<serde_json::Value, String> {
+    rpc_call_in_background("requestlog/costBreakdown", addr, None).await
+}

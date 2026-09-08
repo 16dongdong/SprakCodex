@@ -49,7 +49,7 @@ function SettingSwitchRow(props: SettingSwitchRowProps) {
   );
 }
 
-/// 个人版设置页只装载应用生命周期、外观、网络出口和技术诊断，不读取网关业务配置。
+// 设置按职责分为五个标签；各功能沿用原持久化与权限边界，不在通用页重复挂载。
 export default function SettingsPage() {
   const { t } = useI18n();
   const { theme, setTheme } = useTheme();
@@ -94,9 +94,11 @@ export default function SettingsPage() {
         <TabsList className="glass-card mb-6 grid h-auto w-full grid-cols-2 gap-1 rounded-lg p-1 lg:flex lg:h-11 lg:w-fit">
           <TabsTrigger value="general">{t("通用")}</TabsTrigger>
           <TabsTrigger value="appearance">{t("外观")}</TabsTrigger>
+          <TabsTrigger value="network">{t("网络")}</TabsTrigger>
+          {isDesktopRuntime && <TabsTrigger value="diagnostics">{t("诊断")}</TabsTrigger>}
+          <TabsTrigger value="about">{t("关于")}</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="space-y-6">
-          <AboutCodexManagerCard t={t} />
           <Card className="glass-card shadow-sm">
             <CardHeader><CardTitle className="text-base">{t("基础设置")}</CardTitle></CardHeader>
             <CardContent>
@@ -106,9 +108,10 @@ export default function SettingsPage() {
               <SettingSwitchRow label={t("关闭时最小化到托盘")} description={t("保留本机接入和会话分流后台运行")} checked={snapshot.closeToTrayOnClose} disabled={!snapshot.closeToTraySupported} onChange={(value) => change({ closeToTrayOnClose: value })} />
             </CardContent>
           </Card>
-          <ProxySettingsCard canManage={canAccessManagementRpc} />
-          {isDesktopRuntime ? <DesktopDiagnosticsCard t={t} /> : null}
         </TabsContent>
+        <TabsContent value="network"><ProxySettingsCard canManage={canAccessManagementRpc} /></TabsContent>
+        {isDesktopRuntime && <TabsContent value="diagnostics"><DesktopDiagnosticsCard t={t} /></TabsContent>}
+        <TabsContent value="about"><AboutCodexManagerCard t={t} /></TabsContent>
         <TabsContent value="appearance">
           <AppearanceTabContent
             t={t}

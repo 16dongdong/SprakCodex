@@ -38,6 +38,12 @@ fn member_requestlog_scope(actor: &RpcActor) -> Result<(StorageHandle, Vec<Strin
 /// 返回函数执行结果
 pub(super) fn try_handle(req: &JsonRpcRequest, actor: &RpcActor) -> Option<JsonRpcResponse> {
     let result = match req.method.as_str() {
+        // 个人累计费用只向管理员开放，历史快照分项不通过客户端猜算。
+        "requestlog/costBreakdown" => super::value_or_error((|| {
+            if !actor.is_admin() { return Err("permission_denied".to_string()); }
+            let storage = crate::storage_helpers::open_storage().ok_or("打开存储失败")?;
+            storage.cumulativeCostBreakdown().map_err(|error| error.to_string())
+        })()),
         // 详情沿用列表的不透明 traceId，权限与列表同源；历史未采集返回 null，不把摘要当报文。
         "requestlog/detail" => super::value_or_error((|| {
             let trace = req
