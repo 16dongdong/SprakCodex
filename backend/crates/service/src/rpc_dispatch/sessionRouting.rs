@@ -11,6 +11,7 @@ pub(super) fn dispatch(request: &JsonRpcRequest) -> Option<JsonRpcResponse> {
                 .and_then(|v| v.as_i64())
                 .unwrap_or(1),
             super::str_param(request, "search").unwrap_or_default(),
+            super::str_param(request, "project").unwrap_or_default(),
         )),
         "sessionRouting/reset" => Some(crate::sessionRouting::resetSession(
             &super::str_param(request, "sessionId").unwrap_or_default(),

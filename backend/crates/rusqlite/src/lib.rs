@@ -77,6 +77,16 @@ impl Connection {
         })
     }
 
+    // 外部应用元数据库只读打开，不创建文件、不切换日志模式；写入操作由 SQLite 只读标志拒绝。
+    #[allow(non_snake_case)]
+    pub fn openReadOnly<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let path = path.as_ref().to_path_buf();
+        let rt = sqlite_runtime()?;
+        let options = SqliteConnectOptions::new().filename(&path).read_only(true).create_if_missing(false).busy_timeout(Duration::from_secs(1));
+        let pool = block_on_runtime(&rt, async { SqlitePoolOptions::new().max_connections(1).connect_with(options).await })?;
+        Ok(Self { rt, pool, path: Some(path) })
+    }
+
     pub fn open_in_memory() -> Result<Self> {
         let rt = sqlite_runtime()?;
         let pool = block_on_runtime(&rt, async {

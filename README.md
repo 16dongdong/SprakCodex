@@ -37,13 +37,18 @@ cargo test --manifest-path frontend/src-tauri/Cargo.toml --lib
 Windows 安装包：
 
 ```powershell
-pwsh -File backend/scripts/rebuild.ps1 -Bundle nsis
+pnpm -C frontend run build:desktop
+Set-Location frontend
+pnpm dlx @tauri-apps/cli@2.10.1 build --bundles nsis
+node src-tauri/scripts/stageRelease.mjs
 ```
 
 详细会话分流设计见 [`docs/sessionRouting.md`](docs/sessionRouting.md)。
 
-应用显示名称为 SprakCodex；为兼容升级，内部应用标识、数据库目录和程序文件名保持不变。
+应用显示名称为 SprakCodex；为兼容升级，内部应用标识与数据库目录保持不变；主程序已更名为 `SprakCodex.exe`。
 
 ## 更新
 
 正式版本使用 `v0.6.1` 这样的标准标签。Windows 设置支持静默更新，独立 `updateAgent.exe` 随安装包部署。首次升级本版后可使用新流程；协议、校验范围和回滚边界见 [桌面更新协议](docs/desktopUpdates.md)。
+
+会话页按标题展示，支持标题搜索和项目筛选；标题来自本机客户端元数据库的只读查询。缺少元数据时显示短 ID，不读取聊天正文。

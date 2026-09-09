@@ -42,7 +42,7 @@ pub fn validateJob(job: &UpdateJob) -> Result<(), String> {
     if !job.targetExe.is_absolute() || !job.targetExe.is_file() || !job.installer.is_absolute() {
         return Err("更新路径无效".into());
     }
-    let expectedName = format!("SprakCodex_{}_x64-setup.exe", target);
+    let expectedName = format!("SprakCodex-{}-windows-x64-setup.exe", target);
     if job.installer.file_name().and_then(|n| n.to_str()) != Some(expectedName.as_str()) {
         return Err("安装包名称与目标版本不符".into());
     }

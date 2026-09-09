@@ -15,9 +15,10 @@ enum AutoStartSyncAction {
     Disable,
 }
 
+// 已启用时也刷新注册项的可执行路径，保证更名后开机启动指向当前程序。
 fn auto_start_sync_action(configured: bool, runtime_enabled: bool) -> AutoStartSyncAction {
     match (configured, runtime_enabled) {
-        (true, false) => AutoStartSyncAction::Enable,
+        (true, _) => AutoStartSyncAction::Enable,
         (false, true) => AutoStartSyncAction::Disable,
         _ => AutoStartSyncAction::None,
     }
@@ -213,7 +214,7 @@ mod tests {
     fn auto_start_sync_keeps_matching_runtime_state() {
         assert_eq!(
             auto_start_sync_action(true, true),
-            AutoStartSyncAction::None
+            AutoStartSyncAction::Enable
         );
         assert_eq!(
             auto_start_sync_action(false, false),

@@ -1,3 +1,4 @@
+mod metadata;
 use codexmanager_core::storage::{
     now_ts, AccountRoutingPreference, SessionRoutingCredential, SessionRoutingResolution, Storage,
 };
@@ -295,9 +296,13 @@ mod tests {
 }
 
 // 会话页查询和写操作保留服务数据库错误；标识长度在 RPC 边界统一限制。
-pub fn listSessions(page: i64, search: &str) -> Result<serde_json::Value,String> {
+pub fn listSessions(page: i64, search: &str, project: &str) -> Result<serde_json::Value,String> {
     if search.len()>512 { return Err("搜索内容过长".into()); }
-    openStorage()?.listRoutingSessions(page, search).map_err(|e| e.to_string())
+    let storage=openStorage()?;
+    let warning=metadata::sync(&storage).err();
+    let mut result=storage.listRoutingSessions(page,search,project).map_err(|e|e.to_string())?;
+    result["metadataWarning"]=serde_json::json!(warning);
+    Ok(result)
 }
 // 重置不删除 Codex 内容，也不创建替代会话；下次连接由分配事务重新处理。
 pub fn resetSession(sessionId: &str) -> Result<serde_json::Value,String> {

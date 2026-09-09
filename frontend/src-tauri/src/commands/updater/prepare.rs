@@ -213,7 +213,7 @@ fn select_payload_asset(
 
     if cfg!(target_os = "windows") {
         // 安装模式只选择版本匹配的 x64 NSIS 包，避免把更新器或其他附件当作安装器。
-        let expected = format!("SprakCodex_{latest_version}_x64-setup.exe");
+        let expected = format!("SprakCodex-{latest_version}-windows-x64-setup.exe");
         return assets.iter().find(|asset| asset.name == expected).cloned();
     }
 

@@ -153,7 +153,7 @@ fn manualSwitchAndResetInvalidateOldConnection() {
     assert!(!storage
         .routingConnectionCurrent("session", "b", now_ts())
         .unwrap());
-    assert_eq!(storage.listRoutingSessions(1, "").unwrap()["total"], 0);
+    assert_eq!(storage.listRoutingSessions(1, "", "").unwrap()["total"], 0);
 }
 
 // 删除账号保留会话元数据，缺少候选时等待，新增候选后自动迁移。
@@ -169,7 +169,7 @@ fn deletedAccountKeepsPendingSessionAndMigrates() {
         .execute("DELETE FROM accounts WHERE id='a'", [])
         .unwrap();
     assert_eq!(
-        storage.listRoutingSessions(1, "").unwrap()["items"][0]["reason"],
+        storage.listRoutingSessions(1, "", "").unwrap()["items"][0]["reason"],
         "account_deleted"
     );
     assert_eq!(
@@ -223,4 +223,17 @@ fn quotaOverviewUsesWindowDurationRatherThanSlot() {
     let summary = storage.account_quota_overview_stats().unwrap();
     assert_eq!(summary.primary_remain_percent_avg, Some(97.0));
     assert_eq!(summary.secondary_remain_percent_avg, Some(80.0));
+}
+
+// 显示缓存写入不改变绑定；标题与项目过滤在分页前执行，不把当前页外的匹配会话漏掉。
+#[test]
+fn metadataSearchAndProjectFilterPreserveBinding() {
+    let mut storage=storage();insertAccount(&storage,"a",0);
+    storage.resolveSessionRouting("session","thread-id",now_ts()).unwrap();
+    storage.syncRoutingDisplay(&[("session".into(),"检查网络配置".into(),"D:/workspace/project".into())]).unwrap();
+    let page=storage.listRoutingSessions(1,"网络","D:/workspace/project").unwrap();
+    assert_eq!(page["total"],1);
+    assert_eq!(page["items"][0]["title"],"检查网络配置");
+    assert_eq!(page["items"][0]["accountId"],"a");
+    assert_eq!(storage.listRoutingSessions(1,"网络","D:/other").unwrap()["total"],0);
 }

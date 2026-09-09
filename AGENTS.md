@@ -173,3 +173,5 @@ Tauri rules.
 - 用户要求上传 GitHub 时，将安装包作为 Release 附件上传；明确报告草稿或已发布状态。
 - 验证、打包及安装完成且交付副本已确认后，执行 `cargo clean --manifest-path backend/Cargo.toml` 和 `cargo clean --manifest-path frontend/src-tauri/Cargo.toml`，及时释放构建空间。
 - 清理限于本项目构建产物，不删除账号数据库、认证配置、安装目录、源码或 node_modules；下次构建须重新生成 DLL 和前端资源。
+
+- 自 0.6.3 起本机程序路径为 `D:\CodexManager\SprakCodex.exe`，更新核验按该进程名执行；公开安装包使用 `SprakCodex-版本-windows-x64-setup.exe`。

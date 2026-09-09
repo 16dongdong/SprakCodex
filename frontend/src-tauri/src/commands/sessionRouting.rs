@@ -45,11 +45,12 @@ pub async fn service_session_routing_list(
     addr: Option<String>,
     page: i64,
     search: String,
+    project: Option<String>,
 ) -> Result<serde_json::Value, String> {
     rpc_call_in_background(
         "sessionRouting/list",
         addr,
-        Some(serde_json::json!({"page":page,"search":search})),
+        Some(serde_json::json!({"page":page,"search":search,"project":project})),
     )
     .await
 }

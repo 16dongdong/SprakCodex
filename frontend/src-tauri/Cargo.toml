@@ -1,12 +1,16 @@
 [package]
-name = "CodexManager"
-version = "0.6.2"
-description = "A Tauri App"
-authors = ["you"]
+name = "SprakCodex"
+version = "0.6.3"
+description = "SprakCodex 桌面账号与会话管理工具"
+authors = ["16dongdong"]
 license = ""
 repository = ""
 edition = "2021"
 rust-version = "1.77.2"
+
+[[bin]]
+name = "SprakCodex"
+path = "src/main.rs"
 
 [lib]
 name = "app_lib"

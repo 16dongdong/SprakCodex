@@ -29,6 +29,7 @@ async function verifyBuildBoundaries() {
   const desktopRoot = path.join(repositoryRoot, "frontend/src-tauri");
   const desktopManifest = await fs.readFile(path.join(desktopRoot, "Cargo.toml"), "utf8");
   for (const dependency of desktopManifest.matchAll(/path\s*=\s*"([^"]+)"/g)) {
+    if (dependency[1].endsWith(".rs")) continue;
     const manifestPath = path.resolve(desktopRoot, dependency[1], "Cargo.toml");
     assert.ok(manifestPath.startsWith(path.join(repositoryRoot, "backend") + path.sep) || manifestPath === path.join(repositoryRoot, "frontend", "updateAgent", "Cargo.toml"));
     await fs.access(manifestPath);

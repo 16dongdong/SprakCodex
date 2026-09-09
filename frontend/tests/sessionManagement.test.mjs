@@ -21,3 +21,14 @@ test("会话管理提供重置和手动换号且不直接读取聊天目录",asy
   assert.match(page, /useDesktopPageActive\("\/sessions"\)/);
   assert.doesNotMatch(page, /\bfetch\(|auth\.json|\.codex/);
 });
+
+// 标题列表与详情分栏不再显示宽表格；本机程序命名与更新包规范同步验证。
+test("会话标题布局及主程序命名一致", async () => {
+  const page = await fs.readFile(new URL("../src/app/sessions/page.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(page, /<table/);
+  assert.match(page, /session.title\?\.trim/);
+  assert.match(page, /DropdownMenu/);
+  assert.match(page, /selected\.sessionId/);
+  const config = JSON.parse(await fs.readFile(new URL("../src-tauri/tauri.conf.json", import.meta.url), "utf8"));
+  assert.equal(config.mainBinaryName, "SprakCodex");
+});

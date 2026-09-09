@@ -198,7 +198,7 @@ fn format_startup_error_report(
         .map(|path| path.display().to_string())
         .unwrap_or_else(|| "not created".to_string());
     format!(
-        "CodexManager startup failure\n\
+        "SprakCodex startup failure\n\
          timestamp: {timestamp}\n\
          version: {}\n\
          os: {}\n\
@@ -234,11 +234,11 @@ fn show_startup_error_dialog(error: &str, report_path: Option<&Path>) {
         .map(|path| format!("\n\n诊断日志：{}", path.display()))
         .unwrap_or_default();
     let description = format!(
-        "CodexManager 启动失败，您的数据库不会被自动删除。\n\n{}{}",
+        "SprakCodex 启动失败，您的数据库不会被自动删除。\n\n{}{}",
         error, path_message
     );
     MessageDialog::new()
-        .set_title("CodexManager 启动失败")
+        .set_title("SprakCodex 启动失败")
         .set_description(&description)
         .set_level(MessageLevel::Error)
         .set_buttons(MessageButtons::Ok)
@@ -270,7 +270,7 @@ pub(crate) fn report_build_failure(error: &str) {
     let report_path = STARTUP_ERROR_PATH.get();
     if let Some(path) = report_path {
         let report = format!(
-            "CodexManager startup failure\n\
+            "SprakCodex startup failure\n\
              timestamp: {}\n\
              version: {}\n\
              os: {}\n\

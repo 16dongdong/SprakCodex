@@ -44,6 +44,10 @@ runs:
           }
           pnpm @args
           if ($LASTEXITCODE -eq 0) {
+            if ("${{ inputs.bundles }}" -match "nsis") {
+              node ./src-tauri/scripts/stageRelease.mjs "${{ inputs.target }}"
+              if ($LASTEXITCODE -ne 0) { throw "发布安装包命名失败" }
+            }
             $succeeded = $true
             break
           }

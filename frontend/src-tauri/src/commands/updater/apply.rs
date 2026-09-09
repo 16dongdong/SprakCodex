@@ -80,7 +80,7 @@ fn write_windows_powershell_script(script_path: &Path, script: &str) -> Result<(
 /// 返回函数执行结果
 fn portable_executable_candidates() -> &'static [&'static str] {
     if cfg!(target_os = "windows") {
-        &["CodexManager-portable.exe", "CodexManager.exe"]
+        &["SprakCodex-portable.exe", "SprakCodex.exe"]
     } else if cfg!(target_os = "macos") {
         &[
             "CodexManager-portable.app",

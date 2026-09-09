@@ -25,3 +25,9 @@ pnpm -C frontend run test:runtime
 ```powershell
 cargo clean --manifest-path frontend/updateAgent/Cargo.toml
 ```
+
+## 0.6.3 程序名称迁移
+
+从本版开始主程序为 `SprakCodex.exe`。发布附件统一命名为 `SprakCodex-0.6.3-windows-x64-setup.exe`（后续按版本递增）。旧 0.6.1/0.6.2 更新器只接受旧附件名并按旧程序名重启，因此不会自动安装新命名附件；这些版本需要手动升级一次，之后恢复正常自动更新。
+
+DLL 仍采用系统正常加载流程，不包含绕过安全产品的内存注入实现。安装时如提示 DLL 写入失败，应检查目标设备上的文件占用、安装目录权限与安全产品拦截日志；写入失败本身不证明病毒误报。

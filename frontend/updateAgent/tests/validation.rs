@@ -16,7 +16,7 @@ fn fixture() -> (PathBuf, UpdateJob) {
             .as_nanos()
     ));
     fs::create_dir(&root).unwrap();
-    let installer = root.join("SprakCodex_0.6.2_x64-setup.exe");
+    let installer = root.join("SprakCodex-0.6.2-windows-x64-setup.exe");
     let executable = root.join("application.exe");
     fs::write(&installer, b"installer fixture").unwrap();
     fs::write(&executable, b"application fixture").unwrap();
