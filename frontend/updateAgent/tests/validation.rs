@@ -95,3 +95,82 @@ fn workerWaitsForParentBeforeInstalling() {
     assert!(ready, "更新器没有进入就绪状态");
     assert!(unchanged, "主程序退出前安装目录已改变");
 }
+
+// 子进程只为看门狗提供可等待的真实 PID；环境标记阻止测试入口被手工误运行。
+#[cfg(windows)]
+#[test]
+#[ignore = "仅由看门狗生命周期测试作为父进程夹具调用"]
+fn watchdogParentFixture() {
+    assert_eq!(
+        std::env::var("UPDATE_WATCHDOG_PARENT").as_deref(),
+        Ok("true")
+    );
+    std::thread::sleep(std::time::Duration::from_secs(60));
+}
+
+// stdin 提前关闭不能让看门狗越过仍存活的父进程；父进程退出后无部署记录时应正常结束。
+#[cfg(windows)]
+#[test]
+fn watchdogWaitsForExactParentLifecycle() {
+    use std::{
+        io::{BufRead, BufReader},
+        os::windows::process::CommandExt,
+        process::{Command, Stdio},
+        time::{Duration, Instant},
+    };
+    let root = std::env::temp_dir().join(format!(
+        "update-watchdog-lifecycle-{}",
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    fs::create_dir(&root).unwrap();
+    let mut parent = Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "watchdogParentFixture",
+            "--ignored",
+            "--nocapture",
+        ])
+        .env("UPDATE_WATCHDOG_PARENT", "true")
+        .creation_flags(0x08000000)
+        .spawn()
+        .unwrap();
+    let logPath = root.join("watchdog.log");
+    let mut watchdog = Command::new(env!("CARGO_BIN_EXE_updateAgent"))
+        .arg("watchdog")
+        .arg(parent.id().to_string())
+        .arg(&logPath)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .creation_flags(0x08000000)
+        .spawn()
+        .unwrap();
+    let mut ready = String::new();
+    BufReader::new(watchdog.stdout.take().unwrap())
+        .read_line(&mut ready)
+        .unwrap();
+    assert_eq!(ready.trim(), "watchdog-ready");
+    let mut input = watchdog.stdin.take().unwrap();
+    use std::io::Write;
+    writeln!(input, "不是 JSON").unwrap();
+    drop(input);
+    std::thread::sleep(Duration::from_millis(200));
+    assert!(watchdog.try_wait().unwrap().is_none());
+    parent.kill().unwrap();
+    parent.wait().unwrap();
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let status = loop {
+        if let Some(status) = watchdog.try_wait().unwrap() {
+            break status;
+        }
+        assert!(Instant::now() < deadline, "看门狗未在父进程退出后结束");
+        std::thread::sleep(Duration::from_millis(50));
+    };
+    assert!(status.success());
+    let log = fs::read_to_string(&logPath).unwrap();
+    assert!(log.contains("看门狗命令无效"));
+    assert!(log.contains("看门狗生命周期完成"));
+    fs::remove_dir_all(root).unwrap();
+}

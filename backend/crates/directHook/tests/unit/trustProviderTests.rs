@@ -51,10 +51,10 @@ fn unrelatedVariableKeepsOriginalReturnAndLastError() {
     unsafe {
         let module = GetModuleHandleW(w!("kernel32.dll")).unwrap();
         let address = GetProcAddress(module, s!("GetEnvironmentVariableW")).unwrap();
-        let original: GetVariable = std::mem::transmute(address);
         originalVariable
-            .set(GenericDetour::new(original, readVariable as GetVariable).unwrap())
+            .prepareForTest(address as *const (), readVariable as *const ())
             .unwrap();
+        let original: GetVariable = originalVariable.original();
         let key = w!("SystemRoot");
         let mut expected = [0u16; 512];
         let mut actual = [0u16; 512];
@@ -67,5 +67,6 @@ fn unrelatedVariableKeepsOriginalReturnAndLastError() {
         assert_eq!(GetLastError(), expectedError);
         assert_eq!(actualLength, expectedLength);
         assert_eq!(actual, expected);
+        originalVariable.release().unwrap();
     }
 }

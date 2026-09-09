@@ -1,17 +1,19 @@
 //! 仅发布当前进程选择的 CLI 数据目录；不读取 auth.json，不修改环境变量、身份或配置。
 use std::{
-    ffi::OsString, os::windows::ffi::OsStringExt, os::windows::io::OwnedHandle, path::PathBuf,
-    sync::OnceLock,
+    ffi::OsString,
+    os::windows::{ffi::OsStringExt, io::IntoRawHandle},
+    path::PathBuf,
+    sync::atomic::{AtomicIsize, Ordering},
 };
 use windows::Win32::Foundation::{
-    GetLastError, SetLastError, ERROR_ENVVAR_NOT_FOUND, ERROR_SUCCESS,
+    CloseHandle, GetLastError, SetLastError, ERROR_ENVVAR_NOT_FOUND, ERROR_SUCCESS, HANDLE,
 };
 use windows::{
     core::{w, PCWSTR},
     Win32::System::Environment::GetEnvironmentVariableW,
 };
 
-static mapping: OnceLock<OwnedHandle> = OnceLock::new();
+static mapping: AtomicIsize = AtomicIsize::new(0);
 const maxEnvironmentUnits: usize = 32768;
 
 // loader lock 外先发布元数据再置位模块就绪；句柄保留到目标进程结束，宿主重启可重新读取。
@@ -21,12 +23,29 @@ pub(super) fn publish() -> Result<(), &'static str> {
         None => PathBuf::from(variable(w!("USERPROFILE"))?.ok_or("目标进程缺少 CLI home")?)
             .join(".codex"),
     };
-    mapping
-        .set(cpcommon::runtimeHome::publish(
-            cpcommon::relayContract::deploymentIdentity,
-            &home,
-        )?)
-        .map_err(|_| "运行目录已发布")
+    let publisher =
+        cpcommon::runtimeHome::publish(cpcommon::relayContract::deploymentIdentity, &home)?;
+    let raw = publisher.into_raw_handle() as isize;
+    if mapping
+        .compare_exchange(0, raw, Ordering::AcqRel, Ordering::Acquire)
+        .is_err()
+    {
+        unsafe {
+            let _ = CloseHandle(HANDLE(raw as *mut _));
+        }
+        return Err("运行目录已发布");
+    }
+    Ok(())
+}
+
+// 卸载时关闭目录映射发布句柄，使宿主和看门狗不再把该映像识别为可用实例。
+pub(super) fn shutdown() {
+    let raw = mapping.swap(0, Ordering::AcqRel);
+    if raw != 0 {
+        unsafe {
+            let _ = CloseHandle(HANDLE(raw as *mut _));
+        }
+    }
 }
 
 // 只查询固定的公开目录变量；非 CA 名称由已安装读取入口原样转发，长度和编码不做猜测。

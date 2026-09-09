@@ -5,7 +5,7 @@ use super::*;
 #[test]
 fn readinessIsScopedToProcessAndModule() {
     let event = event_name(42, "fixture-10");
-    assert!(event.starts_with("Local\\ObservationHookReady11-42-"));
+    assert!(event.starts_with("Local\\ObservationHookReady12-42-"));
     assert_ne!(event, event_name(43, "fixture-10"));
     assert_ne!(event, event_name(42, "fixture-11"));
     assert_ne!(event, loaded_event_name(42, "fixture-10"));

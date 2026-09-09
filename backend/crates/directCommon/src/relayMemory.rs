@@ -21,7 +21,7 @@ use windows::{
     },
 };
 
-const magic: u64 = u64::from_le_bytes(*b"OBSCFG11");
+const magic: u64 = u64::from_le_bytes(*b"OBSCFG12");
 const headerBytes: usize = 16;
 pub const maxConfigBytes: usize = 64 * 1024;
 const mappingBytes: usize = headerBytes + maxConfigBytes;

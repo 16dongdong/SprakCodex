@@ -10,6 +10,8 @@ mod commands;
 mod desktop_diagnostics;
 mod rpc_client;
 mod service_runtime;
+#[allow(non_snake_case, non_upper_case_globals)]
+mod updateWatchdog;
 
 use app_shell::{
     handle_main_window_event, handle_run_event, load_env_from_exe_dir,
@@ -173,6 +175,12 @@ pub fn run() {
             if let Err(error) = cleanupLegacyObservationModule() {
                 log::warn!("{error}");
             }
+            updateWatchdog::start(app.handle())
+                .map_err(|error| std::io::Error::other(format!("启动更新看门狗失败：{error}")))?;
+            codexmanager_service::directObservation::setDeploymentLifecycleHandler(
+                updateWatchdog::sendDeployment,
+            )
+            .map_err(|error| std::io::Error::other(format!("注册部署生命周期失败：{error}")))?;
 
             let database_path = match app_storage::apply_runtime_storage_env_checked(app.handle()) {
                 Ok(path) => path,

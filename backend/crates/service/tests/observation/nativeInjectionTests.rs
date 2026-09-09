@@ -98,6 +98,32 @@ fn readyModuleAndRepeatedLoad() {
     assert!(target.child.id() > 0);
 }
 
+// 卸载必须关闭版本事件、释放主映像并允许同一目标实例重新部署，不能仅把配置标记为停用。
+#[test]
+#[ignore = "需要 OBSERVATION_TEST_READY_DLL"]
+fn unloadRemovesImageAndAllowsRedeploy() {
+    let target = Target::start(true, 0);
+    let identity = target.identity();
+    let image = fixtureImage();
+    let first = inject(&identity, image).unwrap().unwrap();
+    assert!(cpcommon::deploymentLifecycle::unload(&first).unwrap());
+    assert!(!loaded(identity.pid));
+    let second = inject(&identity, image).unwrap().unwrap();
+    assert_ne!(second.imageBase, 0);
+    assert!(cpcommon::deploymentLifecycle::unload(&second).unwrap());
+}
+
+// 目标退出会由内核回收整片地址空间；看门狗重复处理该记录时必须报告无需释放，而不是阻断更新。
+#[test]
+#[ignore = "需要 OBSERVATION_TEST_READY_DLL"]
+fn unloadAcceptsTargetExitAsCompleted() {
+    let mut target = Target::start(true, 0);
+    let record = inject(&target.identity(), fixtureImage()).unwrap().unwrap();
+    target.child.kill().unwrap();
+    target.child.wait().unwrap();
+    assert!(!cpcommon::deploymentLifecycle::unload(&record).unwrap());
+}
+
 // 两个独立真实进程共用生产调度器；第一个故意延迟 DLL 加载，第二个必须先就绪，停止后无加载预留遗留。
 #[test]
 #[ignore = "需要 OBSERVATION_TEST_READY_DLL，运行约三秒"]

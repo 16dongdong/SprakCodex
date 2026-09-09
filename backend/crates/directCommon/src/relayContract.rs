@@ -1,9 +1,9 @@
 //! Relay 配置是宿主与 DLL 的共同契约；运行线程身份限制配置寿命，不包含登录或请求内容。
 use serde::{Deserialize, Serialize};
 
-// 第十一版为配置头加入提交序列；稳定标识隔离旧内存映像，防止其误读新版快照。
+// 第十二版加入看门狗卸载 ABI；稳定标识隔离旧内存映像，防止旧模块阻止重新部署。
 #[allow(non_upper_case_globals)]
-pub const deploymentIdentity: &str = "embedded-observation-hook-11";
+pub const deploymentIdentity: &str = "embedded-observation-hook-12";
 
 // 创建时间使用 Windows FILETIME 原始 100ns 单位，线程 ID 被复用时仍能区分运行实例。
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]

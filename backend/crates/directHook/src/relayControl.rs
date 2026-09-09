@@ -9,7 +9,7 @@ pub(super) struct RelayControl {
 }
 
 impl Default for RelayControl {
-    // 生产控制器固定读取第十一版部署映射；测试通过专用构造隔离并行宿主。
+    // 生产控制器固定读取第十二版部署映射；测试通过专用构造隔离并行宿主。
     fn default() -> Self {
         Self {
             identity: cpcommon::relayContract::deploymentIdentity,
@@ -35,6 +35,11 @@ impl RelayControl {
                 None
             }
         }
+    }
+
+    // 入口恢复后清空缓存，释放 RuntimeLease 的线程句柄和所有配置路径。
+    pub(super) fn clear(&mut self) {
+        self.current = None;
     }
 
     // 限制实际读取字节数，并在发布快照前后核对活跃线程；文件、格式和实例错误均终止本次改连。

@@ -4,6 +4,9 @@ pub mod hook_proxy;
 pub mod hook_ready;
 
 #[allow(non_snake_case)]
+pub mod deploymentLifecycle;
+
+#[allow(non_snake_case)]
 pub mod relayContract;
 
 #[allow(non_snake_case, non_upper_case_globals)]

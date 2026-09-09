@@ -12,7 +12,7 @@ mod loopbackListeners;
 mod nativeInjection;
 #[cfg(windows)]
 mod processCatalog;
-#[allow(non_snake_case)]
+#[allow(non_snake_case, non_upper_case_globals)]
 mod processInjector;
 mod processMonitor;
 mod recordSink;
@@ -37,6 +37,16 @@ use tokio_util::sync::CancellationToken;
 const observationHosts: &[&str] = &["chatgpt.com", "api.openai.com"];
 pub const enabledSettingKey: &str = "directObservation.enabled";
 static runningEngine: OnceLock<Mutex<Option<Running>>> = OnceLock::new();
+
+// 桌面壳在服务恢复前注册看门狗通道；部署与卸载事件只包含进程身份和内存映像地址。
+pub fn setDeploymentLifecycleHandler(
+    handler: impl Fn(bool, cpcommon::deploymentLifecycle::DeploymentRecord) -> Result<(), String>
+        + Send
+        + Sync
+        + 'static,
+) -> Result<(), String> {
+    processInjector::setDeploymentHandler(handler)
+}
 
 // 进程发现和文件读取范围统一注入运行期；正常启动使用完整范围，生命周期验收限定其自建实例。
 struct RuntimeScope {
@@ -330,12 +340,14 @@ fn cleanupRunning(current: Running, _disableCapture: bool) -> Result<(), String>
         .transpose();
     current.cancel.cancel();
     let joined = current.thread.join();
+    let unloadResult = processInjector::unloadDeployments();
     let certificateResult = if !current.retainCertificate && current.certificate.exists() {
         std::fs::remove_file(&current.certificate).map_err(|_| "清理观测公开证书失败".to_string())
     } else {
         Ok(())
     };
     joined.map_err(|_| "观测线程异常退出".to_string())?;
+    unloadResult?;
     certificateResult?;
     relayResult.map(|_| ())
 }
@@ -353,7 +365,7 @@ fn stopInternal(disable: bool) -> Result<ObservationStatus, String> {
     };
     let cleanupResult = match guard.take() {
         Some(current) => cleanupRunning(current, disable),
-        None => Ok(()),
+        None => processInjector::unloadDeployments(),
     };
     let persistResult = match storage {
         Some(Ok(storage)) => storage

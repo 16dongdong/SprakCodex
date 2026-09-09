@@ -21,6 +21,7 @@ struct RoutingFixture {
     output: Option<mpsc::Receiver<String>>,
     reader: Option<std::thread::JoinHandle<()>>,
     relayPublisher: runtimePaths::RelayPublisher,
+    deployment: Option<cpcommon::deploymentLifecycle::DeploymentRecord>,
 }
 impl RoutingFixture {
     // 显式接收新构建的生产 DLL，不从用户进程推断路径，也不启动生产自动扫描。
@@ -34,6 +35,7 @@ impl RoutingFixture {
             output: None,
             reader: None,
             relayPublisher: runtimePaths::createRelayPublisher().unwrap().unwrap(),
+            deployment: None,
         };
         let child = Command::new(std::env::current_exe().unwrap())
             .args([
@@ -63,7 +65,8 @@ impl RoutingFixture {
         }));
         fixture.expect("CLIENT_READY");
         let identity = nativeInjection::candidate(fixture.child.as_ref().unwrap().id()).unwrap();
-        nativeInjection::inject(&identity, runtimePaths::moduleImage().unwrap()).unwrap();
+        fixture.deployment =
+            nativeInjection::inject(&identity, runtimePaths::moduleImage().unwrap()).unwrap();
         assert_eq!(
             cpcommon::runtimeHome::read(
                 cpcommon::relayContract::deploymentIdentity,
@@ -146,6 +149,9 @@ impl RoutingFixture {
 impl Drop for RoutingFixture {
     // 仅删除已解析隔离目录中的本次文件；先回收进程和输出线程，再处理 DLL 文件映射。
     fn drop(&mut self) {
+        if let Some(deployment) = self.deployment.take() {
+            assert!(cpcommon::deploymentLifecycle::unload(&deployment).unwrap());
+        }
         if let Some(child) = self.child.as_mut() {
             if child.try_wait().unwrap().is_none() {
                 child.kill().unwrap();

@@ -96,5 +96,5 @@ fn rejectsInvalidFieldsWithoutDereferencingThem() {
 #[test]
 fn unknownBuildDoesNotInstallAnEntry() {
     assert!(!install().unwrap());
-    assert!(detour.get().is_none());
+    assert!(!detour.isInstalled());
 }

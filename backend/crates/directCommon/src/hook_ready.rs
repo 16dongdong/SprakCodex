@@ -5,12 +5,12 @@ pub fn event_name(pid: u32, identity: &str) -> String {
     let hash = identity.bytes().fold(0xcbf29ce484222325_u64, |hash, byte| {
         (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
     });
-    format!("Local\\ObservationHookReady11-{pid}-{hash:016x}")
+    format!("Local\\ObservationHookReady12-{pid}-{hash:016x}")
 }
 
 /// 加载事件早于运行期就绪事件，用于阻止初始化失败的内存映像被重复映射。
 pub fn loaded_event_name(pid: u32, identity: &str) -> String {
-    event_name(pid, identity).replace("Ready11", "Loaded11")
+    event_name(pid, identity).replace("Ready12", "Loaded12")
 }
 
 #[cfg(test)]

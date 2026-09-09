@@ -30,6 +30,7 @@ tauri-plugin-single-instance = "2.4.0"
 tauri-plugin-autostart = "2.5.1"
 tauri-plugin-window-state = "2.4.1"
 codexmanager-core = { path = "../../backend/crates/core" }
+cpcommon = { package = "codexmanager-direct-common", path = "../../backend/crates/directCommon" }
 codexmanager-service = { path = "../../backend/crates/service" }
 webbrowser = "0.8"
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }

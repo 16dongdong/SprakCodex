@@ -17,6 +17,23 @@ pub struct UpdateJob {
     pub pendingPath: std::path::PathBuf,
 }
 
+// 主程序只向看门狗发送固定生命周期命令；协议不接受任意进程地址之外的命令行或脚本。
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
+pub enum WatchdogCommand {
+    Track {
+        record: cpcommon::deploymentLifecycle::DeploymentRecord,
+    },
+    Untrack {
+        processId: u32,
+        createdAt: u64,
+    },
+    Update {
+        jobPath: std::path::PathBuf,
+    },
+    CancelUpdate,
+}
+
 // 流式计算 SHA-256，不把安装包读入内存；文件读取错误保持原始失败原因。
 pub fn fileDigest(path: &Path) -> Result<String, String> {
     let mut file = File::open(path).map_err(|e| e.to_string())?;

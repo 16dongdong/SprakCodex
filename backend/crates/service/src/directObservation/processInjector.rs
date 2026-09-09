@@ -1,9 +1,17 @@
 //! Windows 进程发现与内存载荷部署基础层。
 //! 部署前必须由观测协议层提供已嵌入的 PE 字节；本模块不修改目标进程环境变量。
 
-use std::path::{Path, PathBuf};
+use cpcommon::deploymentLifecycle::DeploymentRecord;
+use std::{
+    collections::BTreeMap,
+    path::{Path, PathBuf},
+    sync::{Arc, OnceLock, RwLock},
+};
 
 const targetProcessNames: &[&str] = &["codex.exe", "codex-app.exe"];
+type DeploymentHandler = Arc<dyn Fn(bool, DeploymentRecord) -> Result<(), String> + Send + Sync>;
+static deployments: OnceLock<RwLock<BTreeMap<(u32, u64), DeploymentRecord>>> = OnceLock::new();
+static deploymentHandler: OnceLock<RwLock<Option<DeploymentHandler>>> = OnceLock::new();
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct ProcessCandidate {
@@ -72,7 +80,76 @@ fn isTargetExecutable(executable: &Path) -> bool {
 // 进程发现与加载事务分离：仅实际 DLL 就绪返回成功，失败语义由 Windows 生命周期模块统一负责。
 #[cfg(windows)]
 pub(super) fn inject(candidate: &ProcessCandidate, image: &[u8]) -> Result<(), String> {
-    super::nativeInjection::inject(candidate, image)
+    super::nativeInjection::inject(candidate, image).map(|_| ())
+}
+
+// 桌面壳在扫描前注册处理器，把后续部署变化同步给独立看门狗；替换处理器不会重复旧事件。
+pub(crate) fn setDeploymentHandler(
+    handler: impl Fn(bool, DeploymentRecord) -> Result<(), String> + Send + Sync + 'static,
+) -> Result<(), String> {
+    let mut current = deploymentHandler
+        .get_or_init(|| RwLock::new(None))
+        .write()
+        .map_err(|_| "观测部署处理器锁损坏")?;
+    *current = Some(Arc::new(handler));
+    Ok(())
+}
+
+// 远程初始化成功后按完整进程实例登记；同一记录重复扫描只覆盖，不增加生命周期槽。
+pub(super) fn recordDeployment(record: DeploymentRecord) -> Result<(), String> {
+    let key = (record.processId, record.createdAt);
+    notifyDeployment(true, record.clone())?;
+    deployments
+        .get_or_init(|| RwLock::new(BTreeMap::new()))
+        .write()
+        .map_err(|_| "观测部署表锁损坏")?
+        .insert(key, record);
+    Ok(())
+}
+
+// 通知在部署表锁外执行，避免看门狗管道写入反向阻塞加载和卸载事务。
+fn notifyDeployment(tracked: bool, record: DeploymentRecord) -> Result<(), String> {
+    let handler = deploymentHandler
+        .get_or_init(|| RwLock::new(None))
+        .read()
+        .map_err(|_| "观测部署处理器锁损坏")?
+        .clone();
+    if let Some(handler) = handler {
+        return handler(tracked, record);
+    }
+    Ok(())
+}
+
+// 服务正常停止时主动卸载；失败记录留给仍持有父进程生命周期的看门狗继续处理。
+pub(super) fn unloadDeployments() -> Result<(), String> {
+    let records = deployments
+        .get_or_init(|| RwLock::new(BTreeMap::new()))
+        .read()
+        .map_err(|_| "观测部署表锁损坏")?
+        .values()
+        .cloned()
+        .collect::<Vec<_>>();
+    let mut failures = Vec::new();
+    for record in records {
+        match cpcommon::deploymentLifecycle::unload(&record) {
+            Ok(_) => {
+                deployments
+                    .get_or_init(|| RwLock::new(BTreeMap::new()))
+                    .write()
+                    .map_err(|_| "观测部署表锁损坏")?
+                    .remove(&(record.processId, record.createdAt));
+                if let Err(error) = notifyDeployment(false, record) {
+                    log::error!("同步观测卸载记录失败：{error}");
+                }
+            }
+            Err(error) => failures.push(format!("pid={}：{error}", record.processId)),
+        }
+    }
+    if failures.is_empty() {
+        Ok(())
+    } else {
+        Err(format!("卸载观测映像失败：{}", failures.join("；")))
+    }
 }
 
 // 模块就绪后只读运行目录映射；创建时间来自最新候选，旧 PID 实例的目录不可复用。

@@ -1,5 +1,6 @@
 //! Windows x64 内存部署事务：宿主完成 PE 映射，目标只运行受控初始化入口。
 use super::processInjector::ProcessCandidate;
+use cpcommon::deploymentLifecycle::DeploymentRecord;
 use pelite::pe64::{image::*, imports::Import, Pe, PeFile, PeObject};
 use std::{
     collections::HashSet,
@@ -146,6 +147,7 @@ struct RemoteLoad {
     persistent: Vec<usize>,
     contextAddress: usize,
     committed: bool,
+    record: DeploymentRecord,
     reservation: Reservation,
 }
 
@@ -599,7 +601,17 @@ fn protectImage(file: PeFile<'_>, process: HANDLE, remoteBase: usize) -> Result<
         .map_err(|_| "刷新目标指令缓存失败".to_string())
 }
 
-// TLS 模板、异常表及入口地址一次性固化到远程引导上下文。
+// 导出必须是映像内的直接符号；转发导出和缺失名称都不参与私有生命周期 ABI。
+fn exportRva(file: PeFile<'_>, name: &[u8]) -> Result<u32, String> {
+    file.exports()
+        .and_then(|exports| exports.by())
+        .and_then(|exports| exports.name(name))
+        .ok()
+        .and_then(|export| export.symbol())
+        .ok_or_else(|| format!("内嵌观测载荷缺少 {} 入口", String::from_utf8_lossy(name)))
+}
+
+// 异常表及入口地址一次性固化到远程引导上下文。
 fn loaderContext(file: PeFile<'_>, pid: u32, remoteBase: usize) -> Result<LoaderContext, String> {
     let remoteSystem = |module: HMODULE, name: PCSTR| {
         unsafe { GetProcAddress(module, name) }
@@ -609,13 +621,7 @@ fn loaderContext(file: PeFile<'_>, pid: u32, remoteBase: usize) -> Result<Loader
     };
     let ntdll = unsafe { GetModuleHandleW(windows::core::w!("ntdll.dll")) }
         .map_err(|_| "读取异常系统模块失败")?;
-    let initializerRva = file
-        .exports()
-        .and_then(|exports| exports.by())
-        .and_then(|exports| exports.name(b"observationInitialize"))
-        .ok()
-        .and_then(|export| export.symbol())
-        .ok_or("内嵌观测载荷缺少初始化入口")?;
+    let initializerRva = exportRva(file, b"observationInitialize")?;
     let mut context = LoaderContext {
         imageBase: remoteBase as u64,
         entryPoint: (remoteBase + file.optional_header().AddressOfEntryPoint as usize) as u64,
@@ -684,6 +690,17 @@ fn cleanupQueue() -> Result<&'static mpsc::Sender<RemoteLoad>, String> {
                                         "延迟回收内存部署事务失败 pid={}：{error}",
                                         load.reservation.identity.0
                                     );
+                                } else {
+                                    if let Err(error) = super::processInjector::recordDeployment(
+                                        load.record.clone(),
+                                    ) {
+                                        log::error!("同步延迟部署记录失败：{error}");
+                                        if let Err(unloadError) =
+                                            cpcommon::deploymentLifecycle::unload(&load.record)
+                                        {
+                                            log::error!("回滚未跟踪的延迟部署失败：{unloadError}");
+                                        }
+                                    }
                                 }
                             }
                             pending
@@ -734,7 +751,10 @@ fn loaded(pid: u32) -> bool {
 }
 
 // 验证实例和架构后，从内嵌字节完成一次映射并等待模块自身就绪。
-pub(super) fn inject(expected: &ProcessCandidate, image: &[u8]) -> Result<(), String> {
+pub(super) fn inject(
+    expected: &ProcessCandidate,
+    image: &[u8],
+) -> Result<Option<DeploymentRecord>, String> {
     let cleanup = cleanupQueue()?;
     let access = PROCESS_QUERY_INFORMATION
         | PROCESS_CREATE_THREAD
@@ -755,14 +775,15 @@ pub(super) fn inject(expected: &ProcessCandidate, image: &[u8]) -> Result<(), St
         return Err("观测目标与宿主体系架构不一致".into());
     }
     if loaded(expected.pid) {
-        return waitEvent(
+        waitEvent(
             native(&process),
             cpcommon::hook_ready::event_name(
                 expected.pid,
                 cpcommon::relayContract::deploymentIdentity,
             ),
             readyTimeout,
-        );
+        )?;
+        return Ok(None);
     }
     let reservation = Reservation::acquire(expected)?;
     let aligned = alignedImage(image);
@@ -785,6 +806,16 @@ pub(super) fn inject(expected: &ProcessCandidate, image: &[u8]) -> Result<(), St
     resolveImports(file, &mut mapped, native(&process), expected.pid)?;
     writeRemote(native(&process), imageAddress, &mapped)?;
     let context = loaderContext(file, expected.pid, imageAddress)?;
+    let record = DeploymentRecord {
+        processId: expected.pid,
+        createdAt: expected.createdAt,
+        imageBase: imageAddress,
+        imageSize: file.optional_header().SizeOfImage as usize,
+        entryPoint: context.entryPoint as usize,
+        shutdownEntry: imageAddress + exportRva(file, b"observationShutdown")? as usize,
+        functionTable: context.functionTable as usize,
+    };
+    record.validate().map_err(str::to_owned)?;
     protectImage(file, native(&process), imageAddress)?;
 
     let code = loaderCode()?;
@@ -833,6 +864,7 @@ pub(super) fn inject(expected: &ProcessCandidate, image: &[u8]) -> Result<(), St
         persistent: persistent.release(),
         contextAddress,
         committed: false,
+        record: record.clone(),
         reservation,
     };
     let completed = unsafe { WaitForSingleObject(native(&load.thread), loadTimeoutMs) };
@@ -849,11 +881,17 @@ pub(super) fn inject(expected: &ProcessCandidate, image: &[u8]) -> Result<(), St
         .into());
     }
     load.commit()?;
+    if let Err(error) = super::processInjector::recordDeployment(record.clone()) {
+        cpcommon::deploymentLifecycle::unload(&record)
+            .map_err(|unload| format!("{error}；回滚未跟踪的观测映像失败：{unload}"))?;
+        return Err(error);
+    }
     waitEvent(
         native(&load.process),
         cpcommon::hook_ready::event_name(expected.pid, cpcommon::relayContract::deploymentIdentity),
         readyTimeout,
-    )
+    )?;
+    Ok(Some(record))
 }
 
 #[cfg(test)]

@@ -1,11 +1,10 @@
 //! 只接入 Codex 已支持的额外 CA 读取点；原有变量值不落日志，也不修改进程环境或登录状态。
 use super::{hookInstall, imp, trustBundle::TrustBundles};
-use retour::GenericDetour;
 use std::{
     ffi::OsString,
     os::windows::ffi::OsStringExt,
     path::{Path, PathBuf},
-    sync::{Mutex, OnceLock},
+    sync::Mutex,
 };
 use windows::{
     core::{s, w},
@@ -16,7 +15,7 @@ use windows::{
 };
 
 type GetVariable = unsafe extern "system" fn(*const u16, *mut u16, u32) -> u32;
-static originalVariable: OnceLock<GenericDetour<GetVariable>> = OnceLock::new();
+static originalVariable: hookInstall::DetourSlot = hookInstall::DetourSlot::new();
 static trustState: Mutex<TrustState> = Mutex::new(TrustState {
     bundles: None,
     provided: None,
@@ -26,6 +25,7 @@ const caVariable: &[u8] = b"CODEX_CA_CERTIFICATE";
 const maxVariableChars: usize = 32768;
 
 // 只有已完整返回证书路径才标记提供；这不等价于既有 TLS 客户端已经重建，旧连接仍独立验收。
+#[derive(Default)]
 struct TrustState {
     bundles: Option<TrustBundles>,
     provided: Option<PathBuf>,
@@ -37,10 +37,7 @@ pub(super) unsafe fn install() -> Result<(), String> {
     let module = GetModuleHandleW(w!("kernel32.dll")).map_err(|_| "读取环境变量模块失败")?;
     let address =
         GetProcAddress(module, s!("GetEnvironmentVariableW")).ok_or("读取环境变量入口失败")?;
-    let original: GetVariable = std::mem::transmute(address);
-    let detour = GenericDetour::new(original, readVariable as GetVariable)
-        .map_err(|_| "创建公开证书读取入口失败")?;
-    hookInstall::activateDetour(&originalVariable, detour)
+    originalVariable.install(address as *const (), readVariable as *const ())
 }
 
 // 新连接在额外证书路径尚未提供时保持原路由，避免注入先于 TLS 配置读取时提前发送观测证书。
@@ -52,16 +49,20 @@ pub(super) fn providedFor(path: &Path) -> bool {
 
 // Win32 回调只比较固定变量名；其他变量直接执行 trampoline，缓冲区尺寸和 LastError 语义保持不变。
 unsafe extern "system" fn readVariable(name: *const u16, buffer: *mut u16, capacity: u32) -> u32 {
-    let original = originalVariable.get().expect("启用前已经发布原读取入口");
+    let activity = hookInstall::CallbackActivity::enter();
+    let original: GetVariable = originalVariable.original();
+    if activity.isUnloading() {
+        return original(name, buffer, capacity);
+    }
     if !matchesCaVariable(name) {
-        return original.call(name, buffer, capacity);
+        return original(name, buffer, capacity);
     }
     let lastError = GetLastError();
     if let Some(length) = provideBundle(buffer, capacity) {
         SetLastError(lastError);
         return length;
     }
-    original.call(name, buffer, capacity)
+    original(name, buffer, capacity)
 }
 
 // 仅读取原环境的 CA 路径，通过 trampoline 避免递归进入 Rust 的环境锁；失败不发布额外路径。
@@ -108,9 +109,9 @@ unsafe fn copyBundlePath(path: &[u16], buffer: *mut u16, capacity: u32) -> (u32,
 // 遵循官方 CODEX_CA_CERTIFICATE 优先、SSL_CERT_FILE 次之、空字符串忽略的规则，不读取任何认证变量。
 unsafe fn selectOriginalCa() -> Result<Option<PathBuf>, &'static str> {
     for key in [w!("CODEX_CA_CERTIFICATE"), w!("SSL_CERT_FILE")] {
-        let original = originalVariable.get().ok_or("原读取入口尚未就绪")?;
+        let original: GetVariable = originalVariable.original();
         let mut value = vec![0u16; maxVariableChars];
-        let length = original.call(key.as_ptr(), value.as_mut_ptr(), value.len() as u32) as usize;
+        let length = original(key.as_ptr(), value.as_mut_ptr(), value.len() as u32) as usize;
         if length >= value.len() {
             return Err("原公开证书环境变量过长");
         }
@@ -123,6 +124,18 @@ unsafe fn selectOriginalCa() -> Result<Option<PathBuf>, &'static str> {
         }
     }
     Ok(None)
+}
+
+// 卸载第一阶段恢复环境变量入口；回调排空后再释放 trampoline 和公开证书文件。
+pub(super) fn disable() -> Result<(), String> {
+    originalVariable.disable()
+}
+
+// 调用方保证没有活跃回调；清空证书缓存会关闭 DELETE_ON_CLOSE 文件句柄。
+pub(super) fn release() -> Result<(), String> {
+    originalVariable.release()?;
+    *trustState.lock().map_err(|_| "公开证书状态锁损坏")? = TrustState::default();
+    Ok(())
 }
 
 // 按 Windows 环境变量规则仅对 ASCII 名称忽略大小写，比较至固定结尾，不扫描任意长度输入。

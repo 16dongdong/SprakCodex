@@ -1,8 +1,6 @@
 use super::{model::UpdateActionResponse, runtime, state};
-use std::os::windows::process::CommandExt;
 use std::{
     fs,
-    process::Command,
     time::{Duration, Instant},
 };
 use update_agent::{validateJob, UpdateJob};
@@ -37,7 +35,7 @@ fn releaseDigest(version: &str, assetName: &str) -> Result<String, String> {
         .ok_or_else(|| "发布附件缺少 SHA-256，未执行更新".into())
 }
 
-// 后台命令启动独立更新器；有活动请求或未保存设置时返回等待状态，不强制停止工作。
+// 后台命令把作业交给启动时建立的看门狗；有活动请求或未保存设置时保持等待状态。
 pub(super) fn apply(app: tauri::AppHandle) -> Result<UpdateActionResponse, String> {
     if crate::app_shell::has_unsaved_settings_draft_sections() {
         return Ok(UpdateActionResponse {
@@ -52,13 +50,6 @@ pub(super) fn apply(app: tauri::AppHandle) -> Result<UpdateActionResponse, Strin
     let installer = pending.installer_path.as_ref().ok_or("安装包路径缺失")?;
     let digest = releaseDigest(&pending.latest_version, &pending.asset_name)?;
     let executable = std::env::current_exe().map_err(|e| e.to_string())?;
-    let source = executable
-        .parent()
-        .ok_or("安装目录缺失")?
-        .join("updateAgent.exe");
-    if !source.is_file() {
-        return Err("安装目录缺少 updateAgent.exe".into());
-    }
     let work = state::updates_root_dir(&app)?.join(format!(
         "apply-{}-{}",
         std::process::id(),
@@ -81,30 +72,21 @@ pub(super) fn apply(app: tauri::AppHandle) -> Result<UpdateActionResponse, Strin
             message: "等待进行中的请求完成".into(),
         });
     }
-    let staged = work.join("updateAgent.exe");
     let jobPath = work.join("job.json");
     let started = (|| {
         fs::create_dir(&work).map_err(|e| e.to_string())?;
-        fs::copy(source, &staged).map_err(|e| e.to_string())?;
         fs::write(
             &jobPath,
             serde_json::to_vec(&job).map_err(|e| e.to_string())?,
         )
         .map_err(|e| e.to_string())?;
-        let mut worker = Command::new(staged)
-            .arg(&jobPath)
-            .creation_flags(runtime::CREATE_NO_WINDOW)
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        crate::updateWatchdog::prepareUpdate(&jobPath)?;
         let deadline = Instant::now() + Duration::from_secs(15);
         while !job.readyPath.is_file() {
-            if worker.try_wait().map_err(|e| e.to_string())?.is_some() {
-                return Err("更新器启动验证失败，请查看更新日志".into());
-            }
+            crate::updateWatchdog::ensureRunning()?;
             if Instant::now() >= deadline {
-                // 父进程仍在运行，工作进程尚未获准安装；结束本次子进程，避免稍后意外应用过期作业。
-                worker.kill().map_err(|e| e.to_string())?;
-                worker.wait().map_err(|e| e.to_string())?;
+                // 父进程仍在运行，必须先撤销看门狗中的作业，避免稍后退出时应用过期更新。
+                crate::updateWatchdog::cancelUpdate()?;
                 return Err("更新器就绪等待超时".into());
             }
             std::thread::sleep(Duration::from_millis(100));

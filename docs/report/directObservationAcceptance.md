@@ -6,13 +6,15 @@
 - Windows 运行期直接解析内嵌 PE，完成区段映射、DIR64 重定位、系统依赖加载、IAT 地址解析、x64 异常函数表注册、最小页面权限设置与显式初始化入口调用。
 - 安装资源清单已移除 `observationHook9.dll`，Relay 控制由版本化命名页映射发布，不再生成安装目录 JSON 控制文件。
 - 回调状态容器改用 `BTreeMap`／`BTreeSet`，避免手工映像依赖 Windows loader 分配静态 TLS；生产 Winsock 夹具覆盖同步 `connect`、Tokio `ConnectEx`、启停、宿主租约失效和再次启用。
+- 第十二版新增 `observationShutdown`：看门狗按 PID 与创建时间调用固定卸载 ABI，模块恢复 detour、排空回调、释放 trampoline／证书／映射句柄、执行 CRT detach 并注销 x64 异常表，宿主随后验证主映像已释放。
+- `updateAgent.exe watchdog` 在父进程私有管道关闭后执行全部记录的卸载；更新作业由同一看门狗持有，卸载失败时不会继续安装或叠加新映像。
 
 ```powershell
 cargo test --manifest-path backend/Cargo.toml -p codexmanager-service directObservation::relayRoutingTests::productionModuleHonorsRuntimeLifetime -- --ignored --exact --nocapture
 cargo test --manifest-path backend/Cargo.toml -p codexmanager-service directObservation::nativeInjection::tests::readyModuleAndRepeatedLoad -- --ignored --exact --nocapture
 ```
 
-后续章节保留各历史阶段的原始验收命令和版本信息，用于回溯迁移前行为；当前发布边界以上述第十一版内存部署结果为准。
+后续章节保留各历史阶段的原始验收命令和版本信息，用于回溯迁移前行为；当前发布边界以上述第十二版内存部署与看门狗结果为准。
 
 ## 总目标与边界
 
@@ -109,7 +111,7 @@ cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib dire
 
 ```powershell
 cargo build --manifest-path backend/Cargo.toml -p codexmanager-service --example observationReadyFixture
-# OBSERVATION_TEST_READY_DLL 指向上述测试 DLL，分别运行四个 ignored 测试，勿把 fixtureTarget 作为父用例执行。
+# OBSERVATION_TEST_READY_DLL 指向上述测试 DLL，分别运行七个 ignored 测试，勿把 fixtureTarget 作为父用例执行。
 cargo test --manifest-path backend/Cargo.toml -p codexmanager-service --lib directObservation::nativeInjection::tests::readyModuleAndRepeatedLoad -- --exact --ignored --nocapture --test-threads=1
 cargo test --manifest-path backend/Cargo.toml -p codexmanager-direct-common -p codexmanager-direct-hook
 ```

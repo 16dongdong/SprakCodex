@@ -1,10 +1,8 @@
 //! 匹配官方 Windows x64 构建的完成事件入口；只复制计量元数据，原函数参数、返回值和展开语义保持不变。
 use cpcommon::completionSpool::{self, Completion};
-use retour::RawDetour;
 use std::{
     ffi::c_void,
     path::PathBuf,
-    sync::OnceLock,
     time::{SystemTime, UNIX_EPOCH},
 };
 use windows::Win32::System::{
@@ -38,7 +36,7 @@ type UsageFn = unsafe extern "system-unwind" fn(
     *const u8,
     *const u8,
 ) -> *mut c_void;
-static detour: OnceLock<RawDetour> = OnceLock::new();
+static detour: super::hookInstall::DetourSlot = super::hookInstall::DetourSlot::new();
 
 // 安装在线程初始化阶段、loader lock 外执行；未知 PDB 或入口返回未支持，绝不对其他构建猜偏移。
 pub(super) fn install() -> Result<bool, &'static str> {
@@ -59,10 +57,8 @@ pub(super) fn install() -> Result<bool, &'static str> {
     if read(address, entryBytes.len()).as_deref() != Some(entryBytes.as_slice()) {
         return Ok(false);
     }
-    let hook = unsafe { RawDetour::new(address as *const (), observed as *const ()) }
-        .map_err(|_| "创建完成入口失败")?;
-    detour.set(hook).map_err(|_| "完成入口状态重复")?;
-    unsafe { detour.get().ok_or("完成入口状态缺失")?.enable() }.map_err(|_| "启用完成入口失败")?;
+    unsafe { detour.install(address as *const (), observed as *const ()) }
+        .map_err(|_| "启用完成入口失败")?;
     Ok(true)
 }
 
@@ -192,6 +188,13 @@ unsafe extern "system-unwind" fn observed(
     response: *const u8,
     usage: *const u8,
 ) -> *mut c_void {
+    let activity = super::hookInstall::CallbackActivity::enter();
+    let original: UsageFn = detour.original();
+    if activity.isUnloading() {
+        return original(
+            out, state, thread, turn, turnLength, session, root, response, usage,
+        );
+    }
     let pending = std::panic::catch_unwind(|| {
         prepare(Arguments {
             state: state as usize,
@@ -205,7 +208,6 @@ unsafe extern "system-unwind" fn observed(
     .ok()
     .flatten();
     // 安装先发布 trampoline 再 enable，因此回调执行时原函数指针必定存在；不捕获原函数自身的展开。
-    let original: UsageFn = std::mem::transmute(detour.get().unwrap().trampoline());
     let result = original(
         out, state, thread, turn, turnLength, session, root, response, usage,
     );
@@ -215,6 +217,16 @@ unsafe extern "system-unwind" fn observed(
         }
     }
     result
+}
+
+// 原生完成入口与网络入口进入同一卸载屏障，先恢复目标代码再等待活跃回调。
+pub(super) fn disable() -> Result<(), String> {
+    detour.disable()
+}
+
+// 调用方保证完成回调已排空；释放 trampoline，避免重复部署累积可执行页。
+pub(super) fn release() -> Result<(), String> {
+    detour.release()
 }
 
 #[cfg(test)]
