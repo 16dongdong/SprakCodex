@@ -1,21 +1,17 @@
 "use client";
 
 import {
-  AlertTriangle,
-  CheckCircle2,
   ChevronDown,
   Clock3,
-  Database,
   RefreshCw,
   Search,
   SlidersHorizontal,
   Trash2,
-  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { RequestDetailsDialog } from "@/components/modals/requestDetailsDialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -52,7 +48,6 @@ import {
   type TranslateFn,
   resolveAccountDisplayName,
   resolveDisplayedStatusCode,
-  SummaryCard,
 } from "./page-helpers";
 import type { RequestLog, RequestLogFilterSummary } from "@/types";
 
@@ -143,20 +138,14 @@ export function RequestLogsTabContent({
 
   return (
     <div className="space-y-4">
-      <Card className="glass-card mission-panel overflow-hidden gap-0 py-0 shadow-sm">
+      <Card className="glass-card overflow-hidden gap-0 rounded-xl border-border/60 py-0 shadow-none">
         <CardContent className="p-0">
-          <div className={cn("grid", filtersExpanded ? "xl:grid-cols-[minmax(0,1fr)_390px]" : "")}>
+          <div className="min-w-0">
             <div
-              className={cn(
-                "space-y-4 p-4",
-                filtersExpanded ? "xl:border-r xl:border-border/50" : "",
-              )}
+              className="space-y-3 p-3 sm:p-4"
             >
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 space-y-1">
-                  <div className="text-[11px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-                    {t("实时网关观测")}
-                  </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full border border-border/60 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                       {compactMetaText}
@@ -186,12 +175,12 @@ export function RequestLogsTabContent({
                 </div>
               </div>
 
-              <div className="grid gap-3 2xl:grid-cols-[minmax(320px,1fr)_auto] 2xl:items-center">
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="relative min-w-0">
                   <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder={t("搜索路径、账号或密钥 ID...")}
-                    className="h-11 rounded-xl border-border/70 bg-background/80 pr-3 pl-10 text-sm shadow-none"
+                    className="h-9 rounded-lg border-border/70 bg-background/80 pr-3 pl-10 text-sm shadow-none"
                     value={search}
                     onChange={(event) => onSearchChange(event.target.value)}
                   />
@@ -222,7 +211,7 @@ export function RequestLogsTabContent({
               </div>
 
               {filtersExpanded ? (
-                <div className="space-y-3 rounded-xl border border-border/50 bg-muted/20 p-3">
+                <div className="space-y-2 border-t border-border/50 pt-3">
                   <div className="grid grid-cols-4 rounded-xl border border-border/60 bg-background/45 p-1 sm:w-fit sm:min-w-[304px]">
                     {[
                       ["all", "ALL"],
@@ -235,6 +224,7 @@ export function RequestLogsTabContent({
                         type="button"
                         variant="ghost"
                         size="sm"
+                        aria-pressed={filter === value}
                         onClick={() => onFilterChange(value as StatusFilter)}
                         className={cn(
                           "h-8 rounded-lg px-3 text-xs font-semibold tracking-wide transition-all",
@@ -248,7 +238,7 @@ export function RequestLogsTabContent({
                     ))}
                   </div>
 
-                  <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)] 2xl:items-center">
+                  <div className="grid gap-2 lg:grid-cols-2 lg:items-center">
                     <div className="flex min-w-0 items-center gap-2 rounded-xl border border-border/60 bg-background/45 p-1">
                       <Clock3 className="ml-2 size-3.5 shrink-0 text-muted-foreground" />
                       <div className="flex min-w-0 flex-wrap items-center gap-1">
@@ -266,6 +256,7 @@ export function RequestLogsTabContent({
                             type="button"
                             variant="ghost"
                             size="sm"
+                            aria-pressed={timePreset === value}
                             onClick={() => onApplyTimePreset(value)}
                             className={cn(
                               "h-8 rounded-lg px-3 text-xs font-semibold transition-all",
@@ -328,67 +319,21 @@ export function RequestLogsTabContent({
               ) : null}
             </div>
 
-            {filtersExpanded ? (
-              <div className="grid gap-3 border-t border-border/50 bg-muted/20 p-4 sm:grid-cols-2 xl:border-t-0">
-                <SummaryCard
-                  title={t("当前结果")}
-                  value={`${summary.filteredCount}`}
-                  description={`${t("总日志")} ${summary.totalCount} ${t("条")}`}
-                  icon={Zap}
-                  toneClass="bg-primary/12 text-primary"
-                />
-                <SummaryCard
-                  title={t("2XX 成功")}
-                  value={`${summary.successCount}`}
-                  description={t("状态码 200-299")}
-                  icon={CheckCircle2}
-                  toneClass="bg-green-500/12 text-green-500"
-                />
-                <SummaryCard
-                  title={t("异常请求")}
-                  value={`${summary.errorCount}`}
-                  description={t("4xx / 5xx 或显式错误")}
-                  icon={AlertTriangle}
-                  toneClass="bg-red-500/12 text-red-500"
-                />
-                <SummaryCard
-                  title={t("累计Token")}
-                  value={formatCompactTokenAmount(summary.totalTokens)}
-                  description={t("当前筛选结果中的总Token")}
-                  icon={Database}
-                  toneClass="bg-amber-500/12 text-amber-500"
-                />
-              </div>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border/50 px-4 py-2.5 text-xs text-muted-foreground">
+              <span>{t("当前结果")} <strong className="ml-1 tabular-nums text-foreground">{summary.filteredCount}</strong> / {summary.totalCount}</span>
+              <span>{t("2XX 成功")} <strong className="ml-1 tabular-nums text-foreground">{summary.successCount}</strong></span>
+              <span>{t("异常请求")} <strong className="ml-1 tabular-nums text-destructive">{summary.errorCount}</strong></span>
+              <span>{t("累计Token")} <strong className="ml-1 tabular-nums text-foreground">{formatCompactTokenAmount(summary.totalTokens)}</strong></span>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="glass-card mission-panel overflow-hidden gap-0 py-0 shadow-sm">
-        <CardHeader className="flex min-h-1 items-center border-b border-border/40 bg-[var(--table-section-bg)] py-3">
-          <div className="flex w-full flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0">
-              <CardTitle className="text-[15px] font-semibold">
-                {t("请求明细")}
-              </CardTitle>
-              <div className="mt-1 truncate text-xs text-muted-foreground">
-                {compactMetaText}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="inline-flex w-fit items-center rounded-full border border-border/60 bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground">
-                {currentFilterLabel}
-              </div>
-              <div className="hidden text-xs text-muted-foreground sm:block">
-                {t("共")} {summary.filteredCount} {t("条匹配日志")}
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+      <Card className="glass-card overflow-hidden gap-0 rounded-xl border-border/60 py-0 shadow-none">
         <CardContent className="px-0">
           <div className="overflow-x-auto">
-            {/* 日志表复用内容宽度约束，不再以固定最小宽度撑开工作区。 */}
-            <Table>
+            {/* 表格只在自身容器内横向滚动，保留方法与状态列的最小可读宽度。 */}
+            <Table className="min-w-[1120px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="h-12 w-[150px] px-4 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">

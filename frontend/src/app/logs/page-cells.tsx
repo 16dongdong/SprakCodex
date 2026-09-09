@@ -121,7 +121,7 @@ export function RequestRouteInfoCell({ log }: { log: RequestLog }) {
                 {t("压缩")}
               </Badge>
             ) : null}
-            <span className="font-bold text-primary">{log.method || "-"}</span>
+            <span className="shrink-0 whitespace-nowrap font-bold text-primary">{log.method || "-"}</span>
           </div>
           <span className="max-w-[220px] truncate font-mono text-[11px] text-foreground">
             {displayPath}

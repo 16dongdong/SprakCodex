@@ -1,4 +1,3 @@
-import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -90,13 +89,7 @@ export function getStatusBadge(statusCode: number | null) {
   );
 }
 
-export function SummaryCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  toneClass,
-}: {
+: {
   title: string;
   value: string;
   description: string;
