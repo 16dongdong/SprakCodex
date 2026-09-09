@@ -28,7 +28,6 @@ struct EnvGuard {
 impl EnvGuard {
     /// 函数 `set`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -48,7 +47,6 @@ impl EnvGuard {
 impl Drop for EnvGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -76,7 +74,6 @@ impl Drop for RuntimeConfigReloadGuard {
 
 /// 函数 `open_mock_http_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -111,7 +108,6 @@ fn open_mock_http_response(content_type: &str, body: &str) -> reqwest::blocking:
 
 /// 函数 `open_streaming_mock_http_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -184,7 +180,6 @@ fn chat_sse_reasoning_fragments(out: &str) -> Vec<String> {
 
 /// 函数 `parse_usage_from_json_reads_cached_and_reasoning_details`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -218,7 +213,6 @@ fn parse_usage_from_json_reads_cached_and_reasoning_details() {
 
 /// 函数 `parse_usage_from_json_reads_response_usage_compat_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -255,7 +249,6 @@ fn parse_usage_from_json_reads_response_usage_compat_fields() {
 
 /// 函数 `parse_usage_from_json_reads_anthropic_compat_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -285,7 +278,6 @@ fn parse_usage_from_json_reads_anthropic_compat_fields() {
 
 /// 函数 `parse_usage_from_json_merges_response_usage_over_top_level_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -344,7 +336,6 @@ fn parse_usage_from_json_prefers_output_text_over_duplicate_output() {
 
 /// 函数 `parse_usage_from_sse_frame_reads_response_completed_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -372,7 +363,6 @@ fn parse_usage_from_sse_frame_reads_response_completed_usage() {
 
 /// 函数 `parse_usage_from_sse_frame_reads_top_level_and_response_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -400,7 +390,6 @@ fn parse_usage_from_sse_frame_reads_top_level_and_response_usage() {
 
 /// 函数 `parse_usage_from_sse_frame_caps_output_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -439,7 +428,6 @@ fn parse_usage_from_sse_frame_caps_output_text() {
 
 /// 函数 `inspect_sse_frame_recognizes_done_marker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -461,7 +449,6 @@ fn inspect_sse_frame_recognizes_done_marker() {
 
 /// 函数 `anthropic_sse_reader_final_usage_contains_input_cache_and_output_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -575,7 +562,6 @@ fn anthropic_sse_reader_uses_request_model_when_upstream_stream_omits_model() {
 
 /// 函数 `inspect_sse_frame_recognizes_response_failed_as_terminal_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -606,7 +592,6 @@ fn inspect_sse_frame_recognizes_response_failed_as_terminal_error() {
 
 /// 函数 `inspect_sse_frame_recognizes_response_done_as_terminal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -628,7 +613,6 @@ fn inspect_sse_frame_recognizes_response_done_as_terminal() {
 
 /// 函数 `inspect_sse_frame_recognizes_chat_completion_finish_reason_as_terminal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -651,7 +635,6 @@ fn inspect_sse_frame_recognizes_chat_completion_finish_reason_as_terminal() {
 
 /// 函数 `inspect_sse_frame_recognizes_nested_response_error_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -683,7 +666,6 @@ fn inspect_sse_frame_recognizes_nested_response_error_message() {
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_extracts_response_completed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -711,7 +693,6 @@ fn collect_non_stream_json_from_sse_bytes_extracts_response_completed() {
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_extracts_response_done`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -739,7 +720,6 @@ fn collect_non_stream_json_from_sse_bytes_extracts_response_done() {
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_synthesizes_chat_completion_chunks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1183,7 +1163,6 @@ fn images_reader_keepalive_does_not_mask_upstream_idle_timeout() {
 
 /// 函数 `extract_openai_completed_output_text_reads_completed_output_message_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1212,7 +1191,6 @@ fn extract_openai_completed_output_text_reads_completed_output_message_text() {
 
 /// 函数 `apply_openai_stream_meta_defaults_fills_missing_chunk_meta`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1247,7 +1225,6 @@ fn apply_openai_stream_meta_defaults_fills_missing_chunk_meta() {
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_backfills_response_output_from_deltas`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1285,7 +1262,6 @@ fn collect_non_stream_json_from_sse_bytes_backfills_response_output_from_deltas(
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_backfills_reasoning_output_items`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1337,7 +1313,6 @@ fn collect_non_stream_json_from_sse_bytes_backfills_image_generation_output_item
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_backfills_function_call_output_items`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1371,7 +1346,6 @@ fn collect_non_stream_json_from_sse_bytes_backfills_function_call_output_items()
 
 /// 函数 `parse_sse_frame_json_infers_type_from_event_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1394,7 +1368,6 @@ fn parse_sse_frame_json_infers_type_from_event_name() {
 
 /// 函数 `collect_non_stream_json_from_sse_bytes_supports_event_only_type_frames`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1481,7 +1454,6 @@ fn sse_completed_response_without_usable_output_falls_back_to_delta_text() {
 
 /// 函数 `parse_sse_frame_json_supports_json_lines_without_data_prefix`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2234,7 +2206,6 @@ fn gemini_raw_reader_emits_plain_json_error_for_incomplete_stream() {
 
 /// 函数 `passthrough_sse_reader_emits_keepalive_for_responses_stream`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2751,7 +2722,6 @@ fn openai_responses_passthrough_reader_maps_bare_incomplete_to_disconnect_messag
 
 /// 函数 `passthrough_sse_reader_captures_raw_html_error_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

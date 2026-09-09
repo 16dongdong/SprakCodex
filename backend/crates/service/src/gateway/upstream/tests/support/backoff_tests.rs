@@ -3,7 +3,6 @@ use std::time::Duration;
 
 /// 函数 `jitter_delay_stays_within_cap`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

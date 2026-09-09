@@ -2,7 +2,6 @@ use super::{parse_request_log_query, RequestLogQuery};
 
 /// 函数 `prefixed_field_query_supports_exact_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ fn prefixed_field_query_supports_exact_mode() {
 
 /// 函数 `prefixed_field_query_keeps_like_mode_by_default`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -48,7 +46,6 @@ fn prefixed_field_query_keeps_like_mode_by_default() {
 
 /// 函数 `prefixed_account_query_supports_alias`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

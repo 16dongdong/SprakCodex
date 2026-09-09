@@ -6,7 +6,6 @@ use super::{
 
 /// 函数 `sample_binding`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -33,7 +32,6 @@ fn sample_binding() -> ConversationBinding {
 
 /// 函数 `conversation_binding_roundtrip_and_touch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -76,7 +74,6 @@ fn conversation_binding_roundtrip_and_touch() {
 
 /// 函数 `conversation_binding_upsert_rebinds_existing_pair`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -146,7 +143,6 @@ fn conversation_binding_claim_is_first_writer_wins() {
 
 /// 函数 `conversation_binding_delete_helpers_remove_rows`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

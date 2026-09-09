@@ -11,7 +11,6 @@ static USAGE_REFRESH_EXECUTOR: OnceLock<UsageRefreshExecutor> = OnceLock::new();
 
 /// 函数 `enqueue_usage_refresh_with_worker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -54,7 +53,6 @@ struct UsageRefreshExecutor {
 impl UsageRefreshExecutor {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -78,7 +76,6 @@ impl UsageRefreshExecutor {
 
 /// 函数 `usage_refresh_executor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -93,7 +90,6 @@ fn usage_refresh_executor() -> &'static UsageRefreshExecutor {
 
 /// 函数 `usage_refresh_worker_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -116,7 +112,6 @@ fn usage_refresh_worker_loop(receiver: Receiver<UsageRefreshTask>) {
 
 /// 函数 `usage_refresh_worker_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -132,7 +127,6 @@ fn usage_refresh_worker_count() -> usize {
 
 /// 函数 `mark_usage_refresh_task_pending`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -149,7 +143,6 @@ fn mark_usage_refresh_task_pending(account_id: &str) -> bool {
 
 /// 函数 `clear_usage_refresh_task_pending`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -168,7 +161,6 @@ fn clear_usage_refresh_task_pending(account_id: &str) {
 
 /// 函数 `clear_pending_usage_refresh_tasks_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

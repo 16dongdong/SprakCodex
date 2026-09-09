@@ -21,7 +21,6 @@ fn normalize_startup_request_log_limit(limit: Option<i64>) -> i64 {
 
 /// 函数 `read_startup_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

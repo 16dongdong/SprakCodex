@@ -333,7 +333,6 @@ fn spawn_timeout_recording_http_proxy(
 
 /// 函数 `usage_header_runtime_scope`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -359,7 +358,6 @@ struct UsageHeaderRuntimeRestore {
 impl UsageHeaderRuntimeRestore {
     /// 函数 `capture`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -380,7 +378,6 @@ impl UsageHeaderRuntimeRestore {
 impl Drop for UsageHeaderRuntimeRestore {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -398,7 +395,6 @@ impl Drop for UsageHeaderRuntimeRestore {
 
 /// 函数 `usage_http_client_is_cloneable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -418,7 +414,6 @@ fn usage_http_client_is_cloneable() {
 
 /// 函数 `refresh_token_status_error_omits_empty_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -437,7 +432,6 @@ fn refresh_token_status_error_omits_empty_body() {
 
 /// 函数 `refresh_token_status_error_includes_body_snippet`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -478,7 +472,6 @@ fn refresh_token_body_matches_codex_refresh_scope() {
 
 /// 函数 `refresh_token_status_error_maps_invalidated_401_to_official_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -500,7 +493,6 @@ fn refresh_token_status_error_maps_invalidated_401_to_official_message() {
 
 /// 函数 `refresh_token_status_error_maps_unknown_401_to_official_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -522,7 +514,6 @@ fn refresh_token_status_error_maps_unknown_401_to_official_message() {
 
 /// 函数 `classify_refresh_token_auth_error_reason_maps_known_and_unknown_401`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -558,7 +549,6 @@ fn classify_refresh_token_auth_error_reason_maps_known_and_unknown_401() {
 
 /// 函数 `refresh_token_status_error_ignores_headers_for_401_reason_when_body_lacks_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -596,7 +586,6 @@ fn refresh_token_status_error_ignores_headers_for_401_reason_when_body_lacks_cod
 
 /// 函数 `refresh_token_status_error_stabilizes_html_and_debug_headers_for_non_401`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -636,7 +625,6 @@ fn refresh_token_status_error_stabilizes_html_and_debug_headers_for_non_401() {
 
 /// 函数 `refresh_token_status_error_uses_header_only_debug_suffix_for_empty_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -703,7 +691,6 @@ fn refresh_token_status_error_plain_forbidden_is_not_region_blocked() {
 
 /// 函数 `refresh_token_auth_error_reason_from_message_tracks_canonical_messages`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -760,7 +747,6 @@ fn refresh_token_auth_error_reason_from_message_tracks_canonical_messages() {
 
 /// 函数 `usage_http_default_headers_follow_gateway_runtime_profile`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -794,7 +780,6 @@ fn usage_http_default_headers_follow_gateway_runtime_profile() {
 
 /// 函数 `usage_request_headers_use_official_chatgpt_account_header_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -903,7 +888,6 @@ fn reset_credit_headers_reject_unsupported_scheme() {
 
 /// 函数 `subscription_request_uses_only_authorization_without_custom_usage_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-17
 ///
@@ -1034,7 +1018,6 @@ fn subscription_request_uses_only_authorization_without_custom_usage_headers() {
 
 /// 函数 `refresh_token_url_uses_official_default_for_openai_issuer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1060,7 +1043,6 @@ fn refresh_token_url_uses_official_default_for_openai_issuer() {
 
 /// 函数 `refresh_token_url_preserves_custom_issuer_and_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1603,7 +1585,6 @@ fn legacy_usage_request_ignores_proxy_pool_when_account_proxy_is_disabled() {
 
 /// 函数 `summarize_usage_error_response_stabilizes_html_and_debug_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1673,7 +1654,6 @@ fn summarize_usage_error_response_redacts_invalid_agent_task_details() {
 
 /// 函数 `summarize_usage_error_response_accepts_raw_error_json_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -69,7 +69,6 @@ where
 impl EnvGuard {
     /// 函数 `set`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -95,7 +94,6 @@ impl EnvGuard {
 impl Drop for EnvGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -133,7 +131,6 @@ fn normalize_body_for_test(
 
 /// 函数 `backend_base_url_uses_http_scheme`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -152,7 +149,6 @@ fn backend_base_url_uses_http_scheme() {
 
 /// 函数 `local_backend_client_builds_without_system_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -403,7 +399,6 @@ fn zstd_safety_limit_rejects_oversized_declared_body_when_generic_limit_is_disab
 
 /// 函数 `request_without_content_length_over_limit_returns_413`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -467,7 +462,6 @@ fn zero_front_proxy_limit_disables_body_rejection() {
 
 /// 函数 `backend_send_failure_returns_502`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

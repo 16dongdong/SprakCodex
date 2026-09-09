@@ -53,7 +53,6 @@ fn quota_guard_matches_thresholds_by_window_duration() {
 
 /// 函数 `candidate_snapshot_cache_reuses_recent_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -140,7 +139,6 @@ fn candidate_snapshot_cache_reuses_recent_snapshot() {
 
 /// 函数 `candidates_follow_account_sort_order`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -332,7 +330,6 @@ fn collect_candidates_patches_identity_without_rewriting_account_row() {
 
 /// 函数 `gateway_error_status_change_invalidates_candidate_snapshot_cache`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -426,7 +423,6 @@ fn gateway_error_status_change_invalidates_candidate_snapshot_cache() {
 
 /// 函数 `gateway_deactivation_status_change_invalidates_candidate_snapshot_cache`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -520,7 +516,6 @@ fn gateway_deactivation_status_change_invalidates_candidate_snapshot_cache() {
 
 /// 函数 `gateway_usage_limit_with_exhausted_snapshot_invalidates_candidate_snapshot_cache`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///

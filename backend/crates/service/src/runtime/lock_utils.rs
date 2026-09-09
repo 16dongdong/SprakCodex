@@ -15,7 +15,6 @@ pub(crate) fn lock_recover<'a, T>(mutex: &'a Mutex<T>, name: &str) -> MutexGuard
 
 /// 函数 `read_recover`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +35,6 @@ pub(crate) fn read_recover<'a, T>(lock: &'a RwLock<T>, name: &str) -> RwLockRead
 
 /// 函数 `write_recover`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

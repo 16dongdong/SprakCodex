@@ -11,7 +11,6 @@ use crate::storage_helpers::open_storage;
 
 /// 函数 `resolve_redirect_uri`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +35,6 @@ pub(crate) fn resolve_redirect_uri() -> Option<String> {
 
 /// 函数 `handle_login_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -72,7 +70,6 @@ pub(crate) fn handle_login_request(request: Request) -> Result<(), String> {
 
 /// 函数 `handle_login_callback_query`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -122,7 +119,6 @@ fn handle_login_callback_query(params: &HashMap<String, String>) -> Result<(), S
 
 /// 函数 `handle_login_callback_params`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -143,7 +139,6 @@ pub(crate) fn handle_login_callback_params(code: &str, state: &str) -> Result<()
 
 /// 函数 `ensure_login_session_exists`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -167,7 +162,6 @@ fn ensure_login_session_exists(state: &str) -> Result<(), String> {
 
 /// 函数 `update_login_session_failed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -189,7 +183,6 @@ fn update_login_session_failed(state: Option<&str>, error: &str) {
 
 /// 函数 `is_missing_codex_entitlement_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -210,7 +203,6 @@ fn is_missing_codex_entitlement_error(error_code: &str, error_description: Optio
 
 /// 函数 `oauth_callback_error_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -244,7 +236,6 @@ static LOGIN_SERVER_STATE: std::sync::OnceLock<std::sync::Mutex<Option<LoginServ
 
 /// 函数 `ensure_login_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -261,7 +252,6 @@ pub(crate) fn ensure_login_server() -> Result<LoginServerInfo, String> {
 
 /// 函数 `ensure_login_server_with_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -286,7 +276,6 @@ fn ensure_login_server_with_addr(addr: &str) -> Result<LoginServerInfo, String> 
 
 /// 函数 `is_loopback_host`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -301,7 +290,6 @@ fn is_loopback_host(host: &str) -> bool {
 
 /// 函数 `allow_non_loopback_login_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -322,7 +310,6 @@ fn allow_non_loopback_login_addr() -> bool {
 
 /// 函数 `server_port`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -341,7 +328,6 @@ fn server_port(server: &Server) -> Result<u16, String> {
 
 /// 函数 `try_bind_login_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -377,7 +363,6 @@ fn try_bind_login_server(
 
 /// 函数 `bind_localhost_login_servers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -453,7 +438,6 @@ fn bind_localhost_login_servers(port: u16) -> Result<(Vec<Server>, LoginServerIn
 
 /// 函数 `bind_login_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -483,7 +467,6 @@ fn bind_login_server(addr: &str) -> Result<(Vec<Server>, LoginServerInfo), Strin
 
 /// 函数 `is_addr_in_use`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -500,7 +483,6 @@ fn is_addr_in_use(err: &(dyn std::error::Error + 'static)) -> bool {
 
 /// 函数 `run_login_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -519,7 +501,6 @@ fn run_login_server(server: Server) {
 
 /// 函数 `html_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -544,7 +525,6 @@ fn html_response(body: String) -> Response<std::io::Cursor<Vec<u8>>> {
 
 /// 函数 `build_callback_success_page`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -594,7 +574,6 @@ fn build_callback_success_page() -> String {
 
 /// 函数 `build_callback_error_page`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

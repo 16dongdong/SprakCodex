@@ -13,7 +13,6 @@ fn comment_keepalive_is_not_a_semantic_event() {
 
 /// 函数 `classify_upstream_stream_read_error_maps_body_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ fn classify_upstream_stream_read_error_maps_body_error() {
 
 /// 函数 `classify_upstream_stream_read_error_maps_disconnect`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -51,7 +49,6 @@ fn classify_upstream_stream_read_error_maps_disconnect() {
 
 /// 函数 `classify_upstream_stream_read_error_maps_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -70,7 +67,6 @@ fn classify_upstream_stream_read_error_maps_timeout() {
 
 /// 函数 `stream_terminal_messages_are_user_friendly`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

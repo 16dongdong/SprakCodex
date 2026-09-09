@@ -15,7 +15,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 /// 函数 `normalize_addr_defaults_to_localhost`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -40,7 +39,6 @@ fn localhost_socket_resolution_prefers_ipv4_loopback() {
 
 /// 函数 `lightweight_close_to_tray_requires_close_to_tray_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -69,7 +67,6 @@ fn startup_visibility_is_not_restored_from_window_state() {
 
 /// 函数 `rpc_call_tolerates_slow_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -103,7 +100,6 @@ fn rpc_call_tolerates_slow_response() {
 
 /// 函数 `rpc_call_handles_chunked_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -145,7 +141,6 @@ fn rpc_call_handles_chunked_response() {
 
 /// 函数 `rpc_call_falls_back_to_next_socket_after_empty_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -217,7 +212,6 @@ fn service_bind_probe_reports_occupied_loopback_port() {
 
 /// 函数 `rpc_token_path_stays_in_db_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -241,7 +235,6 @@ fn rpc_token_path_stays_in_db_dir() {
 
 /// 函数 `read_account_import_contents_from_directory_collects_nested_json_files`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -277,7 +270,6 @@ fn read_account_import_contents_from_directory_collects_nested_json_files() {
 
 /// 函数 `read_account_import_contents_from_files_collects_non_empty_contents`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

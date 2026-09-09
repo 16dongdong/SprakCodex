@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 
 /// 函数 `collect_json_files_recursively`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -40,7 +39,6 @@ fn collect_json_files_recursively(root: &Path, output: &mut Vec<PathBuf>) -> Res
 
 /// 函数 `read_account_import_contents_from_directory`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -70,7 +68,6 @@ pub(crate) fn read_account_import_contents_from_directory(
 
 /// 函数 `read_account_import_contents_from_files`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

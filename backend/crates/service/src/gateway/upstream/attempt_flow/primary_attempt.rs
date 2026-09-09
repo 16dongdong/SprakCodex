@@ -14,7 +14,6 @@ pub(super) enum PrimaryAttemptResult {
 
 /// 函数 `run_primary_upstream_attempt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

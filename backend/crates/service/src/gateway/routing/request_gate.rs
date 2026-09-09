@@ -38,7 +38,6 @@ pub(crate) struct RequestGateLock {
 impl RequestGateLock {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -56,7 +55,6 @@ impl RequestGateLock {
 
     /// 函数 `try_acquire`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -106,7 +104,6 @@ impl RequestGateLock {
 
     /// 函数 `acquire_with_timeout`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -151,7 +148,6 @@ pub(crate) struct RequestGateGuard {
 impl Drop for RequestGateGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -175,7 +171,6 @@ impl Drop for RequestGateGuard {
 
 /// 函数 `gate_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -200,7 +195,6 @@ fn gate_key(key_id: &str, path: &str, model: Option<&str>) -> String {
 
 /// 函数 `request_gate_lock`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -231,7 +225,6 @@ pub(crate) fn request_gate_lock(
 
 /// 函数 `maybe_cleanup_request_gate_locks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -256,7 +249,6 @@ fn maybe_cleanup_request_gate_locks(table: &mut RequestGateLockTable, now: i64) 
 
 /// 函数 `clear_runtime_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -274,7 +266,6 @@ pub(super) fn clear_runtime_state() {
 
 /// 函数 `clear_request_gate_locks_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

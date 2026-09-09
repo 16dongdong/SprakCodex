@@ -6,7 +6,6 @@ import { useAppStore } from "@/lib/store/useAppStore";
 /**
  * 函数 `useDesktopPageActive`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

@@ -6,7 +6,6 @@ use std::collections::HashMap;
 
 /// 函数 `usage_refresh_error_class_groups_by_status_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -39,7 +38,6 @@ fn usage_refresh_error_class_groups_by_status_code() {
 
 /// 函数 `usage_refresh_error_class_catches_timeout_and_connection`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -69,7 +67,6 @@ fn usage_refresh_error_class_catches_timeout_and_connection() {
 
 /// 函数 `usage_refresh_error_class_maps_to_visible_status_reason`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-06-23
 ///
@@ -101,7 +98,6 @@ fn usage_refresh_error_class_maps_to_visible_status_reason() {
 
 /// 函数 `failure_event_throttle_dedupes_within_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -137,7 +133,6 @@ fn failure_event_throttle_dedupes_within_window() {
 
 /// 函数 `failure_event_throttle_isolated_by_error_class`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

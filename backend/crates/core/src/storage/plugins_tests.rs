@@ -69,7 +69,6 @@ fn plugin_task(
 
 /// 函数 `update_plugin_task_definition_updates_interval`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -162,7 +161,6 @@ fn update_plugin_task_definition_updates_interval() {
 
 /// 函数 `list_due_plugin_tasks_returns_enabled_interval_tasks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

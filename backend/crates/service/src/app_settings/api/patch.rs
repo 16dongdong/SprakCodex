@@ -65,7 +65,6 @@ pub(super) struct AppSettingsPatch {
 
 /// 函数 `parse_app_settings_patch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

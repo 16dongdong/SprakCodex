@@ -2,7 +2,6 @@ use tiny_http::Request;
 
 /// 函数 `read_request_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -43,7 +42,6 @@ pub(super) fn read_request_body(
 
 /// 函数 `extract_platform_key_or_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

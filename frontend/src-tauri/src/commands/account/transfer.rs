@@ -157,7 +157,6 @@ fn import_account_contents(
 
 /// 函数 `service_account_import`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -186,7 +185,6 @@ pub async fn service_account_import(
 
 /// 函数 `service_account_import_by_directory`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -229,7 +227,6 @@ pub async fn service_account_import_by_directory(
 
 /// 函数 `service_account_import_by_file`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -274,7 +271,6 @@ pub async fn service_account_import_by_file(
 
 /// 函数 `service_account_export_by_account_files`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

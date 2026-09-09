@@ -53,7 +53,6 @@ impl ErrorCode {
 
 /// 函数 `classify_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -206,7 +205,6 @@ pub(crate) fn classify_message(message: &str) -> ErrorCode {
 
 /// 函数 `code_or_dash`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -224,7 +222,6 @@ pub(crate) fn code_or_dash(message: Option<&str>) -> &'static str {
 
 /// 函数 `code_for_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -239,7 +236,6 @@ pub(crate) fn code_for_message(message: &str) -> &'static str {
 
 /// 函数 `rpc_error_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -262,7 +258,6 @@ pub(crate) fn rpc_error_payload(message: String) -> Value {
 
 /// 函数 `rpc_action_error_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

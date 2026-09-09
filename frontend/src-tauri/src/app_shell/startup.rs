@@ -14,7 +14,6 @@ const DEV_SERVER_READY_INTERVAL_MS: u64 = 500;
 
 /// 函数 `sync_startup_window_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

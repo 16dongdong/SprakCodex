@@ -62,7 +62,6 @@ pub struct BackgroundTasksInput {
 impl BackgroundTasksInput {
     /// 函数 `into_patch`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -119,7 +118,6 @@ impl QuotaGuardInput {
 
 /// 函数 `set_gateway_route_strategy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -136,7 +134,6 @@ pub fn set_gateway_route_strategy(strategy: &str) -> Result<String, String> {
 
 /// 函数 `set_gateway_free_account_max_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -156,7 +153,6 @@ pub fn set_gateway_free_account_max_model(model: &str) -> Result<String, String>
 
 /// 函数 `current_gateway_free_account_max_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -171,7 +167,6 @@ pub fn current_gateway_free_account_max_model() -> String {
 
 /// 函数 `set_gateway_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -195,7 +190,6 @@ pub fn set_gateway_model_forward_rules(raw: &str) -> Result<String, String> {
 
 /// 函数 `current_gateway_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -227,7 +221,6 @@ pub fn current_gateway_compact_model_forward_rules() -> String {
 
 /// 函数 `set_gateway_account_max_inflight`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -247,7 +240,6 @@ pub fn set_gateway_account_max_inflight(limit: usize) -> Result<usize, String> {
 
 /// 函数 `current_gateway_account_max_inflight`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -291,7 +283,6 @@ pub(crate) fn current_gateway_quota_guard() -> gateway::QuotaGuardConfig {
 
 /// 函数 `set_gateway_request_compression_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -308,7 +299,6 @@ pub fn set_gateway_request_compression_enabled(enabled: bool) -> Result<bool, St
 
 /// 函数 `current_gateway_request_compression_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -323,7 +313,6 @@ pub fn current_gateway_request_compression_enabled() -> bool {
 
 /// 函数 `set_gateway_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -340,7 +329,6 @@ pub fn set_gateway_originator(originator: &str) -> Result<String, String> {
 
 /// 函数 `current_gateway_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -355,7 +343,6 @@ pub fn current_gateway_originator() -> String {
 
 /// 函数 `default_gateway_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-11
 ///
@@ -384,7 +371,6 @@ pub fn default_gateway_user_agent() -> String {
 
 /// 函数 `set_gateway_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -401,7 +387,6 @@ pub fn set_gateway_user_agent_version(version: &str) -> Result<String, String> {
 
 /// 函数 `current_gateway_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -416,7 +401,6 @@ pub fn current_gateway_user_agent_version() -> String {
 
 /// 函数 `default_gateway_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-11
 ///
@@ -431,7 +415,6 @@ pub fn default_gateway_user_agent_version() -> &'static str {
 
 /// 函数 `fetch_codex_latest_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-11
 ///
@@ -492,7 +475,6 @@ fn fetch_codex_latest_version_from_url(
 
 /// 函数 `set_gateway_residency_requirement`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -513,7 +495,6 @@ pub fn set_gateway_residency_requirement(value: Option<&str>) -> Result<Option<S
 
 /// 函数 `current_gateway_residency_requirement`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -528,7 +509,6 @@ pub fn current_gateway_residency_requirement() -> Option<String> {
 
 /// 函数 `residency_requirement_options`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -543,7 +523,6 @@ pub fn residency_requirement_options() -> &'static [&'static str] {
 
 /// 函数 `set_gateway_upstream_proxy_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -581,7 +560,6 @@ pub fn set_gateway_upstream_proxy_bypass_hosts(raw: Option<&str>) -> Result<Stri
 
 /// 函数 `set_gateway_upstream_stream_timeout_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -610,7 +588,6 @@ pub fn set_gateway_upstream_total_timeout_ms(timeout_ms: u64) -> Result<u64, Str
 
 /// 函数 `current_gateway_upstream_stream_timeout_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -629,7 +606,6 @@ pub fn current_gateway_upstream_total_timeout_ms() -> u64 {
 
 /// 函数 `set_gateway_sse_keepalive_interval_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -649,7 +625,6 @@ pub fn set_gateway_sse_keepalive_interval_ms(interval_ms: u64) -> Result<u64, St
 
 /// 函数 `current_gateway_sse_keepalive_interval_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -674,7 +649,6 @@ pub fn current_gateway_sse_keepalive_enabled() -> bool {
 
 /// 函数 `set_gateway_background_tasks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -697,7 +671,6 @@ pub fn set_gateway_background_tasks(
 
 /// 函数 `current_background_tasks_snapshot_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

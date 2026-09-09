@@ -7,7 +7,6 @@ use codexmanager_core::storage::{now_ts, Account, Storage, Token};
 
 /// 函数 `jwt_with_claims`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -22,7 +21,6 @@ fn jwt_with_claims(payload: &str) -> String {
 
 /// 函数 `build_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -173,7 +171,6 @@ fn refresh_all_chatgpt_auth_tokens_skips_accounts_without_refresh_token() {
 
 /// 函数 `resolve_plan_type_prefers_latest_access_token_claims`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -200,7 +197,6 @@ fn resolve_plan_type_prefers_latest_access_token_claims() {
 
 /// 函数 `resolve_plan_type_falls_back_to_id_token_when_access_claims_missing`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -225,7 +221,6 @@ fn resolve_plan_type_falls_back_to_id_token_when_access_claims_missing() {
 
 /// 函数 `resolve_plan_type_preserves_unknown_raw_value_for_diagnostics`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

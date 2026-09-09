@@ -20,7 +20,6 @@ use super::support::precheck::{prepare_candidates_for_proxy, CandidatePrecheckRe
 
 /// 函数 `exhausted_gateway_error_for_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -694,7 +693,6 @@ fn take_or_resolve_aggregate_candidates(
 
 /// 函数 `proxy_validated_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

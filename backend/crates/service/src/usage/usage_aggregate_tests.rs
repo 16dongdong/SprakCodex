@@ -3,7 +3,6 @@ use codexmanager_core::storage::{now_ts, Account, UsageSnapshotRecord};
 
 /// 函数 `account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -29,7 +28,6 @@ fn account(id: &str) -> Account {
 
 /// 函数 `usage_record`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -66,7 +64,6 @@ fn usage_record(
 
 /// 函数 `aggregate_summary_routes_free_single_window_account_to_secondary_bucket`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -101,7 +98,6 @@ fn aggregate_summary_routes_free_single_window_account_to_secondary_bucket() {
 
 /// 函数 `aggregate_summary_preserves_unknown_counts_per_bucket`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

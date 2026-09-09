@@ -8,7 +8,6 @@ use sha2::{Digest, Sha256};
 
 /// 函数 `current_web_access_password_hash`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -23,7 +22,6 @@ pub fn current_web_access_password_hash() -> Option<String> {
 
 /// 函数 `web_access_password_configured`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -38,7 +36,6 @@ pub fn web_access_password_configured() -> bool {
 
 /// 函数 `set_web_access_password`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -63,7 +60,6 @@ pub fn set_web_access_password(password: Option<&str>) -> Result<bool, String> {
 
 /// 函数 `web_auth_status_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +76,6 @@ pub fn web_access_auth_status_value() -> Result<Value, String> {
 
 /// 函数 `verify_web_access_password`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -98,7 +93,6 @@ pub fn verify_web_access_password(password: &str) -> bool {
 
 /// 函数 `build_web_access_session_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -114,7 +108,6 @@ pub fn build_web_access_session_token(password_hash: &str, rpc_token: &str) -> S
 
 /// 函数 `hash_web_access_password`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -133,7 +126,6 @@ fn hash_web_access_password(password: &str) -> String {
 
 /// 函数 `verify_password_hash`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -165,7 +157,6 @@ fn verify_password_hash(password: &str, stored_hash: &str) -> bool {
 
 /// 函数 `hex_sha256`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -183,7 +174,6 @@ fn hex_sha256(bytes: impl AsRef<[u8]>) -> String {
 
 /// 函数 `hex_encode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

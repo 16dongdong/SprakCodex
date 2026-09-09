@@ -7,7 +7,6 @@ use super::list::NormalizedRequestLogParams;
 
 /// 函数 `read_request_log_filter_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

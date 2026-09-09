@@ -7,7 +7,6 @@ use super::{
 
 /// 函数 `fallback_status_trigger_is_limited_to_responses_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -37,7 +36,6 @@ fn fallback_status_trigger_is_limited_to_responses_path() {
 
 /// 函数 `fallback_content_type_trigger_is_limited_to_responses_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -68,7 +66,6 @@ fn fallback_content_type_trigger_is_limited_to_responses_path() {
 
 /// 函数 `fallback_base_is_disabled_by_default_for_chatgpt_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -89,7 +86,6 @@ fn fallback_base_is_disabled_by_default_for_chatgpt_backend() {
 
 /// 函数 `fallback_base_ignores_env_override_for_chatgpt_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -116,7 +112,6 @@ fn fallback_base_ignores_env_override_for_chatgpt_backend() {
 
 /// 函数 `fallback_base_is_disabled_for_non_chatgpt_primary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -137,7 +132,6 @@ fn fallback_base_is_disabled_for_non_chatgpt_primary() {
 
 /// 函数 `chatgpt_account_header_is_limited_to_codex_backend_shape`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

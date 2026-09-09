@@ -10,7 +10,6 @@ export const STARTUP_SNAPSHOT_WARMUP_TIMEOUT_MS = 45_000;
 /**
  * 函数 `buildStartupSnapshotQueryKey`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -51,7 +50,6 @@ export function buildStartupSnapshotQueryKey(
 /**
  * 函数 `hasStartupSnapshotSignal`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

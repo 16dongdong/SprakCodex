@@ -68,7 +68,6 @@ interface UsageDetailRowProps {
 /**
  * 函数 `UsageDetailRow`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

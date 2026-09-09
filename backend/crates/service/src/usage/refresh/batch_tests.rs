@@ -9,7 +9,6 @@ use std::collections::HashSet;
 
 /// 函数 `account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -45,7 +44,6 @@ fn account(id: &str, status: &str, workspace_id: Option<&str>) -> Account {
 
 /// 函数 `token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -67,7 +65,6 @@ fn token(account_id: &str) -> Token {
 
 /// 函数 `build_usage_refresh_tasks_skips_disabled_and_banned_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

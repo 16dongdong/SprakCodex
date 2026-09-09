@@ -22,7 +22,6 @@ fn sample_setup() -> super::super::request_setup::UpstreamRequestSetup {
 
 /// 函数 `body_for_attempt_rewrites_model_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

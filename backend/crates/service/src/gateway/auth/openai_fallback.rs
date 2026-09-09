@@ -11,7 +11,6 @@ use super::upstream::GatewayUpstreamResponse;
 
 /// 函数 `should_force_connection_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -29,7 +28,6 @@ fn should_force_connection_close(target_url: &str) -> bool {
 
 /// 函数 `force_connection_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -51,7 +49,6 @@ fn force_connection_close(headers: &mut Vec<(String, String)>) {
 
 /// 函数 `extract_prompt_cache_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -77,7 +74,6 @@ fn extract_prompt_cache_key(body: &[u8]) -> Option<String> {
 
 /// 函数 `is_compact_request_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -92,7 +88,6 @@ fn is_compact_request_path(path: &str) -> bool {
 
 /// 函数 `resolve_chatgpt_account_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -117,7 +112,6 @@ fn resolve_chatgpt_account_header<'a>(
 
 /// 函数 `try_openai_fallback`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

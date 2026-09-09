@@ -4,7 +4,6 @@ use rusqlite::{params_from_iter, types::Value};
 
 /// 函数 `collect_query_plan_details`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -94,7 +93,6 @@ fn request_log_count_plan_for_query(
 
 /// 函数 `method_exact_query_matches_composite_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -116,7 +114,6 @@ fn method_exact_query_matches_composite_index() {
 
 /// 函数 `key_exact_query_matches_composite_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -314,7 +311,6 @@ fn global_search_count_keeps_token_stats_join() {
 
 /// 函数 `insert_request_log_with_token_stat_is_visible_via_join`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -436,7 +432,6 @@ fn insert_request_log_with_token_stat_is_visible_via_join() {
 
 /// 函数 `token_stat_failure_still_commits_request_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -513,7 +508,6 @@ fn token_stat_failure_still_commits_request_log() {
 
 /// 函数 `request_logs_support_backend_pagination_and_status_filters`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -604,7 +598,6 @@ fn request_logs_support_backend_pagination_and_status_filters() {
 
 /// 函数 `request_logs_filtered_summary_aggregates_counts_and_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -10,7 +10,6 @@ pub(super) enum FinalizeUpstreamResponseOutcome {
 
 /// 函数 `respond_terminal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -40,7 +39,6 @@ pub(in super::super) fn respond_terminal(
 
 /// 函数 `is_client_disconnect_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -99,7 +97,6 @@ fn derive_status_for_log(
 
 /// 函数 `respond_total_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -132,7 +129,6 @@ pub(super) fn respond_total_timeout(
 
 /// 函数 `finalize_terminal_candidate`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -169,7 +165,6 @@ pub(super) fn finalize_terminal_candidate(
 
 /// 函数 `finalize_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

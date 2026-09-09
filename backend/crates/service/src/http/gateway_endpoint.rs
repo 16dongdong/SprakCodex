@@ -2,7 +2,6 @@ use tiny_http::{Header, Request, Response};
 
 /// 函数 `handle_gateway`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -19,7 +18,6 @@ pub fn handle_gateway(request: Request) {
 
 /// 函数 `handle_metrics`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

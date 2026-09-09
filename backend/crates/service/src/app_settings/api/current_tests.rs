@@ -5,7 +5,6 @@ use super::{
 
 /// 函数 `free_account_max_model_options_fallback_to_curated_defaults`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -26,7 +25,6 @@ fn free_account_max_model_options_fallback_to_curated_defaults() {
 
 /// 函数 `free_account_max_model_options_reuse_cached_model_picker_options`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -61,7 +59,6 @@ fn free_account_max_model_options_reuse_cached_model_picker_options() {
 
 /// 函数 `plugin_market_mode_normalization_defaults_to_builtin`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

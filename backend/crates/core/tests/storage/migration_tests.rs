@@ -6,7 +6,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 /// 函数 `temp_db_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +59,6 @@ fn open_file_configures_wal_and_temp_store() {
 
 /// 函数 `init_tracks_schema_migrations_and_is_idempotent`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -722,7 +720,6 @@ fn init_tracks_schema_migrations_and_is_idempotent() {
 
 /// 函数 `file_open_enables_wal_and_normal_synchronous`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -754,7 +751,6 @@ fn file_open_enables_wal_and_normal_synchronous() {
 
 /// 函数 `account_meta_sql_migration_coexists_with_legacy_compat_marker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -840,7 +836,6 @@ fn account_meta_sql_migration_coexists_with_legacy_compat_marker() {
 
 /// 函数 `sql_migration_can_fallback_to_compat_when_schema_already_exists`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -998,7 +993,6 @@ fn init_repairs_legacy_aggregate_api_balance_columns_before_indexes() {
 
 /// 函数 `api_key_profile_migration_backfills_existing_keys`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1204,7 +1198,6 @@ fn api_key_profile_drop_azure_protocol_migration_normalizes_legacy_rows() {
 
 /// 函数 `key_hash_index_migration_adds_api_keys_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1234,7 +1227,6 @@ fn key_hash_index_migration_adds_api_keys_index() {
 
 /// 函数 `usage_snapshot_latest_index_migration_adds_captured_id_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1265,7 +1257,6 @@ fn usage_snapshot_latest_index_migration_adds_captured_id_index() {
 
 /// 函数 `accounts_sort_index_migration_adds_sort_updated_at_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1296,7 +1287,6 @@ fn accounts_sort_index_migration_adds_sort_updated_at_index() {
 
 /// 函数 `conversation_bindings_migration_adds_indexes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1339,7 +1329,6 @@ fn conversation_bindings_migration_adds_indexes() {
 
 /// 函数 `request_logs_compact_migration_drops_legacy_usage_columns_and_preserves_rows`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

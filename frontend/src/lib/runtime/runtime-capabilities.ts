@@ -21,7 +21,6 @@ export type RuntimeCapabilityView = {
 /**
  * 函数 `asRecord`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -40,7 +39,6 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 /**
  * 函数 `asString`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -57,7 +55,6 @@ function asString(value: unknown): string {
 /**
  * 函数 `asBoolean`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -75,7 +72,6 @@ function asBoolean(value: unknown, fallback = false): boolean {
 /**
  * 函数 `normalizeRpcBaseUrl`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -98,7 +94,6 @@ export function normalizeRpcBaseUrl(value: string | null | undefined): string {
 /**
  * 函数 `isRuntimeMode`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

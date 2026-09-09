@@ -92,7 +92,6 @@ struct ExistingAccountIndex {
 impl ExistingAccountIndex {
     /// 函数 `build`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -125,7 +124,6 @@ impl ExistingAccountIndex {
 
     /// 函数 `find_existing_account_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -164,7 +162,6 @@ impl ExistingAccountIndex {
 
     /// 函数 `find_by_subject_identity`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -210,7 +207,6 @@ impl ExistingAccountIndex {
 
     /// 函数 `upsert_index`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -229,7 +225,6 @@ impl ExistingAccountIndex {
 
     /// 函数 `index_token_subject`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -271,7 +266,6 @@ impl ExistingAccountIndex {
 
     /// 函数 `record_subject_key`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -383,7 +377,6 @@ fn account_import_snapshot_from_account(account: &Account) -> AccountImportSnaps
 
 /// 函数 `import_account_auth_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -442,7 +435,6 @@ fn import_account_auth_json_with_storage(
 
 /// 函数 `import_batch_size`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -461,7 +453,6 @@ fn import_batch_size() -> usize {
 
 /// 函数 `import_items_in_batches`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -544,7 +535,6 @@ fn import_items_in_batches(
 
 /// 函数 `record_import_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -595,7 +585,6 @@ struct AccountImportBatchProgress {
 impl AccountImportProgress {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -617,7 +606,6 @@ impl AccountImportProgress {
 
     /// 函数 `begin_batch`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -643,7 +631,6 @@ impl AccountImportProgress {
 
     /// 函数 `on_item_success`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -672,7 +659,6 @@ impl AccountImportProgress {
 
     /// 函数 `on_item_failure`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -692,7 +678,6 @@ impl AccountImportProgress {
 
     /// 函数 `finish_batch`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -720,7 +705,6 @@ impl AccountImportProgress {
 
     /// 函数 `finish`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -743,7 +727,6 @@ impl AccountImportProgress {
 
 /// 函数 `parse_items_from_content`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -804,7 +787,6 @@ fn is_supported_sub2api_chatgpt_account(account: &Value) -> bool {
 
 /// 函数 `import_single_item`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1089,7 +1071,6 @@ pub(super) fn is_generated_import_label(label: &str) -> bool {
 
 /// 函数 `extract_import_subject_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1136,7 +1117,6 @@ fn extract_import_subject_account_id(
 
 /// 函数 `extract_token_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1369,7 +1349,6 @@ fn extract_agent_identity_payload(
 
 /// 函数 `resolve_logical_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1447,7 +1426,6 @@ fn resolve_logical_account_id(
 
 /// 函数 `token_fingerprint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1469,7 +1447,6 @@ fn token_fingerprint(refresh_token: &str) -> String {
 
 /// 函数 `extract_account_meta`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1531,7 +1508,6 @@ fn optional_bool_any(candidates: &[(&Value, &str)]) -> Option<bool> {
 
 /// 函数 `optional_string`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1552,7 +1528,6 @@ fn optional_string(value: &Value, key: &str) -> Option<String> {
 
 /// 函数 `optional_string_any`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1572,7 +1547,6 @@ fn optional_string_any(candidates: &[(&Value, &str)]) -> Option<String> {
 
 /// 函数 `optional_tags`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1614,7 +1588,6 @@ fn optional_tags(value: &Value, key: &str) -> Option<String> {
 
 /// 函数 `optional_tags_any`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

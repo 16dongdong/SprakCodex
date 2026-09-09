@@ -22,7 +22,6 @@ fn delete_app_setting_sql() -> &'static str {
 impl Storage {
     /// 函数 `list_app_settings`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -43,7 +42,6 @@ impl Storage {
 
     /// 函数 `get_app_setting`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -64,7 +62,6 @@ impl Storage {
 
     /// 函数 `set_app_setting`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -90,7 +87,6 @@ impl Storage {
 
     /// 函数 `delete_app_setting`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

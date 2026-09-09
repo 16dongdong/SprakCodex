@@ -13,7 +13,6 @@ const RETAIN_FN_PROBE_KEY: &str = "__codexmanager_allowlist_probe__";
 
 /// 函数 `compute_upstream_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -62,7 +61,6 @@ fn rewrite_path_preserving_query(path: &str, replacement_path: &str) -> String {
 
 /// 函数 `is_codex_backend_base`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -77,7 +75,6 @@ fn is_codex_backend_base(base: &str) -> bool {
 
 /// 函数 `should_apply_codex_responses_compat`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -108,7 +105,6 @@ fn should_apply_codex_responses_compat(
 
 /// 函数 `path_matches_retain_fn`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -127,7 +123,6 @@ fn path_matches_retain_fn(path: &str, retain_fn: RetainFn) -> bool {
 
 /// 函数 `resolve_retain_fn`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -153,7 +148,6 @@ fn resolve_retain_fn(path: &str, use_codex_responses_compat: bool) -> Option<Ret
 
 /// 函数 `is_allowed_field`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -173,7 +167,6 @@ fn is_allowed_field(path: &str, key: &str, retain_fn: RetainFn) -> bool {
 
 /// 函数 `filter_form_urlencoded_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -215,7 +208,6 @@ fn filter_form_urlencoded_body(
 
 /// 函数 `apply_model_forward_rule_if_needed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -286,7 +278,6 @@ fn chat_request_rules_path(path: &str) -> String {
 
 /// 函数 `apply_request_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -315,7 +306,6 @@ pub(super) fn apply_request_overrides(
 
 /// 函数 `apply_request_overrides_with_service_tier`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -346,7 +336,6 @@ pub(super) fn apply_request_overrides_with_service_tier(
 
 /// 函数 `apply_request_overrides_with_prompt_cache_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -378,7 +367,6 @@ pub(super) fn apply_request_overrides_with_prompt_cache_key(
 
 /// 函数 `apply_request_overrides_with_service_tier_and_prompt_cache_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -435,7 +423,6 @@ pub(super) fn apply_request_overrides_with_service_tier_and_prompt_cache_key_sco
 
 /// 函数 `apply_request_overrides_with_forced_prompt_cache_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -466,7 +453,6 @@ pub(super) fn apply_request_overrides_with_forced_prompt_cache_key(
 
 /// 函数 `apply_request_overrides_with_service_tier_and_forced_prompt_cache_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -589,7 +575,6 @@ pub(super) fn apply_external_dynamic_tools_transport_rules(path: &str, body: Vec
 
 /// 函数 `apply_request_overrides_with_prompt_cache_key_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

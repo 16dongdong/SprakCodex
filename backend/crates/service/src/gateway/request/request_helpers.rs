@@ -44,7 +44,6 @@ impl InputSizeLimitError {
 
 /// 函数 `parse_request_metadata`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -284,7 +283,6 @@ pub(crate) fn inspect_service_tier_value(value: Option<&Value>) -> ServiceTierLo
 
 /// 函数 `summarize_request_shape_from_object`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -347,7 +345,6 @@ fn summarize_request_shape_from_object(object: &serde_json::Map<String, Value>) 
 
 /// 函数 `should_drop_incoming_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -372,7 +369,6 @@ pub(crate) fn is_upstream_challenge_response(
 
 /// 函数 `is_html_content_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -387,7 +383,6 @@ pub(crate) fn is_html_content_type(value: &str) -> bool {
 
 /// 函数 `normalize_models_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

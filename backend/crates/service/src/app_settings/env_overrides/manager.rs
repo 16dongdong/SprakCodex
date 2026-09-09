@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 /// 函数 `set_env_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

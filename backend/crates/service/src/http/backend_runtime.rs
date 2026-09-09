@@ -40,7 +40,6 @@ pub(crate) struct BackendServer {
 
 /// 函数 `http_worker_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -62,7 +61,6 @@ fn http_worker_count() -> usize {
 
 /// 函数 `http_stream_worker_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -83,7 +81,6 @@ fn http_stream_worker_count() -> usize {
 
 /// 函数 `http_queue_size`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -101,7 +98,6 @@ fn http_queue_size(worker_count: usize) -> usize {
 
 /// 函数 `http_stream_queue_size`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -118,7 +114,6 @@ fn http_stream_queue_size(worker_count: usize) -> usize {
 
 /// 函数 `env_usize_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -139,7 +134,6 @@ fn env_usize_or(name: &str, default: usize) -> usize {
 
 /// 函数 `spawn_request_workers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -172,7 +166,6 @@ fn spawn_request_workers(worker_count: usize, rx: Receiver<Request>, is_stream_q
 
 /// 函数 `handle_backend_request_safely`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -198,7 +191,6 @@ fn handle_backend_request_safely(request: Request) {
 
 /// 函数 `panic_payload_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -219,7 +211,6 @@ fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
 
 /// 函数 `request_accept_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -238,7 +229,6 @@ fn request_accept_header(request: &Request) -> Option<String> {
 
 /// 函数 `request_is_stream_like`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -253,7 +243,6 @@ fn request_is_stream_like(request: &Request) -> bool {
 
 /// 函数 `enqueue_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -319,7 +308,6 @@ fn enqueue_request(
 
 /// 函数 `send_with_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -341,7 +329,6 @@ fn send_with_timeout<T>(tx: &Sender<T>, request: T, timeout: Duration) -> Result
 
 /// 函数 `run_backend_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -383,7 +370,6 @@ fn run_backend_server(server: Server) {
 
 /// 函数 `should_bypass_queue`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -398,7 +384,6 @@ fn should_bypass_queue(path: &str) -> bool {
 
 /// 函数 `start_backend_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -421,7 +406,6 @@ pub(crate) fn start_backend_server() -> io::Result<BackendServer> {
 
 /// 函数 `wake_backend_shutdown`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -20,7 +20,6 @@ use super::state::{
 
 /// 函数 `append_apply_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +35,6 @@ fn append_apply_log(log_path: &Path, message: &str) {
 
 /// 函数 `log_path_for_script_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -52,7 +50,6 @@ fn log_path_for_script_dir(script_dir: &Path, file_name: &str) -> PathBuf {
 
 /// 函数 `write_windows_powershell_script`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -73,7 +70,6 @@ fn write_windows_powershell_script(script_path: &Path, script: &str) -> Result<(
 
 /// 函数 `portable_executable_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -98,7 +94,6 @@ fn portable_executable_candidates() -> &'static [&'static str] {
 
 /// 函数 `resolve_portable_restart_exe`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -129,7 +124,6 @@ pub(super) fn resolve_portable_restart_exe(
 
 /// 函数 `spawn_portable_apply_worker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -290,7 +284,6 @@ log "应用已重新拉起"
 
 /// 函数 `schedule_app_exit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -308,7 +301,6 @@ fn schedule_app_exit(app: tauri::AppHandle) {
 
 /// 函数 `resolve_current_macos_app_bundle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -339,7 +331,6 @@ fn resolve_current_macos_app_bundle(exe_path: &Path) -> Result<PathBuf, String> 
 
 /// 函数 `resolve_staged_macos_app_bundle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -373,7 +364,6 @@ fn resolve_staged_macos_app_bundle(staging_dir: &Path) -> Result<PathBuf, String
 
 /// 函数 `spawn_macos_bundle_replace_worker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -475,7 +465,6 @@ log "应用已重新拉起"
 
 /// 函数 `apply_macos_bundle_update`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -530,7 +519,6 @@ fn apply_macos_bundle_update(
 
 /// 函数 `launch_installer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -591,7 +579,6 @@ fn launch_installer(installer_path: &Path) -> Result<(), String> {
 
 /// 函数 `apply_portable_impl`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -664,7 +651,6 @@ pub(super) fn apply_portable_impl(app: tauri::AppHandle) -> Result<UpdateActionR
 
 /// 函数 `launch_installer_impl`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -734,7 +720,6 @@ mod tests {
 
     /// 函数 `resolve_portable_restart_exe_prefers_existing_current_name`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

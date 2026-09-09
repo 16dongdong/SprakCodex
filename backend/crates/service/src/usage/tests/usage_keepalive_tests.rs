@@ -2,7 +2,6 @@ use super::is_keepalive_error_ignorable;
 
 /// 函数 `keepalive_ignores_expected_idle_errors`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

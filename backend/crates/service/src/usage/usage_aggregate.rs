@@ -12,7 +12,6 @@ const ROUNDING_BIAS: i64 = 3;
 
 /// 函数 `read_usage_aggregate_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -100,7 +99,6 @@ impl UsageAggregateItem for UsageSnapshotSummaryRow {
 
 /// 函数 `compute_usage_aggregate_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -243,7 +241,6 @@ impl UsageAggregateAccumulator {
 
 /// 函数 `normalize_percent`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -258,7 +255,6 @@ fn normalize_percent(value: Option<f64>) -> Option<f64> {
 
 /// 函数 `remaining_percent`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -273,7 +269,6 @@ fn remaining_percent(value: Option<f64>) -> Option<f64> {
 
 /// 函数 `average_percent`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -292,7 +287,6 @@ fn average_percent(total: f64, count: i64) -> Option<i64> {
 
 /// 函数 `is_long_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -307,7 +301,6 @@ fn is_long_window(window_minutes: Option<i64>) -> bool {
 
 /// 函数 `is_free_plan_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -327,7 +320,6 @@ fn is_free_plan_usage(raw: Option<&str>) -> bool {
 
 /// 函数 `parse_credits`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -346,7 +338,6 @@ fn parse_credits(raw: Option<&str>) -> Option<Value> {
 
 /// 函数 `extract_plan_type_recursive`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

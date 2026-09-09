@@ -10,7 +10,6 @@ pub struct AccountSortUpdatePayload {
 
 /// 函数 `account_update_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -83,7 +82,6 @@ fn account_update_payload(
 
 /// 函数 `service_account_list`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -100,7 +98,6 @@ pub async fn service_account_list(
 
 /// 函数 `service_account_delete`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -121,7 +118,6 @@ pub async fn service_account_delete(
 
 /// 函数 `service_account_delete_many`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -142,7 +138,6 @@ pub async fn service_account_delete_many(
 
 /// 函数 `service_account_delete_unavailable_free`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -160,7 +155,6 @@ pub async fn service_account_delete_unavailable_free(
 
 /// 函数 `service_account_delete_by_statuses`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-04
 ///
@@ -181,7 +175,6 @@ pub async fn service_account_delete_by_statuses(
 
 /// 函数 `service_account_update`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -249,7 +242,6 @@ pub async fn service_account_update_sorts(
 
 /// 函数 `service_account_warmup`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-14
 ///
@@ -299,7 +291,6 @@ pub async fn service_account_associate_models(
 
 /// 函数 `service_account_test_start`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -333,7 +324,6 @@ pub async fn service_account_test_start(
 
 /// 函数 `service_account_test_cancel`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -526,7 +516,6 @@ mod tests {
 
     /// 函数 `account_update_payload_supports_status_only_updates`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -559,7 +548,6 @@ mod tests {
 
     /// 函数 `account_update_payload_supports_sort_only_updates`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -592,7 +580,6 @@ mod tests {
 
     /// 函数 `account_update_payload_omits_blank_status`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

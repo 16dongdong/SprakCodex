@@ -42,7 +42,6 @@ const CLEANUP_STATUS_ALLOWLIST: &[&str] = &[
 
 /// 函数 `delete_unavailable_free_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -274,7 +273,6 @@ fn cleanup_snapshot_record(row: &UsageSnapshotCleanupRow) -> UsageSnapshotRecord
 
 /// 函数 `plan_label_for_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

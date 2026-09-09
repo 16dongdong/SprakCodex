@@ -33,7 +33,6 @@ fn latest_cached_usage_snapshot<'a>(
 
 /// 函数 `decide_upstream_outcome`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

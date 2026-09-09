@@ -5,7 +5,6 @@ use super::{
 
 /// 函数 `inspect_sse_frame_keeps_last_event_type_from_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -30,7 +29,6 @@ fn inspect_sse_frame_keeps_last_event_type_from_header() {
 
 /// 函数 `inspect_sse_frame_keeps_last_event_type_from_json_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

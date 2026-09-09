@@ -2,7 +2,6 @@ use crate::commands::shared::rpc_call_in_background;
 
 /// 函数 `service_usage_read`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -23,7 +22,6 @@ pub async fn service_usage_read(
 
 /// 函数 `service_usage_list`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -39,7 +37,6 @@ pub async fn service_usage_list(addr: Option<String>) -> Result<serde_json::Valu
 
 /// 函数 `service_usage_aggregate`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -55,7 +52,6 @@ pub async fn service_usage_aggregate(addr: Option<String>) -> Result<serde_json:
 
 /// 函数 `service_usage_refresh`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

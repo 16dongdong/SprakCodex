@@ -41,7 +41,6 @@ impl EnvOverrideCatalogItem {
 
 /// 函数 `env_override_reserved_keys`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -56,7 +55,6 @@ pub(crate) fn env_override_reserved_keys() -> &'static [&'static str] {
 
 /// 函数 `env_override_unsupported_keys`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -71,7 +69,6 @@ pub(crate) fn env_override_unsupported_keys() -> &'static [&'static str] {
 
 /// 函数 `editable_env_override_catalog`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -89,7 +86,6 @@ pub(super) fn editable_env_override_catalog(
 
 /// 函数 `env_override_catalog_item`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -104,7 +100,6 @@ pub(super) fn env_override_catalog_item(key: &str) -> Option<&'static EnvOverrid
 
 /// 函数 `is_env_override_catalog_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -119,7 +114,6 @@ pub(super) fn is_env_override_catalog_key(key: &str) -> bool {
 
 /// 函数 `is_env_override_unsupported_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -136,7 +130,6 @@ pub(super) fn is_env_override_unsupported_key(key: &str) -> bool {
 
 /// 函数 `is_env_override_reserved_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -214,7 +207,6 @@ fn env_override_safety_note(key: &str) -> &'static str {
 
 /// 函数 `env_override_catalog_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

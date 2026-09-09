@@ -6,7 +6,6 @@ use tokio::runtime::Builder;
 
 /// 函数 `text_response_sets_status_and_plain_text_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -30,7 +29,6 @@ fn text_response_sets_status_and_plain_text_header() {
 
 /// 函数 `text_error_response_sets_error_code_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -70,7 +68,6 @@ fn text_error_response_returns_raw_message_body() {
 
 /// 函数 `merge_upstream_headers_filters_hop_by_hop_and_content_length`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

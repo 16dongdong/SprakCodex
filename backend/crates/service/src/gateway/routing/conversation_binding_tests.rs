@@ -10,7 +10,6 @@ use std::collections::HashMap;
 
 /// 函数 `sample_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -37,7 +36,6 @@ fn sample_account(id: &str, sort: i64) -> Account {
 
 /// 函数 `sample_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +57,6 @@ fn sample_token(account_id: &str) -> Token {
 
 /// 函数 `sample_binding`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +83,6 @@ fn sample_binding(account_id: &str) -> ConversationBinding {
 
 /// 函数 `prepare_conversation_routing_rotates_bound_account_first`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -118,7 +114,6 @@ fn prepare_conversation_routing_rotates_bound_account_first() {
 
 /// 函数 `effective_thread_anchor_prefers_existing_binding_anchor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -138,7 +133,6 @@ fn effective_thread_anchor_prefers_existing_binding_anchor() {
 
 /// 函数 `resolve_attempt_thread_uses_next_generation_for_switched_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -437,7 +431,6 @@ fn prompt_cache_existing_only_route_binding_does_not_create_initial_binding() {
 
 /// 函数 `apply_candidate_rotation_reports_binding_source_when_binding_selected`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -583,7 +576,6 @@ fn apply_candidate_rotation_keeps_existing_binding_before_thread_distribution() 
 
 /// 函数 `terminal_response_creates_and_rebinds_conversation_binding_on_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

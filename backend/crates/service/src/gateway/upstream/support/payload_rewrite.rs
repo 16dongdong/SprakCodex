@@ -2,7 +2,6 @@ use serde_json::Value;
 
 /// 函数 `body_has_encrypted_content_hint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -20,7 +19,6 @@ pub(in crate::gateway) fn body_has_encrypted_content_hint(body: &[u8]) -> bool {
 
 /// 函数 `strip_encrypted_content_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -79,7 +77,6 @@ fn strip_encrypted_content_value(value: &mut Value) -> bool {
 
 /// 函数 `strip_encrypted_content_from_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

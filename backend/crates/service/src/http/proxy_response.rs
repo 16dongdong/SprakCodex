@@ -6,7 +6,6 @@ use crate::http::header_filter::should_skip_response_header;
 
 /// 函数 `text_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -27,7 +26,6 @@ pub(crate) fn text_response(status: StatusCode, body: impl Into<String>) -> Resp
 
 /// 函数 `text_error_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -48,7 +46,6 @@ pub(crate) fn text_error_response(status: StatusCode, body: impl Into<String>) -
 
 /// 函数 `merge_upstream_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

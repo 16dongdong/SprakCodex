@@ -26,7 +26,6 @@ const WEB_COMMAND_MAP: Record<string, WebCommandDescriptor> =
 /**
  * 函数 `invokeWebRpc`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -63,7 +62,6 @@ async function invokeWebRpc<T>(
 /**
  * 函数 `postWebRpc`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -99,7 +97,6 @@ async function postWebRpc<T>(
 /**
  * 函数 `withAddr`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -122,7 +119,6 @@ export function withAddr(
 /**
  * 函数 `invokeFirst`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -156,7 +152,6 @@ export async function invokeFirst<T>(
 /**
  * 函数 `invoke`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -187,7 +182,6 @@ export async function invoke<T>(
 /**
  * 函数 `requestlogListViaHttpRpc`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

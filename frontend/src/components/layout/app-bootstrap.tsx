@@ -67,7 +67,6 @@ function writeCodexCliGuideSessionDismissed(dismissed: boolean) {
 /**
  * 函数 `sleep`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -102,7 +101,6 @@ export function startupAppSettingsTimeoutMs(runtimeMode?: string | null): number
 /**
  * 函数 `AppBootstrap`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -160,7 +158,6 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
   /**
    * 函数 `applyLowTransparency`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -363,7 +360,6 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
   /**
    * 函数 `handleForceStart`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *

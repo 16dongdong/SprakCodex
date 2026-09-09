@@ -22,7 +22,6 @@ mod usage;
 
 /// 函数 `response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -40,7 +39,6 @@ pub(super) fn response(req: &JsonRpcRequest, result: Value) -> JsonRpcResponse {
 
 /// 函数 `as_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -55,7 +53,6 @@ pub(super) fn as_json<T: Serialize>(value: T) -> Value {
 
 /// 函数 `str_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -73,7 +70,6 @@ pub(super) fn str_param<'a>(req: &'a JsonRpcRequest, key: &str) -> Option<&'a st
 
 /// 函数 `string_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -88,7 +84,6 @@ pub(super) fn string_param(req: &JsonRpcRequest, key: &str) -> Option<String> {
 
 /// 函数 `i64_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -106,7 +101,6 @@ pub(super) fn i64_param(req: &JsonRpcRequest, key: &str) -> Option<i64> {
 
 /// 函数 `bool_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -124,7 +118,6 @@ pub(super) fn bool_param(req: &JsonRpcRequest, key: &str) -> Option<bool> {
 
 /// 函数 `ok_result`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -139,7 +132,6 @@ pub(super) fn ok_result() -> Value {
 
 /// 函数 `ok_or_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -157,7 +149,6 @@ pub(super) fn ok_or_error(result: Result<(), String>) -> Value {
 
 /// 函数 `value_or_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -242,7 +233,6 @@ fn ensure_method_allowed(actor: &RpcActor, method: &str) -> Result<(), String> {
 
 /// 函数 `handle_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

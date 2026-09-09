@@ -5,7 +5,6 @@ use crate::RpcActor;
 
 /// 函数 `try_handle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `lookup_evicts_expired_target_entry_without_full_scan`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -31,7 +30,6 @@ fn lookup_evicts_expired_target_entry_without_full_scan() {
 
 /// 函数 `mark_path_cleanup_prunes_expired_entries`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +58,6 @@ fn mark_path_cleanup_prunes_expired_entries() {
 
 /// 函数 `rate_limit_ladder_maps_to_expected_steps`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +77,6 @@ fn rate_limit_ladder_maps_to_expected_steps() {
 
 /// 函数 `rate_limited_mark_increments_and_success_clear_decays_offense`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -121,7 +117,6 @@ fn rate_limited_mark_increments_and_success_clear_decays_offense() {
 
 /// 函数 `non_rate_limited_mark_keeps_existing_behavior_without_offense_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -174,7 +169,6 @@ fn anthropic_challenge_cooldown_extends_generic_challenge_window() {
 
 /// 函数 `rate_limited_offense_resets_after_quiet_period`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

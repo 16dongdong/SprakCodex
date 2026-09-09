@@ -457,7 +457,6 @@ fn serialize_credits_payload(
 
 /// 函数 `normalize_base_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -478,7 +477,6 @@ pub fn normalize_base_url(base_url: &str) -> String {
 
 /// 函数 `usage_endpoint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -642,7 +640,6 @@ pub fn parse_reset_credits_snapshot(value: &Value) -> ResetCreditsSnapshot {
 
 /// 函数 `subscription_endpoint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-17
 ///
@@ -669,7 +666,6 @@ pub fn accounts_check_endpoint(base_url: &str) -> String {
 
 /// 函数 `parse_usage_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

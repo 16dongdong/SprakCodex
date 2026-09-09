@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `login_force_requested_accepts_truthy_flags`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -30,7 +29,6 @@ fn login_force_requested_accepts_truthy_flags() {
 
 /// 函数 `login_success_html_marks_current_tab_session`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `route_quality_penalty_prefers_successful_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ fn route_quality_penalty_prefers_successful_accounts() {
 
 /// 函数 `route_quality_penalty_evicts_expired_record`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -61,7 +59,6 @@ fn route_quality_penalty_evicts_expired_record() {
 
 /// 函数 `record_path_cleanup_prunes_expired_records`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

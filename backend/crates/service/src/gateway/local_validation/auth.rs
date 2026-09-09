@@ -4,7 +4,6 @@ use crate::storage_helpers::{hash_platform_key, open_storage, StorageHandle};
 
 /// 函数 `open_storage_or_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ pub(super) fn open_storage_or_error() -> Result<StorageHandle, super::LocalValid
 
 /// 函数 `load_active_api_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

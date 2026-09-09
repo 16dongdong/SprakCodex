@@ -3,7 +3,6 @@ use crate::storage::ApiKeyOwner;
 
 /// 函数 `make_test_api_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-28
 ///
@@ -50,7 +49,6 @@ fn seed_app_user(storage: &Storage, user_id: &str) {
 
 /// 函数 `large_key_sets_are_chunked_for_api_key_and_quota_queries`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-28
 ///

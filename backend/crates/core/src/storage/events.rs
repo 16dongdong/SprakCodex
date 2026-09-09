@@ -7,7 +7,6 @@ use super::{Event, Storage};
 impl Storage {
     /// 函数 `insert_event`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -32,7 +31,6 @@ impl Storage {
 
     /// 函数 `event_count`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -47,7 +45,6 @@ impl Storage {
 
     /// 函数 `latest_account_status_reasons`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -210,7 +207,6 @@ fn latest_account_status_ranked_cte_sql(
 
 /// 函数 `extract_status_reason_from_event_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

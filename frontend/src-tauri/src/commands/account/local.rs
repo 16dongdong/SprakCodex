@@ -4,7 +4,6 @@ use crate::app_storage::resolve_db_path_with_legacy_migration;
 
 /// 函数 `local_account_delete`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

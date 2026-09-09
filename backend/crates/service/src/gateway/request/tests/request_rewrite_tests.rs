@@ -93,7 +93,6 @@ fn apply_codex_compat_request_overrides_with_prompt_cache_key(
 
 /// 函数 `chat_completions_stream_enforces_include_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -128,7 +127,6 @@ fn chat_completions_stream_enforces_include_usage() {
 
 /// 函数 `chat_completions_stream_preserves_options_while_enabling_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -171,7 +169,6 @@ fn chat_completions_stream_preserves_options_while_enabling_usage() {
 
 /// 函数 `chat_completions_uses_reasoning_effort_and_drops_non_official_keys`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -212,7 +209,6 @@ fn chat_completions_uses_reasoning_effort_and_drops_non_official_keys() {
 
 /// 函数 `chat_completions_accepts_responses_style_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -312,7 +308,6 @@ fn chat_completions_preserves_responses_system_role_and_text() {
 
 /// 函数 `chat_completions_normalizes_responses_function_tools`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -369,7 +364,6 @@ fn chat_completions_normalizes_responses_function_tools() {
 
 /// 函数 `responses_overrides_model_and_reasoning_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -492,7 +486,6 @@ fn chat_completions_maps_client_ultra_to_upstream_max() {
 
 /// 函数 `responses_input_string_normalized_to_list`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -528,7 +521,6 @@ fn responses_input_string_normalized_to_list() {
 
 /// 函数 `responses_stream_and_store_are_forced_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1223,7 +1215,6 @@ fn responses_codex_backend_replaces_null_or_blank_instructions_with_minimal_fall
 
 /// 函数 `responses_infers_prompt_cache_key_from_conversation_id_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1258,7 +1249,6 @@ fn responses_infers_prompt_cache_key_from_conversation_id_for_codex_backend() {
 
 /// 函数 `responses_forced_prompt_cache_key_overrides_existing_value_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1294,7 +1284,6 @@ fn responses_forced_prompt_cache_key_overrides_existing_value_for_codex_backend(
 
 /// 函数 `responses_stream_passthrough_keeps_client_stream_flag_when_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1356,7 +1345,6 @@ fn responses_official_allowlist_drops_stream_passthrough() {
 
 /// 函数 `responses_dynamic_tools_are_mapped_to_tools_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1458,7 +1446,6 @@ fn responses_dynamic_tools_are_mapped_for_explicit_non_codex_upstream() {
 
 /// 函数 `responses_preserves_priority_service_tier_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1595,7 +1582,6 @@ fn responses_codex_backend_keeps_conservative_field_snapshot() {
 
 /// 函数 `responses_preserves_client_metadata_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-16
 ///
@@ -1658,7 +1644,6 @@ fn responses_preserves_client_metadata_for_codex_backend() {
 
 /// 函数 `responses_defaults_tool_choice_and_reasoning_include_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1776,7 +1761,6 @@ fn responses_preserve_specific_function_tool_choice_object() {
 
 /// 函数 `responses_defaults_empty_include_without_reasoning_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1815,7 +1799,6 @@ fn responses_defaults_empty_include_without_reasoning_for_codex_backend() {
 
 /// 函数 `responses_normalizes_fast_service_tier_to_priority_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1850,7 +1833,6 @@ fn responses_normalizes_fast_service_tier_to_priority_for_codex_backend() {
 
 /// 函数 `responses_applies_fast_service_tier_override_as_priority_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1996,7 +1978,6 @@ fn responses_default_path_omits_auto_service_tier_for_codex_backend() {
 
 /// 函数 `responses_preserves_flex_service_tier_override_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2031,7 +2012,6 @@ fn responses_preserves_flex_service_tier_override_for_codex_backend() {
 
 /// 函数 `responses_compact_uses_codex_compat_rewrite`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2297,7 +2277,6 @@ fn responses_compact_injects_prompt_cache_key_from_thread_anchor_for_codex_backe
 
 /// 函数 `responses_compact_defaults_parallel_tool_calls_to_false_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2392,7 +2371,6 @@ fn responses_compact_default_path_keeps_normalized_service_tier_for_codex_backen
 
 /// 函数 `responses_omits_include_when_reasoning_missing_for_codex_backend`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2421,7 +2399,6 @@ fn responses_omits_include_when_reasoning_missing_for_codex_backend() {
 
 /// 函数 `responses_codex_compat_defaults_parallel_tool_calls_false_when_tools_are_present`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2456,7 +2433,6 @@ fn responses_codex_compat_defaults_parallel_tool_calls_false_when_tools_are_pres
 
 /// 函数 `responses_passthrough_for_non_codex_upstream`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2701,7 +2677,6 @@ fn responses_compact_bridges_body_to_chat_completions_when_configured() {
 
 /// 函数 `non_matching_endpoint_keeps_non_json_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

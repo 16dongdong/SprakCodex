@@ -7,7 +7,6 @@ static SHUTDOWN_REQUESTED: AtomicBool = AtomicBool::new(false);
 
 /// 函数 `shutdown_requested`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -22,7 +21,6 @@ pub fn shutdown_requested() -> bool {
 
 /// 函数 `clear_shutdown_flag`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -37,7 +35,6 @@ pub fn clear_shutdown_flag() {
 
 /// 函数 `request_shutdown`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -61,7 +58,6 @@ pub fn request_shutdown(addr: &str) {
 
 /// 函数 `send_shutdown_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

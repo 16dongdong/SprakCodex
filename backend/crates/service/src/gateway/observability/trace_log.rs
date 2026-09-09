@@ -71,7 +71,6 @@ struct TraceAsyncWriter {
 impl TraceAsyncWriter {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -101,7 +100,6 @@ impl TraceAsyncWriter {
 
     /// 函数 `append_line`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -155,7 +153,6 @@ impl TraceAsyncWriter {
 
     /// 函数 `reset_path`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -180,7 +177,6 @@ struct TraceFileWriter {
 impl TraceFileWriter {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -195,7 +191,6 @@ impl TraceFileWriter {
 
     /// 函数 `reset_path`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -215,7 +210,6 @@ impl TraceFileWriter {
 
     /// 函数 `append_line`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -237,7 +231,6 @@ impl TraceFileWriter {
 
     /// 函数 `ensure_open_writer`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -260,7 +253,6 @@ impl TraceFileWriter {
 
 /// 函数 `trace_file_path_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -281,7 +273,6 @@ fn trace_file_path_from_env() -> PathBuf {
 
 /// 函数 `sanitize_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -431,7 +422,6 @@ fn redact_json_string_field_for_log(value: &str, field: &str) -> String {
 
 /// 函数 `short_fingerprint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -489,7 +479,6 @@ fn mirror_trace_line_to_stdout(line: &str) {
 
 /// 函数 `append_trace_line`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -505,7 +494,6 @@ fn append_trace_line(line: String, flush: bool) {
 
 /// 函数 `trace_error_traces`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -520,7 +508,6 @@ fn trace_error_traces() -> &'static Mutex<HashSet<String>> {
 
 /// 函数 `trace_pending_lines`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -535,7 +522,6 @@ fn trace_pending_lines() -> &'static Mutex<HashMap<String, Vec<String>>> {
 
 /// 函数 `mark_trace_has_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -552,7 +538,6 @@ fn mark_trace_has_error(trace_id: &str) {
 
 /// 函数 `clear_trace_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -569,7 +554,6 @@ fn clear_trace_error(trace_id: &str) {
 
 /// 函数 `current_trace_ts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -587,7 +571,6 @@ fn current_trace_ts() -> i64 {
 
 /// 函数 `buffer_trace_line`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -628,7 +611,6 @@ fn buffer_trace_line(trace_id: &str, line: String) {
 
 /// 函数 `flush_trace_lines`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -652,7 +634,6 @@ fn flush_trace_lines(trace_id: &str) {
 
 /// 函数 `clear_trace_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -670,7 +651,6 @@ fn clear_trace_state(trace_id: &str) {
 
 /// 函数 `trace_has_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -689,7 +669,6 @@ fn trace_has_error(trace_id: &str) -> bool {
 
 /// 函数 `has_error_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -706,7 +685,6 @@ fn has_error_text(error: Option<&str>) -> bool {
 
 /// 函数 `trace_writer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -721,7 +699,6 @@ fn trace_writer() -> &'static TraceAsyncWriter {
 
 /// 函数 `trace_writer_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -754,7 +731,6 @@ fn trace_writer_loop(rx: Receiver<TraceCommand>, mut writer: TraceFileWriter) {
 
 /// 函数 `trace_queue_capacity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -774,7 +750,6 @@ fn trace_queue_capacity() -> usize {
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -790,7 +765,6 @@ pub(super) fn reload_from_env() {
 
 /// 函数 `next_trace_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -811,7 +785,6 @@ pub(crate) fn next_trace_id() -> String {
 
 /// 函数 `log_request_start`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -891,7 +864,6 @@ pub(crate) fn log_client_service_tier(
 
 /// 函数 `log_request_body_preview`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -939,7 +911,6 @@ pub(crate) fn log_gemini_request_diagnostics(
 
 /// 函数 `log_request_gate_wait`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -962,7 +933,6 @@ pub(crate) fn log_request_gate_wait(trace_id: &str, key_id: &str, path: &str, mo
 
 /// 函数 `log_request_gate_acquired`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -992,7 +962,6 @@ pub(crate) fn log_request_gate_acquired(
 
 /// 函数 `log_request_gate_skip`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1014,7 +983,6 @@ pub(crate) fn log_request_gate_skip(trace_id: &str, reason: &str, wait_ms: u128)
 
 /// 函数 `log_candidate_start`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1044,7 +1012,6 @@ pub(crate) fn log_candidate_start(
 
 /// 函数 `log_candidate_pool`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1085,7 +1052,6 @@ pub(crate) fn log_candidate_pool(
 
 /// 函数 `log_candidate_skip`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1115,7 +1081,6 @@ pub(crate) fn log_candidate_skip(
 
 /// 函数 `log_attempt_result`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1150,7 +1115,6 @@ pub(crate) fn log_attempt_result(
 
 /// 函数 `log_bridge_result`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1243,7 +1207,6 @@ pub(crate) fn log_bridge_result(params: BridgeResultLog<'_>) {
 
 /// 函数 `log_attempt_profile`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1306,7 +1269,6 @@ pub(crate) fn log_attempt_profile(params: AttemptProfileLog<'_>) {
 
 /// 函数 `log_request_final`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1337,7 +1299,6 @@ pub(crate) fn log_request_final(
 
 /// 函数 `log_failed_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

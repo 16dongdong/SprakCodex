@@ -91,7 +91,6 @@ const DEFAULT_RUNTIME_TIME_ZONE: RuntimeTimeZone = {
 /**
  * 函数 `asObject`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -110,7 +109,6 @@ function asObject(payload: unknown): Record<string, unknown> {
 /**
  * 函数 `asArray`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -127,7 +125,6 @@ function asArray<T = unknown>(payload: unknown): T[] {
 /**
  * 函数 `asString`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -158,7 +155,6 @@ function asJsonString(value: unknown): string | null {
 /**
  * 函数 `asBoolean`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -193,7 +189,6 @@ function toNullableObject(value: unknown): Record<string, unknown> | null {
 /**
  * 函数 `asInteger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -214,7 +209,6 @@ function asInteger(value: unknown, fallback: number, min = 0): number {
 /**
  * 函数 `normalizeStringRecord`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -235,7 +229,6 @@ function normalizeStringRecord(payload: unknown): Record<string, string> {
 /**
  * 函数 `asStringArray`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -263,7 +256,6 @@ function asStringArray(value: unknown): string[] {
 /**
  * 函数 `normalizeUsageSnapshot`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -301,7 +293,6 @@ export function normalizeUsageSnapshot(payload: unknown): AccountUsage | null {
 /**
  * 函数 `normalizeUsageList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -322,7 +313,6 @@ export function normalizeUsageList(payload: unknown): AccountUsage[] {
 /**
  * 函数 `buildUsageMap`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -351,7 +341,6 @@ export function buildUsageMap(usages: AccountUsage[]): Map<string, AccountUsage>
 /**
  * 函数 `normalizeUsageAggregateSummary`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -394,7 +383,6 @@ function normalizeStartupAccountSummary(payload: unknown) {
 /**
  * 函数 `normalizeTodaySummary`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -427,7 +415,6 @@ export function normalizeTodaySummary(payload: unknown): RequestLogTodaySummary 
 /**
  * 函数 `normalizeAccount`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -505,7 +492,6 @@ export function normalizeAccount(item: unknown, usage?: AccountUsage | null): Ac
 /**
  * 函数 `normalizeAccountList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -538,7 +524,6 @@ export function normalizeAccountList(
 /**
  * 函数 `attachUsagesToAccounts`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -560,7 +545,6 @@ export function attachUsagesToAccounts(
 /**
  * 函数 `normalizeModelReasoningLevels`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-12
  *
@@ -714,7 +698,6 @@ function normalizeModelInfo(payload: unknown): ModelInfo | null {
 /**
  * 函数 `normalizeModelCatalog`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-12
  *
@@ -738,7 +721,6 @@ export function normalizeModelCatalog(payload: unknown): ModelCatalog {
 /**
  * 函数 `normalizeApiKey`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -780,7 +762,6 @@ export function normalizeApiKey(item: unknown): ApiKey | null {
 /**
  * 函数 `normalizeApiKeyList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -801,7 +782,6 @@ export function normalizeApiKeyList(payload: unknown): ApiKey[] {
 /**
  * 函数 `normalizeApiKeyCreateResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -822,7 +802,6 @@ export function normalizeApiKeyCreateResult(payload: unknown): ApiKeyCreateResul
 /**
  * 函数 `normalizeAggregateApi`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -889,7 +868,6 @@ export function normalizeAggregateApi(item: unknown): AggregateApi | null {
 /**
  * 函数 `normalizeAggregateApiList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -910,7 +888,6 @@ export function normalizeAggregateApiList(payload: unknown): AggregateApi[] {
 /**
  * 函数 `normalizeAggregateApiCreateResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -942,7 +919,6 @@ export function normalizeAggregateApiSecretResult(payload: unknown): AggregateAp
 /**
  * 函数 `normalizeAggregateApiTestResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1059,7 +1035,6 @@ export function normalizeAggregateApiAssociateModelsResult(
 /**
  * 函数 `normalizeApiKeyUsageStats`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1103,7 +1078,6 @@ export function normalizeApiKeyUsageStats(payload: unknown): ApiKeyUsageStat[] {
 /**
  * 函数 `normalizePluginCatalogTask`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1132,7 +1106,6 @@ export function normalizePluginCatalogTask(payload: unknown): PluginCatalogTask 
 /**
  * 函数 `normalizePluginCatalogEntry`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1170,7 +1143,6 @@ export function normalizePluginCatalogEntry(payload: unknown): PluginCatalogEntr
 /**
  * 函数 `normalizePluginCatalogResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1194,7 +1166,6 @@ export function normalizePluginCatalogResult(payload: unknown): PluginCatalogRes
 /**
  * 函数 `normalizeInstalledPlugin`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1236,7 +1207,6 @@ export function normalizeInstalledPlugin(payload: unknown): InstalledPluginSumma
 /**
  * 函数 `normalizePluginInstalledList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1257,7 +1227,6 @@ export function normalizePluginInstalledList(payload: unknown): InstalledPluginS
 /**
  * 函数 `normalizePluginTask`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1292,7 +1261,6 @@ export function normalizePluginTask(payload: unknown): PluginTaskSummary | null 
 /**
  * 函数 `normalizePluginTaskList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1313,7 +1281,6 @@ export function normalizePluginTaskList(payload: unknown): PluginTaskSummary[] {
 /**
  * 函数 `normalizePluginRunLog`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1346,7 +1313,6 @@ export function normalizePluginRunLog(payload: unknown): PluginRunLogSummary | n
 /**
  * 函数 `normalizePluginRunLogList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1367,7 +1333,6 @@ export function normalizePluginRunLogList(payload: unknown): PluginRunLogSummary
 /**
  * 函数 `normalizeDeviceAuthInfo`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1393,7 +1358,6 @@ export function normalizeDeviceAuthInfo(payload: unknown): DeviceAuthInfo | null
 /**
  * 函数 `normalizeLoginStartResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1431,7 +1395,6 @@ export function normalizeLoginStartResult(payload: unknown): LoginStartResult {
 /**
  * 函数 `normalizeRequestLog`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1552,7 +1515,6 @@ export function normalizeRequestLog(item: unknown): RequestLog | null {
 /**
  * 函数 `normalizeRequestLogs`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1573,7 +1535,6 @@ export function normalizeRequestLogs(payload: unknown): RequestLog[] {
 /**
  * 函数 `normalizeRequestLogListResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1607,7 +1568,6 @@ export function normalizeRequestLogListWithSummaryResult(
 /**
  * 函数 `normalizeRequestLogFilterSummary`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1634,7 +1594,6 @@ export function normalizeRequestLogFilterSummary(
 /**
  * 函数 `normalizeBackgroundTasks`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1713,7 +1672,6 @@ export function normalizeBackgroundTasks(payload: unknown): BackgroundTaskSettin
 /**
  * 函数 `normalizeEnvOverrideCatalog`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1889,7 +1847,6 @@ export function normalizeAppSettings(payload: unknown): AppSettings {
 /**
  * 函数 `normalizeStartupSnapshot`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

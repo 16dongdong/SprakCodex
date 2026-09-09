@@ -15,7 +15,6 @@ const LOGIN_COMPLETION_STALE_SECONDS: i64 = 5 * 60;
 
 /// 函数 `is_device_login_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -31,7 +30,6 @@ fn is_device_login_type(login_type: &str) -> bool {
 
 /// 函数 `is_supported_chatgpt_login_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -49,7 +47,6 @@ fn is_supported_chatgpt_login_type(login_type: &str) -> bool {
 
 /// 函数 `login_start`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -197,7 +194,6 @@ pub(crate) fn login_start(
 
 /// 函数 `login_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

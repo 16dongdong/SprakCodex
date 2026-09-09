@@ -9,7 +9,6 @@ use crate::{
 
 /// 函数 `try_handle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -516,7 +515,6 @@ fn account_sort_updates_param(
 
 /// 函数 `first_str_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -532,7 +530,6 @@ fn first_str_param<'a>(req: &'a JsonRpcRequest, keys: &[&str]) -> Option<&'a str
 
 /// 函数 `first_string_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -548,7 +545,6 @@ fn first_string_param(req: &JsonRpcRequest, keys: &[&str]) -> Option<String> {
 
 /// 函数 `first_bool_param`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

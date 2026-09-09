@@ -25,7 +25,6 @@ const DISCLAIMER_ROTATE_INTERVAL_MS = 3200;
 /**
  * 函数 `DisclaimerTicker`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

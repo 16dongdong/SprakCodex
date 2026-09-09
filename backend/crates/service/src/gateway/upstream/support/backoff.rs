@@ -3,7 +3,6 @@ use std::time::{Duration, Instant};
 
 /// 函数 `as_millis_u64`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -18,7 +17,6 @@ fn as_millis_u64(duration: Duration) -> u64 {
 
 /// 函数 `exponential_jitter_delay`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -45,7 +43,6 @@ pub(in super::super) fn exponential_jitter_delay(
 
 /// 函数 `sleep_with_exponential_jitter`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

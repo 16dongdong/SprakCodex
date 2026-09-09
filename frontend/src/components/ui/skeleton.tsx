@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils"
 /**
  * 函数 `Skeleton`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

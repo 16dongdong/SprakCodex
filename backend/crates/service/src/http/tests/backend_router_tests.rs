@@ -2,7 +2,6 @@ use super::{resolve_backend_route, BackendRoute};
 
 /// 函数 `resolves_rpc_route`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -18,7 +17,6 @@ fn resolves_rpc_route() {
 
 /// 函数 `resolves_auth_callback_route`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -45,7 +43,6 @@ fn resolves_usage_refresh_events_route() {
 
 /// 函数 `resolves_metrics_route`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -64,7 +61,6 @@ fn resolves_metrics_route() {
 
 /// 函数 `falls_back_to_gateway_route`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

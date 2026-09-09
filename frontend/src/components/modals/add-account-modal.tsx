@@ -62,7 +62,6 @@ const LOGIN_COMPLETION_GRACE_MS = 5 * 60 * 1000;
 /**
  * 函数 `pickImportTokenField`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -91,7 +90,6 @@ function pickImportTokenField(record: unknown, keys: string[]): string {
 /**
  * 函数 `normalizeSingleImportRecord`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -152,7 +150,6 @@ function normalizeSingleImportRecord(record: unknown): unknown {
 /**
  * 函数 `normalizeImportContentForCompatibility`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -182,7 +179,6 @@ function normalizeImportContentForCompatibility(rawContent: string): string {
 /**
  * 函数 `buildBulkImportContents`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -210,7 +206,6 @@ function buildBulkImportContents(rawContent: string): string[] {
 /**
  * 函数 `getBulkImportErrorMessage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -239,7 +234,6 @@ function getBulkImportErrorMessage(
 /**
  * 函数 `AddAccountModal`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -331,7 +325,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `invalidateLoginQueries`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -359,7 +352,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `handleDialogOpenChange`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -404,7 +396,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `completeLoginSuccess`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -469,7 +460,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `ensureServiceReady`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -494,7 +484,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `waitForLogin`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -597,7 +586,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `handleStartLogin`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -678,7 +666,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `handleManualCallback`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -777,7 +764,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `handleBulkImport`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -827,7 +813,6 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   /**
    * 函数 `copyUrl`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *

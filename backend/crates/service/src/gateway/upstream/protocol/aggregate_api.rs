@@ -497,7 +497,6 @@ fn resolve_passthrough_sse_protocol(
 
 /// 函数 `should_skip_forward_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -545,7 +544,6 @@ fn should_skip_forward_header_for_aggregate_request(
 
 /// 函数 `respond_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -572,7 +570,6 @@ fn respond_error(request: Request, status: u16, message: &str, trace_id: Option<
 
 /// 函数 `normalize_candidate_order`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -608,7 +605,6 @@ fn promote_preferred_aggregate_candidate(candidates: &mut Vec<AggregateApi>, pre
 
 /// 函数 `apply_gateway_route_strategy_to_aggregate_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -730,7 +726,6 @@ fn prepare_aggregate_candidate_client(candidate: &AggregateApi, trace_id: &str, 
 
 /// 函数 `normalize_provider_type_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -755,7 +750,6 @@ fn normalize_provider_type_value(value: &str) -> String {
 
 /// 函数 `first_upstream_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -778,7 +772,6 @@ fn first_upstream_header(headers: &reqwest::header::HeaderMap, names: &[&str]) -
 
 /// 函数 `aggregate_api_failure_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -829,7 +822,6 @@ fn aggregate_api_failure_message(
 
 /// 函数 `build_aggregate_api_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1000,7 +992,6 @@ fn build_anthropic_bridge_aggregate_api_request(
 
 /// 函数 `resolve_aggregate_api_rotation_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1045,7 +1036,6 @@ pub(crate) fn resolve_aggregate_api_rotation_candidates(
 
 /// 函数 `proxy_aggregate_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1683,7 +1673,6 @@ mod bridge_tests {
 
     /// 函数 `candidate`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1806,7 +1795,6 @@ mod bridge_tests {
 
     /// 函数 `ids`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1821,7 +1809,6 @@ mod bridge_tests {
 
     /// 函数 `balanced_route_strategy_rotates_aggregate_candidates`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1935,7 +1922,6 @@ mod bridge_tests {
 
     /// 函数 `balanced_route_strategy_preserves_explicit_preferred_aggregate_api`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

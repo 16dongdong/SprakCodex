@@ -12,7 +12,6 @@ const QA_DEFAULT_SERVICE_ADDR: &str = "localhost:48762";
 
 /// 函数 `resolve_rpc_token_path_for_db`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -28,7 +27,6 @@ pub(crate) fn resolve_rpc_token_path_for_db(db_path: &Path) -> PathBuf {
 
 /// 函数 `env_non_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -46,7 +44,6 @@ fn env_non_empty(name: &str) -> Option<String> {
 
 /// 函数 `exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -65,7 +62,6 @@ fn exe_dir() -> PathBuf {
 
 /// 函数 `resolve_path_with_base`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +82,6 @@ fn resolve_path_with_base(raw: &str, base_dir: &Path) -> PathBuf {
 
 /// 函数 `resolve_env_db_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -101,7 +96,6 @@ fn resolve_env_db_path() -> Option<PathBuf> {
 
 /// 函数 `resolve_runtime_rpc_token_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -118,7 +112,6 @@ fn resolve_runtime_rpc_token_path(db_path: &Path) -> PathBuf {
 
 /// 函数 `default_app_data_db_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -138,7 +131,6 @@ fn default_app_data_db_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 
 /// 函数 `apply_runtime_storage_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -168,7 +160,6 @@ pub(crate) fn apply_runtime_storage_env(app: &tauri::AppHandle) {
 
 /// 函数 `profile_default_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -187,7 +178,6 @@ fn profile_default_service_addr(identifier: &str) -> Option<&'static str> {
 
 /// 函数 `should_seed_profile_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -211,7 +201,6 @@ fn should_seed_profile_service_addr(
 
 /// 函数 `maybe_seed_profile_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -253,7 +242,6 @@ fn maybe_seed_profile_service_addr(app: &tauri::AppHandle) {
 
 /// 函数 `resolve_db_path_with_legacy_migration`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -291,7 +279,6 @@ mod tests {
     impl EnvGuard {
         /// 函数 `set`
         ///
-        /// 作者: gaohongshun
         ///
         /// 时间: 2026-04-02
         ///
@@ -314,7 +301,6 @@ mod tests {
     impl Drop for EnvGuard {
         /// 函数 `drop`
         ///
-        /// 作者: gaohongshun
         ///
         /// 时间: 2026-04-02
         ///
@@ -334,7 +320,6 @@ mod tests {
 
     /// 函数 `profile_default_service_addr_is_only_defined_for_qa_profile`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -361,7 +346,6 @@ mod tests {
 
     /// 函数 `profile_service_addr_migration_only_applies_to_legacy_default_port`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -398,7 +382,6 @@ mod tests {
 
     /// 函数 `resolve_path_with_base_uses_base_for_relative_paths`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -419,7 +402,6 @@ mod tests {
 
     /// 函数 `runtime_rpc_token_path_prefers_env_relative_to_exe_dir`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

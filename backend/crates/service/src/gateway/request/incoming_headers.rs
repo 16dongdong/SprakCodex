@@ -34,7 +34,6 @@ pub(crate) struct IncomingHeaderSnapshot {
 impl IncomingHeaderSnapshot {
     /// 函数 `from_http_headers`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-05
     ///
@@ -199,7 +198,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `from_request`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -384,7 +382,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `platform_key`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -401,7 +398,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `sticky_key_material`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -419,7 +415,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `user_agent`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-16
     ///
@@ -434,7 +429,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `originator`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-16
     ///
@@ -449,7 +443,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `has_authorization`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -464,7 +457,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `has_x_api_key`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -479,7 +471,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `session_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -494,7 +485,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `session_affinity`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-16
     ///
@@ -509,7 +499,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `client_request_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -524,7 +513,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `subagent`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -539,7 +527,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `beta_features`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -554,7 +541,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `window_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-11
     ///
@@ -569,7 +555,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `turn_metadata`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -584,7 +569,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `turn_state`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -599,7 +583,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `parent_thread_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-11
     ///
@@ -614,7 +597,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `codex_installation_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-05-02
     ///
@@ -629,7 +611,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `responsesapi_include_timing_metrics`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-05-02
     ///
@@ -652,7 +633,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `passthrough_codex_headers`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-11
     ///
@@ -673,7 +653,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `conversation_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -688,7 +667,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `with_conversation_id_override`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -703,7 +681,6 @@ impl IncomingHeaderSnapshot {
 
     /// 函数 `with_thread_affinity_override`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -769,7 +746,6 @@ fn is_safe_derived_session_id(value: &str) -> bool {
 
 /// 函数 `strict_bearer_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -789,7 +765,6 @@ fn strict_bearer_token(value: &str) -> Option<String> {
 
 /// 函数 `case_insensitive_bearer_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

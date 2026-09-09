@@ -758,7 +758,6 @@ fn prepare_gateway_candidates_does_not_filter_account_pool_by_legacy_mapping() {
 
 /// 函数 `allow_openai_fallback_for_account_accepts_individual_plan_tiers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -806,7 +805,6 @@ fn allow_openai_fallback_for_account_accepts_individual_plan_tiers() {
 
 /// 函数 `allow_openai_fallback_for_account_rejects_workspace_plans`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///

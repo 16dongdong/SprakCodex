@@ -48,7 +48,6 @@ pub const WEB_ACCESS_SESSION_COOKIE_NAME: &str = "codexmanager_web_auth";
 
 /// 函数 `parse_bool_with_default`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -67,7 +66,6 @@ pub(crate) fn parse_bool_with_default(raw: &str, default: bool) -> bool {
 
 /// 函数 `normalize_optional_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

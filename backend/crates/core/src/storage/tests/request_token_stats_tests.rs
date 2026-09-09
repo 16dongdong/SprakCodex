@@ -27,7 +27,6 @@ fn assert_uses_index(details: &[String], index_name: &str, label: &str) {
 
 /// 函数 `insert_rollup_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-28
 ///
@@ -92,7 +91,6 @@ fn insert_rollup_row(
 
 /// 函数 `assert_float_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-28
 ///
@@ -194,7 +192,6 @@ fn seed_usage_log(
 
 /// 函数 `summaries_for_selected_keys_include_rollups_and_respect_time_ranges`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-28
 ///
@@ -1862,7 +1859,6 @@ fn model_summaries_short_circuit_empty_optional_ranges() {
 
 /// 函数 `summaries_for_large_key_lists_use_temp_filter`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-28
 ///

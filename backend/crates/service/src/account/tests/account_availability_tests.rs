@@ -3,7 +3,6 @@ use codexmanager_core::storage::UsageSnapshotRecord;
 
 /// 函数 `snap`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +35,6 @@ fn snap(
 
 /// 函数 `availability_marks_missing_primary_unavailable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -56,7 +54,6 @@ fn availability_marks_missing_primary_unavailable() {
 
 /// 函数 `availability_marks_missing_secondary_available_when_both_secondary_fields_absent`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -76,7 +73,6 @@ fn availability_marks_missing_secondary_available_when_both_secondary_fields_abs
 
 /// 函数 `availability_marks_partial_secondary_missing_available`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +92,6 @@ fn availability_marks_partial_secondary_missing_available() {
 
 /// 函数 `availability_marks_exhausted_secondary_unavailable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -144,7 +139,6 @@ fn availability_rejects_expired_luna_reserve() {
 
 /// 函数 `availability_marks_ok_available`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

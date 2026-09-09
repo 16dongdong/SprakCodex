@@ -28,7 +28,6 @@ const UPDATE_LOG_MAX_FILE_SIZE: u64 = 512 * 1024;
 
 /// 函数 `append_update_runtime_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -70,7 +69,6 @@ pub(super) fn append_update_runtime_log(log_path: &std::path::Path, message: &st
 
 /// 函数 `updater_root_logs_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -87,7 +85,6 @@ fn updater_root_logs_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 
 /// 函数 `app_update_check`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -134,7 +131,6 @@ pub async fn app_update_check(app: tauri::AppHandle) -> Result<UpdateCheckRespon
 
 /// 函数 `app_update_prepare`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -166,7 +162,6 @@ pub async fn app_update_prepare(app: tauri::AppHandle) -> Result<UpdatePrepareRe
 
 /// 函数 `app_update_apply_portable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -182,7 +177,6 @@ pub fn app_update_apply_portable(app: tauri::AppHandle) -> Result<UpdateActionRe
 
 /// 函数 `app_update_launch_installer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -198,7 +192,6 @@ pub fn app_update_launch_installer(app: tauri::AppHandle) -> Result<UpdateAction
 
 /// 函数 `app_update_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -232,7 +225,6 @@ pub fn app_update_status(app: tauri::AppHandle) -> Result<UpdateStatusResponse, 
 
 /// 函数 `app_update_open_logs_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

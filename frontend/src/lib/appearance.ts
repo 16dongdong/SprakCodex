@@ -18,7 +18,6 @@ export const APPEARANCE_PRESETS = [
 /**
  * 函数 `normalizeAppearancePreset`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -37,7 +36,6 @@ export function normalizeAppearancePreset(
 /**
  * 函数 `applyAppearancePreset`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

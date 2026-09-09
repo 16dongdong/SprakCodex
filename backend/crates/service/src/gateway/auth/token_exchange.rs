@@ -31,7 +31,6 @@ static ACCOUNT_TOKEN_EXCHANGE_LOCKS: OnceLock<Mutex<AccountTokenExchangeLockTabl
 
 /// 函数 `account_token_exchange_lock`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +58,6 @@ pub(super) fn account_token_exchange_lock(account_id: &str) -> Arc<Mutex<()>> {
 
 /// 函数 `maybe_cleanup_exchange_locks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -247,7 +245,6 @@ pub(super) fn resolve_openai_bearer_token(
 
 /// 函数 `clear_account_token_exchange_locks_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

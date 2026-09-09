@@ -24,7 +24,6 @@ fn oauth_authorization(value: &str) -> super::super::primary_flow::PrimaryAuthor
 
 /// 函数 `build_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -51,7 +50,6 @@ fn build_account(id: &str, now: i64) -> Account {
 
 /// 函数 `build_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -627,7 +625,6 @@ fn chatgpt_responses_stripped_candidate_does_not_retry_without_session_headers_a
 
 /// 函数 `retries_server_error_once_before_final_decision`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

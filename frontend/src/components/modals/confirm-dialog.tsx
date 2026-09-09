@@ -27,7 +27,6 @@ interface ConfirmDialogProps {
 /**
  * 函数 `ConfirmDialog`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

@@ -17,7 +17,6 @@ const TRAY_MENU_QUIT_APP: &str = "tray_quit_app";
 
 /// 函数 `setup_tray`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

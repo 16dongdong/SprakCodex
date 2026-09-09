@@ -2,7 +2,6 @@ use crate::rpc_client::rpc_call;
 
 /// 函数 `rpc_call_in_background`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ pub(crate) async fn rpc_call_in_background(
 
 /// 函数 `open_in_browser_blocking`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -158,7 +156,6 @@ pub(crate) fn open_external_url_blocking(url: &str) -> Result<(), String> {
 
 /// 函数 `spawn_background_command`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -183,7 +180,6 @@ fn spawn_background_command(
 
 /// 函数 `open_in_file_manager_blocking`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

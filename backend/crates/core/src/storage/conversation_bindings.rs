@@ -59,7 +59,6 @@ fn active_conversation_binding_account_counts_sql() -> &'static str {
 impl Storage {
     /// 函数 `get_conversation_binding`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -97,7 +96,6 @@ impl Storage {
 
     /// 函数 `upsert_conversation_binding`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -201,7 +199,6 @@ impl Storage {
 
     /// 函数 `touch_conversation_binding`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -238,7 +235,6 @@ impl Storage {
 
     /// 函数 `delete_conversation_binding`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -263,7 +259,6 @@ impl Storage {
 
     /// 函数 `delete_conversation_bindings_for_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -284,7 +279,6 @@ impl Storage {
 
     /// 函数 `delete_stale_conversation_bindings`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -304,7 +298,6 @@ impl Storage {
 
     /// 函数 `active_conversation_binding_account_counts`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-07-09
     ///

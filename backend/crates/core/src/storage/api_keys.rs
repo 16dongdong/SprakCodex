@@ -83,7 +83,6 @@ const API_KEY_CODEX_PROFILE_CANDIDATE_SELECT_SQL: &str = "SELECT
 impl Storage {
     /// 函数 `insert_api_key`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -142,7 +141,6 @@ impl Storage {
 
     /// 函数 `list_api_keys`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -217,7 +215,6 @@ impl Storage {
 
     /// 函数 `list_api_keys_for_ids`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-05-28
     ///
@@ -247,7 +244,6 @@ impl Storage {
 
     /// 函数 `find_api_key_by_hash`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -269,7 +265,6 @@ impl Storage {
 
     /// 函数 `find_api_key_by_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -360,7 +355,6 @@ impl Storage {
 
     /// 函数 `update_api_key_last_used`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -386,7 +380,6 @@ impl Storage {
 
     /// 函数 `update_api_key_status`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -405,7 +398,6 @@ impl Storage {
 
     /// 函数 `update_api_key_rotation_config`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -450,7 +442,6 @@ impl Storage {
 
     /// 函数 `update_api_key_name`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -469,7 +460,6 @@ impl Storage {
 
     /// 函数 `update_api_key_model_slug`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -488,7 +478,6 @@ impl Storage {
 
     /// 函数 `update_api_key_model_config`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -553,7 +542,6 @@ impl Storage {
 
     /// 函数 `update_api_key_profile_config`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -632,7 +620,6 @@ impl Storage {
 
     /// 函数 `delete_api_key`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -653,7 +640,6 @@ impl Storage {
 
     /// 函数 `upsert_api_key_secret`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -679,7 +665,6 @@ impl Storage {
 
     /// 函数 `find_api_key_secret_by_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -701,7 +686,6 @@ impl Storage {
 
     /// 函数 `ensure_api_key_model_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -717,7 +701,6 @@ impl Storage {
 
     /// 函数 `ensure_api_key_reasoning_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -733,7 +716,6 @@ impl Storage {
 
     /// 函数 `ensure_api_key_rotation_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -768,7 +750,6 @@ impl Storage {
 
     /// 函数 `ensure_api_key_profiles_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -803,7 +784,6 @@ impl Storage {
 
     /// 函数 `ensure_api_key_service_tier_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -819,7 +799,6 @@ impl Storage {
 
     /// 函数 `ensure_api_key_secrets_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -847,7 +826,6 @@ impl Storage {
 
     /// 函数 `backfill_api_key_profiles`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1055,7 +1033,6 @@ fn api_key_summaries_for_ids_chunk_sql(key_condition: &str) -> String {
 
 /// 函数 `map_api_key_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

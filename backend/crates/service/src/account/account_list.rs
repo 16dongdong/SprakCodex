@@ -80,7 +80,6 @@ impl From<&Account> for AccountSummaryParts {
 
 /// 函数 `read_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -150,7 +149,6 @@ fn resolve_generated_import_labels(
 
 /// 函数 `to_account_summary_with_reason`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -226,7 +224,6 @@ fn to_account_summary_with_reason(
 
 /// 函数 `to_account_summaries`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -402,7 +399,6 @@ where
 
 /// 函数 `map_account_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

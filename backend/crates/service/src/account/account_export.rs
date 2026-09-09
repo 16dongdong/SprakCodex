@@ -92,7 +92,6 @@ impl AccountExportMode {
 
 /// 函数 `export_accounts_to_directory`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -181,7 +180,6 @@ pub(crate) fn export_accounts_to_directory(
 
 /// 函数 `export_accounts_data`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -383,7 +381,6 @@ fn load_export_agent_identities(
 
 /// 函数 `build_account_export_file_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -425,7 +422,6 @@ fn build_account_export_file_path(
 
 /// 函数 `build_account_export_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -488,7 +484,6 @@ fn build_account_export_payload(
 
 /// 函数 `sanitize_file_stem`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

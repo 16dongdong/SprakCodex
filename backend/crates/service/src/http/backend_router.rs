@@ -12,7 +12,6 @@ pub(crate) enum BackendRoute {
 
 /// 函数 `resolve_backend_route`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -42,7 +41,6 @@ pub(crate) fn resolve_backend_route(method: &str, path: &str) -> BackendRoute {
 
 /// 函数 `handle_backend_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

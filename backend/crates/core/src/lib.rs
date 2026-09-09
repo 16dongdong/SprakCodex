@@ -5,7 +5,6 @@ pub mod usage;
 
 /// 函数 `core_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -2,7 +2,6 @@ use super::{classify_message, ErrorCode};
 
 /// 函数 `classify_known_messages`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

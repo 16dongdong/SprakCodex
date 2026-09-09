@@ -41,7 +41,6 @@ pub(crate) struct UpstreamResponseBridgeResult {
 impl UpstreamResponseBridgeResult {
     /// 函数 `is_ok`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -67,7 +66,6 @@ impl UpstreamResponseBridgeResult {
 
     /// 函数 `error_message`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -98,7 +96,6 @@ impl UpstreamResponseBridgeResult {
 
 /// 函数 `merge_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -140,7 +137,6 @@ pub(in super::super) fn merge_usage(
 
 /// 函数 `usage_has_signal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -165,7 +161,6 @@ pub(in super::super) fn usage_has_signal(usage: &UpstreamResponseUsage) -> bool 
 
 /// 函数 `parse_usage_from_object`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -247,7 +242,6 @@ fn parse_usage_from_object(usage: Option<&Map<String, Value>>) -> UpstreamRespon
 
 /// 函数 `append_output_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -290,7 +284,6 @@ pub(in super::super) fn append_output_text(buffer: &mut String, text: &str) {
 
 /// 函数 `append_output_text_raw`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -326,7 +319,6 @@ pub(in super::super) fn append_output_text_raw(buffer: &mut String, text: &str) 
 
 /// 函数 `collect_response_output_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -395,7 +387,6 @@ fn collect_reasoning_text_fragment(value: &Value, output: &mut String) {
 
 /// 函数 `collect_response_reasoning_summary_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-21
 ///
@@ -462,7 +453,6 @@ pub(in super::super) fn collect_response_reasoning_summary_text(
 
 /// 函数 `output_text_limit_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -478,7 +468,6 @@ pub(in super::super) fn output_text_limit_bytes() -> usize {
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -498,7 +487,6 @@ pub(in super::super) fn reload_from_env() {
 
 /// 函数 `truncate_str_to_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -521,7 +509,6 @@ fn truncate_str_to_bytes(text: &str, max_bytes: usize) -> &str {
 
 /// 函数 `truncate_string_to_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -544,7 +531,6 @@ fn truncate_string_to_bytes(value: &mut String, max_bytes: usize) {
 
 /// 函数 `mark_output_text_truncated`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -584,7 +570,6 @@ fn mark_output_text_truncated(buffer: &mut String, limit: usize) {
 
 /// 函数 `collect_output_text_from_event_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -610,7 +595,6 @@ pub(in super::super) fn collect_output_text_from_event_fields(value: &Value, out
 
 /// 函数 `extract_output_text_from_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -652,7 +636,6 @@ fn extract_output_text_from_json(value: &Value) -> Option<String> {
 
 /// 函数 `parse_usage_from_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -674,7 +657,6 @@ pub(in super::super) fn parse_usage_from_json(value: &Value) -> UpstreamResponse
 
 /// 函数 `extract_error_message_from_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -686,7 +668,6 @@ pub(in super::super) fn parse_usage_from_json(value: &Value) -> UpstreamResponse
 pub(crate) fn extract_error_message_from_json(value: &Value) -> Option<String> {
     /// 函数 `extract_message_from_error_map`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -745,7 +726,6 @@ pub(crate) fn extract_error_message_from_json(value: &Value) -> Option<String> {
 
     /// 函数 `extract_message_from_error_value`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -803,7 +783,6 @@ pub(crate) fn extract_error_message_from_json(value: &Value) -> Option<String> {
 
 /// 函数 `extract_error_hint_from_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -845,7 +824,6 @@ pub(in super::super) fn extract_error_hint_from_body(
 
 /// 函数 `limit_upstream_error_hint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -869,7 +847,6 @@ fn limit_upstream_error_hint(raw: &str) -> String {
 
 /// 函数 `summarize_upstream_error_hint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -914,7 +891,6 @@ fn looks_like_cloudflare_challenge(status_code: u16, raw: &str) -> bool {
 
 /// 函数 `summarize_cloudflare_challenge`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -946,7 +922,6 @@ fn summarize_cloudflare_challenge(raw: &str) -> String {
 
 /// 函数 `extract_html_title`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -967,7 +942,6 @@ fn extract_html_title(raw: &str) -> Option<String> {
 
 /// 函数 `extract_object_string_field`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

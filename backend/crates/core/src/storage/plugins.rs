@@ -262,7 +262,6 @@ fn plugin_run_log_summary_list_sql(plugin_filter: bool, task_filter: bool) -> St
 impl Storage {
     /// 函数 `upsert_plugin_install`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -318,7 +317,6 @@ impl Storage {
 
     /// 函数 `replace_plugin_install`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -407,7 +405,6 @@ impl Storage {
 
     /// 函数 `list_plugin_installs`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -465,7 +462,6 @@ impl Storage {
 
     /// 函数 `find_plugin_install`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -544,7 +540,6 @@ impl Storage {
 
     /// 函数 `update_plugin_install_status`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -573,7 +568,6 @@ impl Storage {
 
     /// 函数 `update_plugin_install_last_run`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -602,7 +596,6 @@ impl Storage {
 
     /// 函数 `delete_plugin_install`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -622,7 +615,6 @@ impl Storage {
 
     /// 函数 `list_plugin_tasks`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -781,7 +773,6 @@ impl Storage {
 
     /// 函数 `find_plugin_task`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -808,7 +799,6 @@ impl Storage {
 
     /// 函数 `set_plugin_task_enabled`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -829,7 +819,6 @@ impl Storage {
 
     /// 函数 `update_plugin_task_definition`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -880,7 +869,6 @@ impl Storage {
 
     /// 函数 `update_plugin_task_schedule`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -918,7 +906,6 @@ impl Storage {
 
     /// 函数 `list_due_plugin_tasks`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -967,7 +954,6 @@ impl Storage {
 
     /// 函数 `insert_plugin_run_log`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -999,7 +985,6 @@ impl Storage {
 
     /// 函数 `list_plugin_run_logs`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1085,7 +1070,6 @@ impl Storage {
 
 /// 函数 `map_plugin_install_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1117,7 +1101,6 @@ fn map_plugin_install_row(row: &Row<'_>) -> Result<PluginInstall> {
 
 /// 函数 `map_plugin_task_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1148,7 +1131,6 @@ fn map_plugin_task_row(row: &Row<'_>) -> Result<PluginTask> {
 
 /// 函数 `map_plugin_run_log_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

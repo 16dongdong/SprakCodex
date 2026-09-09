@@ -14,7 +14,6 @@ pub(in super::super) enum CustomUpstreamStatusKind {
 
 /// 函数 `follow_up_action`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -37,7 +36,6 @@ pub(in super::super) fn follow_up_action(
 
 /// 函数 `classify_custom_upstream_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -59,7 +57,6 @@ pub(in super::super) fn classify_custom_upstream_status(
 
 /// 函数 `should_failover_after_fallback_non_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///

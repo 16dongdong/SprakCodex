@@ -5,7 +5,6 @@ use codexmanager_core::storage::{Account, Token};
 
 /// 函数 `build_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -27,7 +26,6 @@ fn build_token(access_token: &str) -> Token {
 
 /// 函数 `chatgpt_primary_bearer_prefers_access_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -47,7 +45,6 @@ fn chatgpt_primary_bearer_prefers_access_token() {
 
 /// 函数 `chatgpt_primary_bearer_rejects_empty_access_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

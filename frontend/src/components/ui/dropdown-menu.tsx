@@ -9,7 +9,6 @@ import { ChevronRightIcon, CheckIcon } from "lucide-react"
 /**
  * 函数 `DropdownMenu`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -26,7 +25,6 @@ function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
 /**
  * 函数 `DropdownMenuPortal`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -43,7 +41,6 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 /**
  * 函数 `DropdownMenuTrigger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -67,7 +64,6 @@ function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
 /**
  * 函数 `DropdownMenuContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -111,7 +107,6 @@ function DropdownMenuContent({
 /**
  * 函数 `DropdownMenuGroup`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -128,7 +123,6 @@ function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
 /**
  * 函数 `DropdownMenuLabel`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -161,7 +155,6 @@ function DropdownMenuLabel({
 /**
  * 函数 `DropdownMenuItem`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -197,7 +190,6 @@ function DropdownMenuItem({
 /**
  * 函数 `DropdownMenuSub`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -214,7 +206,6 @@ function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
 /**
  * 函数 `DropdownMenuSubTrigger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -252,7 +243,6 @@ function DropdownMenuSubTrigger({
 /**
  * 函数 `DropdownMenuSubContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -286,7 +276,6 @@ function DropdownMenuSubContent({
 /**
  * 函数 `DropdownMenuCheckboxItem`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -333,7 +322,6 @@ function DropdownMenuCheckboxItem({
 /**
  * 函数 `DropdownMenuRadioGroup`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -355,7 +343,6 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
 /**
  * 函数 `DropdownMenuRadioItem`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -400,7 +387,6 @@ function DropdownMenuRadioItem({
 /**
  * 函数 `DropdownMenuSeparator`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -426,7 +412,6 @@ function DropdownMenuSeparator({
 /**
  * 函数 `DropdownMenuShortcut`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

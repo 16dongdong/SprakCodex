@@ -9,7 +9,6 @@ use codexmanager_core::storage::Storage;
 
 /// 函数 `normalize_upstream_url_keeps_official_domains`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ fn normalize_upstream_url_keeps_official_domains() {
 
 /// 函数 `normalize_upstream_url_keeps_local_addresses`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -55,7 +53,6 @@ fn normalize_upstream_url_keeps_local_addresses() {
 
 /// 函数 `normalize_upstream_url_keeps_custom_addresses`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -74,7 +71,6 @@ fn normalize_upstream_url_keeps_custom_addresses() {
 
 /// 函数 `normalize_upstream_url_trims_empty_values`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -141,7 +137,6 @@ fn derive_size_reject_stage_distinguishes_local_and_upstream() {
 
 /// 函数 `request_log_list_params_default_to_first_page_with_twenty_items`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -162,7 +157,6 @@ fn request_log_list_params_default_to_first_page_with_twenty_items() {
 
 /// 函数 `normalize_status_filter_accepts_known_values`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -183,7 +177,6 @@ fn normalize_status_filter_accepts_known_values() {
 
 /// 函数 `normalize_optional_text_trims_blank_values`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

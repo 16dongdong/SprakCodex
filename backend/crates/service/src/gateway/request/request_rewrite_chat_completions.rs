@@ -6,7 +6,6 @@ use super::request_rewrite_shared::{
 
 /// 函数 `is_chat_completions_create_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -21,7 +20,6 @@ fn is_chat_completions_create_path(path: &str) -> bool {
 
 /// 函数 `is_stream_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +34,6 @@ fn is_stream_request(obj: &serde_json::Map<String, Value>) -> bool {
 
 /// 函数 `map_responses_role_to_chat`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -56,7 +53,6 @@ fn map_responses_role_to_chat(role: &str) -> &'static str {
 
 /// 函数 `value_to_string`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -77,7 +73,6 @@ fn value_to_string(value: &Value) -> Option<String> {
 
 /// 函数 `flatten_responses_message_content`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -143,7 +138,6 @@ fn flatten_responses_message_content(content: &Value) -> Option<Value> {
 
 /// 函数 `convert_responses_input_item_to_chat_messages`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -220,7 +214,6 @@ fn convert_responses_input_item_to_chat_messages(item: &Value, out: &mut Vec<Val
 
 /// 函数 `normalize_responses_tools_to_chat`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -270,7 +263,6 @@ fn normalize_responses_tools_to_chat(obj: &mut serde_json::Map<String, Value>) -
 
 /// 函数 `normalize_responses_tool_choice_to_chat`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -300,7 +292,6 @@ fn normalize_responses_tool_choice_to_chat(obj: &mut serde_json::Map<String, Val
 
 /// 函数 `normalize_responses_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -373,7 +364,6 @@ pub(super) fn normalize_responses_payload(
 
 /// 函数 `ensure_stream_usage_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -415,7 +405,6 @@ pub(super) fn ensure_stream_usage_override(
 
 /// 函数 `ensure_reasoning_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -454,7 +443,6 @@ pub(super) fn ensure_reasoning_effort(
 
 /// 函数 `apply_reasoning_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -483,7 +471,6 @@ pub(super) fn apply_reasoning_override(
 
 /// 函数 `is_supported_openai_chat_completions_create_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -533,7 +520,6 @@ fn is_supported_openai_chat_completions_create_key(key: &str) -> bool {
 
 /// 函数 `is_supported_openai_chat_completions_metadata_update_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -559,7 +545,6 @@ const CHAT_COMPLETIONS_ALLOWLISTS: &[TemplateAllowlist] = &[
 
 /// 函数 `retain_official_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

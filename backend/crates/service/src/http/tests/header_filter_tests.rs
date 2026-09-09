@@ -3,7 +3,6 @@ use axum::http::{HeaderName, HeaderValue};
 
 /// 函数 `request_header_filters_hop_by_hop_and_non_ascii`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ fn request_header_filters_hop_by_hop_and_non_ascii() {
 
 /// 函数 `request_header_keeps_ascii_turn_metadata`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -45,7 +43,6 @@ fn request_header_keeps_ascii_turn_metadata() {
 
 /// 函数 `request_header_keeps_normal_content_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -63,7 +60,6 @@ fn request_header_keeps_normal_content_type() {
 
 /// 函数 `response_header_filters_content_length_and_connection`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -30,7 +30,6 @@ const badgeVariants = cva(
 /**
  * 函数 `Badge`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

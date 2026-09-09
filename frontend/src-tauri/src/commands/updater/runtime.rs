@@ -15,7 +15,6 @@ pub(super) const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 /// 函数 `now_unix_secs`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -33,7 +32,6 @@ pub(super) fn now_unix_secs() -> u64 {
 
 /// 函数 `resolve_update_repo`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -52,7 +50,6 @@ pub(super) fn resolve_update_repo() -> String {
 
 /// 函数 `normalize_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -68,7 +65,6 @@ pub(super) fn normalize_version(input: &str) -> Result<Version, String> {
 
 /// 函数 `current_exe_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -83,7 +79,6 @@ pub(super) fn current_exe_path() -> Result<PathBuf, String> {
 
 /// 函数 `current_mode_and_marker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -112,7 +107,6 @@ pub(super) fn current_mode_and_marker() -> Result<(String, bool, PathBuf, PathBu
 
 /// 函数 `env_flag`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -133,7 +127,6 @@ fn env_flag(name: &str) -> Option<bool> {
 
 /// 函数 `should_include_prerelease_updates_with_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -151,7 +144,6 @@ pub(super) fn should_include_prerelease_updates_with_override(
 
 /// 函数 `should_include_prerelease_updates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -169,7 +161,6 @@ pub(super) fn should_include_prerelease_updates(current_version: &Version) -> bo
 
 /// 函数 `http_client`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -187,7 +178,6 @@ fn build_http_client() -> Result<Client, String> {
 
 /// 函数 `http_client`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -211,7 +201,6 @@ pub(super) fn http_client() -> Result<Client, String> {
 
 /// 函数 `resolve_github_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -240,7 +229,6 @@ mod tests {
 
     /// 函数 `prerelease_channel_defaults_to_stable_latest`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -272,7 +260,6 @@ mod tests {
 
     /// 函数 `normalize_version_accepts_v_prefix`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

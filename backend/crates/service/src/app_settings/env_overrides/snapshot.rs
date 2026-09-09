@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 
 /// 函数 `env_override_default_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -22,7 +21,6 @@ pub(super) fn env_override_default_value(key: &str) -> String {
 
 /// 函数 `env_override_default_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -41,7 +39,6 @@ pub(super) fn env_override_default_snapshot() -> BTreeMap<String, String> {
 
 /// 函数 `persisted_env_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -84,7 +81,6 @@ fn persisted_env_overrides(mut normalized: BTreeMap<String, String>) -> BTreeMap
 
 /// 函数 `persisted_env_overrides_only`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -99,7 +95,6 @@ pub(crate) fn persisted_env_overrides_only() -> BTreeMap<String, String> {
 
 /// 函数 `persisted_env_overrides_missing_process_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -117,7 +112,6 @@ pub(crate) fn persisted_env_overrides_missing_process_env() -> BTreeMap<String, 
 
 /// 函数 `current_env_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -136,7 +130,6 @@ pub(crate) fn current_env_overrides() -> BTreeMap<String, String> {
 
 /// 函数 `save_env_overrides_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

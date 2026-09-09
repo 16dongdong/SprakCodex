@@ -10,7 +10,6 @@ import { buttonVariants } from "@/components/ui/button"
 /**
  * 函数 `Dialog`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -27,7 +26,6 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
 /**
  * 函数 `DialogTrigger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -44,7 +42,6 @@ function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
 /**
  * 函数 `DialogPortal`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -77,7 +74,6 @@ function DialogViewport({
 /**
  * 函数 `DialogClose`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -94,7 +90,6 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
 /**
  * 函数 `DialogOverlay`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -123,7 +118,6 @@ function DialogOverlay({
 /**
  * 函数 `DialogContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -177,7 +171,6 @@ function DialogContent({
 /**
  * 函数 `DialogHeader`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -200,7 +193,6 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * 函数 `DialogFooter`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -243,7 +235,6 @@ function DialogFooter({
 /**
  * 函数 `DialogTitle`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -266,7 +257,6 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
 /**
  * 函数 `DialogDescription`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

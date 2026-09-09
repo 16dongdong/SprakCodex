@@ -50,7 +50,6 @@ pub(crate) struct WarmupAuthorization {
 
 /// 函数 `warmup_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-14
 ///

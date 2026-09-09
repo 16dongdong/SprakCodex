@@ -23,7 +23,6 @@ struct MainWindowHandle {
 
 /// 函数 `show_main_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -182,7 +181,6 @@ pub(crate) fn toggle_tray_preview_window(
 
 /// 函数 `ensure_main_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

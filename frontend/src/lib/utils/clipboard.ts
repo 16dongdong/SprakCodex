@@ -3,7 +3,6 @@
 /**
  * 函数 `legacyCopyText`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -54,7 +53,6 @@ function legacyCopyText(text: string): boolean {
 /**
  * 函数 `copyTextToClipboard`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

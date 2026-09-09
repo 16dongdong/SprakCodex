@@ -13,7 +13,6 @@ pub(crate) const MIN_GATEWAY_KEEPALIVE_INTERVAL_SECS: u64 = 30;
 
 /// 函数 `run_blocking_poll_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +58,6 @@ pub(crate) fn run_blocking_poll_loop<F, L>(
 
 /// 函数 `run_blocking_poll_loop_with_sleep`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -117,7 +115,6 @@ pub(crate) fn run_blocking_poll_loop_with_sleep<F, L, S, J>(
 
 /// 函数 `next_poll_delay`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -151,7 +148,6 @@ fn next_poll_delay(
 
 /// 函数 `next_failure_backoff`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -187,7 +183,6 @@ fn next_failure_backoff(
 
 /// 函数 `duration_from_millis`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -207,7 +202,6 @@ fn duration_from_millis(ms: u128) -> Duration {
 
 /// 函数 `parse_interval_secs`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

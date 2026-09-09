@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils"
 /**
  * 函数 `Card`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -36,7 +35,6 @@ function Card({
 /**
  * 函数 `CardHeader`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -62,7 +60,6 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * 函数 `CardTitle`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -88,7 +85,6 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * 函数 `CardDescription`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -111,7 +107,6 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * 函数 `CardAction`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -137,7 +132,6 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * 函数 `CardContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -160,7 +154,6 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * 函数 `CardFooter`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

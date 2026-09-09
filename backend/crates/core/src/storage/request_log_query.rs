@@ -18,7 +18,6 @@ pub(super) enum RequestLogQuery {
 
 /// 函数 `parse_request_log_query`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -42,7 +41,6 @@ pub(super) fn parse_request_log_query(query: Option<&str>) -> RequestLogQuery {
 
 /// 函数 `parse_prefixed_request_log_query`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -115,7 +113,6 @@ fn parse_prefixed_request_log_query(raw: &str) -> Option<RequestLogQuery> {
 
 /// 函数 `parse_match_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -141,7 +138,6 @@ fn parse_match_mode(raw: &str) -> Option<(bool, &str)> {
 
 /// 函数 `parse_field_query`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -174,7 +170,6 @@ fn parse_account_query(is_exact: bool, value: &str) -> RequestLogQuery {
 
 /// 函数 `parse_status_query`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

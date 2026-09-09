@@ -8,7 +8,6 @@ use codexmanager_core::storage::{now_ts, Account, Storage, Token, UsageSnapshotR
 
 /// 函数 `encode_base64url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -50,7 +49,6 @@ fn encode_base64url(bytes: &[u8]) -> String {
 
 /// 函数 `free_plan_detection_accepts_common_variants`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -68,7 +66,6 @@ fn free_plan_detection_accepts_common_variants() {
 
 /// 函数 `free_plan_detection_rejects_paid_or_unknown_variants`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -88,7 +85,6 @@ fn free_plan_detection_rejects_paid_or_unknown_variants() {
 
 /// 函数 `free_plan_detection_accepts_credits_json_marker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -105,7 +101,6 @@ fn free_plan_detection_accepts_credits_json_marker() {
 
 /// 函数 `extract_plan_type_from_credits_json_reads_nested_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -125,7 +120,6 @@ fn extract_plan_type_from_credits_json_reads_nested_value() {
 
 /// 函数 `extract_plan_type_from_id_token_reads_chatgpt_claim`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -156,7 +150,6 @@ fn extract_plan_type_from_id_token_reads_chatgpt_claim() {
 
 /// 函数 `single_window_long_usage_snapshot_counts_as_free_like`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -184,7 +177,6 @@ fn single_window_long_usage_snapshot_counts_as_free_like() {
 
 /// 函数 `free_or_single_window_account_accepts_weekly_single_window_without_plan_claim`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -241,7 +233,6 @@ fn free_or_single_window_account_accepts_weekly_single_window_without_plan_claim
 
 /// 函数 `normalize_plan_type_maps_known_variants`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -268,7 +259,6 @@ fn normalize_plan_type_maps_known_variants() {
 
 /// 函数 `resolve_account_plan_prefers_token_claims_and_falls_back_to_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -382,7 +372,6 @@ fn account_plan_filter_with_preloaded_snapshot_matches_usage_plan() {
 
 /// 函数 `account_plan_filter_unknown_accepts_unresolved_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-10
 ///

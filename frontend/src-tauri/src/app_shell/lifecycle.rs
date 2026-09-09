@@ -34,7 +34,6 @@ enum MainWindowCloseMode {
 
 /// 函数 `resolve_main_window_close_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -61,7 +60,6 @@ fn resolve_main_window_close_mode(
 
 /// 函数 `should_confirm_unsaved_settings_before_window_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +78,6 @@ fn should_confirm_unsaved_settings_before_window_close(
 
 /// 函数 `should_confirm_unsaved_settings_before_app_exit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -101,7 +98,6 @@ fn should_confirm_unsaved_settings_before_app_exit(
 
 /// 函数 `handle_main_window_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -200,7 +196,6 @@ pub(crate) fn handle_main_window_event(window: &tauri::Window, event: &tauri::Wi
 
 /// 函数 `handle_run_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -254,7 +249,6 @@ mod tests {
 
     /// 函数 `resolves_main_window_close_modes`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -285,7 +279,6 @@ mod tests {
 
     /// 函数 `confirms_window_close_only_when_window_destroy_would_drop_drafts`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -316,7 +309,6 @@ mod tests {
 
     /// 函数 `confirms_app_exit_only_when_unsaved_drafts_would_be_lost`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

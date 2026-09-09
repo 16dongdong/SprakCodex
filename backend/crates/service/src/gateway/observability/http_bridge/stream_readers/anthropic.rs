@@ -66,7 +66,6 @@ impl AnthropicSseReader {
 
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -93,7 +92,6 @@ impl AnthropicSseReader {
 
     /// 函数 `next_chunk`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -176,7 +174,6 @@ impl AnthropicSseReader {
 
     /// 函数 `process_sse_frame`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -211,7 +208,6 @@ impl AnthropicSseReader {
 
     /// 函数 `consume_openai_event`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -370,7 +366,6 @@ impl AnthropicSseReader {
 
     /// 函数 `capture_response_meta`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -469,7 +464,6 @@ impl AnthropicSseReader {
 
     /// 函数 `ensure_message_start`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -512,7 +506,6 @@ impl AnthropicSseReader {
 
     /// 函数 `ensure_text_block_start`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -545,7 +538,6 @@ impl AnthropicSseReader {
 
     /// 函数 `close_text_block`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -571,7 +563,6 @@ impl AnthropicSseReader {
 
     /// 函数 `finish_stream`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -626,7 +617,6 @@ impl AnthropicSseReader {
 impl Read for AnthropicSseReader {
     /// 函数 `read`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -653,7 +643,6 @@ impl Read for AnthropicSseReader {
 
 /// 函数 `append_sse_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -680,7 +669,6 @@ mod tests;
 
 /// 函数 `build_anthropic_usage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -723,7 +711,6 @@ fn build_anthropic_usage(
 
 /// 函数 `extract_function_call_input`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -764,7 +751,6 @@ fn extract_function_call_input(item_obj: &Map<String, Value>) -> Option<Value> {
 
 /// 函数 `tool_input_partial_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

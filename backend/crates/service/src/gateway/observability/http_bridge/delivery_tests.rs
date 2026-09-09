@@ -97,7 +97,6 @@ fn responses_from_anthropic_streaming_uses_manual_chunked_delivery() {
 
 /// 函数 `compact_header_only_identity_error_is_normalized_and_classified`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -130,7 +129,6 @@ fn compact_header_only_identity_error_is_normalized_and_classified() {
 
 /// 函数 `compact_header_only_cf_ray_is_classified_as_cloudflare_edge`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

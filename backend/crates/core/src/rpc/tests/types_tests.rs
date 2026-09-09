@@ -10,7 +10,6 @@ use super::{
 
 /// 函数 `account_summary_serialization_matches_compact_contract`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -88,7 +87,6 @@ fn account_summary_serialization_matches_compact_contract() {
 
 /// 函数 `account_list_result_serialization_includes_pagination_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -155,7 +153,6 @@ fn account_list_result_serialization_includes_pagination_fields() {
 
 /// 函数 `request_log_summary_serialization_includes_trace_route_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -239,7 +236,6 @@ fn request_log_summary_serialization_includes_trace_route_fields() {
 
 /// 函数 `request_log_list_params_default_to_first_page_with_twenty_items`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -260,7 +256,6 @@ fn request_log_list_params_default_to_first_page_with_twenty_items() {
 
 /// 函数 `request_log_list_result_serialization_includes_pagination_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -325,7 +320,6 @@ fn request_log_list_result_serialization_includes_pagination_fields() {
 
 /// 函数 `request_log_filter_summary_serialization_uses_camel_case`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -363,7 +357,6 @@ fn request_log_filter_summary_serialization_uses_camel_case() {
 
 /// 函数 `api_key_usage_stat_summary_serialization_uses_camel_case`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

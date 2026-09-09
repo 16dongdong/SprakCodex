@@ -52,7 +52,6 @@ fn usage_refresh_prefers_chatgpt_account_id_over_workspace_fallback() {
 
 /// 函数 `unique_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -71,7 +70,6 @@ fn unique_id(prefix: &str) -> String {
 
 /// 函数 `apply_status_missing_snapshot_keeps_account_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -123,7 +121,6 @@ fn apply_status_missing_snapshot_keeps_account_status() {
 
 /// 函数 `apply_status_skips_db_and_event_when_status_unchanged`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -198,7 +195,6 @@ fn apply_status_skips_db_and_event_when_status_unchanged() {
 
 /// 函数 `apply_status_exhausted_snapshot_marks_account_limited`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-19
 ///
@@ -304,7 +300,6 @@ fn apply_status_preserves_force_enabled_account_after_exhaustion() {
 
 /// 函数 `apply_status_available_snapshot_recovers_limited_account_to_active`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-19
 ///
@@ -403,7 +398,6 @@ fn apply_status_available_snapshot_reuses_existing_usage_ok_reason() {
 
 /// 函数 `mark_usage_unreachable_marks_401_403_as_unavailable_but_ignores_429`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -566,7 +560,6 @@ fn mark_usage_unreachable_marks_401_403_as_unavailable_but_ignores_429() {
 
 /// 函数 `mark_usage_unreachable_does_not_override_manual_disabled_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -608,7 +601,6 @@ fn mark_usage_unreachable_does_not_override_manual_disabled_status() {
 
 /// 函数 `apply_status_available_preserves_manual_disabled_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -718,7 +710,6 @@ fn apply_status_available_recovers_region_blocked_status() {
 
 /// 函数 `refresh_token_auth_error_marks_account_unavailable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -759,7 +750,6 @@ fn refresh_token_auth_error_marks_account_unavailable() {
 
 /// 函数 `refresh_token_forbidden_without_invalid_grant_keeps_account_active`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -839,7 +829,6 @@ fn refresh_token_region_blocked_forbidden_marks_account_unavailable() {
 
 /// 函数 `refresh_token_invalid_grant_on_forbidden_keeps_account_active`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -880,7 +869,6 @@ fn refresh_token_invalid_grant_on_forbidden_keeps_account_active() {
 
 /// 函数 `refresh_token_invalid_grant_on_bad_request_marks_account_unavailable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-03
 ///
@@ -960,7 +948,6 @@ fn refresh_token_app_session_terminated_on_bad_request_marks_account_unavailable
 
 /// 未分类刷新拒绝不应改变账号状态
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1001,7 +988,6 @@ fn refresh_token_unknown_401_preserves_account_state() {
 
 /// 函数 `deactivation_reason_detects_workspace_and_account_scope`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1040,7 +1026,6 @@ fn deactivation_reason_detects_workspace_and_account_scope() {
 
 /// 函数 `deactivation_error_marks_account_banned`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1081,7 +1066,6 @@ fn deactivation_error_marks_account_banned() {
 
 /// 函数 `generic_deactivated_error_marks_account_banned`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1130,7 +1114,6 @@ fn generic_deactivated_error_marks_account_banned() {
 
 /// 函数 `auth_error_deactivated_marks_account_banned`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1181,7 +1164,6 @@ fn auth_error_deactivated_marks_account_banned() {
 
 /// 函数 `deactivation_error_updates_reason_for_existing_unavailable_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1239,7 +1221,6 @@ fn deactivation_error_updates_reason_for_existing_unavailable_account() {
 
 /// 函数 `deactivation_error_preserves_manual_disabled_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1281,7 +1262,6 @@ fn deactivation_error_preserves_manual_disabled_status() {
 
 /// 函数 `refresh_retry_filter_matches_auth_failures`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1299,7 +1279,6 @@ fn refresh_retry_filter_matches_auth_failures() {
 
 /// 函数 `usage_refresh_failure_events_are_throttled_by_error_class`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1343,7 +1322,6 @@ fn usage_refresh_failure_events_are_throttled_by_error_class() {
 
 /// 函数 `usage_refresh_failure_throttle_splits_401_reason_classes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -5,7 +5,6 @@ use super::normalize_optional_text;
 
 /// 函数 `open_app_settings_storage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -22,7 +21,6 @@ pub(crate) fn open_app_settings_storage() -> Option<crate::storage_helpers::Stor
 
 /// 函数 `list_app_settings_map`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -41,7 +39,6 @@ pub(crate) fn list_app_settings_map() -> HashMap<String, String> {
 
 /// 函数 `get_persisted_app_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -58,7 +55,6 @@ pub(crate) fn get_persisted_app_setting(key: &str) -> Option<String> {
 
 /// 函数 `save_persisted_app_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -78,7 +74,6 @@ pub(crate) fn save_persisted_app_setting(key: &str, value: Option<&str>) -> Resu
 
 /// 函数 `save_persisted_bool_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

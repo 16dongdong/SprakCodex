@@ -22,7 +22,6 @@ use super::{
 
 /// 函数 `usage_polling_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +58,6 @@ pub(super) fn usage_polling_loop() {
 
 /// 函数 `gateway_keepalive_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +94,6 @@ pub(super) fn gateway_keepalive_loop() {
 
 /// 函数 `token_refresh_polling_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -217,7 +214,6 @@ pub(super) fn warmup_cron_loop() {
 
 /// 函数 `parse_interval_with_fallback`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -329,7 +325,6 @@ struct CronSchedule {
 
 /// 函数 `run_dynamic_poll_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -445,7 +440,6 @@ fn should_recalculate_dynamic_poll_delay(
 
 /// 函数 `next_dynamic_poll_delay`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -479,7 +473,6 @@ fn next_dynamic_poll_delay(
 
 /// 函数 `next_dynamic_failure_backoff`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

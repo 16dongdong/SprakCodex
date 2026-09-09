@@ -12,7 +12,6 @@ pub(in super::super) enum CandidateSkipReason {
 
 /// 函数 `prepare_gateway_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -199,7 +198,6 @@ fn request_exceeds_free_account_model_ceiling(
 
 /// 函数 `allow_openai_fallback_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -227,7 +225,6 @@ pub(in super::super) fn allow_openai_fallback_for_account_with_snapshot(
 
 /// 函数 `candidate_skip_reason_for_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

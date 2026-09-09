@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `spa_route_fallback_uses_html_content_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -27,7 +26,6 @@ fn spa_route_fallback_uses_html_content_type() {
 
 /// 函数 `directory_route_prefers_embedded_directory_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -19,7 +19,6 @@ static UPDATER_STATE: OnceLock<Mutex<UpdaterState>> = OnceLock::new();
 
 /// 函数 `updater_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ fn updater_state() -> &'static Mutex<UpdaterState> {
 
 /// 函数 `set_last_check`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -52,7 +50,6 @@ pub(super) fn set_last_check(check: UpdateCheckResponse) {
 
 /// 函数 `set_last_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -69,7 +66,6 @@ pub(super) fn set_last_error(message: String) {
 
 /// 函数 `clear_last_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +82,6 @@ pub(super) fn clear_last_error() {
 
 /// 函数 `snapshot_last_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -105,7 +100,6 @@ pub(super) fn snapshot_last_state() -> (Option<UpdateCheckResponse>, Option<Stri
 
 /// 函数 `updates_root_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -126,7 +120,6 @@ pub(super) fn updates_root_dir(app: &tauri::AppHandle) -> Result<PathBuf, String
 
 /// 函数 `pending_update_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -141,7 +134,6 @@ pub(super) fn pending_update_path(app: &tauri::AppHandle) -> Result<PathBuf, Str
 
 /// 函数 `read_pending_update`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -163,7 +155,6 @@ pub(super) fn read_pending_update(app: &tauri::AppHandle) -> Result<Option<Pendi
 
 /// 函数 `write_pending_update`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -187,7 +178,6 @@ pub(super) fn write_pending_update(
 
 /// 函数 `clear_pending_update`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -272,7 +262,6 @@ fn pending_update_is_applied(pending: &PendingUpdate) -> bool {
 
 /// 函数 `script_dir_from_pending`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

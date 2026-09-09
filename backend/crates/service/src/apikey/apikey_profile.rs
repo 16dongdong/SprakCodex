@@ -9,7 +9,6 @@ pub(crate) const ROTATION_ACCOUNT: &str = "account_rotation";
 
 /// 函数 `normalize_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ fn normalize_key(value: &str) -> String {
 
 /// 函数 `is_anthropic_request_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -78,7 +76,6 @@ pub(crate) fn is_gemini_request_path(path: &str) -> bool {
 
 /// 函数 `resolve_gateway_protocol_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///

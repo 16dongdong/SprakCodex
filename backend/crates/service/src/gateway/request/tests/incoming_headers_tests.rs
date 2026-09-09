@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `strict_bearer_parsing_matches_auth_extraction_behavior`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -20,7 +19,6 @@ fn strict_bearer_parsing_matches_auth_extraction_behavior() {
 
 /// 函数 `case_insensitive_bearer_parsing_matches_sticky_derivation_behavior`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -45,7 +43,6 @@ fn case_insensitive_bearer_parsing_matches_sticky_derivation_behavior() {
 
 /// 函数 `goog_api_key_header_is_accepted_as_platform_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -129,7 +126,6 @@ fn current_codex_hyphenated_headers_are_captured_from_tiny_http_requests() {
 
 /// 函数 `codex_headers_are_captured_from_http_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-11
 ///

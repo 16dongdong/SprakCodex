@@ -27,7 +27,6 @@ pub(super) struct ResolvedUpdateContext {
 
 /// 函数 `append_prepare_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -43,7 +42,6 @@ fn append_prepare_log(log_path: &Path, message: &str) {
 
 /// 函数 `portable_asset_names_for_platform`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -75,7 +73,6 @@ pub(super) fn portable_asset_names_for_platform(latest_version: &str) -> Vec<Str
 
 /// 函数 `macos_current_arch_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +93,6 @@ fn macos_current_arch_tokens() -> &'static [&'static str] {
 
 /// 函数 `is_dmg_asset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -111,7 +107,6 @@ fn is_dmg_asset(name: &str) -> bool {
 
 /// 函数 `dmg_name_has_arch_suffix`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -131,7 +126,6 @@ fn dmg_name_has_arch_suffix(name: &str, suffix: &str) -> bool {
 
 /// 函数 `select_macos_dmg_asset_for_arch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -189,7 +183,6 @@ fn select_macos_dmg_asset_for_arch(
 
 /// 函数 `select_payload_asset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -258,7 +251,6 @@ fn select_payload_asset(
 
 /// 函数 `sanitize_tag`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -287,7 +279,6 @@ fn sanitize_tag(tag: &str) -> String {
 
 /// 函数 `download_to_file`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -318,7 +309,6 @@ fn download_to_file(client: &Client, url: &str, target: &Path) -> Result<(), Str
 
 /// 函数 `extract_zip_archive`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -362,7 +352,6 @@ fn extract_zip_archive(zip_path: &Path, target_dir: &Path) -> Result<(), String>
 
 /// 函数 `stage_portable_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -405,7 +394,6 @@ fn stage_portable_payload(
 
 /// 函数 `detach_macos_dmg_mount`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -431,7 +419,6 @@ fn detach_macos_dmg_mount(mount_dir: &Path) -> Result<(), String> {
 
 /// 函数 `find_first_app_bundle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -472,7 +459,6 @@ fn find_first_app_bundle(root: &Path) -> Result<PathBuf, String> {
 
 /// 函数 `copy_macos_app_bundle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -506,7 +492,6 @@ fn copy_macos_app_bundle(source: &Path, target: &Path) -> Result<(), String> {
 
 /// 函数 `stage_macos_dmg_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -591,7 +576,6 @@ fn stage_macos_dmg_payload(
 
 /// 函数 `resolve_update_context`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -649,7 +633,6 @@ pub(super) fn resolve_update_context() -> Result<ResolvedUpdateContext, String> 
 
 /// 函数 `prepare_update_impl`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -760,7 +743,6 @@ mod tests {
 
     /// 函数 `portable_asset_names_include_current_workflow_artifact`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -787,7 +769,6 @@ mod tests {
 
     /// 函数 `sanitize_tag_replaces_unsafe_characters`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -803,7 +784,6 @@ mod tests {
 
     /// 函数 `macos_dmg_selection_prefers_matching_arch_suffix`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -832,7 +812,6 @@ mod tests {
 
     /// 函数 `macos_dmg_selection_falls_back_to_generic_dmg`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

@@ -82,7 +82,6 @@ pub(crate) struct RpcRequestGuard {
 impl Drop for GatewayRequestGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -99,7 +98,6 @@ impl Drop for GatewayRequestGuard {
 impl Drop for RpcRequestGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -120,7 +118,6 @@ impl Drop for RpcRequestGuard {
 impl RpcRequestGuard {
     /// 函数 `mark_success`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -136,7 +133,6 @@ impl RpcRequestGuard {
 
 /// 函数 `begin_gateway_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -153,7 +149,6 @@ pub(crate) fn begin_gateway_request() -> GatewayRequestGuard {
 
 /// 函数 `begin_rpc_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -172,7 +167,6 @@ pub(crate) fn begin_rpc_request() -> RpcRequestGuard {
 
 /// 函数 `record_gateway_failover_attempt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -187,7 +181,6 @@ pub(crate) fn record_gateway_failover_attempt() {
 
 /// 函数 `record_gateway_candidate_skip`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -210,7 +203,6 @@ pub(crate) fn record_gateway_candidate_skip(reason: GatewayCandidateSkipReason) 
 
 /// 函数 `record_gateway_cooldown_mark`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -225,7 +217,6 @@ pub(crate) fn record_gateway_cooldown_mark() {
 
 /// 函数 `record_usage_refresh_outcome`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -246,7 +237,6 @@ pub(crate) fn record_usage_refresh_outcome(success: bool, duration_ms: u64) {
 
 /// 函数 `record_db_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -264,7 +254,6 @@ pub(crate) fn record_db_error(err: &str) {
 
 /// 函数 `record_http_queue_capacity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -280,7 +269,6 @@ pub(crate) fn record_http_queue_capacity(normal_capacity: usize, stream_capacity
 
 /// 函数 `record_http_queue_enqueue`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -299,7 +287,6 @@ pub(crate) fn record_http_queue_enqueue(is_stream_queue: bool) {
 
 /// 函数 `record_http_queue_dequeue`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -318,7 +305,6 @@ pub(crate) fn record_http_queue_dequeue(is_stream_queue: bool) {
 
 /// 函数 `record_http_queue_enqueue_failure`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -333,7 +319,6 @@ pub(crate) fn record_http_queue_enqueue_failure() {
 
 /// 函数 `record_gateway_upstream_attempt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -352,7 +337,6 @@ pub(crate) fn record_gateway_upstream_attempt(duration_ms: u64, failed: bool) {
 
 /// 函数 `record_gateway_request_outcome`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -379,7 +363,6 @@ pub(crate) fn record_gateway_request_outcome(
 
 /// 函数 `duration_to_millis`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -394,7 +377,6 @@ pub(crate) fn duration_to_millis(duration: Duration) -> u64 {
 
 /// 函数 `account_inflight_total`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -411,7 +393,6 @@ fn account_inflight_total() -> usize {
 
 /// 函数 `gateway_metrics_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -455,7 +436,6 @@ pub(crate) fn gateway_metrics_snapshot() -> GatewayMetricsSnapshot {
 
 /// 函数 `gateway_metrics_prometheus`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -529,7 +509,6 @@ codexmanager_gateway_upstream_attempt_errors_total {}\n\
 
 /// 函数 `gateway_labeled_metrics_prometheus`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -556,7 +535,6 @@ fn gateway_labeled_metrics_prometheus() -> String {
 
 /// 函数 `classify_gateway_route`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -593,7 +571,6 @@ fn classify_gateway_route(path: &str) -> &'static str {
 
 /// 函数 `classify_status_class`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -615,7 +592,6 @@ fn classify_status_class(status_code: u16) -> &'static str {
 
 /// 函数 `classify_protocol`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -648,7 +624,6 @@ fn classify_protocol(protocol_type: Option<&str>) -> &'static str {
 
 /// 函数 `account_inflight_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -670,7 +645,6 @@ pub(crate) struct AccountInFlightGuard {
 impl Drop for AccountInFlightGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -694,7 +668,6 @@ impl Drop for AccountInFlightGuard {
 
 /// 函数 `acquire_account_inflight`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -715,7 +688,6 @@ pub(crate) fn acquire_account_inflight(account_id: &str) -> AccountInFlightGuard
 
 /// 函数 `atomic_dec_saturating`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -744,7 +716,6 @@ fn atomic_dec_saturating(value: &AtomicUsize) {
 
 /// 函数 `is_db_busy_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

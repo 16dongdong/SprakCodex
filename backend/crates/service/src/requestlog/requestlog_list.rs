@@ -40,7 +40,6 @@ impl NormalizedRequestLogParams {
 
 /// 函数 `normalize_upstream_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -113,7 +112,6 @@ fn derive_size_reject_stage(status_code: Option<i64>, error: Option<&str>) -> St
 
 /// 函数 `read_request_logs`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -165,7 +163,6 @@ pub(crate) fn read_request_logs_for_key_ids_with_storage(
 
 /// 函数 `read_request_log_page`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -348,7 +345,6 @@ fn read_request_log_page_for_key_ids_with_normalized_total(
 
 /// 函数 `normalize_optional_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -367,7 +363,6 @@ pub(crate) fn normalize_optional_text(value: Option<String>) -> Option<String> {
 
 /// 函数 `normalize_status_filter`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -403,7 +398,6 @@ pub(crate) fn normalize_time_range(
 
 /// 函数 `normalize_page_size`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -426,7 +420,6 @@ fn normalize_summary_limit(value: Option<i64>) -> i64 {
 
 /// 函数 `clamp_page`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -449,7 +442,6 @@ fn clamp_page(page: i64, total: i64, page_size: i64) -> i64 {
 
 /// 函数 `to_request_log_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -4,7 +4,6 @@ use super::state::current_unsaved_settings_draft_sections;
 
 /// 函数 `format_unsaved_settings_discard_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ fn format_unsaved_settings_discard_message(
 
 /// 函数 `confirm_discard_unsaved_settings`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +58,6 @@ fn confirm_discard_unsaved_settings(action_label: &str) -> bool {
 
 /// 函数 `confirm_discard_unsaved_settings_for_window_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -75,7 +72,6 @@ pub(crate) fn confirm_discard_unsaved_settings_for_window_close() -> bool {
 
 /// 函数 `confirm_discard_unsaved_settings_for_app_exit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -94,7 +90,6 @@ mod tests {
 
     /// 函数 `omits_prompt_when_no_unsaved_sections`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -110,7 +105,6 @@ mod tests {
 
     /// 函数 `formats_unsaved_sections_prompt_with_action`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

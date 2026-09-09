@@ -33,7 +33,6 @@ pub(super) fn delete_account_metadata_for_account_sql() -> &'static str {
 impl Storage {
     /// 函数 `upsert_account_metadata`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -73,7 +72,6 @@ impl Storage {
 
     /// 函数 `find_account_metadata`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -95,7 +93,6 @@ impl Storage {
 
     /// 函数 `list_account_metadata`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -134,7 +131,6 @@ impl Storage {
 
 /// 函数 `normalize_optional_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -152,7 +148,6 @@ fn normalize_optional_text(value: Option<&str>) -> Option<String> {
 
 /// 函数 `map_account_metadata_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -7,7 +7,6 @@ use std::collections::HashMap;
 
 /// 函数 `clean_header_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ pub(crate) fn clean_header_value(value: Option<String>) -> Option<String> {
 
 /// 函数 `resolve_workspace_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -52,7 +50,6 @@ fn resolve_workspace_header(
 
 /// 函数 `workspace_header_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -70,7 +67,6 @@ pub(crate) fn workspace_header_for_account(account: &Account) -> Option<String> 
 
 /// 函数 `build_workspace_map_from_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -93,7 +89,6 @@ pub(crate) fn build_workspace_map_from_accounts(
 
 /// 函数 `resolve_workspace_id_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -117,7 +112,6 @@ pub(crate) fn resolve_workspace_id_for_account(
 
 /// 函数 `derive_account_meta`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -163,7 +157,6 @@ pub(crate) fn derive_account_meta(token: &Token) -> (Option<String>, Option<Stri
 
 /// 函数 `patch_account_meta`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -197,7 +190,6 @@ pub(crate) fn patch_account_meta(
 
 /// 函数 `patch_account_meta_cached`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -231,7 +223,6 @@ pub(crate) fn patch_account_meta_cached(
 
 /// 函数 `patch_account_meta_in_place`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -250,7 +241,6 @@ pub(crate) fn patch_account_meta_in_place(
 
 /// 函数 `is_invalid_upstream_scope_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -270,7 +260,6 @@ fn is_invalid_upstream_scope_value(value: &str) -> bool {
 
 /// 函数 `apply_account_meta_patch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

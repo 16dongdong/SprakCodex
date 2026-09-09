@@ -9,7 +9,6 @@ static UPSTREAM_FALLBACK_BASE_URL: OnceLock<RwLock<Option<String>>> = OnceLock::
 
 /// 函数 `normalize_upstream_base_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ pub(in super::super) fn normalize_upstream_base_url(base: &str) -> String {
 
 /// 函数 `resolve_upstream_base_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -48,7 +46,6 @@ pub(in super::super) fn resolve_upstream_base_url() -> String {
 
 /// 函数 `resolve_upstream_fallback_base_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -64,7 +61,6 @@ pub(in super::super) fn resolve_upstream_fallback_base_url(primary_base: &str) -
 
 /// 函数 `is_openai_api_base`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +76,6 @@ pub(in super::super) fn is_openai_api_base(base: &str) -> bool {
 
 /// 函数 `is_chatgpt_backend_base`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -97,7 +92,6 @@ pub(in super::super) fn is_chatgpt_backend_base(base: &str) -> bool {
 
 /// 函数 `should_send_chatgpt_account_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -114,7 +108,6 @@ pub(in super::super) fn should_send_chatgpt_account_header(base: &str) -> bool {
 
 /// 函数 `is_official_openai_target`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -129,7 +122,6 @@ pub(in super::super) fn is_official_openai_target(base: &str) -> bool {
 
 /// 函数 `should_try_openai_fallback`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -149,7 +141,6 @@ pub(in super::super) fn should_try_openai_fallback(
 
 /// 函数 `should_try_openai_fallback_by_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -169,7 +160,6 @@ pub(in super::super) fn should_try_openai_fallback_by_status(
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -194,7 +184,6 @@ pub(in super::super) fn reload_from_env() {
 
 /// 函数 `ensure_config_loaded`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -209,7 +198,6 @@ fn ensure_config_loaded() {
 
 /// 函数 `upstream_base_url_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -224,7 +212,6 @@ fn upstream_base_url_cell() -> &'static RwLock<String> {
 
 /// 函数 `upstream_fallback_base_url_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -239,7 +226,6 @@ fn upstream_fallback_base_url_cell() -> &'static RwLock<Option<String>> {
 
 /// 函数 `env_non_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -4,7 +4,6 @@ use std::time::{Duration, Instant};
 
 /// 函数 `same_scope_reuses_same_lock_instance`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ fn same_scope_reuses_same_lock_instance() {
 
 /// 函数 `different_scope_uses_different_lock_instances`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -44,7 +42,6 @@ fn different_scope_uses_different_lock_instances() {
 
 /// 函数 `stale_unshared_lock_entry_is_reclaimed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -79,7 +76,6 @@ fn stale_unshared_lock_entry_is_reclaimed() {
 
 /// 函数 `stale_shared_lock_entry_is_not_reclaimed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

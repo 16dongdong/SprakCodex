@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `should_spawn_service`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ fn service_probe_client() -> Result<reqwest::Client, String> {
 
 /// 函数 `service_rpc_probe`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -99,7 +97,6 @@ async fn service_rpc_probe(
 
 /// 函数 `shutdown_existing_service`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -126,7 +123,6 @@ async fn shutdown_existing_service(service_addr: &str) -> bool {
 
 /// 函数 `tcp_probe`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -155,7 +151,6 @@ pub(super) async fn tcp_probe(addr: &str) -> bool {
 
 /// 函数 `service_bin_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -177,7 +172,6 @@ fn service_bin_path(dir: &Path) -> PathBuf {
 
 /// 函数 `spawn_service_detached`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -206,7 +200,6 @@ fn spawn_service_detached(dir: &Path, service_addr: &str) -> std::io::Result<()>
 
 /// 函数 `ensure_service_running`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -285,7 +278,6 @@ pub(super) async fn ensure_service_running(
 
 /// 函数 `rpc_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -459,7 +451,6 @@ fn gateway_proxy_max_body_bytes() -> usize {
 
 /// 函数 `gateway_proxy_target_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -479,7 +470,6 @@ fn gateway_proxy_target_url(service_addr: &str, uri: &axum::http::Uri) -> String
 
 /// 函数 `is_hop_by_hop_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -501,7 +491,6 @@ fn is_hop_by_hop_header(name: &str) -> bool {
 
 /// 函数 `should_skip_gateway_request_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -521,7 +510,6 @@ fn should_skip_gateway_request_header(name: &header::HeaderName, value: &HeaderV
 
 /// 函数 `should_skip_gateway_response_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -537,7 +525,6 @@ fn should_skip_gateway_response_header(name: &header::HeaderName) -> bool {
 
 /// 函数 `gateway_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -610,7 +597,6 @@ pub(super) async fn gateway_proxy(
 
 /// 函数 `format_upstream_error_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-10
 ///
@@ -632,7 +618,6 @@ fn format_upstream_error_message(service_addr: &str, err: impl std::fmt::Display
 
 /// 函数 `quit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

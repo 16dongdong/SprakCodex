@@ -19,7 +19,6 @@ static RPC_TEST_DIR_SEQ: AtomicUsize = AtomicUsize::new(0);
 
 /// 函数 `new_test_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -47,7 +46,6 @@ struct RpcTestContext {
 impl RpcTestContext {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -74,7 +72,6 @@ impl RpcTestContext {
 
     /// 函数 `db_path`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -89,7 +86,6 @@ impl RpcTestContext {
 
     /// 函数 `seed_accounts`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -126,7 +122,6 @@ impl RpcTestContext {
 impl Drop for RpcTestContext {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -142,7 +137,6 @@ impl Drop for RpcTestContext {
 
 /// 函数 `post_rpc_raw`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -180,7 +174,6 @@ fn post_rpc_raw(addr: &str, body: &str, headers: &[(&str, &str)]) -> (u16, Strin
 
 /// 函数 `post_rpc`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -268,7 +261,6 @@ fn wait_for_account_proxy_test_job(account_id: &str, job_id: &str) -> serde_json
 
 /// 函数 `encode_base64url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -310,7 +302,6 @@ fn encode_base64url(bytes: &[u8]) -> String {
 
 /// 函数 `build_access_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -348,7 +339,6 @@ fn build_access_token(
 
 /// 函数 `start_mock_oauth_token_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -504,7 +494,6 @@ struct RecordedRequest {
 
 /// 函数 `start_mock_device_login_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -771,7 +760,6 @@ fn start_mock_proxy_speed_server(
 
 /// 函数 `rpc_initialize_roundtrip`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -826,7 +814,6 @@ fn rpc_initialize_roundtrip() {
 
 /// 函数 `rpc_account_list_empty_uses_default_pagination`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -868,7 +855,6 @@ fn rpc_account_list_empty_uses_default_pagination() {
 
 /// 函数 `rpc_account_list_returns_all_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -933,7 +919,6 @@ fn rpc_account_list_returns_all_accounts() {
 
 /// 函数 `rpc_account_list_includes_account_plan_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1173,7 +1158,6 @@ fn rpc_account_list_prefers_accounts_check_plan_over_subscription_plan() {
 
 /// 函数 `rpc_account_update_profile_updates_label_note_tags_and_sort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1940,7 +1924,6 @@ fn rpc_account_proxy_latency_test_fails_closed_for_disabled_profile() {
 
 /// 函数 `rpc_app_settings_set_invalid_payload_returns_structured_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1989,7 +1972,6 @@ fn rpc_app_settings_set_invalid_payload_returns_structured_error() {
 
 /// 函数 `rpc_app_settings_can_roundtrip_free_account_max_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2041,7 +2023,6 @@ fn rpc_app_settings_can_roundtrip_free_account_max_model() {
 
 /// 函数 `rpc_account_delete_many_deletes_requested_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2097,7 +2078,6 @@ fn rpc_account_delete_many_deletes_requested_accounts() {
 
 /// 函数 `rpc_account_delete_unavailable_free_removes_refresh_invalid_free_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2258,7 +2238,6 @@ fn rpc_account_delete_unavailable_free_removes_refresh_invalid_free_accounts() {
 
 /// 函数 `rpc_account_delete_by_statuses_deletes_only_selected_statuses`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-04
 ///
@@ -2354,7 +2333,6 @@ fn rpc_account_delete_by_statuses_deletes_only_selected_statuses() {
 
 /// 函数 `rpc_account_delete_by_statuses_deletes_unknown_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-04
 ///
@@ -2427,7 +2405,6 @@ fn rpc_account_delete_by_statuses_deletes_unknown_status() {
 
 /// 函数 `rpc_account_update_status_toggles_manual_enable_disable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2493,7 +2470,6 @@ fn rpc_account_update_status_toggles_manual_enable_disable() {
 
 /// 函数 `rpc_login_start_returns_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2546,7 +2522,6 @@ fn rpc_login_start_returns_url() {
 
 /// 函数 `rpc_login_start_returns_api_key_variant`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2577,7 +2552,6 @@ fn rpc_login_start_returns_api_key_variant() {
 
 /// 函数 `rpc_login_start_chatgpt_device_code_returns_user_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2908,7 +2882,6 @@ fn rpc_login_status_expires_abandoned_completion_and_clears_verifier() {
 
 /// 函数 `rpc_chatgpt_auth_tokens_login_read_logout_roundtrip`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3118,7 +3091,6 @@ fn rpc_chatgpt_auth_tokens_login_enqueues_usage_refresh() {
 
 /// 函数 `rpc_chatgpt_auth_tokens_refresh_updates_access_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3460,7 +3432,6 @@ fn rpc_usage_refresh_persists_subscription_fields() {
 
 /// 函数 `rpc_usage_read_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3488,7 +3459,6 @@ fn rpc_usage_read_empty() {
 
 /// 函数 `rpc_login_status_pending`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3516,7 +3486,6 @@ fn rpc_login_status_pending() {
 
 /// 函数 `rpc_usage_list_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3639,7 +3608,6 @@ fn rpc_usage_list_zero_limit_returns_empty_without_unbounded_read() {
 
 /// 函数 `rpc_usage_aggregate_returns_backend_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3750,7 +3718,6 @@ fn rpc_usage_aggregate_returns_backend_summary() {
 
 /// 函数 `rpc_requestlog_list_and_summary_support_pagination`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3911,7 +3878,6 @@ fn rpc_requestlog_list_and_summary_support_pagination() {
 }
 /// 函数 `rpc_rejects_missing_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3938,7 +3904,6 @@ fn rpc_rejects_missing_token() {
 
 /// 函数 `rpc_rejects_cross_site_origin`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3975,7 +3940,6 @@ fn rpc_rejects_cross_site_origin() {
 
 /// 函数 `rpc_accepts_loopback_origin`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

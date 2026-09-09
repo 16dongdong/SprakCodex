@@ -53,7 +53,6 @@ $artifactsRoot = if ($ArtifactsDir) { $ArtifactsDir } else { Join-Path $root "ar
 <#
 函数 `Write-Step`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -71,7 +70,6 @@ function Write-Step {
 <#
 函数 `Remove-Dir`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -100,7 +98,6 @@ function Remove-Dir {
 <#
 函数 `Run-Cargo`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -126,7 +123,6 @@ function Run-Cargo {
 <#
 函数 `Get-GitHubRepoInfo`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -153,7 +149,6 @@ function Get-GitHubRepoInfo {
 <#
 函数 `Resolve-GitHubToken`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -179,7 +174,6 @@ function Resolve-GitHubToken {
 <#
 函数 `Invoke-GitHubApi`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -213,7 +207,6 @@ function Invoke-GitHubApi {
 <#
 函数 `Resolve-WorkflowDefinition`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -257,7 +250,6 @@ function Resolve-WorkflowDefinition {
 <#
 函数 `Invoke-LocalWindowsBuild`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 
@@ -324,7 +316,6 @@ function Invoke-LocalWindowsBuild {
 <#
 函数 `Invoke-AllPlatformBuild`
 
-作者: gaohongshun
 
 时间: 2026-04-02
 

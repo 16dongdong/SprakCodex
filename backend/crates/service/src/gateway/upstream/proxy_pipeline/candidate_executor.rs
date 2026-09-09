@@ -22,7 +22,6 @@ use super::stream_preflight::{preflight_stream_response, StreamPreflightOutcome}
 
 /// 函数 `extract_prompt_cache_key_for_trace`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -244,7 +243,6 @@ fn respond_terminal_attempt(
 
 /// 函数 `execute_candidate_sequence`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

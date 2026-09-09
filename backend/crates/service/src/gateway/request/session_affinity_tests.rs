@@ -2,7 +2,6 @@ use super::derive_outgoing_session_affinity;
 
 /// 函数 `uses_conversation_anchor_when_prompt_cache_missing`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ fn uses_conversation_anchor_when_prompt_cache_missing() {
 
 /// 函数 `uses_thread_anchor_for_fallback_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -69,7 +67,6 @@ fn uses_thread_anchor_for_fallback_headers() {
 
 /// 函数 `clears_turn_state_when_thread_anchor_diverges`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -95,7 +92,6 @@ fn preserves_root_session_and_turn_state_for_child_thread() {
 
 /// 函数 `drops_orphan_turn_state_without_conversation_anchor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -124,7 +120,6 @@ fn drops_orphan_turn_state_without_conversation_anchor() {
 
 /// 函数 `uses_conversation_as_session_fallback_without_rewriting_explicit_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

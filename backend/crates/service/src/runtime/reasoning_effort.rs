@@ -1,6 +1,5 @@
 /// 函数 `normalize_reasoning_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ pub(crate) fn normalize_reasoning_effort(value: &str) -> Option<&'static str> {
 
 /// 函数 `normalize_reasoning_effort_owned`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

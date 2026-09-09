@@ -67,7 +67,6 @@ pub(super) use super::{
 
 /// 函数 `app_settings_get`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -82,7 +81,6 @@ pub fn app_settings_get() -> Result<Value, String> {
 
 /// 函数 `app_settings_get_with_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -101,7 +99,6 @@ pub fn app_settings_get_with_overrides(
 
 /// 函数 `app_settings_set`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

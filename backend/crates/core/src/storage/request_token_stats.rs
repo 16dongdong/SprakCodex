@@ -655,7 +655,6 @@ fn map_api_key_model_token_usage_summary(row: &Row<'_>) -> Result<ApiKeyModelTok
 impl Storage {
     /// 函数 `insert_request_token_stat`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

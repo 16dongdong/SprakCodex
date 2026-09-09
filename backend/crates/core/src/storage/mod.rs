@@ -1687,7 +1687,6 @@ impl Storage {
 
     /// 函数 `open`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1707,7 +1706,6 @@ impl Storage {
 
     /// 函数 `open_in_memory`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1727,7 +1725,6 @@ impl Storage {
 
     /// 函数 `init`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2442,7 +2439,6 @@ impl Storage {
 
     /// 函数 `insert_login_session`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2474,7 +2470,6 @@ impl Storage {
 
     /// 函数 `get_login_session`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2508,7 +2503,6 @@ impl Storage {
 
     /// 函数 `update_login_session_status`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2535,7 +2529,6 @@ impl Storage {
 
     /// 函数 `update_login_session_code_verifier`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2620,7 +2613,6 @@ impl Storage {
 
     /// 函数 `ensure_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2647,7 +2639,6 @@ impl Storage {
 
     /// 函数 `has_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2683,7 +2674,6 @@ impl Storage {
 
     /// 函数 `ensure_migrations_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2705,7 +2695,6 @@ impl Storage {
 
     /// 函数 `has_migration`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2739,7 +2728,6 @@ impl Storage {
 
     /// 函数 `mark_migration`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2762,7 +2750,6 @@ impl Storage {
 
     /// 函数 `apply_sql_migration`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2783,7 +2770,6 @@ impl Storage {
 
     /// 函数 `apply_sql_or_compat_migration`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2817,7 +2803,6 @@ impl Storage {
 
     /// 函数 `apply_compat_migration`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2841,7 +2826,6 @@ impl Storage {
 
     /// 函数 `is_schema_conflict_error`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -2935,7 +2919,6 @@ mod migration_tests;
 
 /// 函数 `now_ts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

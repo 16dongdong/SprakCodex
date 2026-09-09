@@ -13,7 +13,6 @@ pub enum RequestId {
 impl fmt::Display for RequestId {
     /// 函数 `fmt`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -34,7 +33,6 @@ impl fmt::Display for RequestId {
 impl From<i64> for RequestId {
     /// 函数 `from`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -51,7 +49,6 @@ impl From<i64> for RequestId {
 impl From<i32> for RequestId {
     /// 函数 `from`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -68,7 +65,6 @@ impl From<i32> for RequestId {
 impl From<u64> for RequestId {
     /// 函数 `from`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -85,7 +81,6 @@ impl From<u64> for RequestId {
 impl From<u32> for RequestId {
     /// 函数 `from`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -102,7 +97,6 @@ impl From<u32> for RequestId {
 impl From<usize> for RequestId {
     /// 函数 `from`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1567,7 +1561,6 @@ pub struct RequestLogListParams {
 impl Default for RequestLogListParams {
     /// 函数 `default`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1591,7 +1584,6 @@ impl Default for RequestLogListParams {
 impl RequestLogListParams {
     /// 函数 `normalized`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

@@ -15,7 +15,6 @@ pub(crate) const ENV_RPC_TOKEN_FILE: &str = "CODEXMANAGER_RPC_TOKEN_FILE";
 
 /// 函数 `exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ pub(crate) fn exe_dir() -> PathBuf {
 
 /// 函数 `strip_inline_comment`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -53,7 +51,6 @@ fn strip_inline_comment(value: &str) -> &str {
 
 /// 函数 `parse_dotenv_kv`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -89,7 +86,6 @@ fn parse_dotenv_kv(line: &str) -> Option<(String, String)> {
 
 /// 函数 `find_env_file_in_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -110,7 +106,6 @@ fn find_env_file_in_dir(dir: &Path) -> Option<PathBuf> {
 
 /// 函数 `load_env_from_exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -152,7 +147,6 @@ pub(crate) fn load_env_from_exe_dir() {
 
 /// 函数 `resolve_path_with_base`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -176,7 +170,6 @@ fn resolve_path_with_base(raw: &str, base_dir: &Path) -> PathBuf {
 
 /// 函数 `ensure_default_db_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -197,7 +190,6 @@ pub(crate) fn ensure_default_db_path() -> PathBuf {
 
 /// 函数 `db_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -216,7 +208,6 @@ pub(crate) fn db_dir() -> PathBuf {
 
 /// 函数 `rpc_token_file_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -306,7 +297,6 @@ pub(crate) fn rpc_token_file_path() -> PathBuf {
 
 /// 函数 `read_rpc_token_from_file`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -332,7 +322,6 @@ pub(crate) fn read_rpc_token_from_file(path: &Path) -> Option<String> {
 
 /// 函数 `read_rpc_token_from_env_or_file`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -402,7 +391,6 @@ pub(crate) fn persist_rpc_token_if_missing(token: &str) -> Option<String> {
 
 /// 函数 `generate_rpc_token_hex_32bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

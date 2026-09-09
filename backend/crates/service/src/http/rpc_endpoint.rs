@@ -14,7 +14,6 @@ use url::Url;
 
 /// 函数 `rpc_response_failed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -35,7 +34,6 @@ fn rpc_response_failed(resp: &codexmanager_core::rpc::types::JsonRpcResponse) ->
 
 /// 函数 `get_header_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -56,7 +54,6 @@ fn get_header_value<'a>(request: &'a Request, name: &str) -> Option<&'a str> {
 
 /// 函数 `is_json_content_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -91,7 +88,6 @@ fn rpc_actor_from_axum_headers(headers: &HeaderMap) -> crate::RpcActor {
 
 /// 函数 `is_loopback_origin`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -112,7 +108,6 @@ fn is_loopback_origin(origin: &str) -> bool {
 
 /// 函数 `panic_payload_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -133,7 +128,6 @@ fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
 
 /// 函数 `jsonrpc_message_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -153,7 +147,6 @@ fn jsonrpc_message_success(message: &JsonRpcMessage) -> bool {
 
 /// 函数 `handle_parsed_rpc_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -202,7 +195,6 @@ where
 
 /// 函数 `handle_rpc_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -234,7 +226,6 @@ fn handle_rpc_body(body: &str, actor: crate::RpcActor) -> (u16, String, bool) {
 
 /// 函数 `is_axum_json_content_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -254,7 +245,6 @@ fn is_axum_json_content_type(headers: &HeaderMap) -> bool {
 
 /// 函数 `validate_axum_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -323,7 +313,6 @@ async fn read_axum_rpc_body_bounded(body: Body) -> Result<String, StatusCode> {
 
 /// 函数 `handle_rpc_http`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -378,7 +367,6 @@ pub(crate) async fn handle_rpc_http(request: axum::extract::Request) -> AxumResp
 
 /// 函数 `handle_rpc`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

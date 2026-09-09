@@ -3,7 +3,6 @@ use axum::body::to_bytes;
 
 /// 函数 `web_auth_cookie_is_scoped_by_process_session_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ fn web_auth_cookie_is_scoped_by_process_session_key() {
 
 /// 函数 `parse_cookie_value_returns_matching_cookie`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -49,7 +47,6 @@ fn parse_cookie_value_returns_matching_cookie() {
 
 /// 函数 `normalize_connect_addr_maps_all_interfaces_to_localhost`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +83,6 @@ fn parse_linux_default_gateway_ipv4_reads_default_route() {
 
 /// 函数 `browser_open_addr_maps_all_interfaces_to_loopback`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -113,7 +109,6 @@ fn browser_open_addr_maps_all_interfaces_to_loopback() {
 
 /// 函数 `runtime_info_reports_web_gateway_capabilities`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

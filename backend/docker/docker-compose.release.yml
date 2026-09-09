@@ -1,6 +1,6 @@
 services:
   codexmanager-service:
-    image: ghcr.io/qxcnm/codexmanager-service:${CODEXMANAGER_RELEASE_TAG:-stable}
+    image: ${SERVICE_IMAGE:?请指定服务镜像地址}
     restart: unless-stopped
     environment:
       CODEXMANAGER_SERVICE_ADDR: 0.0.0.0:48760
@@ -13,7 +13,7 @@ services:
       - "48760:48760"
 
   codexmanager-web:
-    image: ghcr.io/qxcnm/codexmanager-web:${CODEXMANAGER_RELEASE_TAG:-stable}
+    image: ${WEB_IMAGE:?请指定Web镜像地址}
     restart: unless-stopped
     depends_on:
       codexmanager-service:

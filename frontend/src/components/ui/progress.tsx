@@ -12,7 +12,6 @@ interface ProgressProps extends ProgressPrimitive.Root.Props {
 /**
  * 函数 `Progress`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -48,7 +47,6 @@ function Progress({
 /**
  * 函数 `ProgressTrack`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -74,7 +72,6 @@ function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
 /**
  * 函数 `ProgressIndicator`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -100,7 +97,6 @@ function ProgressIndicator({
 /**
  * 函数 `ProgressLabel`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -123,7 +119,6 @@ function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
 /**
  * 函数 `ProgressValue`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

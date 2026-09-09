@@ -3,7 +3,6 @@ use std::time::Instant;
 
 /// 函数 `acquire_request_gate`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

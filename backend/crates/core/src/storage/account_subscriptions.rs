@@ -33,7 +33,6 @@ pub(super) fn delete_account_subscription_for_account_sql() -> &'static str {
 impl Storage {
     /// 函数 `upsert_account_subscription`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-17
     ///
@@ -97,7 +96,6 @@ impl Storage {
 
     /// 函数 `delete_account_subscription`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-17
     ///
@@ -115,7 +113,6 @@ impl Storage {
 
     /// 函数 `find_account_subscription`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-17
     ///
@@ -140,7 +137,6 @@ impl Storage {
 
     /// 函数 `list_account_subscriptions`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-17
     ///
@@ -178,7 +174,6 @@ impl Storage {
 
     /// 函数 `ensure_account_subscriptions_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-17
     ///

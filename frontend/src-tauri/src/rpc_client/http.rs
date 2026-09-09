@@ -1,6 +1,5 @@
 /// 函数 `split_http_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -21,7 +20,6 @@ fn split_http_response(buf: &str) -> Option<(&str, &str)> {
 
 /// 函数 `response_uses_chunked`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -42,7 +40,6 @@ fn response_uses_chunked(headers: &str) -> bool {
 
 /// 函数 `decode_chunked_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +83,6 @@ fn decode_chunked_body(raw: &str) -> Result<String, String> {
 
 /// 函数 `parse_http_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

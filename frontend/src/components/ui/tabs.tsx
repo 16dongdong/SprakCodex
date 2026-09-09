@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils"
 /**
  * 函数 `Tabs`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -55,7 +54,6 @@ const tabsListVariants = cva(
 /**
  * 函数 `TabsList`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -83,7 +81,6 @@ function TabsList({
 /**
  * 函数 `TabsTrigger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -109,7 +106,6 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
 /**
  * 函数 `TabsContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

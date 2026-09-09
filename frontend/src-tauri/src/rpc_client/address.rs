@@ -2,7 +2,6 @@ use std::net::{SocketAddr, ToSocketAddrs};
 
 /// 函数 `normalize_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -38,7 +37,6 @@ pub(crate) fn normalize_addr(raw: &str) -> Result<String, String> {
 
 /// 函数 `resolve_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -61,7 +59,6 @@ pub(crate) fn resolve_service_addr(addr: Option<String>) -> Result<String, Strin
 
 /// 函数 `resolve_socket_addrs`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -97,7 +94,6 @@ pub(crate) fn resolve_socket_addrs(addr: &str) -> Result<Vec<SocketAddr>, String
 
 /// 函数 `normalize_host`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

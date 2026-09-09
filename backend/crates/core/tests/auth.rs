@@ -8,7 +8,6 @@ fn jwt_with_json(payload_json: &str) -> String {
 
 /// 函数 `build_authorize_url_matches_codex`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -54,7 +53,6 @@ fn build_authorize_url_matches_codex() {
 
 /// 函数 `parse_id_token_claims_extracts_email_and_sub`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -104,7 +102,6 @@ fn parse_id_token_claims_extracts_client_id() {
 
 /// 函数 `extract_token_exp_reads_exp_claim`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

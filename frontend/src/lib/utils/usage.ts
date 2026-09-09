@@ -32,7 +32,6 @@ export interface ExtraUsageDisplayRow {
 /**
  * 函数 `toNullableNumber`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -58,7 +57,6 @@ export function toNullableNumber(value: unknown): number | null {
 /**
  * 函数 `formatTsFromSeconds`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -152,7 +150,6 @@ export function formatRemainingDurationFromSeconds(
 /**
  * 函数 `trimTrailingZeros`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -169,7 +166,6 @@ function trimTrailingZeros(text: string): string {
 /**
  * 函数 `formatCompactNumber`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -208,7 +204,6 @@ export function formatCompactNumber(
 /**
  * 函数 `normalizedAccountStatus`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -225,7 +220,6 @@ function normalizedAccountStatus(account?: { status?: string } | null): string {
 /**
  * 函数 `normalizedAccountStatusReason`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -244,7 +238,6 @@ function normalizedAccountStatusReason(
 /**
  * 函数 `isDisabledAccount`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -261,7 +254,6 @@ function isDisabledAccount(account?: { status?: string } | null): boolean {
 /**
  * 函数 `isRecoveryRequiredAccount`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -278,7 +270,6 @@ function isRecoveryRequiredAccount(account?: { status?: string } | null): boolea
 /**
  * 函数 `isUnavailableAccount`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -303,7 +294,6 @@ export function isForceEnabledAccount(account?: { status?: string } | null): boo
 /**
  * 函数 `isBannedAccount`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -332,7 +322,6 @@ export function isBannedAccount(
 /**
  * 函数 `remainingPercent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -351,7 +340,6 @@ export function remainingPercent(value: number | null | undefined): number | nul
 /**
  * 函数 `hasSecondarySignal`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -371,7 +359,6 @@ function hasSecondarySignal(usage?: Partial<AccountUsage> | null): boolean {
 /**
  * 函数 `isLongWindow`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -389,7 +376,6 @@ function isLongWindow(windowMinutes: number | null | undefined): boolean {
 /**
  * 函数 `parseCreditsJson`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -675,7 +661,6 @@ export function hasUsableLunaReserve(
 /**
  * 函数 `extractPlanTypeRecursive`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -724,7 +709,6 @@ function extractPlanTypeRecursive(value: unknown): string | null {
 /**
  * 函数 `isFreePlanUsage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -743,7 +727,6 @@ function isFreePlanUsage(raw: string | null | undefined): boolean {
 /**
  * 函数 `getUsageWindowDisplayMode`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -779,7 +762,6 @@ export function getUsageWindowDisplayMode(
 /**
  * 函数 `getUsageDisplayBuckets`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -825,7 +807,6 @@ export function getExtraUsageDisplayRows(
 /**
  * 函数 `calcAvailability`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -930,7 +911,6 @@ export function calcAvailability(
 /**
  * 函数 `isPrimaryWindowOnlyUsage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -949,7 +929,6 @@ export function isPrimaryWindowOnlyUsage(
 /**
  * 函数 `isSecondaryWindowOnlyUsage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -968,7 +947,6 @@ export function isSecondaryWindowOnlyUsage(
 /**
  * 函数 `isLowQuotaUsage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -991,7 +969,6 @@ export function isLowQuotaUsage(usage?: Partial<AccountUsage> | null): boolean {
 /**
  * 函数 `canParticipateInRouting`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1008,7 +985,6 @@ export function canParticipateInRouting(level: AvailabilityLevel): boolean {
 /**
  * 函数 `pickCurrentAccount`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -1055,7 +1031,6 @@ export function pickCurrentAccount(
 /**
  * 函数 `pickBestRecommendations`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

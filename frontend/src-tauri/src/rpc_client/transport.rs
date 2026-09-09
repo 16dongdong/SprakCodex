@@ -15,7 +15,6 @@ const RPC_CODEX_SKILLS_SEARCH_IO_TIMEOUT: Duration = Duration::from_secs(60);
 
 /// 函数 `rpc_io_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -67,7 +66,6 @@ fn rpc_io_timeout(method: &str, params: Option<&serde_json::Value>) -> Duration 
 
 /// 函数 `rpc_call_on_socket`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -173,7 +171,6 @@ fn rpc_call_on_socket(
 
 /// 函数 `rpc_call_with_sockets`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -211,7 +208,6 @@ pub(crate) fn rpc_call_with_sockets(
 
 /// 函数 `rpc_call`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -239,7 +235,6 @@ mod tests {
 
     /// 函数 `bulk_usage_refresh_uses_extended_timeout`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -256,7 +251,6 @@ mod tests {
 
     /// 函数 `single_usage_refresh_keeps_default_timeout`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -338,7 +332,6 @@ mod tests {
 
     /// 函数 `unrelated_rpc_keeps_default_timeout`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

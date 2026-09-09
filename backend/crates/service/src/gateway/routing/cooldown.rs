@@ -40,7 +40,6 @@ pub(super) enum CooldownReason {
 
 /// 函数 `cooldown_secs_for_reason`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -63,7 +62,6 @@ fn cooldown_secs_for_reason(reason: CooldownReason) -> i64 {
 
 /// 函数 `rate_limit_cooldown_secs_for_offense`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -81,7 +79,6 @@ fn rate_limit_cooldown_secs_for_offense(offense_count: u32) -> i64 {
 
 /// 函数 `cooldown_secs_for_mark`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -121,7 +118,6 @@ fn cooldown_secs_for_mark(
 
 /// 函数 `decay_offense_count_for_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -153,7 +149,6 @@ fn decay_offense_count_for_success(
 
 /// 函数 `cooldown_reason_for_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -174,7 +169,6 @@ pub(super) fn cooldown_reason_for_status(status: u16) -> CooldownReason {
 
 /// 函数 `is_account_in_cooldown`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -199,7 +193,6 @@ pub(super) fn is_account_in_cooldown(account_id: &str) -> bool {
 
 /// 函数 `mark_account_cooldown`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -238,7 +231,6 @@ pub(super) fn mark_account_cooldown(account_id: &str, reason: CooldownReason) {
 
 /// 函数 `mark_account_cooldown_for_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -253,7 +245,6 @@ pub(super) fn mark_account_cooldown_for_status(account_id: &str, status: u16) {
 
 /// 函数 `clear_account_cooldown`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -276,7 +267,6 @@ pub(super) fn clear_account_cooldown(account_id: &str) {
 
 /// 函数 `maybe_cleanup_expired_cooldowns`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -308,7 +298,6 @@ fn maybe_cleanup_expired_cooldowns(state: &mut AccountCooldownState, now: i64) {
 
 /// 函数 `clear_runtime_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -328,7 +317,6 @@ pub(super) fn clear_runtime_state() {
 
 /// 函数 `clear_account_cooldown_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

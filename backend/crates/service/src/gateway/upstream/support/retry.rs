@@ -29,7 +29,6 @@ pub(in super::super) enum AltPathRetryResult {
 
 /// 函数 `retry_with_alternate_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

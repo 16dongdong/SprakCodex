@@ -227,7 +227,6 @@ impl Storage {
 
     /// 函数 `upsert_model_catalog_models`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-12
     ///
@@ -364,7 +363,6 @@ impl Storage {
 
     /// 函数 `list_model_catalog_models`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-12
     ///
@@ -1105,7 +1103,6 @@ impl Storage {
 
     /// 函数 `ensure_model_catalog_models_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-12
     ///

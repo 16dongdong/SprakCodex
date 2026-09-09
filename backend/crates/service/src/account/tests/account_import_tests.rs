@@ -37,7 +37,6 @@ fn test_jwt(payload: serde_json::Value) -> String {
 
 /// 函数 `payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +58,6 @@ fn payload() -> ImportTokenPayload {
 
 /// 函数 `resolve_logical_account_id_distinguishes_workspace_under_same_chatgpt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -93,7 +91,6 @@ fn resolve_logical_account_id_distinguishes_workspace_under_same_chatgpt() {
 
 /// 函数 `resolve_logical_account_id_is_stable_when_scope_is_stable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -131,7 +128,6 @@ fn resolve_logical_account_id_is_stable_when_scope_is_stable() {
 
 /// 函数 `existing_account_index_next_sort_uses_step_five`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -180,7 +176,6 @@ fn existing_account_index_next_sort_uses_step_five() {
 
 /// 函数 `extract_token_payload_supports_flat_codex_format`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -210,7 +205,6 @@ fn extract_token_payload_supports_flat_codex_format() {
 
 /// 函数 `extract_token_payload_supports_camel_case_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -244,7 +238,6 @@ fn extract_token_payload_supports_camel_case_fields() {
 
 /// 函数 `extract_token_payload_allows_missing_id_and_refresh_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -942,7 +935,6 @@ fn import_account_auth_json_expands_sub2api_accounts_and_persists_agent_identiti
 
 /// 函数 `import_single_item_reuses_existing_login_account_by_scope_identity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1003,7 +995,6 @@ fn import_single_item_reuses_existing_login_account_by_scope_identity() {
 
 /// 函数 `import_single_item_distinguishes_team_members_sharing_account_hint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1054,7 +1045,6 @@ fn import_single_item_distinguishes_team_members_sharing_account_hint() {
 
 /// 函数 `import_single_item_distinguishes_same_subject_with_different_chatgpt_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -1102,7 +1092,6 @@ fn import_single_item_distinguishes_same_subject_with_different_chatgpt_accounts
 
 /// 函数 `import_single_item_distinguishes_same_subject_across_team_workspaces`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -1147,7 +1136,6 @@ fn import_single_item_distinguishes_same_subject_across_team_workspaces() {
 
 /// 函数 `import_single_item_restores_account_when_old_import_overwrote_scoped_identity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -1219,7 +1207,6 @@ fn import_single_item_restores_account_when_old_import_overwrote_scoped_identity
 
 /// 函数 `import_single_item_reuses_legacy_team_account_when_token_subject_matches`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1282,7 +1269,6 @@ fn import_single_item_reuses_legacy_team_account_when_token_subject_matches() {
 
 /// 函数 `import_single_item_prefers_meta_fields_for_new_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1340,7 +1326,6 @@ fn import_single_item_prefers_meta_fields_for_new_account() {
 
 /// 函数 `import_single_item_allows_missing_id_and_refresh_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1389,7 +1374,6 @@ fn import_single_item_allows_missing_id_and_refresh_tokens() {
 
 /// 函数 `import_account_auth_json_keeps_valid_items_when_one_content_is_invalid`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1439,7 +1423,6 @@ fn import_account_auth_json_keeps_valid_items_when_one_content_is_invalid() {
 
 /// 函数 `import_account_auth_json_handles_large_multi_batch_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-06-11
 ///

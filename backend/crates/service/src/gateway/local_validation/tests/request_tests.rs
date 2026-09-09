@@ -39,7 +39,6 @@ impl Drop for RuntimeEnvGuard {
 
 /// 函数 `sample_api_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -81,7 +80,6 @@ fn sample_api_key(
 
 /// 函数 `anthropic_key_keeps_empty_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -106,7 +104,6 @@ fn anthropic_key_keeps_empty_overrides() {
 
 /// 函数 `anthropic_key_applies_custom_model_and_reasoning`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -401,7 +398,6 @@ fn anthropic_key_preserves_flex_service_tier_on_responses_request() {
 
 /// 函数 `openai_key_keeps_empty_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -922,7 +918,6 @@ fn prompt_cache_route_id_is_partitioned_by_model() {
 
 /// 函数 `aggregate_passthrough_applies_model_reasoning_and_service_tier_overrides_without_forcing_log_tier`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1724,7 +1719,6 @@ fn deferred_passthrough_keeps_fast_until_codex_candidate_is_selected() {
 
 /// 函数 `anthropic_model_must_exist_in_v2_catalog`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

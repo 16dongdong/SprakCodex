@@ -90,7 +90,6 @@ pub(crate) enum LowQuotaCandidateMode {
 
 /// 函数 `collect_gateway_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -131,7 +130,6 @@ pub(crate) fn collect_gateway_candidates_for_account_ids_with_low_quota_mode(
 
 /// 函数 `collect_gateway_candidates_uncached`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -342,7 +340,6 @@ fn parse_bool_env(raw: &str, fallback: bool) -> bool {
 
 /// 函数 `read_candidate_cache`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -381,7 +378,6 @@ fn read_candidate_cache(low_quota_mode: LowQuotaCandidateMode) -> Option<Vec<(Ac
 
 /// 函数 `write_candidate_cache`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -417,7 +413,6 @@ fn write_candidate_cache(low_quota_mode: LowQuotaCandidateMode, candidates: Vec<
 
 /// 函数 `cache_identity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -436,7 +431,6 @@ fn cache_identity() -> Option<String> {
 
 /// 函数 `candidate_cache_ttl`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -453,7 +447,6 @@ fn candidate_cache_ttl() -> Duration {
 
 /// 函数 `current_db_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -469,7 +462,6 @@ fn current_db_path() -> String {
 
 /// 函数 `log_no_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -502,7 +494,6 @@ fn log_no_candidates(storage: &Storage) {
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -567,7 +558,6 @@ pub(crate) fn invalidate_candidate_cache() {
 
 /// 函数 `ensure_selection_config_loaded`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -582,7 +572,6 @@ fn ensure_selection_config_loaded() {
 
 /// 函数 `current_db_path_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -597,7 +586,6 @@ fn current_db_path_cell() -> &'static RwLock<String> {
 
 /// 函数 `clear_candidate_cache`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -621,7 +609,6 @@ fn clear_candidate_cache() {
 
 /// 函数 `clear_candidate_cache_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

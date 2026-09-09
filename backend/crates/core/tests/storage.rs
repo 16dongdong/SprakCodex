@@ -7,7 +7,6 @@ use codexmanager_core::storage::{
 
 /// 函数 `storage_can_insert_account_and_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -51,7 +50,6 @@ fn storage_can_insert_account_and_token() {
 
 /// 函数 `storage_can_find_token_and_account_by_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -748,7 +746,6 @@ fn delete_account_preserves_legacy_model_source_routes() {
 
 /// 函数 `token_upsert_keeps_refresh_schedule_columns`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -811,7 +808,6 @@ fn token_upsert_keeps_refresh_schedule_columns() {
 
 /// 函数 `tokens_due_for_refresh_uses_access_exp_when_next_refresh_is_stale`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-26
 ///
@@ -866,7 +862,6 @@ fn tokens_due_for_refresh_uses_access_exp_when_next_refresh_is_stale() {
 
 /// 函数 `tokens_due_for_refresh_include_other_unavailable_accounts_but_skip_deactivated`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -967,7 +962,6 @@ fn tokens_due_for_refresh_include_other_unavailable_accounts_but_skip_deactivate
 
 /// 函数 `storage_login_session_roundtrip`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1167,7 +1161,6 @@ fn storage_completion_claim_wins_concurrent_callback_failure() {
 
 /// 函数 `storage_account_metadata_roundtrip_and_delete_cleanup`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1216,7 +1209,6 @@ fn storage_account_metadata_roundtrip_and_delete_cleanup() {
 
 /// 函数 `storage_account_subscription_roundtrip_and_delete_cleanup`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-17
 ///
@@ -1273,7 +1265,6 @@ fn storage_account_subscription_roundtrip_and_delete_cleanup() {
 
 /// 函数 `storage_can_update_account_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1317,7 +1308,6 @@ fn storage_can_update_account_status() {
 
 /// 函数 `storage_updates_account_status_only_when_changed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1424,7 +1414,6 @@ fn storage_updates_account_status_only_when_observed_context_still_matches() {
 
 /// 函数 `storage_gateway_candidates_exclude_unavailable_or_missing_token_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1550,7 +1539,6 @@ fn storage_gateway_candidates_exclude_unavailable_or_missing_token_accounts() {
 
 /// 函数 `latest_usage_snapshots_break_ties_by_latest_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1624,7 +1612,6 @@ fn latest_usage_snapshots_break_ties_by_latest_id() {
 
 /// 函数 `request_logs_support_prefixed_query_filters`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1839,7 +1826,6 @@ fn request_logs_support_prefixed_query_filters() {
 
 /// 函数 `request_log_today_summary_reads_from_token_stats_table`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1914,7 +1900,6 @@ fn request_log_today_summary_reads_from_token_stats_table() {
 
 /// 函数 `insert_request_log_with_token_stat_writes_both_tables_in_one_call`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2409,7 +2394,6 @@ fn app_user_exists_helpers_read_minimal_user_state() {
 
 /// 函数 `clear_request_logs_keeps_token_stats_for_usage_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2513,7 +2497,6 @@ fn clear_request_logs_keeps_token_stats_for_usage_summary() {
 
 /// 函数 `request_token_stats_can_summarize_total_tokens_by_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2603,7 +2586,6 @@ fn request_token_stats_can_summarize_total_tokens_by_key() {
 
 /// 函数 `usage_snapshots_can_prune_history_per_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2724,7 +2706,6 @@ fn usage_snapshots_can_prune_history_per_account() {
 
 /// 函数 `storage_api_keys_include_profile_fields`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2776,7 +2757,6 @@ fn storage_api_keys_include_profile_fields() {
 
 /// 函数 `storage_can_roundtrip_api_key_secret`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

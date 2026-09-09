@@ -99,7 +99,6 @@ pub(crate) enum CandidateRotationSource {
 impl CandidateRotationSource {
     /// 函数 `as_str`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -156,7 +155,6 @@ impl InitialBindingClaim {
 
 /// 函数 `normalize_conversation_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -174,7 +172,6 @@ fn normalize_conversation_id(conversation_id: Option<&str>) -> Option<String> {
 
 /// 函数 `load_conversation_binding`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -198,7 +195,6 @@ pub(crate) fn load_conversation_binding(
 
 /// 函数 `effective_thread_anchor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -218,7 +214,6 @@ pub(crate) fn effective_thread_anchor(
 
 /// 函数 `rotate_to_bound_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -237,7 +232,6 @@ fn rotate_to_bound_account(
 
 /// 函数 `rotate_to_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -262,7 +256,6 @@ fn rotate_to_account_id(candidates: &mut [(Account, Token)], account_id: &str) -
 
 /// 函数 `derive_next_thread_epoch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -277,7 +270,6 @@ fn derive_next_thread_epoch(existing_binding: Option<&ConversationBinding>) -> O
 
 /// 函数 `switch_reason_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -355,7 +347,6 @@ fn rotate_to_least_loaded_thread_account(
 
 /// 函数 `prepare_conversation_routing`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -421,7 +412,6 @@ pub(crate) fn prepare_conversation_routing_with_source(
 
 /// 函数 `apply_candidate_rotation`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -543,7 +533,6 @@ pub(crate) fn claim_initial_conversation_binding(
 
 /// 函数 `resolve_attempt_thread`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -584,7 +573,6 @@ pub(crate) fn resolve_attempt_thread(
 
 /// 函数 `record_conversation_binding_terminal_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

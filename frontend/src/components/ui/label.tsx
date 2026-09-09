@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils"
 /**
  * 函数 `Label`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

@@ -3,7 +3,6 @@ use std::path::{Path, PathBuf};
 
 /// 函数 `main`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -20,7 +19,6 @@ fn main() {
 
 /// 函数 `emit_embedded_ui_tracking`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -68,7 +66,6 @@ fn emit_embedded_ui_tracking(manifest_dir: &Path) {
 
 /// 函数 `fingerprint_tree`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -123,7 +120,6 @@ fn fingerprint_tree(root: &Path) -> String {
 
 /// 函数 `mirror_tree`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -162,7 +158,6 @@ fn mirror_tree(source: &Path, target: &Path) -> std::io::Result<()> {
 
 /// 函数 `compile_windows_icon`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -194,7 +189,6 @@ fn compile_windows_icon(manifest_dir: &Path) {
 
 /// 函数 `compile_windows_icon`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

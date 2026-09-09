@@ -4,7 +4,6 @@ static RPC_AUTH_TOKEN: OnceLock<String> = OnceLock::new();
 
 /// 函数 `build_rpc_auth_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ fn build_rpc_auth_token() -> String {
 
 /// 函数 `rpc_auth_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -47,7 +45,6 @@ pub fn rpc_auth_token() -> &'static str {
 
 /// 函数 `constant_time_eq`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -69,7 +66,6 @@ pub(crate) fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
 
 /// 函数 `rpc_auth_token_matches`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

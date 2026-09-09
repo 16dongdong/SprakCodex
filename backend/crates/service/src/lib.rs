@@ -163,7 +163,6 @@ pub use usage_refresh::{set_usage_refresh_completed_handler, UsageRefreshComplet
 
 /// 函数 `test_env_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -183,7 +182,6 @@ pub(crate) fn test_env_guard() -> std::sync::MutexGuard<'static, ()> {
 
 /// 函数 `handle_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

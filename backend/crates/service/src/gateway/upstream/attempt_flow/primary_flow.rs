@@ -32,7 +32,6 @@ pub(in crate::gateway::upstream) struct PrimaryAuthorization {
 
 /// 函数 `resolve_chatgpt_primary_bearer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -101,7 +100,6 @@ fn resolve_chatgpt_primary_authorization(
 
 /// 函数 `run_primary_upstream_flow`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

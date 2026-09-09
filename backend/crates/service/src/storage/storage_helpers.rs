@@ -75,7 +75,6 @@ pub(crate) struct StorageHandle {
 impl StorageHandle {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -98,7 +97,6 @@ impl Deref for StorageHandle {
 
     /// 函数 `deref`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -115,7 +113,6 @@ impl Deref for StorageHandle {
 impl DerefMut for StorageHandle {
     /// 函数 `deref_mut`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -132,7 +129,6 @@ impl DerefMut for StorageHandle {
 impl Drop for StorageHandle {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -152,7 +148,6 @@ impl Drop for StorageHandle {
 
 /// 函数 `normalize_key_part`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -172,7 +167,6 @@ fn normalize_key_part(value: Option<&str>) -> Option<String> {
 
 /// 函数 `compact_key_part`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -206,7 +200,6 @@ fn compact_key_part(value: &str) -> String {
 
 /// 函数 `account_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -230,7 +223,6 @@ pub(crate) fn account_key(account_id: &str, tags: Option<&str>) -> String {
 
 /// 函数 `hash_platform_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -253,7 +245,6 @@ pub(crate) fn hash_platform_key(key: &str) -> String {
 
 /// 函数 `generate_platform_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -265,7 +256,6 @@ pub(crate) fn hash_platform_key(key: &str) -> String {
 
 /// 函数 `generate_key_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -277,7 +267,6 @@ pub(crate) fn hash_platform_key(key: &str) -> String {
 
 /// 函数 `generate_aggregate_api_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -357,7 +346,6 @@ fn initialized_storage_paths() -> &'static Mutex<HashMap<String, ()>> {
 
 /// 函数 `open_storage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -380,7 +368,6 @@ pub(crate) fn open_storage() -> Option<StorageHandle> {
 
 /// 函数 `open_storage_at_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -696,7 +683,6 @@ fn restore_model_catalog_database(db_path: &Path, backup_path: &Path) -> Result<
 
 /// 函数 `initialize_storage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -755,7 +741,6 @@ pub(crate) fn initialize_storage() -> Result<(), String> {
 
 /// 函数 `clear_storage_cache_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -776,7 +761,6 @@ fn clear_storage_cache_for_tests() {
 
 /// 函数 `record_storage_open_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -798,7 +782,6 @@ fn record_storage_open_for_tests(path: &str) {
 
 /// 函数 `storage_open_count_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -821,7 +804,6 @@ fn storage_open_count_for_tests(path: &str) -> usize {
 
 /// 函数 `clear_storage_open_count_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

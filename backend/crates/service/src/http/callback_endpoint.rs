@@ -2,7 +2,6 @@ use tiny_http::Request;
 
 /// 函数 `handle_callback`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

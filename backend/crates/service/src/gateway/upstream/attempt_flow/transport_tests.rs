@@ -356,7 +356,6 @@ fn captured_header<'a>(headers: &'a [(String, String)], name: &str) -> Option<&'
 
 /// 函数 `request_compression_only_applies_to_streaming_chatgpt_responses`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -476,7 +475,6 @@ fn gemini_codex_compat_header_profile_matches_cpa_executor_shape() {
 
 /// 函数 `encode_request_body_adds_zstd_content_encoding`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

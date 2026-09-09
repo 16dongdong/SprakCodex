@@ -45,7 +45,6 @@ struct RouteStateEntry<T> {
 impl<T> RouteStateEntry<T> {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -77,7 +76,6 @@ struct RouteRoundRobinState {
 
 /// 函数 `apply_route_strategy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -137,7 +135,6 @@ pub(crate) fn apply_route_strategy_with_source(
 
 /// 函数 `apply_balanced_round_robin`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -192,7 +189,6 @@ pub(crate) fn preview_balanced_round_robin<T>(
 
 /// 函数 `rotate_to_manual_preferred_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -219,7 +215,6 @@ fn rotate_to_manual_preferred_account(candidates: &mut [(Account, Token)]) -> bo
 
 /// 函数 `route_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -234,7 +229,6 @@ fn route_mode() -> u8 {
 
 /// 函数 `route_mode_label`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -253,7 +247,6 @@ fn route_mode_label(mode: u8) -> &'static str {
 
 /// 函数 `parse_route_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -274,7 +267,6 @@ fn parse_route_mode(raw: &str) -> Option<u8> {
 
 /// 函数 `current_route_strategy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -290,7 +282,6 @@ pub(crate) fn current_route_strategy() -> &'static str {
 
 /// 函数 `set_route_strategy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -320,7 +311,6 @@ pub(crate) fn set_route_strategy(strategy: &str) -> Result<&'static str, String>
 
 /// 函数 `get_manual_preferred_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -337,7 +327,6 @@ pub(crate) fn get_manual_preferred_account() -> Option<String> {
 
 /// 函数 `set_manual_preferred_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -362,7 +351,6 @@ pub(crate) fn set_manual_preferred_account(account_id: &str) -> Result<(), Strin
 
 /// 函数 `clear_manual_preferred_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -380,7 +368,6 @@ pub(crate) fn clear_manual_preferred_account() {
 
 /// 函数 `next_start_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -494,7 +481,6 @@ fn current_start_index(key_id: &str, model: Option<&str>, candidate_count: usize
 
 /// 函数 `apply_health_p2c`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -532,7 +518,6 @@ fn apply_health_p2c(
 
 /// 函数 `p2c_challenger_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -585,7 +570,6 @@ fn p2c_challenger_index(
 
 /// 函数 `stable_hash_u64`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -605,7 +589,6 @@ fn stable_hash_u64(input: &[u8]) -> u64 {
 
 /// 函数 `route_health_p2c_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -620,7 +603,6 @@ fn route_health_p2c_enabled() -> bool {
 
 /// 函数 `route_health_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -639,7 +621,6 @@ fn route_health_window(mode: u8) -> usize {
 
 /// 函数 `route_state_ttl`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -654,7 +635,6 @@ fn route_state_ttl() -> Duration {
 
 /// 函数 `route_state_capacity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -669,7 +649,6 @@ fn route_state_capacity() -> usize {
 
 /// 函数 `is_entry_expired`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -690,7 +669,6 @@ fn is_entry_expired(last_seen: Instant, now: Instant, ttl: Duration) -> bool {
 
 /// 函数 `remove_entry_if_expired`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -721,7 +699,6 @@ fn remove_entry_if_expired<T>(
 
 /// 函数 `prune_expired_entries`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -745,7 +722,6 @@ fn prune_expired_entries<T>(
 
 /// 函数 `enforce_capacity_pair`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -787,7 +763,6 @@ fn enforce_capacity<T>(map: &mut HashMap<String, RouteStateEntry<T>>, capacity: 
 
 /// 函数 `find_oldest_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -804,7 +779,6 @@ fn find_oldest_key<T>(map: &HashMap<String, RouteStateEntry<T>>) -> Option<Strin
 
 /// 函数 `key_model_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -827,7 +801,6 @@ fn key_model_key(key_id: &str, model: Option<&str>) -> String {
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -882,7 +855,6 @@ pub(super) fn reload_from_env() {
 
 /// 函数 `ensure_route_config_loaded`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -897,7 +869,6 @@ fn ensure_route_config_loaded() {
 
 /// 函数 `env_bool_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -920,7 +891,6 @@ fn env_bool_or(name: &str, default: bool) -> bool {
 
 /// 函数 `env_usize_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -939,7 +909,6 @@ fn env_usize_or(name: &str, default: usize) -> usize {
 
 /// 函数 `env_u64_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -959,7 +928,6 @@ fn env_u64_or(name: &str, default: u64) -> u64 {
 impl RouteRoundRobinState {
     /// 函数 `maybe_maintain`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -995,7 +963,6 @@ impl RouteRoundRobinState {
 
 /// 函数 `clear_route_state_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

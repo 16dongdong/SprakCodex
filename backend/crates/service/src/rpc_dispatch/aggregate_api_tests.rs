@@ -4,7 +4,6 @@ use codexmanager_core::rpc::types::JsonRpcRequest;
 
 /// 函数 `rpc_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ fn rpc_request(method: &str, params: serde_json::Value) -> JsonRpcRequest {
 
 /// 函数 `error_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -44,7 +42,6 @@ fn error_message(resp: &codexmanager_core::rpc::types::JsonRpcResponse) -> Strin
 
 /// 函数 `aggregate_api_update_accepts_id_and_api_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -89,7 +86,6 @@ fn aggregate_api_update_accepts_id_and_api_id() {
 
 /// 函数 `aggregate_api_test_connection_accepts_id_and_api_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

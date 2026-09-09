@@ -29,7 +29,6 @@ impl CandidateExecutionState {
 
     /// 函数 `rewrite_cache_key`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -61,7 +60,6 @@ impl CandidateExecutionState {
 
     /// 函数 `strip_session_affinity`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -103,7 +101,6 @@ impl CandidateExecutionState {
 
     /// 函数 `rewrite_body_for_model`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -175,7 +172,6 @@ impl CandidateExecutionState {
 
     /// 函数 `body_for_attempt`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -223,7 +219,6 @@ impl CandidateExecutionState {
 
     /// 函数 `retry_body`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

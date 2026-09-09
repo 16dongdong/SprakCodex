@@ -70,7 +70,6 @@ fn hide_billed_request_logs_before_sql() -> &'static str {
 impl Storage {
     /// 函数 `ensure_request_logs_indexes`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -148,7 +147,6 @@ impl Storage {
 
     /// 函数 `insert_request_log`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -211,7 +209,6 @@ impl Storage {
 
     /// 函数 `insert_request_log_with_token_stat`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -315,7 +312,6 @@ impl Storage {
 
     /// 函数 `list_request_logs`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -341,7 +337,6 @@ impl Storage {
 
     /// 函数 `list_request_logs_paginated`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -431,7 +426,6 @@ impl Storage {
 
     /// 函数 `count_request_logs`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -492,7 +486,6 @@ impl Storage {
 
     /// 函数 `summarize_request_logs_filtered`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -577,7 +570,6 @@ impl Storage {
 
     /// 函数 `clear_request_logs`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -642,7 +634,6 @@ impl Storage {
 
     /// 函数 `summarize_request_logs_between`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -672,7 +663,6 @@ impl Storage {
 
     /// 函数 `ensure_request_logs_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -749,7 +739,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_reasoning_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -765,7 +754,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_account_tokens_cost_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -789,7 +777,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_cached_reasoning_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -804,7 +791,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_trace_context_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -827,7 +813,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_aggregate_api_context_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -844,7 +829,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_attempt_chain_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -861,7 +845,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_aggregate_api_attempt_chain_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -878,7 +861,6 @@ impl Storage {
 
     /// 函数 `ensure_request_log_duration_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -932,7 +914,6 @@ impl Storage {
 
     /// 函数 `compact_request_logs_legacy_usage_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1116,7 +1097,6 @@ fn request_log_summary_sql(filters: &RequestLogSqlFilters) -> String {
 
 /// 函数 `map_request_log_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1187,7 +1167,6 @@ fn map_request_log_query_summary_row(row: &Row<'_>) -> Result<RequestLogQuerySum
 
 /// 函数 `normalize_request_log_limit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1208,7 +1187,6 @@ fn normalize_request_log_limit(value: i64) -> i64 {
 
 /// 函数 `build_request_log_filters`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

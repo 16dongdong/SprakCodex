@@ -43,7 +43,6 @@ use super::{
 
 /// 函数 `is_compact_request_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -66,7 +65,6 @@ fn response_adapter_uses_manual_chunked_streaming(response_adapter: ResponseAdap
 
 /// 函数 `should_suppress_deactivation_delivery`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -162,7 +160,6 @@ fn respond_passthrough_collector_stream(
 
 /// 函数 `respond_with_upstream`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -30,7 +30,6 @@ pub(in super::super) struct GatewayUpstreamExecutionContext<'a> {
 impl<'a> GatewayUpstreamExecutionContext<'a> {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -94,7 +93,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `has_more_candidates`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -113,7 +111,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `should_skip_candidate`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -138,7 +135,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `log_candidate_start`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -164,7 +160,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `log_candidate_skip`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -194,7 +189,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `log_attempt_result`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -221,7 +215,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `mark_account_unavailable_for_gateway_error`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -263,7 +256,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `log_final_result`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -296,7 +288,6 @@ impl<'a> GatewayUpstreamExecutionContext<'a> {
 
     /// 函数 `log_final_result_with_model`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

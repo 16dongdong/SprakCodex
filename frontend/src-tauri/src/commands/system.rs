@@ -7,7 +7,6 @@ use crate::{
 
 /// 函数 `open_in_browser`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ pub async fn open_external_url(url: String) -> Result<(), String> {
 
 /// 函数 `open_in_file_manager`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -50,7 +48,6 @@ pub async fn open_in_file_manager(path: String) -> Result<(), String> {
 
 /// 函数 `app_window_unsaved_draft_sections_set`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -85,7 +85,6 @@ pub(crate) fn sync_auto_start_runtime_state_from_settings(
 
 /// 函数 `app_close_to_tray_on_close_get`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -105,7 +104,6 @@ pub fn app_close_to_tray_on_close_get(app: tauri::AppHandle) -> bool {
 
 /// 函数 `app_close_to_tray_on_close_set`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -129,7 +127,6 @@ pub fn app_close_to_tray_on_close_set(app: tauri::AppHandle, enabled: bool) -> b
 
 /// 函数 `app_settings_get`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -159,7 +156,6 @@ pub async fn app_settings_get(app: tauri::AppHandle) -> Result<serde_json::Value
 
 /// 函数 `app_settings_set`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

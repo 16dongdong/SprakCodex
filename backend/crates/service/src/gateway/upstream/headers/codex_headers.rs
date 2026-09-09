@@ -124,7 +124,6 @@ pub(crate) fn resolve_codex_installation_id(
 
 /// 函数 `build_codex_upstream_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -276,7 +275,6 @@ pub(crate) fn build_codex_upstream_headers(
 
 /// 函数 `build_codex_compact_upstream_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -384,7 +382,6 @@ pub(crate) fn build_codex_compact_upstream_headers(
 
 /// 函数 `resolve_optional_session_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -475,7 +472,6 @@ fn append_passthrough_codex_headers(
 
 /// 函数 `resolve_client_request_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

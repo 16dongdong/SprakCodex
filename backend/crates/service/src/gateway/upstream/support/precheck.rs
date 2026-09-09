@@ -14,7 +14,6 @@ pub(in super::super) enum CandidatePrecheckResult {
 
 /// 函数 `prepare_candidates_for_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

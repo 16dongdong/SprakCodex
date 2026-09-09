@@ -18,7 +18,6 @@ static UNSAVED_SETTINGS_DRAFT_SECTIONS: LazyLock<Mutex<Vec<String>>> =
 
 /// 函数 `should_keep_alive_for_lightweight_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ pub(crate) fn should_keep_alive_for_lightweight_close() -> bool {
 
 /// 函数 `set_unsaved_settings_draft_sections`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -69,7 +67,6 @@ pub(crate) fn set_unsaved_settings_draft_sections(sections: Vec<String>) {
 
 /// 函数 `current_unsaved_settings_draft_sections`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -90,7 +87,6 @@ pub(crate) fn current_unsaved_settings_draft_sections() -> Vec<String> {
 
 /// 函数 `has_unsaved_settings_draft_sections`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -105,7 +101,6 @@ pub(crate) fn has_unsaved_settings_draft_sections() -> bool {
 
 /// 函数 `mark_skip_next_unsaved_settings_window_close_confirm`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -120,7 +115,6 @@ pub(crate) fn mark_skip_next_unsaved_settings_window_close_confirm() {
 
 /// 函数 `take_skip_next_unsaved_settings_window_close_confirm`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -135,7 +129,6 @@ pub(crate) fn take_skip_next_unsaved_settings_window_close_confirm() -> bool {
 
 /// 函数 `mark_skip_next_unsaved_settings_exit_confirm`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -150,7 +143,6 @@ pub(crate) fn mark_skip_next_unsaved_settings_exit_confirm() {
 
 /// 函数 `take_skip_next_unsaved_settings_exit_confirm`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -165,7 +157,6 @@ pub(crate) fn take_skip_next_unsaved_settings_exit_confirm() -> bool {
 
 /// 函数 `clear_skip_next_unsaved_settings_confirms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -181,7 +172,6 @@ pub(crate) fn clear_skip_next_unsaved_settings_confirms() {
 
 /// 函数 `prepare_for_forced_app_exit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -209,7 +199,6 @@ mod tests {
 
     /// 函数 `clears_skip_flags_for_unsaved_settings_confirms`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

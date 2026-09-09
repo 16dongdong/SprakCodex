@@ -1,6 +1,5 @@
 /// 函数 `normalize_service_tier`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -23,7 +22,6 @@ pub(crate) fn normalize_service_tier(value: &str) -> Option<&'static str> {
 
 /// 函数 `normalize_service_tier_for_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///

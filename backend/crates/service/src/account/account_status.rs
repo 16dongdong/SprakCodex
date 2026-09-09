@@ -34,7 +34,6 @@ pub(crate) struct AccountStatusContext {
 
 /// 函数 `latest_status_reason`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -68,7 +67,6 @@ pub(crate) fn load_account_status_context(
 
 /// 函数 `set_account_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -117,7 +115,6 @@ pub(crate) fn set_account_status_with_context(
 
 /// 函数 `should_preserve_manual_account_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -155,7 +152,6 @@ fn should_preserve_usage_limit_status(storage: &Storage, account_id: &str) -> bo
 
 /// 函数 `classify_account_availability_signal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -200,7 +196,6 @@ pub(crate) fn classify_account_availability_signal(err: &str) -> Option<AccountA
 
 /// 函数 `extract_usage_http_status_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -231,7 +226,6 @@ fn extract_usage_http_status_code(message: &str) -> Option<u16> {
 
 /// 函数 `deactivation_reason_from_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -304,7 +298,6 @@ pub(crate) fn analyze_gateway_error(err: &str, has_more_candidates: bool) -> Gat
 
 /// 函数 `should_failover_for_deactivation_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -336,7 +329,6 @@ fn mark_account_unavailable_for_confirmed_usage_exhausted(
 
 /// 函数 `set_account_unavailable_with_reason`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -365,7 +357,6 @@ fn set_account_limited_with_reason(storage: &Storage, account_id: &str, reason: 
 
 /// 函数 `set_account_banned_with_reason`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -386,7 +377,6 @@ fn set_account_banned_with_reason(storage: &Storage, account_id: &str, reason: &
 
 /// 函数 `mark_account_unavailable_for_usage_http_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -416,7 +406,6 @@ pub(crate) fn mark_account_unavailable_for_usage_http_error(
 
 /// 函数 `mark_account_unavailable_for_deactivation_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -497,7 +486,6 @@ pub(crate) fn mark_account_unavailable_for_refresh_token_error(
 
 /// 函数 `mark_account_unavailable_for_test_auth_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -527,7 +515,6 @@ pub(crate) fn mark_account_unavailable_for_test_auth_status(
 
 /// 函数 `mark_account_limited_for_test_rate_limit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -596,7 +583,6 @@ fn set_account_status_after_test_if_context_matches(
 
 /// 函数 `restore_account_active_after_test`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///

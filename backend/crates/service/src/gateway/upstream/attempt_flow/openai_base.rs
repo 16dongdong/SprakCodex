@@ -13,7 +13,6 @@ pub(in crate::gateway::upstream) enum OpenAiAttemptResult {
 
 /// 函数 `handle_openai_base_attempt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

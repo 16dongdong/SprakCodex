@@ -22,7 +22,6 @@ static FAILURE_EVENT_THROTTLE: OnceLock<Mutex<HashMap<FailureThrottleKey, i64>>>
 
 /// 函数 `record_usage_refresh_failure`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -58,7 +57,6 @@ pub(super) fn record_usage_refresh_failure(storage: &Storage, account_id: &str, 
 
 /// 函数 `mark_usage_unreachable_if_needed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -79,7 +77,6 @@ pub(super) fn mark_usage_unreachable_if_needed(storage: &Storage, account_id: &s
 
 /// 函数 `should_retry_with_refresh`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -97,7 +94,6 @@ pub(super) fn should_retry_with_refresh(err: &str) -> bool {
 
 /// 函数 `usage_refresh_failure_event_window_secs`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -116,7 +112,6 @@ fn usage_refresh_failure_event_window_secs() -> i64 {
 
 /// 函数 `classify_usage_refresh_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -166,7 +161,6 @@ fn status_reason_for_refresh_failure(error_class: &str) -> Option<&'static str> 
 
 /// 函数 `extract_usage_status_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -196,7 +190,6 @@ fn extract_usage_status_code(message: &str) -> Option<u16> {
 
 /// 函数 `should_record_failure_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -225,7 +218,6 @@ fn should_record_failure_event(
 
 /// 函数 `should_record_failure_event_with_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -266,7 +258,6 @@ fn should_record_failure_event_with_state(
 
 /// 函数 `prune_failure_event_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

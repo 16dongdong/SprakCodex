@@ -16,7 +16,6 @@ pub(crate) struct ResolvedAccountPlan {
 
 /// 函数 `extract_plan_type_from_id_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +35,6 @@ pub(crate) fn extract_plan_type_from_id_token(id_token: &str) -> Option<String> 
 
 /// 函数 `is_free_plan_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +57,6 @@ pub(crate) fn is_free_plan_type(plan_type: Option<&str>) -> bool {
 
 /// 函数 `is_free_plan_from_credits_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -75,7 +72,6 @@ pub(crate) fn is_free_plan_from_credits_json(raw_credits_json: Option<&str>) -> 
 
 /// 函数 `resolve_account_plan`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -144,7 +140,6 @@ pub(crate) fn normalize_account_plan_value(value: &str) -> Option<String> {
 
 /// 函数 `extract_plan_type_from_credits_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -177,7 +172,6 @@ pub(crate) fn extract_plan_type_from_credits_json(
 
 /// 函数 `is_single_window_long_usage_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -195,7 +189,6 @@ pub(crate) fn is_single_window_long_usage_snapshot(snapshot: &UsageSnapshotRecor
 
 /// 函数 `is_free_or_single_window_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -245,7 +238,6 @@ pub(crate) fn account_matches_plan_filter_with_snapshot(
 
 /// 函数 `is_long_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -260,7 +252,6 @@ fn is_long_window(window_minutes: Option<i64>) -> bool {
 
 /// 函数 `extract_string_by_keys_recursive`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -303,7 +294,6 @@ fn extract_string_by_keys_recursive(value: &Value, keys: &[&str]) -> Option<Stri
 
 /// 函数 `normalize_plan_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

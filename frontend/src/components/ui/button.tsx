@@ -45,7 +45,6 @@ const buttonVariants = cva(
 /**
  * 函数 `Button`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

@@ -6,7 +6,6 @@ import { getLocalDayRange, type LocalDayRange } from "@/lib/utils/time";
 /**
  * 函数 `useLocalDayRange`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-13
  *

@@ -10,7 +10,6 @@ use output_text::{
 
 /// 函数 `parse_usage_from_sse_frame`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -89,7 +88,6 @@ pub(in super::super) struct SseFrameInspection {
 
 /// 函数 `classify_terminal_event_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -130,7 +128,6 @@ fn classify_terminal_event_name(
 
 /// 函数 `is_response_completed_event_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -146,7 +143,6 @@ pub(in super::super) fn is_response_completed_event_name(name: &str) -> bool {
 
 /// 函数 `is_chat_completion_terminal_chunk`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -173,7 +169,6 @@ fn is_chat_completion_terminal_chunk(value: &Value) -> bool {
 
 /// 函数 `inspect_sse_frame`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -296,7 +291,6 @@ pub(in super::super) fn inspect_sse_frame(lines: &[String]) -> SseFrameInspectio
 
 /// 函数 `extract_sse_event_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -320,7 +314,6 @@ pub(in super::super) fn extract_sse_event_name(lines: &[String]) -> Option<Strin
 
 /// 函数 `normalize_sse_event_name_for_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -339,7 +332,6 @@ fn normalize_sse_event_name_for_type(event_name: &str) -> Option<&str> {
 
 /// 函数 `extract_sse_frame_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -386,7 +378,6 @@ mod tests;
 
 /// 函数 `ensure_value_has_sse_event_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -417,7 +408,6 @@ fn ensure_value_has_sse_event_type(lines: &[String], value: &mut Value) {
 
 /// 函数 `parse_sse_frame_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

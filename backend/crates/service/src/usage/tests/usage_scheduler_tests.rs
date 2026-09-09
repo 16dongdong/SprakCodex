@@ -4,7 +4,6 @@ use std::time::Duration;
 
 /// 函数 `blocking_poll_loop_runs_task_and_respects_interval`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -45,7 +44,6 @@ fn blocking_poll_loop_runs_task_and_respects_interval() {
 
 /// 函数 `blocking_poll_loop_calls_error_filter_before_sleep`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -89,7 +87,6 @@ fn blocking_poll_loop_calls_error_filter_before_sleep() {
 
 /// 函数 `blocking_poll_loop_applies_failure_backoff_with_cap_and_reset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -137,7 +134,6 @@ fn blocking_poll_loop_applies_failure_backoff_with_cap_and_reset() {
 
 /// 函数 `blocking_poll_loop_adds_jitter_on_top_of_base_delay`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -177,7 +173,6 @@ fn blocking_poll_loop_adds_jitter_on_top_of_base_delay() {
 
 /// 函数 `parse_interval_secs_falls_back_and_applies_minimum`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

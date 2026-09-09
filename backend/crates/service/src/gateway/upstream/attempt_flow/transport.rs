@@ -150,7 +150,6 @@ pub(in super::super) struct UpstreamRequestContext<'a> {
 impl<'a> UpstreamRequestContext<'a> {
     /// 函数 `from_request`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -175,7 +174,6 @@ impl<'a> UpstreamRequestContext<'a> {
 
 /// 函数 `should_force_connection_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -193,7 +191,6 @@ fn should_force_connection_close(target_url: &str) -> bool {
 
 /// 函数 `force_connection_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -227,7 +224,6 @@ fn is_session_scoped_header(name: &str) -> bool {
 
 /// 函数 `extract_prompt_cache_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -271,7 +267,6 @@ fn strip_compact_service_tier_for_transport(body: &Bytes, preserve_service_tier:
 
 /// 函数 `is_compact_request_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -377,7 +372,6 @@ fn apply_final_upstream_header_policy(
 
 /// 函数 `has_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -395,7 +389,6 @@ fn has_header(headers: &[(String, String)], name: &str) -> bool {
 
 /// 函数 `resolve_chatgpt_account_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -417,7 +410,6 @@ fn resolve_chatgpt_account_header<'a>(account: &'a Account, target_url: &str) ->
 
 /// 函数 `resolve_request_compression_with_flag`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -452,7 +444,6 @@ fn resolve_request_compression_with_flag(
 
 /// 函数 `resolve_request_compression`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -766,7 +757,6 @@ pub(in crate::gateway) fn send_async_stream_request(
 
 /// 函数 `encode_request_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -824,7 +814,6 @@ fn encode_request_body(
 
 /// 函数 `send_upstream_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -895,7 +884,6 @@ pub(in super::super) fn send_upstream_request_without_session_headers(
 
 /// 函数 `send_upstream_request_without_compression`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-04
 ///
@@ -936,7 +924,6 @@ pub(in super::super) fn send_upstream_request_without_compression(
 
 /// 函数 `send_upstream_request_with_compression_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-04
 ///

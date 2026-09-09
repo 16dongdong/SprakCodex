@@ -10,7 +10,6 @@ import { I18nProvider } from "@/lib/i18n/provider";
 /**
  * 函数 `Providers`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

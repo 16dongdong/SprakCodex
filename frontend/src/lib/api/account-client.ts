@@ -219,7 +219,6 @@ const MAX_IMPORT_ERROR_ITEMS = 50;
 /**
  * 函数 `createEmptyImportResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -243,7 +242,6 @@ function createEmptyImportResult(): AccountImportResult {
 /**
  * 函数 `estimateImportRequestBytes`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -260,7 +258,6 @@ function estimateImportRequestBytes(contents: string[]): number {
 /**
  * 函数 `splitImportContents`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -324,7 +321,6 @@ function normalizeUsageRefreshResult(payload: unknown): AccountUsageRefreshResul
 /**
  * 函数 `mergeImportResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -391,7 +387,6 @@ function mergeImportResult(
 /**
  * 函数 `importAccountContents`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

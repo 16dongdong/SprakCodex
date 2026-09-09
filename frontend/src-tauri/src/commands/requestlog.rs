@@ -2,7 +2,6 @@ use crate::commands::shared::rpc_call_in_background;
 
 /// 函数 `service_requestlog_list`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +58,6 @@ pub async fn service_requestlog_list_with_summary(
 
 /// 函数 `service_requestlog_clear`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -75,7 +73,6 @@ pub async fn service_requestlog_clear(addr: Option<String>) -> Result<serde_json
 
 /// 函数 `service_requestlog_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -105,7 +102,6 @@ pub async fn service_requestlog_summary(
 
 /// 函数 `service_requestlog_today_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

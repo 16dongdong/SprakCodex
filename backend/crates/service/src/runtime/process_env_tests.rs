@@ -8,7 +8,6 @@ struct EnvGuard {
 impl EnvGuard {
     /// 函数 `set`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -31,7 +30,6 @@ impl EnvGuard {
 impl Drop for EnvGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -51,7 +49,6 @@ impl Drop for EnvGuard {
 
 /// 函数 `ensure_default_db_path_resolves_relative_env_against_exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -75,7 +72,6 @@ fn ensure_default_db_path_resolves_relative_env_against_exe_dir() {
 
 /// 函数 `rpc_token_file_path_resolves_relative_env_against_exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

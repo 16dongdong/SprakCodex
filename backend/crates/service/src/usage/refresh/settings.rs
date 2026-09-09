@@ -59,7 +59,6 @@ pub(crate) struct BackgroundTasksSettingsPatch {
 
 /// 函数 `background_tasks_settings`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -93,7 +92,6 @@ pub(crate) fn background_tasks_settings() -> BackgroundTasksSettings {
 
 /// 函数 `set_background_tasks_settings`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -221,7 +219,6 @@ pub(crate) fn validate_background_tasks_settings_patch(
 
 /// 函数 `reload_background_tasks_runtime_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -243,7 +240,6 @@ pub(crate) fn reload_background_tasks_runtime_from_env() {
 
 /// 函数 `ensure_background_tasks_config_loaded`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -258,7 +254,6 @@ pub(super) fn ensure_background_tasks_config_loaded() {
 
 /// 函数 `reload_background_tasks_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -376,7 +371,6 @@ fn normalize_text_setting(value: &str) -> String {
 
 /// 函数 `env_usize_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -395,7 +389,6 @@ fn env_usize_or(name: &str, default: usize) -> usize {
 
 /// 函数 `env_bool_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

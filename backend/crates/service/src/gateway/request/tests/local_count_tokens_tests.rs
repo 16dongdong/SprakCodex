@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `estimate_input_tokens_uses_messages_and_system_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -35,7 +34,6 @@ fn anthropic_count_tokens_matches_original_path_after_protocol_adaptation() {
 
 /// 函数 `estimate_input_tokens_rejects_invalid_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -53,7 +51,6 @@ fn estimate_input_tokens_rejects_invalid_json() {
 
 /// 函数 `estimate_input_tokens_rejects_non_object_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

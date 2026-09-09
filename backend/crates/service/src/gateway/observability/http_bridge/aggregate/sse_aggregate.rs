@@ -41,7 +41,6 @@ struct ResponsesSseSynthesis {
 
 /// 函数 `merge_tool_call_arguments`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -71,7 +70,6 @@ fn merge_tool_call_arguments(existing: &mut String, fragment: &str) {
 
 /// 函数 `reserve_output_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -94,7 +92,6 @@ fn reserve_output_index(synthesis: &mut ResponsesSseSynthesis, explicit_index: O
 
 /// 函数 `merge_response_output_item_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -206,7 +203,6 @@ fn merge_response_output_item_event(synthesis: &mut ResponsesSseSynthesis, value
 
 /// 函数 `append_chat_delta_content`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -233,7 +229,6 @@ fn append_chat_delta_content(buffer: &mut String, delta_content: &Value) {
 
 /// 函数 `update_chat_completion_sse_synthesis`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -299,7 +294,6 @@ fn update_chat_completion_sse_synthesis(synthesis: &mut ChatCompletionSseSynthes
 
 /// 函数 `update_responses_sse_synthesis`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -412,7 +406,6 @@ fn update_responses_sse_synthesis(synthesis: &mut ResponsesSseSynthesis, value: 
 
 /// 函数 `response_has_effective_output`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -431,7 +424,6 @@ fn response_has_effective_output(response: &Value) -> bool {
 
 /// 函数 `build_response_output_items_from_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -453,7 +445,6 @@ fn build_response_output_items_from_text(text: &str) -> Value {
 
 /// 函数 `build_response_output_items_from_sse`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -473,7 +464,6 @@ fn build_response_output_items_from_sse(synthesis: &ResponsesSseSynthesis) -> Op
 
 /// 函数 `enrich_completed_response_with_sse_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -567,7 +557,6 @@ fn enrich_completed_response_with_sse_text(
 
 /// 函数 `synthesize_response_body_from_sse`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -636,7 +625,6 @@ fn synthesize_response_body_from_sse(synthesis: &ResponsesSseSynthesis) -> Optio
 
 /// 函数 `synthesize_chat_completion_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -729,7 +717,6 @@ fn merge_sse_frame_usage(
 
 /// 函数 `collect_non_stream_json_from_sse_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -809,7 +796,6 @@ pub(in super::super) fn collect_non_stream_json_from_sse_bytes(
 
 /// 函数 `looks_like_sse_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

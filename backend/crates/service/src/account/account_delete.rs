@@ -4,7 +4,6 @@ use crate::storage_helpers::open_storage;
 
 /// 函数 `delete_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

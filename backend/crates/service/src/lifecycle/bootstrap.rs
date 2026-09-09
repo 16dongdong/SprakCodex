@@ -1,7 +1,6 @@
 pub mod portable {
     /// 函数 `bootstrap_current_process`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -19,7 +18,6 @@ pub mod portable {
 
 /// 函数 `initialize_storage_if_needed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

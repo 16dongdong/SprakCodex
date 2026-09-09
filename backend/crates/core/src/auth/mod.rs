@@ -74,7 +74,6 @@ pub struct PkceCodes {
 
 /// 函数 `generate_pkce`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -97,7 +96,6 @@ pub fn generate_pkce() -> PkceCodes {
 
 /// 函数 `generate_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -114,7 +112,6 @@ pub fn generate_state() -> String {
 
 /// 函数 `parse_id_token_claims`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -181,7 +178,6 @@ pub fn normalize_workspace_id(value: Option<&str>) -> Option<String> {
 
 /// 函数 `extract_token_exp`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -204,7 +200,6 @@ pub fn extract_token_exp(token: &str) -> Option<i64> {
 
 /// 函数 `extract_chatgpt_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -236,7 +231,6 @@ pub fn extract_chatgpt_account_id(token: &str) -> Option<String> {
 
 /// 函数 `extract_chatgpt_user_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -286,7 +280,6 @@ pub fn extract_chatgpt_user_id(token: &str) -> Option<String> {
 
 /// 函数 `extract_workspace_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -354,7 +347,6 @@ pub fn extract_workspace_id(token: &str) -> Option<String> {
 
 /// 函数 `extract_workspace_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -403,7 +395,6 @@ pub fn extract_workspace_name(token: &str) -> Option<String> {
 
 /// 函数 `build_authorize_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -456,7 +447,6 @@ pub fn build_authorize_url(
 
 /// 函数 `token_exchange_body_authorization_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -485,7 +475,6 @@ pub fn token_exchange_body_authorization_code(
 
 /// 函数 `token_exchange_body_token_exchange`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -508,7 +497,6 @@ pub fn token_exchange_body_token_exchange(id_token: &str, client_id: &str) -> St
 
 /// 函数 `device_usercode_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -526,7 +514,6 @@ pub fn device_usercode_url(issuer: &str) -> String {
 
 /// 函数 `device_token_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -544,7 +531,6 @@ pub fn device_token_url(issuer: &str) -> String {
 
 /// 函数 `device_verification_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -559,7 +545,6 @@ pub fn device_verification_url(issuer: &str) -> String {
 
 /// 函数 `device_redirect_uri`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

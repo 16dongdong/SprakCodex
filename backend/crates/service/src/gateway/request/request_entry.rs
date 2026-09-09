@@ -2,7 +2,6 @@ use tiny_http::{Request, Response};
 
 /// 函数 `handle_gateway_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

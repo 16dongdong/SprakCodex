@@ -54,7 +54,6 @@ pub(crate) enum SseKeepAliveFrame {
 impl SseKeepAliveFrame {
     /// 函数 `bytes`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -128,7 +127,6 @@ impl UpstreamSseFramePump {
 
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -143,7 +141,6 @@ impl UpstreamSseFramePump {
 
     /// 函数 `recv_timeout`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -162,7 +159,6 @@ impl UpstreamSseFramePump {
 
 /// 函数 `sse_keepalive_interval`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -206,7 +202,6 @@ pub(super) fn should_emit_keepalive_after_first_frame(saw_upstream_frame: bool) 
 
 /// 函数 `mark_collector_terminal_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -226,7 +221,6 @@ pub(super) fn mark_collector_terminal_success(
 
 /// 函数 `stream_incomplete_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -241,7 +235,6 @@ pub(super) fn stream_incomplete_message() -> String {
 
 /// 函数 `stream_reader_disconnected_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -266,7 +259,6 @@ pub(super) fn upstream_hint_or_stream_incomplete_message(
 
 /// 函数 `classify_upstream_stream_read_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

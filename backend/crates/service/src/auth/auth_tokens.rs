@@ -48,7 +48,6 @@ const CLOUDFLARE_BLOCKED_MESSAGE: &str =
 
 /// 函数 `auth_runtime`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -70,7 +69,6 @@ fn auth_runtime() -> &'static Runtime {
 
 /// 函数 `run_auth_future`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -88,7 +86,6 @@ where
 
 /// 函数 `read_json_with_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -117,7 +114,6 @@ where
 
 /// 函数 `read_text_with_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -143,7 +139,6 @@ async fn read_text_with_timeout(
 
 /// 函数 `summarize_token_endpoint_error_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -158,7 +153,6 @@ fn summarize_token_endpoint_error_body(body: &str) -> String {
 
 /// 函数 `extract_response_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -179,7 +173,6 @@ fn extract_response_header(headers: &HeaderMap, name: &str) -> Option<String> {
 
 /// 函数 `build_token_endpoint_debug_suffix`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -218,7 +211,6 @@ fn build_token_endpoint_debug_suffix(headers: &HeaderMap) -> String {
 
 /// 函数 `classify_token_endpoint_error_kind`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -254,7 +246,6 @@ fn classify_token_endpoint_error_kind(body: &str) -> &'static str {
 
 /// 函数 `looks_like_blocked_marker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -273,7 +264,6 @@ fn looks_like_blocked_marker(value: &str) -> bool {
 
 /// 函数 `classify_token_endpoint_error_kind_with_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -327,7 +317,6 @@ pub(crate) struct TokenEndpointErrorDetail {
 impl std::fmt::Display for TokenEndpointErrorDetail {
     /// 函数 `fmt`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -360,7 +349,6 @@ const SENSITIVE_URL_QUERY_KEYS: &[&str] = &[
 
 /// 函数 `extract_html_title`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -383,7 +371,6 @@ fn extract_html_title(raw: &str) -> Option<String> {
 
 /// 函数 `summarize_html_error_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -425,7 +412,6 @@ fn summarize_html_error_body(raw: &str) -> String {
 
 /// 函数 `redact_sensitive_query_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -448,7 +434,6 @@ fn redact_sensitive_query_value(key: &str, value: &str) -> String {
 
 /// 函数 `redact_sensitive_url_parts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -491,7 +476,6 @@ fn redact_sensitive_url_parts(url: &mut url::Url) {
 
 /// 函数 `redact_sensitive_error_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -509,7 +493,6 @@ fn redact_sensitive_error_url(mut err: ReqwestError) -> ReqwestError {
 
 /// 函数 `parse_token_endpoint_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -596,7 +579,6 @@ pub(crate) fn parse_token_endpoint_error(body: &str) -> TokenEndpointErrorDetail
 
 /// 函数 `summarize_header_only_token_endpoint_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -627,7 +609,6 @@ fn summarize_header_only_token_endpoint_error(headers: &HeaderMap) -> Option<Str
 
 /// 函数 `resolve_token_endpoint_error_detail`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -648,7 +629,6 @@ fn resolve_token_endpoint_error_detail(headers: &HeaderMap, body: &str) -> Strin
 
 /// 函数 `format_token_endpoint_status_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -683,7 +663,6 @@ fn format_token_endpoint_status_error(
 
 /// 函数 `format_api_key_exchange_status_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -723,7 +702,6 @@ fn format_api_key_exchange_status_error(
 
 /// 函数 `next_account_sort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -762,7 +740,6 @@ pub(crate) fn resolve_existing_account_for_login(
 
 /// 函数 `openai_auth_http_client`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -801,7 +778,6 @@ fn openai_auth_loopback_http_client_build_count() -> usize {
 
 /// 函数 `issuer_uses_loopback_host`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -819,7 +795,6 @@ pub(crate) fn issuer_uses_loopback_host(issuer: &str) -> bool {
 
 /// 函数 `auth_http_client_for_issuer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -850,7 +825,6 @@ struct DeviceUserCodeResponse {
 
 /// 函数 `default_device_poll_interval`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -869,7 +843,6 @@ fn normalized_device_poll_interval(interval: u64) -> Duration {
 
 /// 函数 `deserialize_interval`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -960,7 +933,6 @@ pub(crate) fn cancel_device_code_login(login_id: &str) {
 
 /// 函数 `request_device_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -978,7 +950,6 @@ pub(crate) fn request_device_code(
 
 /// 函数 `request_device_code_async`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1027,7 +998,6 @@ async fn request_device_code_async(
 
 /// 函数 `spawn_device_code_login_completion`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1102,7 +1072,6 @@ pub(crate) fn spawn_device_code_login_completion(
 
 /// 函数 `poll_device_auth_token_async`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1201,7 +1170,6 @@ async fn sleep_with_device_cancel(
 
 /// 函数 `complete_device_code_login`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1265,7 +1233,6 @@ fn complete_device_code_login_with_cancel(
 
 /// 函数 `complete_login`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1280,7 +1247,6 @@ pub(crate) fn complete_login(state: &str, code: &str) -> Result<(), String> {
 
 /// 函数 `complete_login_with_redirect`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1471,7 +1437,6 @@ pub(crate) fn complete_login_with_redirect(
 
 /// 函数 `build_exchange_code_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1510,7 +1475,6 @@ struct TokenResponse {
 
 /// 函数 `exchange_code_for_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1541,7 +1505,6 @@ fn exchange_code_for_tokens(
 
 /// 函数 `exchange_code_for_tokens_async`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1592,7 +1555,6 @@ async fn exchange_code_for_tokens_async(
 
 /// 函数 `obtain_api_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1611,7 +1573,6 @@ pub(crate) fn obtain_api_key(
 
 /// 函数 `obtain_api_key_async`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1657,7 +1618,6 @@ async fn obtain_api_key_async(
 
 /// 函数 `build_api_key_exchange_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1682,7 +1642,6 @@ pub(crate) fn build_api_key_exchange_request(
 
 /// 函数 `ensure_workspace_allowed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

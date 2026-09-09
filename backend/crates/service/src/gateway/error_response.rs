@@ -3,7 +3,6 @@ use tiny_http::{Header, Response};
 
 /// 函数 `with_trace_id_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -29,7 +28,6 @@ pub(super) fn with_trace_id_header<R: std::io::Read>(
 
 /// 函数 `terminal_text_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

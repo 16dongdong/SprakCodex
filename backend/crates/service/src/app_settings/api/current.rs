@@ -60,7 +60,6 @@ const DEFAULT_FREE_ACCOUNT_MAX_MODEL_OPTIONS: &[&str] = &[
 
 /// 函数 `normalize_service_bind_mode_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -105,7 +104,6 @@ fn current_runtime_time_zone_value() -> Value {
 
 /// 函数 `current_app_settings_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -436,7 +434,6 @@ fn current_app_settings_value_inner(
 
 /// 函数 `load_free_account_max_model_options`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -471,7 +468,6 @@ fn load_free_account_max_model_options(current: &str) -> Vec<String> {
 
 /// 函数 `collect_free_account_max_model_options`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -512,7 +508,6 @@ fn collect_free_account_max_model_options(current: &str, cached: &[String]) -> V
 
 /// 函数 `is_free_account_max_model_option`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -853,7 +848,6 @@ fn persist_get_snapshot_if_changed(
 }
 /// 函数 `normalize_market_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

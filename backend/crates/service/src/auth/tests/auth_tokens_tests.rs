@@ -39,7 +39,6 @@ fn device_poll_reports_expired_without_waiting_for_real_timeout() {
 
 /// 函数 `build_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -72,7 +71,6 @@ fn build_account(
 
 /// 函数 `pick_existing_account_requires_exact_scope_when_workspace_present`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -102,7 +100,6 @@ fn pick_existing_account_requires_exact_scope_when_workspace_present() {
 
 /// 函数 `pick_existing_account_matches_exact_workspace_scope`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -135,7 +132,6 @@ fn pick_existing_account_matches_exact_workspace_scope() {
 
 /// 函数 `build_account_storage_id_keeps_login_scope_shape`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -152,7 +148,6 @@ fn build_account_storage_id_keeps_login_scope_shape() {
 
 /// 函数 `next_account_sort_uses_step_five`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -307,7 +302,6 @@ fn resolve_existing_account_for_login_keeps_same_team_accounts_separate_by_subje
 
 /// 函数 `jwt_with_claims`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -322,7 +316,6 @@ fn jwt_with_claims(payload: &str) -> String {
 
 /// 函数 `ensure_workspace_allowed_accepts_matching_auth_chatgpt_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -345,7 +338,6 @@ fn ensure_workspace_allowed_accepts_matching_auth_chatgpt_account_id() {
 
 /// 函数 `ensure_workspace_allowed_rejects_mismatched_workspace`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -369,7 +361,6 @@ fn ensure_workspace_allowed_rejects_mismatched_workspace() {
 
 /// 函数 `ensure_workspace_allowed_accepts_composite_scope_values_after_normalization`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-17
 ///
@@ -395,7 +386,6 @@ fn ensure_workspace_allowed_accepts_composite_scope_values_after_normalization()
 
 /// 函数 `parse_token_endpoint_error_prefers_error_description`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -415,7 +405,6 @@ fn parse_token_endpoint_error_prefers_error_description() {
 
 /// 函数 `parse_token_endpoint_error_reads_nested_error_message_and_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -435,7 +424,6 @@ fn parse_token_endpoint_error_reads_nested_error_message_and_code() {
 
 /// 函数 `parse_token_endpoint_error_preserves_plain_text_for_display`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -453,7 +441,6 @@ fn parse_token_endpoint_error_preserves_plain_text_for_display() {
 
 /// 函数 `parse_token_endpoint_error_summarizes_challenge_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -475,7 +462,6 @@ fn parse_token_endpoint_error_summarizes_challenge_html() {
 
 /// 函数 `parse_token_endpoint_error_summarizes_blocked_cloudflare_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -498,7 +484,6 @@ fn parse_token_endpoint_error_summarizes_blocked_cloudflare_html() {
 
 /// 函数 `parse_token_endpoint_error_summarizes_generic_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -519,7 +504,6 @@ fn parse_token_endpoint_error_summarizes_generic_html() {
 
 /// 函数 `format_token_endpoint_status_error_appends_debug_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -562,7 +546,6 @@ fn format_token_endpoint_status_error_appends_debug_headers() {
 
 /// 函数 `format_token_endpoint_status_error_marks_cloudflare_blocked_kind`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -597,7 +580,6 @@ fn format_token_endpoint_status_error_marks_cloudflare_blocked_kind() {
 
 /// 函数 `format_api_key_exchange_status_error_appends_debug_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -632,7 +614,6 @@ fn format_api_key_exchange_status_error_appends_debug_headers() {
 
 /// 函数 `format_token_endpoint_status_error_accepts_raw_error_json_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -666,7 +647,6 @@ fn format_token_endpoint_status_error_accepts_raw_error_json_header() {
 
 /// 函数 `format_token_endpoint_status_error_uses_header_only_blocked_signal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -699,7 +679,6 @@ fn format_token_endpoint_status_error_uses_header_only_blocked_signal() {
 
 /// 函数 `format_api_key_exchange_status_error_uses_identity_header_when_body_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -727,7 +706,6 @@ fn format_api_key_exchange_status_error_uses_identity_header_when_body_empty() {
 
 /// 函数 `format_token_endpoint_status_error_uses_cloudflare_edge_kind_when_only_cf_ray_exists`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -751,7 +729,6 @@ fn format_token_endpoint_status_error_uses_cloudflare_edge_kind_when_only_cf_ray
 
 /// 函数 `issuer_uses_loopback_host_accepts_local_test_issuers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -768,7 +745,6 @@ fn issuer_uses_loopback_host_accepts_local_test_issuers() {
 
 /// 函数 `issuer_uses_loopback_host_rejects_remote_issuers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -803,7 +779,6 @@ fn loopback_auth_http_client_reuses_cached_no_proxy_client() {
 
 /// 函数 `exchange_code_for_tokens_matches_official_login_server_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -852,7 +827,6 @@ fn exchange_code_for_tokens_matches_official_login_server_headers() {
 
 /// 函数 `obtain_api_key_matches_official_login_server_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

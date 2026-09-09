@@ -1,6 +1,5 @@
 /// 函数 `find_subsequence`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -23,7 +22,6 @@ fn find_subsequence(haystack: &[u8], needle: &[u8], start: usize) -> Option<usiz
 
 /// 函数 `extract_multipart_part_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -62,7 +60,6 @@ fn extract_multipart_part_name(headers: &[u8]) -> Option<String> {
 
 /// 函数 `filter_multipart_form_data_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

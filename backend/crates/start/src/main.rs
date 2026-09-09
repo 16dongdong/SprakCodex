@@ -32,7 +32,6 @@ mod windows_job {
     impl ChildJob {
         /// 函数 `new`
         ///
-        /// 作者: gaohongshun
         ///
         /// 时间: 2026-04-02
         ///
@@ -69,7 +68,6 @@ mod windows_job {
 
         /// 函数 `assign`
         ///
-        /// 作者: gaohongshun
         ///
         /// 时间: 2026-04-02
         ///
@@ -91,7 +89,6 @@ mod windows_job {
     impl Drop for ChildJob {
         /// 函数 `drop`
         ///
-        /// 作者: gaohongshun
         ///
         /// 时间: 2026-04-02
         ///
@@ -112,7 +109,6 @@ mod windows_job {
 
 /// 函数 `exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -131,7 +127,6 @@ fn exe_dir() -> PathBuf {
 
 /// 函数 `strip_inline_comment`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -150,7 +145,6 @@ fn strip_inline_comment(value: &str) -> &str {
 
 /// 函数 `parse_dotenv_kv`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -185,7 +179,6 @@ fn parse_dotenv_kv(line: &str) -> Option<(String, String)> {
 
 /// 函数 `find_env_file_in_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -206,7 +199,6 @@ fn find_env_file_in_dir(dir: &Path) -> Option<PathBuf> {
 
 /// 函数 `load_env_from_exe_dir_best_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -238,7 +230,6 @@ fn load_env_from_exe_dir_best_effort() {
 
 /// 函数 `normalize_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -270,7 +261,6 @@ fn normalize_addr(raw: &str) -> Option<String> {
 
 /// 函数 `resolve_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -289,7 +279,6 @@ fn resolve_addr(var: &str, default: &str) -> String {
 
 /// 函数 `resolve_web_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -307,7 +296,6 @@ fn resolve_web_addr() -> String {
 
 /// 函数 `normalize_connect_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -329,7 +317,6 @@ fn normalize_connect_addr(raw: &str) -> String {
 
 /// 函数 `browser_open_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -351,7 +338,6 @@ fn browser_open_addr(raw: &str) -> String {
 
 /// 函数 `resolve_socket_addrs_best_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -385,7 +371,6 @@ fn resolve_socket_addrs_best_effort(host_port: &str) -> Vec<SocketAddr> {
 
 /// 函数 `tcp_probe`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -481,7 +466,6 @@ fn simple_get_best_effort(addr: &str, path: &str) {
 
 /// 函数 `wait_for_port_closed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -503,7 +487,6 @@ fn wait_for_port_closed(addr: &str, attempts: usize) -> bool {
 
 /// 函数 `stop_existing_service_best_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -519,7 +502,6 @@ fn stop_existing_service_best_effort(addr: &str) -> bool {
 
 /// 函数 `stop_existing_web_best_effort`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -539,7 +521,6 @@ fn stop_existing_web_best_effort(bind_addr: &str, open_addr: &str) -> bool {
 
 /// 函数 `bin_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -562,7 +543,6 @@ fn bin_path(dir: &Path, name: &str) -> PathBuf {
 
 /// 函数 `spawn_child`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -582,7 +562,6 @@ fn spawn_child(bin: &Path, service_bind_addr: Option<&str>) -> std::io::Result<C
 
 /// 函数 `main`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -766,7 +745,6 @@ mod tests {
 
     /// 函数 `normalize_connect_addr_maps_all_interfaces_to_localhost`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -787,7 +765,6 @@ mod tests {
 
     /// 函数 `browser_open_addr_maps_all_interfaces_to_loopback`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

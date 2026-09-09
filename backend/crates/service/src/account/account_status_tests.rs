@@ -8,7 +8,6 @@ use codexmanager_core::storage::{now_ts, Account, Storage, UsageSnapshotRecord};
 
 /// 函数 `classify_account_availability_signal_separates_usage_refresh_and_deactivation`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +95,6 @@ fn classify_account_availability_signal_separates_usage_refresh_and_deactivation
 
 /// 函数 `gateway_usage_limit_error_marks_account_limited_immediately`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -148,7 +146,6 @@ fn gateway_usage_limit_error_marks_account_limited_immediately() {
 
 /// 函数 `gateway_usage_limit_error_marks_account_limited_when_snapshot_exhausted`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///

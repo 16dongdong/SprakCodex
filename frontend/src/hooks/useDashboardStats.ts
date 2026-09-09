@@ -32,7 +32,6 @@ interface UseDashboardStatsOptions {
 /**
  * 函数 `useDashboardStats`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

@@ -23,7 +23,6 @@ use super::{
 impl Storage {
     /// 函数 `insert_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -256,7 +255,6 @@ impl Storage {
 
     /// 函数 `account_count`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -302,7 +300,6 @@ impl Storage {
 
     /// 函数 `account_count_filtered`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -327,7 +324,6 @@ impl Storage {
 
     /// 函数 `list_accounts`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -342,7 +338,6 @@ impl Storage {
 
     /// 函数 `list_accounts_filtered`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -926,7 +921,6 @@ impl Storage {
 
     /// 函数 `list_accounts_paginated`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -951,7 +945,6 @@ impl Storage {
 
     /// 函数 `list_gateway_candidates`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1051,7 +1044,6 @@ impl Storage {
 
     /// 函数 `find_account_by_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1176,7 +1168,6 @@ impl Storage {
 
     /// 函数 `update_account_sort`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1195,7 +1186,6 @@ impl Storage {
 
     /// 函数 `update_account_label`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1240,7 +1230,6 @@ impl Storage {
 
     /// 函数 `touch_account_updated_at`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1258,7 +1247,6 @@ impl Storage {
 
     /// 函数 `update_account_status`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1277,7 +1265,6 @@ impl Storage {
 
     /// 函数 `update_account_status_if_changed`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1334,7 +1321,6 @@ impl Storage {
 
     /// 函数 `delete_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1401,7 +1387,6 @@ impl Storage {
 
     /// 函数 `ensure_account_meta_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1453,7 +1438,6 @@ impl Storage {
 
     /// 函数 `preferred_account_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-10
     ///
@@ -1474,7 +1458,6 @@ impl Storage {
 
     /// 函数 `set_preferred_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-10
     ///
@@ -1500,7 +1483,6 @@ impl Storage {
 
     /// 函数 `clear_preferred_account_if`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-10
     ///
@@ -1524,7 +1506,6 @@ impl Storage {
 
     /// 函数 `ensure_login_session_workspace_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1540,7 +1521,6 @@ impl Storage {
 
     /// 函数 `query_accounts`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1646,7 +1626,6 @@ impl Storage {
 
 /// 函数 `normalize_optional_filter`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1665,7 +1644,6 @@ fn normalize_optional_filter(value: Option<&str>) -> Option<String> {
 
 /// 函数 `build_account_where_clause`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1711,7 +1689,6 @@ fn build_account_where_clause(
 
 /// 函数 `qualified_column`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2262,7 +2239,6 @@ fn gateway_candidates_filtered_sql(latest_usage_cte: &str, where_clause: &str) -
 
 /// 函数 `latest_usage_cte_sql`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2327,7 +2303,6 @@ fn remaining_percent_sql(percent_expr: &str) -> String {
 
 /// 函数 `available_usage_clause`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2351,7 +2326,6 @@ fn available_usage_clause(usage_alias: &str) -> String {
 
 /// 函数 `gateway_account_usage_filter_clause`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2385,7 +2359,6 @@ fn gateway_account_status_filter_clause(account_alias: &str) -> String {
 
 /// 函数 `account_select_columns`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2415,7 +2388,6 @@ fn account_select_columns(table_name: &str) -> String {
 
 /// 函数 `token_select_columns`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2441,7 +2413,6 @@ fn token_select_columns(table_name: &str) -> String {
 
 /// 函数 `map_account_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2456,7 +2427,6 @@ fn map_account_row(row: &Row<'_>) -> Result<Account> {
 
 /// 函数 `map_account_row_from_offset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2483,7 +2453,6 @@ fn map_account_row_from_offset(row: &Row<'_>, offset: usize) -> Result<Account> 
 
 /// 函数 `map_token_row_from_offset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2506,7 +2475,6 @@ fn map_token_row_from_offset(row: &Row<'_>, offset: usize) -> Result<Token> {
 
 /// 函数 `map_gateway_candidate_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

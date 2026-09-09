@@ -4,7 +4,6 @@ pub(crate) mod ui;
 
 /// 函数 `effective_lightweight_mode_on_close_to_tray`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ pub fn effective_lightweight_mode_on_close_to_tray(
 
 /// 函数 `sync_window_runtime_state_from_settings`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

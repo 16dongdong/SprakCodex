@@ -5,7 +5,6 @@ static ENV_OVERRIDE_BASELINE: OnceLock<Mutex<HashMap<String, Option<String>>>> =
 
 /// 函数 `env_override_baseline`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -20,7 +19,6 @@ fn env_override_baseline() -> &'static Mutex<HashMap<String, Option<String>>> {
 
 /// 函数 `env_override_original_process_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -41,7 +39,6 @@ pub(super) fn env_override_original_process_value(key: &str) -> Option<String> {
 
 /// 函数 `apply_env_overrides_to_process`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -92,7 +89,6 @@ pub(crate) fn apply_env_overrides_to_process(
 
 /// 函数 `reload_runtime_after_env_override_apply`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

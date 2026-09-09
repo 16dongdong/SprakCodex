@@ -111,7 +111,6 @@ fn prune_usage_snapshots_all_accounts_sql() -> &'static str {
 impl Storage {
     /// 函数 `insert_usage_snapshot`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -208,7 +207,6 @@ impl Storage {
 
     /// 函数 `prune_usage_snapshots_for_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -243,7 +241,6 @@ impl Storage {
 
     /// 函数 `usage_snapshot_count_for_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -268,7 +265,6 @@ impl Storage {
 
     /// 函数 `latest_usage_snapshot`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -289,7 +285,6 @@ impl Storage {
 
     /// 函数 `latest_usage_snapshot_for_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -336,7 +331,6 @@ impl Storage {
 
     /// 函数 `latest_usage_snapshots_by_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -471,7 +465,6 @@ impl Storage {
 
     /// 函数 `ensure_usage_secondary_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -498,7 +491,6 @@ fn normalize_remaining_threshold(value: f64) -> f64 {
 
 /// 函数 `map_usage_snapshot_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

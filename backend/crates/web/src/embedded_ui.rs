@@ -8,7 +8,6 @@ const _DIST_FINGERPRINT: &str = env!("CODEXMANAGER_WEB_DIST_FINGERPRINT");
 
 /// 函数 `has_embedded_ui`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ pub fn has_embedded_ui() -> bool {
 
 /// 函数 `read_asset_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -44,7 +42,6 @@ pub fn read_asset_bytes(path: &str) -> Option<&'static [u8]> {
 
 /// 函数 `guess_mime`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -64,7 +61,6 @@ pub fn guess_mime(path: &str) -> String {
 
 /// 函数 `has_embedded_ui`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +76,6 @@ pub fn has_embedded_ui() -> bool {
 
 /// 函数 `read_asset_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +91,6 @@ pub fn read_asset_bytes(_path: &str) -> Option<&'static [u8]> {
 
 /// 函数 `guess_mime`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -4,7 +4,6 @@ use crate::account_availability::{evaluate_snapshot, Availability};
 
 /// 函数 `should_failover_after_refresh`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -49,7 +48,6 @@ pub(super) fn should_failover_from_low_quota_snapshot_value(snap: &UsageSnapshot
 
 /// 函数 `should_failover_by_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

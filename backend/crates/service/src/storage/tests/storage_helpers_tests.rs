@@ -36,7 +36,6 @@ impl Drop for EnvGuard {
 
 /// 函数 `unique_db_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -189,7 +188,6 @@ fn initialize_storage_migrates_case_conflicting_legacy_slugs() {
 
 /// 函数 `open_storage_reuses_cached_connection_in_same_thread`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -221,7 +219,6 @@ fn open_storage_reuses_cached_connection_in_same_thread() {
 
 /// 函数 `open_storage_reopens_when_db_path_changes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -259,7 +256,6 @@ fn open_storage_reopens_when_db_path_changes() {
 
 /// 函数 `open_storage_waits_for_bounded_pool_slot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-02
 ///
@@ -337,7 +333,6 @@ fn open_storage_waits_for_bounded_pool_slot() {
 
 /// 函数 `open_storage_times_out_when_pool_is_exhausted`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-02
 ///

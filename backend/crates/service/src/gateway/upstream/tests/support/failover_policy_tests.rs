@@ -5,7 +5,6 @@ use super::{
 
 /// 函数 `follow_up_action_only_failovers_when_candidates_remain`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -29,7 +28,6 @@ fn follow_up_action_only_failovers_when_candidates_remain() {
 
 /// 函数 `classify_custom_upstream_status_groups_known_retryable_statuses`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -60,7 +58,6 @@ fn classify_custom_upstream_status_groups_known_retryable_statuses() {
 
 /// 函数 `fallback_non_success_helper_matches_existing_retryable_status_set`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///

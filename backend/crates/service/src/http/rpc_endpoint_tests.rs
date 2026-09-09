@@ -10,7 +10,6 @@ use std::sync::Arc;
 
 /// 函数 `panicking_rpc_handler_returns_structured_json_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -54,7 +53,6 @@ fn panicking_rpc_handler_returns_structured_json_error() {
 
 /// 函数 `normal_rpc_handler_keeps_success_shape`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -93,7 +91,6 @@ fn normal_rpc_handler_keeps_success_shape() {
 
 /// 函数 `notification_handler_returns_empty_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

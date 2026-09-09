@@ -11,7 +11,6 @@ const Select = SelectPrimitive.Root
 /**
  * 函数 `SelectGroup`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -34,7 +33,6 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
 /**
  * 函数 `SelectValue`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -57,7 +55,6 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
 /**
  * 函数 `SelectTrigger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -98,7 +95,6 @@ function SelectTrigger({
 /**
  * 函数 `SelectContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -150,7 +146,6 @@ function SelectContent({
 /**
  * 函数 `SelectLabel`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -176,7 +171,6 @@ function SelectLabel({
 /**
  * 函数 `SelectItem`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -217,7 +211,6 @@ function SelectItem({
 /**
  * 函数 `SelectSeparator`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -243,7 +236,6 @@ function SelectSeparator({
 /**
  * 函数 `SelectScrollUpButton`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -275,7 +267,6 @@ function SelectScrollUpButton({
 /**
  * 函数 `SelectScrollDownButton`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

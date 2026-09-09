@@ -15,7 +15,6 @@ pub(super) enum StatelessRetryResult {
 
 /// 函数 `should_trigger_stateless_retry`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -42,7 +41,6 @@ fn should_trigger_stateless_retry(
 
 /// 函数 `retry_stateless_then_optional_alt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

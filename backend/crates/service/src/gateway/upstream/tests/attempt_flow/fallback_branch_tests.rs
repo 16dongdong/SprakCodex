@@ -7,7 +7,6 @@ use reqwest::header::HeaderValue;
 
 /// 函数 `fallback_non_success_5xx_does_not_failover_even_with_more_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ fn fallback_non_success_5xx_does_not_failover_even_with_more_candidates() {
 
 /// 函数 `fallback_non_success_auth_and_rate_limit_can_failover_when_candidates_remain`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -43,7 +41,6 @@ fn fallback_non_success_auth_and_rate_limit_can_failover_when_candidates_remain(
 
 /// 函数 `fallback_non_success_never_failover_without_more_candidates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -61,7 +58,6 @@ fn fallback_non_success_never_failover_without_more_candidates() {
 
 /// 函数 `fallback_non_success_summary_includes_debug_headers_and_body_hint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -127,7 +123,6 @@ fn fallback_non_success_summary_includes_debug_headers_and_body_hint() {
 
 /// 函数 `fallback_non_success_summary_uses_plain_body_when_no_structured_hint_exists`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -149,7 +144,6 @@ fn fallback_non_success_summary_uses_plain_body_when_no_structured_hint_exists()
 
 /// 函数 `fallback_non_success_headers_only_summary_includes_debug_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -217,7 +211,6 @@ fn fallback_non_success_headers_only_summary_includes_debug_headers() {
 
 /// 函数 `fallback_non_success_headers_only_summary_marks_server_error_without_debug_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

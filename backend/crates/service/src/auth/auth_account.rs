@@ -93,7 +93,6 @@ pub(crate) struct ChatgptAuthTokensLoginInput {
 
 /// 函数 `login_with_chatgpt_auth_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -225,7 +224,6 @@ pub(crate) fn login_with_chatgpt_auth_tokens(
 
 /// 函数 `read_current_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -282,7 +280,6 @@ pub(crate) fn read_current_account(refresh_token: bool) -> Result<AccountReadRes
 
 /// 函数 `refresh_current_chatgpt_auth_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -402,7 +399,6 @@ pub(crate) fn refresh_current_chatgpt_auth_tokens(
 
 /// 函数 `refresh_all_chatgpt_auth_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-03
 ///
@@ -516,7 +512,6 @@ fn refresh_target_issuer<'a>(
 
 /// 函数 `logout_current_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -545,7 +540,6 @@ pub(crate) fn logout_current_account() -> Result<serde_json::Value, String> {
 
 /// 函数 `resolve_current_account_with_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -573,7 +567,6 @@ fn resolve_current_account_with_token(
 
 /// 函数 `resolve_refresh_target`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -607,7 +600,6 @@ fn resolve_refresh_target(
 
 /// 函数 `current_account_payload`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -660,7 +652,6 @@ fn current_account_payload(
 
 /// 函数 `resolve_plan_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -680,7 +671,6 @@ fn resolve_plan_type(
 
 /// 函数 `resolve_plan_type_raw`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -706,7 +696,6 @@ struct ResolvedPlanType {
 
 /// 函数 `resolve_plan_type_resolution`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -746,7 +735,6 @@ fn resolve_plan_type_resolution(
 
 /// 函数 `normalize_plan_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -776,7 +764,6 @@ fn normalize_plan_type(value: String) -> Option<ResolvedPlanType> {
 
 /// 函数 `set_current_auth_account_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -791,7 +778,6 @@ pub(crate) fn set_current_auth_account_id(account_id: Option<&str>) -> Result<()
 
 /// 函数 `set_current_auth_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -806,7 +792,6 @@ pub(crate) fn set_current_auth_mode(auth_mode: Option<&str>) -> Result<(), Strin
 
 /// 函数 `resolve_current_auth_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -824,7 +809,6 @@ fn resolve_current_auth_mode(token: &Token) -> String {
 
 /// 函数 `infer_auth_mode_from_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

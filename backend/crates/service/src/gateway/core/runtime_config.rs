@@ -210,7 +210,6 @@ impl UpstreamClientPool {
 
     /// 函数 `proxy_for_account`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -228,7 +227,6 @@ impl UpstreamClientPool {
 
 /// 函数 `upstream_client`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -244,7 +242,6 @@ pub(crate) fn upstream_client() -> Client {
 
 /// 函数 `upstream_client_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -283,7 +280,6 @@ pub(crate) fn prepare_upstream_client_for_account(account_id: &str) -> Result<()
 
 /// 函数 `fresh_upstream_client_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -359,7 +355,6 @@ pub(crate) fn fresh_async_upstream_client_for_account(
 
 /// 函数 `account_test_proxy_url_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -395,7 +390,6 @@ pub(crate) fn account_test_proxy_url_for_account(
 
 /// 函数 `build_account_test_client_with_timeouts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -663,7 +657,6 @@ fn aggregate_candidate_client_for_key(key: AggregateCandidateClientKey) -> Clien
 
 /// 函数 `upstream_connect_timeout_cached`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -683,7 +676,6 @@ pub(crate) fn current_upstream_connect_timeout() -> Duration {
 
 /// 函数 `build_upstream_client`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -773,7 +765,6 @@ fn build_async_client_with_proxy_strict(
 
 /// 函数 `build_upstream_client_with_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -842,7 +833,6 @@ fn build_async_upstream_client_with_proxy(proxy_url: Option<&str>) -> reqwest::C
 
 /// 函数 `upstream_total_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -863,7 +853,6 @@ pub(crate) fn upstream_total_timeout() -> Option<Duration> {
 
 /// 函数 `upstream_stream_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -884,7 +873,6 @@ pub(crate) fn upstream_stream_timeout() -> Option<Duration> {
 
 /// 函数 `current_upstream_stream_timeout_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -944,7 +932,6 @@ pub(super) fn set_sse_keepalive_interval_ms(interval_ms: u64) -> Result<u64, Str
 
 /// 函数 `request_compression_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -978,7 +965,6 @@ pub(crate) fn current_codex_image_tool_model() -> String {
 
 /// 函数 `account_max_inflight_limit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -994,7 +980,6 @@ pub(crate) fn account_max_inflight_limit() -> usize {
 
 /// 函数 `set_account_max_inflight_limit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1022,7 +1007,6 @@ pub(crate) fn set_thread_aware_account_distribution_enabled(enabled: bool) -> bo
 
 /// 函数 `strict_request_param_allowlist_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1038,7 +1022,6 @@ pub(crate) fn strict_request_param_allowlist_enabled() -> bool {
 
 /// 函数 `request_gate_wait_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1059,7 +1042,6 @@ pub(crate) fn request_gate_wait_timeout() -> Option<Duration> {
 
 /// 函数 `trace_body_preview_max_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1075,7 +1057,6 @@ pub(crate) fn trace_body_preview_max_bytes() -> usize {
 
 /// 函数 `front_proxy_max_body_bytes`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1096,7 +1077,6 @@ pub(crate) fn front_proxy_zstd_max_body_bytes() -> usize {
 
 /// 函数 `upstream_proxy_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1121,7 +1101,6 @@ pub(super) fn upstream_proxy_bypass_hosts() -> String {
 
 /// 函数 `current_free_account_max_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1137,7 +1116,6 @@ pub(crate) fn current_free_account_max_model() -> String {
 
 /// 函数 `current_compact_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1153,7 +1131,6 @@ pub(crate) fn current_compact_model() -> String {
 
 /// 函数 `current_compact_model_override`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1178,7 +1155,6 @@ pub(crate) fn compact_api_path_uses_chat_completions() -> bool {
 
 /// 函数 `current_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -1205,7 +1181,6 @@ pub(crate) fn current_compact_model_forward_rules() -> String {
 
 /// 函数 `resolve_forwarded_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -1229,7 +1204,6 @@ pub(crate) fn resolve_forwarded_model(model: &str) -> Option<String> {
 
 /// 函数 `resolve_builtin_forwarded_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-16
 ///
@@ -1245,7 +1219,6 @@ pub(crate) fn resolve_builtin_forwarded_model(model: &str) -> Option<String> {
 
 /// 函数 `current_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1261,7 +1234,6 @@ pub(crate) fn current_originator() -> String {
 
 /// 函数 `default_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-11
 ///
@@ -1276,7 +1248,6 @@ pub(crate) fn default_originator() -> &'static str {
 
 /// 函数 `current_wire_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1291,7 +1262,6 @@ pub(crate) fn current_wire_originator() -> String {
 
 /// 函数 `set_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1311,7 +1281,6 @@ pub(crate) fn set_originator(originator: &str) -> Result<String, String> {
 
 /// 函数 `current_codex_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1328,7 +1297,6 @@ pub(crate) fn current_codex_user_agent_version() -> String {
 
 /// 函数 `default_codex_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-11
 ///
@@ -1343,7 +1311,6 @@ pub(crate) fn default_codex_user_agent_version() -> &'static str {
 
 /// 函数 `set_codex_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1365,7 +1332,6 @@ pub(crate) fn set_codex_user_agent_version(version: &str) -> Result<String, Stri
 
 /// 函数 `current_codex_user_agent`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1430,7 +1396,6 @@ pub(crate) fn current_gateway_user_agent() -> String {
 
 /// 函数 `current_residency_requirement`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1446,7 +1411,6 @@ pub(crate) fn current_residency_requirement() -> Option<String> {
 
 /// 函数 `set_residency_requirement`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1471,7 +1435,6 @@ pub(crate) fn set_residency_requirement(value: Option<&str>) -> Result<Option<St
 
 /// 函数 `set_free_account_max_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1492,7 +1455,6 @@ pub(crate) fn set_free_account_max_model(model: &str) -> Result<String, String> 
 
 /// 函数 `set_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -1535,7 +1497,6 @@ pub(crate) fn set_compact_model_forward_rules(raw: &str) -> Result<String, Strin
 
 /// 函数 `set_request_compression_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1556,7 +1517,6 @@ pub(crate) fn set_request_compression_enabled(enabled: bool) -> bool {
 
 /// 函数 `set_upstream_proxy_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1603,7 +1563,6 @@ pub(super) fn set_upstream_proxy_bypass_hosts(raw: Option<&str>) -> String {
 
 /// 函数 `set_upstream_stream_timeout_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1628,7 +1587,6 @@ pub(crate) fn set_upstream_total_timeout_ms(timeout_ms: u64) -> u64 {
 
 /// 函数 `token_exchange_client_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1645,7 +1603,6 @@ pub(super) fn token_exchange_client_id() -> String {
 
 /// 函数 `token_exchange_default_issuer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1661,7 +1618,6 @@ pub(super) fn token_exchange_default_issuer() -> String {
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1919,7 +1875,6 @@ pub(super) fn reload_from_env() {
 
 /// 函数 `ensure_runtime_config_loaded`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1934,7 +1889,6 @@ fn ensure_runtime_config_loaded() {
 
 /// 函数 `upstream_client_lock`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1977,7 +1931,6 @@ fn async_retry_upstream_client_lock() -> &'static RwLock<reqwest::Client> {
 
 /// 函数 `upstream_client_pool_lock`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2025,7 +1978,6 @@ fn aggregate_candidate_clients_lock(
 
 /// 函数 `refresh_upstream_clients_from_runtime_config`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2092,7 +2044,6 @@ fn clear_candidate_client_caches() {
 
 /// 函数 `build_upstream_client_pool`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2144,7 +2095,6 @@ fn build_upstream_client_pool() -> UpstreamClientPool {
 
 /// 函数 `upstream_proxy_url_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2163,7 +2113,6 @@ fn upstream_proxy_bypass_hosts_cell() -> &'static RwLock<Vec<String>> {
 
 /// 函数 `free_account_max_model_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2178,7 +2127,6 @@ fn free_account_max_model_cell() -> &'static RwLock<String> {
 
 /// 函数 `compact_model_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2197,7 +2145,6 @@ fn compact_api_path_cell() -> &'static RwLock<String> {
 
 /// 函数 `model_forward_rules_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2231,7 +2178,6 @@ fn codex_image_tool_model_cell() -> &'static RwLock<String> {
 
 /// 函数 `originator_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2246,7 +2192,6 @@ fn originator_cell() -> &'static RwLock<String> {
 
 /// 函数 `codex_user_agent_version_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2266,7 +2211,6 @@ fn gateway_user_agent_cell() -> &'static RwLock<Option<String>> {
 
 /// 函数 `residency_requirement_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2281,7 +2225,6 @@ fn residency_requirement_cell() -> &'static RwLock<Option<String>> {
 
 /// 函数 `current_upstream_proxy_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2378,7 +2321,6 @@ fn load_account_proxy_client_cache_entry_from_storage(
 
 /// 函数 `token_exchange_client_id_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2393,7 +2335,6 @@ fn token_exchange_client_id_cell() -> &'static RwLock<String> {
 
 /// 函数 `token_exchange_issuer_cell`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2408,7 +2349,6 @@ fn token_exchange_issuer_cell() -> &'static RwLock<String> {
 
 /// 函数 `env_non_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2426,7 +2366,6 @@ fn env_non_empty(name: &str) -> Option<String> {
 
 /// 函数 `env_u64_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2444,7 +2383,6 @@ fn env_u64_or(name: &str, default: u64) -> u64 {
 
 /// 函数 `env_usize_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2462,7 +2400,6 @@ fn env_usize_or(name: &str, default: usize) -> usize {
 
 /// 函数 `env_bool_or`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2485,7 +2422,6 @@ fn env_bool_or(name: &str, default: bool) -> bool {
 
 /// 函数 `normalize_model_forward_pattern`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2513,7 +2449,6 @@ fn normalize_model_forward_pattern(raw: &str) -> Result<String, String> {
 
 /// 函数 `normalize_forward_target_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2541,7 +2476,6 @@ fn normalize_forward_target_model(raw: &str) -> Result<String, String> {
 
 /// 函数 `parse_model_forward_rule_line`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2556,7 +2490,6 @@ fn parse_model_forward_rule_line(line: &str) -> Option<(&str, &str)> {
 
 /// 函数 `normalize_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2587,7 +2520,6 @@ fn normalize_model_forward_rules(raw: &str) -> Result<String, String> {
 
 /// 函数 `parse_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2613,7 +2545,6 @@ fn parse_model_forward_rules(raw: &str) -> Result<Vec<ModelForwardRule>, String>
 
 /// 函数 `serialize_model_forward_rules`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2642,7 +2573,6 @@ fn resolve_forwarded_model_from_rules(
 
 /// 函数 `wildcard_pattern_matches`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-05
 ///
@@ -2702,7 +2632,6 @@ fn normalize_model_forward_lookup_model(raw: &str) -> Option<String> {
 
 /// 函数 `normalize_model_slug`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2751,7 +2680,6 @@ fn normalize_compact_api_path(raw: &str) -> Result<String, String> {
 
 /// 函数 `normalize_originator`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2773,7 +2701,6 @@ fn normalize_originator(raw: &str) -> Result<String, String> {
 
 /// 函数 `normalize_codex_user_agent_version`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2801,7 +2728,6 @@ fn normalize_codex_user_agent_version(raw: &str) -> Result<String, String> {
 
 /// 函数 `current_codex_terminal_user_agent_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2877,7 +2803,6 @@ fn format_terminal_user_agent(name: String, version: Option<String>) -> String {
 
 /// 函数 `sanitize_header_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2905,7 +2830,6 @@ fn sanitize_header_value(raw: String) -> String {
 
 /// 函数 `normalize_residency_requirement`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2926,7 +2850,6 @@ fn normalize_residency_requirement(raw: Option<&str>) -> Result<Option<String>, 
 
 /// 函数 `rewrite_socks_proxy_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -2952,7 +2875,6 @@ fn rewrite_socks_proxy_url(proxy_url: &str) -> String {
 
 /// 函数 `normalize_upstream_proxy_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3044,7 +2966,6 @@ fn normalize_exact_bypass_host(raw: &str) -> Option<String> {
 
 /// 函数 `parse_proxy_list_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3089,7 +3010,6 @@ fn bypass_host_pattern_matches(pattern: &str, host: &str) -> bool {
 
 /// 函数 `stable_proxy_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -3112,7 +3032,6 @@ fn stable_proxy_index(account_id: &str, size: usize) -> Option<usize> {
 
 /// 函数 `stable_account_hash`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -4,7 +4,6 @@ use crate::http::header_filter::should_skip_request_header;
 
 /// 函数 `build_target_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ pub(crate) fn build_target_url(backend_base_url: &str, uri: &Uri) -> String {
 
 /// 函数 `filter_request_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

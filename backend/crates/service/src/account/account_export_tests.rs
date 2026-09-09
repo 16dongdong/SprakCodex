@@ -33,7 +33,6 @@ fn sample_token(account_id: &str) -> Token {
 
 /// 函数 `sanitize_file_stem_replaces_windows_invalid_chars`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -50,7 +49,6 @@ fn sanitize_file_stem_replaces_windows_invalid_chars() {
 
 /// 函数 `sanitize_file_stem_trims_tailing_space_and_dot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -67,7 +65,6 @@ fn sanitize_file_stem_trims_tailing_space_and_dot() {
 
 /// 函数 `normalize_selected_account_ids_trims_deduplicates_and_sorts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -124,7 +121,6 @@ fn load_export_metadata_reads_only_export_accounts() {
 
 /// 函数 `single_export_bundle_uses_array_shape_for_reimport`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

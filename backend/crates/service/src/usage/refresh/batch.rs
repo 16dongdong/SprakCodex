@@ -47,7 +47,6 @@ pub(crate) fn refresh_usage_for_all_accounts_result() -> Result<UsageRefreshRunR
 
 /// 函数 `refresh_usage_for_polling_batch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -173,7 +172,6 @@ struct UsageRefreshTaskPlan {
 
 /// 函数 `build_usage_refresh_tasks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -279,7 +277,6 @@ fn hydrate_usage_refresh_tasks(
 
 /// 函数 `run_usage_refresh_tasks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -381,7 +378,6 @@ fn format_all_usage_refresh_failed(total: usize, first_error: Option<String>) ->
 
 /// 函数 `run_usage_refresh_task`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -408,7 +404,6 @@ fn run_usage_refresh_task(storage: &Storage, task: UsageRefreshBatchTask) -> Res
 
 /// 函数 `usage_refresh_worker_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -423,7 +418,6 @@ fn usage_refresh_worker_count() -> usize {
 
 /// 函数 `is_account_refresh_skipped`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -450,7 +444,6 @@ fn build_workspace_map_from_refresh_targets(
 
 /// 函数 `usage_poll_batch_limit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -476,7 +469,6 @@ fn usage_poll_batch_limit(total: usize) -> usize {
 
 /// 函数 `usage_poll_cycle_budget`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -499,7 +491,6 @@ fn usage_poll_cycle_budget() -> Option<Duration> {
 
 /// 函数 `usage_poll_batch_indices`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -525,7 +516,6 @@ pub(crate) fn usage_poll_batch_indices(
 
 /// 函数 `next_usage_poll_cursor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -544,7 +534,6 @@ pub(crate) fn next_usage_poll_cursor(total: usize, cursor: usize, processed: usi
 
 /// 函数 `usage_poll_batch_indices`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -568,7 +557,6 @@ fn usage_poll_batch_indices(total: usize, cursor: usize, batch_limit: usize) -> 
 
 /// 函数 `next_usage_poll_cursor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

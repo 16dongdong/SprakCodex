@@ -6,7 +6,6 @@ use crate::storage_helpers::open_storage;
 
 /// 函数 `usage_snapshot_result_from_record`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ pub(crate) fn usage_snapshot_result_from_record(snap: UsageSnapshotRecord) -> Us
 
 /// 函数 `classify_availability_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -89,7 +87,6 @@ fn classify_availability_status(snap: &UsageSnapshotRecord) -> &'static str {
 
 /// 函数 `read_usage_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

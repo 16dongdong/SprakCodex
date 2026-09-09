@@ -39,7 +39,6 @@ use images::{
 
 /// 函数 `reload_from_env`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -54,7 +53,6 @@ pub(super) fn reload_from_env() {
 
 /// 函数 `summarize_upstream_error_hint_from_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -74,7 +72,6 @@ mod delivery;
 mod stream_readers;
 /// 函数 `respond_with_upstream`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

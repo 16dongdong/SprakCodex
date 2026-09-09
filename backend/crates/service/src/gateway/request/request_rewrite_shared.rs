@@ -2,7 +2,6 @@ use serde_json::Value;
 
 /// 函数 `retain_fields_with_allowlist`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -29,7 +28,6 @@ pub(super) fn retain_fields_with_allowlist(
 
 /// 函数 `normalize_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -44,7 +42,6 @@ pub(super) fn normalize_path(path: &str) -> &str {
 
 /// 函数 `path_matches_template`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -90,7 +87,6 @@ pub(super) struct TemplateAllowlist {
 
 /// 函数 `retain_fields_by_templates`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

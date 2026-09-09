@@ -19,7 +19,6 @@ pub(super) struct LoginQuery {
 
 /// 函数 `current_web_access_password_hash`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -34,7 +33,6 @@ fn current_web_access_password_hash() -> Option<String> {
 
 /// 函数 `generate_web_auth_session_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -55,7 +53,6 @@ pub(super) fn generate_web_auth_session_key() -> String {
 
 /// 函数 `build_web_auth_cookie_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -75,7 +72,6 @@ pub(super) fn build_web_auth_cookie_value(
 
 /// 函数 `parse_cookie_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -98,7 +94,6 @@ pub(super) fn parse_cookie_value(headers: &HeaderMap, cookie_name: &str) -> Opti
 
 /// 函数 `set_cookie_header_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -116,7 +111,6 @@ fn set_cookie_header_value(value: &str) -> Option<HeaderValue> {
 
 /// 函数 `clear_cookie_header_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -134,7 +128,6 @@ fn clear_cookie_header_value() -> Option<HeaderValue> {
 
 /// 函数 `append_no_store_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -158,7 +151,6 @@ fn append_no_store_headers(response: &mut Response) {
 
 /// 函数 `login_force_requested`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -197,7 +189,6 @@ fn is_public_static_asset_path(path: &str) -> bool {
 
 /// 函数 `request_is_authenticated`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -243,7 +234,6 @@ pub(super) fn current_app_session_from_headers(
 
 /// 函数 `builtin_login_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -513,7 +503,6 @@ fn account_login_html(error: Option<&str>, bootstrap: bool) -> String {
 
 /// 函数 `login_success_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -546,7 +535,6 @@ fn login_success_html() -> String {
 
 /// 函数 `logout_success_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -579,7 +567,6 @@ fn logout_success_html() -> String {
 
 /// 函数 `web_auth_middleware`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -612,7 +599,6 @@ pub(super) async fn web_auth_middleware(
 
 /// 函数 `login_page`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -654,7 +640,6 @@ pub(super) async fn login_page(
 
 /// 函数 `login_submit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -744,7 +729,6 @@ pub(super) async fn login_submit(
 
 /// 函数 `logout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -769,7 +753,6 @@ pub(super) async fn logout(headers: HeaderMap) -> impl IntoResponse {
 
 /// 函数 `auth_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -88,7 +88,6 @@ fn models_etag_header(models: &ModelsResponse) -> Result<Option<tiny_http::Heade
 
 /// 函数 `read_cached_models_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-12
 ///
@@ -112,7 +111,6 @@ fn read_cached_models_response(
 
 /// 函数 `maybe_respond_local_models`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

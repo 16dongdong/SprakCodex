@@ -13,7 +13,6 @@ pub const SERVICE_BIND_MODE_ALL_INTERFACES: &str = "all_interfaces";
 
 /// 函数 `normalize_service_bind_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ pub const SERVICE_BIND_MODE_ALL_INTERFACES: &str = "all_interfaces";
 /// 返回函数执行结果
 /// 函数 `normalize_saved_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -54,7 +52,6 @@ fn normalize_saved_service_addr(raw: Option<&str>) -> Result<String, String> {
 
 /// 函数 `current_env_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -77,7 +74,6 @@ fn current_env_service_addr() -> Option<String> {
 
 /// 函数 `current_env_service_bind_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -88,7 +84,6 @@ fn current_env_service_addr() -> Option<String> {
 /// 返回函数执行结果
 /// 函数 `current_persisted_service_bind_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -99,7 +94,6 @@ fn current_env_service_addr() -> Option<String> {
 /// 返回函数执行结果
 /// 函数 `current_effective_service_bind_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -114,7 +108,6 @@ fn current_effective_service_bind_mode() -> String {
 
 /// 函数 `current_service_bind_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -129,7 +122,6 @@ pub fn current_service_bind_mode() -> String {
 
 /// 函数 `set_service_bind_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -152,7 +144,6 @@ pub fn set_service_bind_mode(mode: &str) -> Result<String, String> {
 
 /// 函数 `bind_all_interfaces_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -167,7 +158,6 @@ pub fn bind_all_interfaces_enabled() -> bool {
 
 /// 函数 `bind_all_interfaces_enabled_for_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -183,7 +173,6 @@ pub fn bind_all_interfaces_enabled_for_mode(mode: &str) -> bool {
 
 /// 函数 `default_listener_bind_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -198,7 +187,6 @@ pub fn default_listener_bind_addr() -> String {
 
 /// 函数 `default_web_listener_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -220,7 +208,6 @@ pub fn default_web_listener_addr() -> String {
 
 /// 函数 `listener_bind_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -235,7 +222,6 @@ pub fn listener_bind_addr(addr: &str) -> String {
 
 /// 函数 `listener_bind_addr_for_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -252,7 +238,6 @@ pub fn listener_bind_addr_for_mode(addr: &str, bind_mode: &str) -> String {
 
 /// 函数 `current_saved_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -272,7 +257,6 @@ pub fn current_saved_service_addr() -> String {
 
 /// 函数 `set_saved_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

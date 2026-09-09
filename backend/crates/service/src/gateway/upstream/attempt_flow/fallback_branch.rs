@@ -20,7 +20,6 @@ pub(super) enum FallbackBranchResult {
 
 /// 函数 `should_failover_after_fallback_non_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -42,7 +41,6 @@ fn should_failover_after_fallback_non_success(status: u16, has_more_candidates: 
 
 /// 函数 `extract_response_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -63,7 +61,6 @@ fn extract_response_header(headers: &HeaderMap, name: &str) -> Option<String> {
 
 /// 函数 `looks_like_blocked_marker`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -116,7 +113,6 @@ fn body_looks_like_cloudflare_challenge(status_code: u16, body: &[u8]) -> bool {
 
 /// 函数 `classify_fallback_non_success_kind`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -185,7 +181,6 @@ fn classify_fallback_non_success_kind(
 
 /// 函数 `summarize_fallback_non_success`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -249,7 +244,6 @@ fn summarize_fallback_non_success(
 
 /// 函数 `summarize_fallback_non_success_headers_only`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -308,7 +302,6 @@ fn summarize_fallback_non_success_headers_only(
 
 /// 函数 `handle_openai_fallback_branch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

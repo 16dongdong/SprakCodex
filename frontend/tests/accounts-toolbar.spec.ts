@@ -158,8 +158,8 @@ test("accounts toolbar shows warmup button and tooltip", async ({ page }) => {
         items: [
           {
             id: "acct-plus-1",
-            name: "qxcnms@gmail.com",
-            label: "qxcnms@gmail.com",
+            name: "test-account@example.com",
+            label: "test-account@example.com",
             plan_type: "plus",
             status: "active",
             sort: 0,
@@ -209,7 +209,7 @@ test("accounts toolbar shows warmup button and tooltip", async ({ page }) => {
         results: [
           {
             accountId: "acct-plus-1",
-            accountName: "qxcnms@gmail.com",
+            accountName: "test-account@example.com",
             ok: true,
             message: null,
           },

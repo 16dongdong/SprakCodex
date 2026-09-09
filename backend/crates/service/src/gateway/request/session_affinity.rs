@@ -8,7 +8,6 @@ pub(crate) struct OutgoingSessionAffinity<'a> {
 
 /// 函数 `normalize_anchor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +79,6 @@ pub(crate) fn log_outgoing_session_affinity(
 
 /// 函数 `derive_outgoing_session_affinity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

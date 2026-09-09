@@ -3,7 +3,6 @@ use crate::commands::shared::rpc_call_in_background;
 
 /// 函数 `service_startup_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

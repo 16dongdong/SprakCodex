@@ -2,7 +2,6 @@ use crate::commands::shared::rpc_call_in_background;
 
 /// 函数 `service_login_start`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -40,7 +39,6 @@ pub async fn service_login_start(
 
 /// 函数 `service_login_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -74,7 +72,6 @@ pub async fn service_login_cancel(
 
 /// 函数 `service_login_complete`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -103,7 +100,6 @@ pub async fn service_login_complete(
 
 /// 函数 `service_login_chatgpt_auth_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -142,7 +138,6 @@ pub async fn service_login_chatgpt_auth_tokens(
 
 /// 函数 `service_account_read`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -165,7 +160,6 @@ pub async fn service_account_read(
 
 /// 函数 `service_account_logout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -181,7 +175,6 @@ pub async fn service_account_logout(addr: Option<String>) -> Result<serde_json::
 
 /// 函数 `service_chatgpt_auth_tokens_refresh`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -210,7 +203,6 @@ pub async fn service_chatgpt_auth_tokens_refresh(
 
 /// 函数 `service_chatgpt_auth_tokens_refresh_all`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-03
 ///

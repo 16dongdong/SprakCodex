@@ -4,7 +4,6 @@ use crate::storage_helpers::account_key;
 
 /// 函数 `clean_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -29,7 +28,6 @@ pub(crate) fn clean_value(value: Option<String>) -> Option<String> {
 
 /// 函数 `normalize_non_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -44,7 +42,6 @@ fn normalize_non_empty<'a>(value: Option<&'a str>) -> Option<&'a str> {
 
 /// 函数 `normalize_id_part`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +57,6 @@ fn normalize_id_part(value: Option<&str>) -> Option<String> {
 
 /// 函数 `same_normalized`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -127,7 +123,6 @@ where
 
 /// 函数 `build_scope_identity_hint`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -154,7 +149,6 @@ pub(crate) fn build_scope_identity_hint(
 
 /// 函数 `build_account_storage_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -185,7 +179,6 @@ pub(crate) fn build_account_storage_id(
 
 /// 函数 `build_fallback_subject_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -203,7 +196,6 @@ pub(crate) fn build_fallback_subject_key(
 
 /// 函数 `pick_existing_account_id_by_identity`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

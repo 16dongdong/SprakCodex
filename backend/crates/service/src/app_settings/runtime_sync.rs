@@ -23,7 +23,6 @@ use super::{
 
 /// 函数 `process_env_has_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -41,7 +40,6 @@ fn process_env_has_value(name: &str) -> bool {
 
 /// 函数 `any_process_env_has_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -112,7 +110,6 @@ fn migrate_legacy_compact_model_forward_rules(settings: &HashMap<String, String>
 
 /// 函数 `sync_runtime_settings_from_storage`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

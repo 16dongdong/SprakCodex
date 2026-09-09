@@ -24,7 +24,6 @@ const VALID_UI_LOCALES: &[&str] = &["zh-CN", "en", "ru", "ko"];
 
 /// 函数 `normalize_ui_theme`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -44,7 +43,6 @@ pub(super) fn normalize_ui_theme(raw: Option<&str>) -> String {
 
 /// 函数 `normalize_ui_appearance_preset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -95,7 +93,6 @@ pub(super) fn normalize_ui_zoom_factor(value: f64) -> f64 {
 
 /// 函数 `current_update_auto_check_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -112,7 +109,6 @@ pub fn current_update_auto_check_enabled() -> bool {
 
 /// 函数 `set_update_auto_check_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -150,7 +146,6 @@ pub fn set_show_main_window_on_startup_setting(enabled: bool) -> Result<bool, St
 
 /// 函数 `current_close_to_tray_on_close_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -167,7 +162,6 @@ pub fn current_close_to_tray_on_close_setting() -> bool {
 
 /// 函数 `set_close_to_tray_on_close_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -203,7 +197,6 @@ pub fn set_keep_window_ui_mounted_setting(enabled: bool) -> Result<bool, String>
 
 /// 函数 `current_lightweight_mode_on_close_to_tray_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -218,7 +211,6 @@ pub fn current_lightweight_mode_on_close_to_tray_setting() -> bool {
 
 /// 函数 `set_lightweight_mode_on_close_to_tray_setting`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -234,7 +226,6 @@ pub fn set_lightweight_mode_on_close_to_tray_setting(enabled: bool) -> Result<bo
 
 /// 函数 `current_ui_low_transparency_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -257,7 +248,6 @@ pub fn current_codex_cli_guide_dismissed() -> bool {
 
 /// 函数 `set_ui_low_transparency_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -287,7 +277,6 @@ pub fn set_codex_cli_guide_dismissed(dismissed: bool) -> Result<bool, String> {
 
 /// 函数 `current_ui_theme`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -302,7 +291,6 @@ pub fn current_ui_theme() -> String {
 
 /// 函数 `set_ui_theme`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -319,7 +307,6 @@ pub fn set_ui_theme(theme: Option<&str>) -> Result<String, String> {
 
 /// 函数 `current_ui_appearance_preset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -336,7 +323,6 @@ pub fn current_ui_appearance_preset() -> String {
 
 /// 函数 `set_ui_appearance_preset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

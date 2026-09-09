@@ -86,7 +86,6 @@ NavItem.displayName = "NavItem";
 /**
  * 函数 `Sidebar`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

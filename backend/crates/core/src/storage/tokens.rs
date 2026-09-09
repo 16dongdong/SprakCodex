@@ -64,7 +64,6 @@ impl Storage {
 
     /// 函数 `insert_token`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -98,7 +97,6 @@ impl Storage {
 
     /// 函数 `list_tokens_due_for_refresh`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -132,7 +130,6 @@ impl Storage {
 
     /// 函数 `update_token_refresh_schedule`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -162,7 +159,6 @@ impl Storage {
 
     /// 函数 `touch_token_refresh_attempt`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -185,7 +181,6 @@ impl Storage {
 
     /// 函数 `token_count`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -205,7 +200,6 @@ impl Storage {
 
     /// 函数 `list_tokens`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -330,7 +324,6 @@ impl Storage {
 
     /// 函数 `find_token_by_account_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -352,7 +345,6 @@ impl Storage {
 
     /// 函数 `ensure_token_api_key_column`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -374,7 +366,6 @@ impl Storage {
 
     /// 函数 `ensure_token_refresh_schedule_columns`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -498,7 +489,6 @@ fn tokens_due_for_refresh_sql() -> &'static str {
 
 /// 函数 `map_token_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

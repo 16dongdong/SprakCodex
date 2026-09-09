@@ -62,7 +62,6 @@ type ToggleManyAccountStatusResult = {
 /**
  * 函数 `isAccountRefreshBlocked`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -79,7 +78,6 @@ function isAccountRefreshBlocked(status: string | null | undefined): boolean {
 /**
  * 函数 `buildImportSummaryMessage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -105,7 +103,6 @@ function buildImportSummaryMessage(result: ImportByDirectoryResult, t: (message:
 /**
  * 函数 `formatUsageRefreshErrorMessage`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -204,7 +201,6 @@ function buildAccountListResultFromSnapshot(accounts: Account[]): AccountListRes
 /**
  * 函数 `useAccounts`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -286,7 +282,6 @@ export function useAccounts() {
   /**
    * 函数 `ensureServiceReady`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *
@@ -540,7 +535,6 @@ export function useAccounts() {
     /**
      * 函数 `getSortIndex`
      *
-     * 作者: gaohongshun
      *
      * 时间: 2026-04-02
      *
@@ -574,7 +568,6 @@ export function useAccounts() {
   /**
    * 函数 `invalidateUsageData`
    *
-   * 作者: gaohongshun
    *
    * 时间: 2026-04-02
    *

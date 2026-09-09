@@ -7,7 +7,6 @@ const MAX_REQUESTED_DAY_RANGE_SECS: i64 = 48 * 60 * 60;
 
 /// 函数 `resolve_day_bounds_ts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -30,7 +29,6 @@ fn resolve_day_bounds_ts(
 
 /// 函数 `read_requestlog_today_summary`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

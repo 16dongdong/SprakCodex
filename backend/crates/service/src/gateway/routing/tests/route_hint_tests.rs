@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `candidate_list`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -84,7 +83,6 @@ fn candidate_list() -> Vec<(Account, Token)> {
 
 /// 函数 `account_ids`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -102,7 +100,6 @@ fn account_ids(candidates: &[(Account, Token)]) -> Vec<String> {
 
 /// 函数 `defaults_to_ordered_strategy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -151,7 +148,6 @@ fn defaults_to_ordered_strategy() {
 
 /// 函数 `balanced_round_robin_rotates_start_by_key_and_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -351,7 +347,6 @@ fn balanced_round_robin_records_single_account_before_pool_expands() {
 
 /// 函数 `balanced_round_robin_isolated_by_key_and_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -394,7 +389,6 @@ fn balanced_round_robin_isolated_by_key_and_model() {
 
 /// 函数 `set_route_strategy_accepts_aliases_and_reports_canonical_name`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -431,7 +425,6 @@ fn set_route_strategy_accepts_aliases_and_reports_canonical_name() {
 
 /// 函数 `route_state_ttl_expires_per_key_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -502,7 +495,6 @@ fn route_state_ttl_expires_per_key_state() {
 
 /// 函数 `route_state_capacity_evicts_lru_and_keeps_maps_in_sync`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -570,7 +562,6 @@ fn route_state_capacity_evicts_lru_and_keeps_maps_in_sync() {
 
 /// 函数 `health_p2c_promotes_healthier_candidate_in_ordered_mode`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -608,7 +599,6 @@ fn health_p2c_promotes_healthier_candidate_in_ordered_mode() {
 
 /// 函数 `balanced_mode_keeps_strict_round_robin_by_default`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -664,7 +654,6 @@ fn balanced_mode_keeps_strict_round_robin_by_default() {
 
 /// 函数 `persisted_preferred_account_rotates_to_head`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

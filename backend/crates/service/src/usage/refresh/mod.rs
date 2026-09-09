@@ -124,7 +124,6 @@ enum UsageAvailabilityStatus {
 impl UsageAvailabilityStatus {
     /// 函数 `as_code`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -242,7 +241,6 @@ pub(crate) fn notify_usage_refresh_completed(source: &'static str, processed: us
 
 /// 函数 `ensure_usage_polling`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -260,7 +258,6 @@ pub(crate) fn ensure_usage_polling() {
 
 /// 函数 `ensure_gateway_keepalive`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -278,7 +275,6 @@ pub(crate) fn ensure_gateway_keepalive() {
 
 /// 函数 `ensure_token_refresh_polling`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -303,7 +299,6 @@ pub(crate) fn ensure_warmup_cron() {
 
 /// 函数 `spawn_background_loop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -332,7 +327,6 @@ fn spawn_background_loop(name: &str, worker: fn()) {
 
 /// 函数 `enqueue_usage_refresh_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -383,7 +377,6 @@ fn env_bool_or(name: &str, default: bool) -> bool {
 
 /// 函数 `reset_usage_poll_cursor_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -399,7 +392,6 @@ fn reset_usage_poll_cursor_for_tests() {
 
 /// 函数 `refresh_tokens_before_expiry_for_all_accounts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -481,7 +473,6 @@ fn load_token_refresh_issuers_for_tokens(
 
 /// 函数 `refresh_usage_for_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -551,7 +542,6 @@ pub(crate) fn refresh_usage_for_account(account_id: &str) -> Result<(), String> 
 
 /// 函数 `record_usage_refresh_metrics`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -570,7 +560,6 @@ fn record_usage_refresh_metrics(success: bool, started_at: Instant) {
 
 /// 函数 `refresh_usage_for_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -875,7 +864,6 @@ mod tests;
 
 /// 函数 `classify_usage_status_from_snapshot_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -954,7 +942,6 @@ fn classify_usage_status(
 
 /// 函数 `classify_usage_status_from_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -976,7 +963,6 @@ fn classify_usage_status_from_error(err: &str) -> UsageAvailabilityStatus {
 
 /// 函数 `token_refresh_batch_limit`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -995,7 +981,6 @@ fn token_refresh_batch_limit() -> usize {
 
 /// 函数 `token_refresh_worker_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1016,7 +1001,6 @@ fn token_refresh_worker_count(total: usize) -> usize {
 
 /// 函数 `run_token_refresh_tasks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1036,7 +1020,6 @@ struct TokenRefreshTask {
 
 /// 函数 `run_token_refresh_tasks`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1107,7 +1090,6 @@ fn run_token_refresh_tasks(tasks: Vec<TokenRefreshTask>) -> Result<usize, String
 
 /// 函数 `run_token_refresh_task`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1164,7 +1146,6 @@ fn resolve_token_refresh_issuer(account_issuer: Option<&str>, default_issuer: &s
 
 /// 函数 `token_refresh_schedule`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1218,7 +1199,6 @@ fn token_refresh_access_exp_cutoff(refresh_due_cutoff_ts: i64, ahead_secs: i64) 
 
 /// 函数 `should_retry_usage_refresh_with_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-12
 ///

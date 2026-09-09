@@ -192,7 +192,6 @@ static ACCOUNT_TEST_SUBSCRIBER_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// 函数 `set_account_test_event_handler`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -214,7 +213,6 @@ where
 
 /// 函数 `subscribe_account_test_events`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -241,7 +239,6 @@ pub(crate) fn subscribe_account_test_events(test_id: &str) -> AccountTestEventSu
 
 /// 函数 `notify_account_test_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -302,7 +299,6 @@ fn generate_account_test_id() -> String {
 
 /// 函数 `start_account_test`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///
@@ -379,7 +375,6 @@ pub(crate) fn start_account_test(
 
 /// 函数 `cancel_account_test`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-08-26
 ///

@@ -2,7 +2,6 @@ use super::*;
 
 /// 函数 `builtin_missing_ui_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -47,7 +46,6 @@ pub(super) fn builtin_missing_ui_html(detail: &str) -> String {
 
 /// 函数 `serve_missing_ui`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -62,7 +60,6 @@ pub(super) async fn serve_missing_ui(State(state): State<Arc<AppState>>) -> Html
 
 /// 函数 `serve_embedded_index`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -77,7 +74,6 @@ pub(super) async fn serve_embedded_index() -> Response {
 
 /// 函数 `serve_embedded_asset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -94,7 +90,6 @@ pub(super) async fn serve_embedded_asset(
 
 /// 函数 `looks_like_asset_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -109,7 +104,6 @@ fn looks_like_asset_path(path: &str) -> bool {
 
 /// 函数 `serve_embedded_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -174,7 +168,6 @@ pub(super) fn append_no_store_for_html_documents(response: &mut Response) {
 
 /// 函数 `resolve_embedded_asset`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

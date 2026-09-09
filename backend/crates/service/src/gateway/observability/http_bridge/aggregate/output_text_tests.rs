@@ -35,7 +35,6 @@ impl Drop for EnvGuard {
 
 /// 函数 `summarize_upstream_error_hint_recognizes_challenge_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -54,7 +53,6 @@ fn summarize_upstream_error_hint_recognizes_challenge_html() {
 
 /// 函数 `summarize_upstream_error_hint_recognizes_generic_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -73,7 +71,6 @@ fn summarize_upstream_error_hint_recognizes_generic_html() {
 
 /// 函数 `summarize_upstream_error_hint_recognizes_unsupported_model`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -99,7 +96,6 @@ fn summarize_upstream_error_hint_recognizes_unsupported_model() {
 
 /// 函数 `extract_error_hint_from_body_summarizes_html_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -118,7 +114,6 @@ fn extract_error_hint_from_body_summarizes_html_body() {
 
 /// 函数 `extract_error_hint_from_body_prefers_json_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -138,7 +133,6 @@ fn extract_error_hint_from_body_prefers_json_message() {
 
 /// 函数 `extract_error_hint_from_body_summarizes_unsupported_model_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -158,7 +152,6 @@ fn extract_error_hint_from_body_summarizes_unsupported_model_json() {
 
 /// 函数 `extract_error_hint_from_body_summarizes_unsupported_model_detail_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -178,7 +171,6 @@ fn extract_error_hint_from_body_summarizes_unsupported_model_detail_json() {
 
 /// 函数 `limit_upstream_error_hint_truncates_large_body`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -197,7 +189,6 @@ fn limit_upstream_error_hint_truncates_large_body() {
 
 /// 函数 `bridge_error_message_reports_stream_incomplete_in_chinese`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

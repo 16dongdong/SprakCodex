@@ -18,7 +18,6 @@ const sourcePath = path.join(
 /**
  * 函数 `loadRuntimeModule`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

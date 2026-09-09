@@ -96,7 +96,7 @@ Docker images default to `TZ=Asia/Shanghai`, and compose examples use `TZ=${TZ:-
 ### GitHub Packages / GHCR
 - After a Release is published, both `codexmanager-service` and `codexmanager-web` images are pushed to GitHub Packages (GHCR).
 - Stable releases update the versioned, `stable`, and `latest` tags. Prereleases only publish their versioned tag and never replace the floating tags.
-- Use `stable` for automatic updates, or pin a release such as `docker pull ghcr.io/qxcnm/codexmanager-service:v0.5.2`.
+- Use `stable` for automatic updates, or pin a release such as `docker pull ${SERVICE_IMAGE}`.
 - [`backend/docker/docker-compose.release.yml`](../../../backend/docker/docker-compose.release.yml) defaults to `stable`. Set `CODEXMANAGER_RELEASE_TAG` only when pinning a version.
 - Example: `CODEXMANAGER_RELEASE_TAG=v0.1.15 docker compose -f backend/docker/docker-compose.release.yml up -d`
 - `registry.cn-hangzhou.aliyuncs.com/kilimiao/codex-manager` is not part of the current official release workflow and may be outdated. The GHCR `service` and `web` images above are the maintained prebuilt images.

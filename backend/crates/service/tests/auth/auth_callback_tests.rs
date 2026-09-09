@@ -14,7 +14,6 @@ use support::EnvGuard;
 
 /// 函数 `reset_login_server_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -33,7 +32,6 @@ fn reset_login_server_state() {
 
 /// 函数 `resolve_redirect_uri_prefers_login_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -78,7 +76,6 @@ fn resolve_redirect_uri_prefers_login_server() {
 
 /// 函数 `login_server_reports_port_in_use`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -113,7 +110,6 @@ fn login_server_reports_port_in_use() {
 
 /// 函数 `login_server_rejects_non_loopback_by_default`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -141,7 +137,6 @@ fn login_server_rejects_non_loopback_by_default() {
 
 /// 函数 `callback_success_page_contains_auto_close_script`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -160,7 +155,6 @@ fn callback_success_page_contains_auto_close_script() {
 
 /// 函数 `callback_error_page_escapes_message`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -178,7 +172,6 @@ fn callback_error_page_escapes_message() {
 
 /// 函数 `callback_html_response_forces_connection_close`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -207,7 +200,6 @@ fn callback_html_response_forces_connection_close() {
 
 /// 函数 `oauth_callback_error_message_maps_missing_entitlement`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -279,7 +271,6 @@ fn callback_error_does_not_override_claimed_login_completion() {
 
 /// 函数 `login_start_fails_when_login_server_cannot_bind`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

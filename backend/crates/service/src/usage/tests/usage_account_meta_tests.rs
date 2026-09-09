@@ -7,7 +7,6 @@ use std::collections::HashMap;
 
 /// 函数 `build_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -39,7 +38,6 @@ fn build_account(
 
 /// 函数 `clean_header_value_trims_and_drops_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +58,6 @@ fn clean_header_value_trims_and_drops_empty() {
 
 /// 函数 `resolve_workspace_prefers_workspace_then_chatgpt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -82,7 +79,6 @@ fn resolve_workspace_prefers_workspace_then_chatgpt() {
 
 /// 函数 `build_workspace_map_from_accounts_uses_preloaded_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -107,7 +103,6 @@ fn build_workspace_map_from_accounts_uses_preloaded_snapshot() {
 
 /// 函数 `patch_account_meta_cached_updates_preloaded_account_without_lookup`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -188,7 +183,6 @@ fn patch_account_meta_cached_updates_identity_without_rewriting_account() {
 
 /// 函数 `patch_account_meta_updates_identity_without_rewriting_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-06-20
 ///
@@ -236,7 +230,6 @@ fn patch_account_meta_updates_identity_without_rewriting_account() {
 
 /// 函数 `patch_account_meta_cached_replaces_subject_style_scope_values`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -272,7 +265,6 @@ fn patch_account_meta_cached_replaces_subject_style_scope_values() {
 
 /// 函数 `patch_account_meta_cached_overrides_stale_team_scope_with_latest_token_scope`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -308,7 +300,6 @@ fn patch_account_meta_cached_overrides_stale_team_scope_with_latest_token_scope(
 
 /// 函数 `resolve_workspace_id_for_account_filters_storage_style_scope_suffix`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-17
 ///
@@ -334,7 +325,6 @@ fn resolve_workspace_id_for_account_filters_storage_style_scope_suffix() {
 
 /// 函数 `derive_account_meta_filters_storage_style_scope_suffix_from_token_claims`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-17
 ///

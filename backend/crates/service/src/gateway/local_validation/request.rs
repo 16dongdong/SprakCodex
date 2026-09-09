@@ -18,7 +18,6 @@ const DEFAULT_GATEWAY_BLOCKED_PATHS: &[&str] = &["/v1/props"];
 
 /// 函数 `resolve_effective_request_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -196,7 +195,6 @@ fn is_gateway_blocked_request_path(normalized_path: &str) -> bool {
 
 /// 函数 `ensure_anthropic_model_is_listed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -260,7 +258,6 @@ fn ensure_anthropic_model_is_listed(
 
 /// 函数 `allow_openai_responses_path_rewrite`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1350,7 +1347,6 @@ fn adapt_openai_images_edits_body_to_responses(
 
 /// 函数 `should_derive_compat_conversation_anchor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1367,7 +1363,6 @@ fn should_derive_compat_conversation_anchor(protocol_type: &str, normalized_path
 
 /// 函数 `is_native_codex_client_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-16
 ///
@@ -1540,7 +1535,6 @@ fn is_turn_state_only_anchor(incoming_headers: &super::super::IncomingHeaderSnap
 
 /// 函数 `resolve_local_conversation_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1780,7 +1774,6 @@ fn validate_text_input_limit_for_body_or_snapshot(
 
 /// 函数 `apply_passthrough_request_overrides`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -1847,7 +1840,6 @@ fn apply_passthrough_request_overrides(
 
 /// 函数 `build_local_validation_result`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

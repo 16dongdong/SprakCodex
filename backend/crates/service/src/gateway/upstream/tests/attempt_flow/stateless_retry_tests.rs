@@ -2,7 +2,6 @@ use super::should_trigger_stateless_retry;
 
 /// 函数 `stateless_retry_disables_403_when_challenge_retry_is_disabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -21,7 +20,6 @@ fn stateless_retry_disables_403_when_challenge_retry_is_disabled() {
 
 /// 函数 `stateless_retry_keeps_403_when_challenge_retry_is_enabled`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -39,7 +37,6 @@ fn stateless_retry_keeps_403_when_challenge_retry_is_enabled() {
 
 /// 函数 `stateless_retry_respects_session_affinity_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

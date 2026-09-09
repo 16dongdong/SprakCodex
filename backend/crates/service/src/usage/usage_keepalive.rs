@@ -1,6 +1,5 @@
 /// 函数 `run_gateway_keepalive_once`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -22,7 +21,6 @@ pub(crate) fn run_gateway_keepalive_once() -> Result<(), String> {
 
 /// 函数 `is_keepalive_error_ignorable`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

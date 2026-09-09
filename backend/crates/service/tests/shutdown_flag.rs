@@ -1,6 +1,5 @@
 /// 函数 `shutdown_flag_can_toggle`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

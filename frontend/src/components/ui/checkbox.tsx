@@ -8,7 +8,6 @@ import { CheckIcon } from "lucide-react"
 /**
  * 函数 `Checkbox`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

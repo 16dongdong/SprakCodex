@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils"
 /**
  * 函数 `TooltipProvider`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -33,7 +32,6 @@ function TooltipProvider({
 /**
  * 函数 `Tooltip`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -50,7 +48,6 @@ function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
 /**
  * 函数 `TooltipTrigger`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -67,7 +64,6 @@ function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
 /**
  * 函数 `TooltipContent`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

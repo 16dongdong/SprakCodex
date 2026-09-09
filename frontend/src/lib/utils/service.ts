@@ -7,7 +7,6 @@ const LOOPBACK_PROXY_HINT = "若开启全局代理，请将 localhost/127.0.0.1/
 /**
  * 函数 `asRecord`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -26,7 +25,6 @@ function asRecord(payload: unknown): Record<string, unknown> {
 /**
  * 函数 `normalizeServiceAddr`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -66,7 +64,6 @@ export function normalizeServiceAddr(raw: string): string {
 /**
  * 函数 `readInitializeResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -109,7 +106,6 @@ export function readInitializeResult(payload: unknown): ServiceInitializationRes
 /**
  * 函数 `isExpectedInitializeResult`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -127,7 +123,6 @@ export function isExpectedInitializeResult(payload: unknown): boolean {
 /**
  * 函数 `formatServiceError`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

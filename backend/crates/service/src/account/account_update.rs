@@ -17,7 +17,6 @@ pub(crate) struct AccountSortUpdateResult {
 
 /// 函数 `update_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -238,7 +237,6 @@ pub(crate) fn update_account_sorts(
 
 /// 函数 `normalize_account_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -259,7 +257,6 @@ fn normalize_account_status(status: &str) -> Result<&'static str, String> {
 
 /// 函数 `normalize_optional_label`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -281,7 +278,6 @@ fn normalize_optional_label(label: Option<&str>) -> Result<Option<&str>, String>
 
 /// 函数 `normalize_optional_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -299,7 +295,6 @@ fn normalize_optional_text(value: Option<&str>) -> Option<String> {
 
 /// 函数 `normalize_optional_tags`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

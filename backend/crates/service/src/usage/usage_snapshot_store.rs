@@ -254,7 +254,6 @@ fn usage_status_updates_blocked(context: &AccountStatusContext) -> bool {
 
 /// 函数 `usage_snapshots_retain_per_account`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -272,7 +271,6 @@ fn usage_snapshots_retain_per_account() -> usize {
 
 /// 函数 `apply_status_from_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -324,7 +322,6 @@ fn apply_status_from_snapshot_with_change(
 
 /// 函数 `store_usage_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

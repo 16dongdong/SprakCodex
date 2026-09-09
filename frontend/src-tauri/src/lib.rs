@@ -70,7 +70,6 @@ fn install_ayatana_deprecation_notice_filter() {}
 
 /// 函数 `run`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

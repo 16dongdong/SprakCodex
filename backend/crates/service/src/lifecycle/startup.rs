@@ -9,7 +9,6 @@ pub struct ServerHandle {
 impl ServerHandle {
     /// 函数 `join`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -25,7 +24,6 @@ impl ServerHandle {
 
 /// 函数 `start_one_shot_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -57,7 +55,6 @@ pub fn start_one_shot_server() -> std::io::Result<ServerHandle> {
 
 /// 函数 `start_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

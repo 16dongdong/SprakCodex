@@ -3,7 +3,6 @@ use std::collections::{BTreeMap, HashMap};
 
 /// 函数 `normalize_env_override_key`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -41,7 +40,6 @@ pub(super) fn normalize_env_override_key(raw: &str) -> Result<String, String> {
 
 /// 函数 `normalize_env_override_patch_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -58,7 +56,6 @@ pub(super) fn normalize_env_override_patch_value(raw: Option<&str>) -> Option<St
 
 /// 函数 `normalize_saved_env_override_text`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -73,7 +70,6 @@ pub(super) fn normalize_saved_env_override_text(raw: &str) -> String {
 
 /// 函数 `normalize_env_overrides_patch`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -95,7 +91,6 @@ pub(super) fn normalize_env_overrides_patch(
 
 /// 函数 `parse_saved_env_override_value`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

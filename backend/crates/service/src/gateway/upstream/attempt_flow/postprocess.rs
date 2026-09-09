@@ -49,7 +49,6 @@ fn challenge_cooldown_reason(protocol_type: &str) -> super::super::super::Cooldo
 
 /// 函数 `try_refresh_chatgpt_access_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -97,7 +96,6 @@ fn try_refresh_chatgpt_access_token(
 
 /// 函数 `retry_upstream_server_error_once`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -182,7 +180,6 @@ fn retry_upstream_server_error_once(
 
 /// 函数 `retry_chatgpt_challenge_without_compression`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-04
 ///
@@ -347,7 +344,6 @@ fn allow_openai_fallback_for_authorization(
 
 /// 函数 `process_upstream_post_retry_flow`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

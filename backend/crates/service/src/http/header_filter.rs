@@ -2,7 +2,6 @@ use axum::http::{HeaderName, HeaderValue};
 
 /// 函数 `is_hop_by_hop_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -24,7 +23,6 @@ fn is_hop_by_hop_header(name: &str) -> bool {
 
 /// 函数 `should_skip_request_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -48,7 +46,6 @@ pub(crate) fn should_skip_request_header(name: &HeaderName, value: &HeaderValue)
 
 /// 函数 `should_skip_response_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -227,7 +227,6 @@ fn aggregate_candidate_filter_keeps_model_override_candidate_for_client_model() 
 
 /// 函数 `exhausted_gateway_error_includes_attempts_skips_and_last_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -254,7 +253,6 @@ fn exhausted_gateway_error_includes_attempts_skips_and_last_error() {
 
 /// 函数 `exhausted_gateway_error_marks_cooldown_only_skip_kind`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

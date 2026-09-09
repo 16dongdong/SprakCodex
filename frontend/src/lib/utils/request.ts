@@ -67,7 +67,6 @@ function runWithAbortSignal<T>(
 /**
  * 函数 `fetchWithRetry`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -133,7 +132,6 @@ export async function fetchWithRetry(
 /**
  * 函数 `runWithControl`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

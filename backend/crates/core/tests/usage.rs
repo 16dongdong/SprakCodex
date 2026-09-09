@@ -8,7 +8,6 @@ use serde_json::{json, Value};
 
 /// 函数 `usage_snapshot_parsed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

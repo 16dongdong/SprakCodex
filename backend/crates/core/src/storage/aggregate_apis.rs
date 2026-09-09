@@ -13,7 +13,6 @@ use super::{
 impl Storage {
     /// 函数 `insert_aggregate_api`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -85,7 +84,6 @@ impl Storage {
 
     /// 函数 `list_aggregate_apis`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -127,7 +125,6 @@ impl Storage {
 
     /// 函数 `find_aggregate_api_by_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -397,7 +394,6 @@ impl Storage {
 
     /// 函数 `update_aggregate_api`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -416,7 +412,6 @@ impl Storage {
 
     /// 函数 `update_aggregate_api_supplier_name`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -441,7 +436,6 @@ impl Storage {
 
     /// 函数 `update_aggregate_api_sort`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -468,7 +462,6 @@ impl Storage {
 
     /// 函数 `update_aggregate_api_type`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -581,7 +574,6 @@ impl Storage {
 
     /// 函数 `delete_aggregate_api`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -606,7 +598,6 @@ impl Storage {
 
     /// 函数 `upsert_aggregate_api_secret`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -632,7 +623,6 @@ impl Storage {
 
     /// 函数 `find_aggregate_api_secret_by_id`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -707,7 +697,6 @@ impl Storage {
 
     /// 函数 `update_aggregate_api_test_result`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -747,7 +736,6 @@ impl Storage {
 
     /// 函数 `ensure_aggregate_apis_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -897,7 +885,6 @@ impl Storage {
 
     /// 函数 `ensure_aggregate_api_secrets_table`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -1020,7 +1007,6 @@ impl Storage {
 
 /// 函数 `map_aggregate_api_row`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

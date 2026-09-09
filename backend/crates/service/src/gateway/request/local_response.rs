@@ -15,7 +15,6 @@ pub(super) struct LocalResponseContext<'a> {
 
 /// 函数 `record_local_result`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -61,7 +60,6 @@ pub(super) fn record_local_result(
 
 /// 函数 `respond_local_json`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///
@@ -111,7 +109,6 @@ pub(super) fn respond_local_json_with_headers(
 
 /// 函数 `respond_local_terminal_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-13
 ///

@@ -3,7 +3,6 @@ use crate::http::proxy_runtime::run_front_proxy;
 
 /// 函数 `start_http`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

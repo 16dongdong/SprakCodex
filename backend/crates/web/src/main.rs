@@ -40,7 +40,6 @@ struct AppState {
 
 /// 函数 `read_env_trim`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -58,7 +57,6 @@ fn read_env_trim(name: &str) -> Option<String> {
 
 /// 函数 `normalize_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +94,6 @@ async fn ui_document_cache_middleware(request: Request, next: Next) -> Response 
 
 /// 函数 `normalize_connect_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -119,7 +116,6 @@ fn normalize_connect_addr(raw: &str) -> Option<String> {
 
 /// 函数 `browser_open_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -141,7 +137,6 @@ fn browser_open_addr(raw: &str) -> Option<String> {
 
 /// 函数 `resolve_service_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -158,7 +153,6 @@ fn resolve_service_addr() -> String {
 
 /// 函数 `rewrite_linux_docker_host_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-10
 ///
@@ -190,7 +184,6 @@ fn rewrite_linux_docker_host_addr(addr: String) -> String {
 
 /// 函数 `rewrite_linux_docker_host_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-10
 ///
@@ -206,7 +199,6 @@ fn rewrite_linux_docker_host_addr(addr: String) -> String {
 
 /// 函数 `linux_default_gateway_ipv4`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-10
 ///
@@ -223,7 +215,6 @@ fn linux_default_gateway_ipv4() -> Option<Ipv4Addr> {
 
 /// 函数 `parse_linux_default_gateway_ipv4`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-10
 ///
@@ -248,7 +239,6 @@ fn parse_linux_default_gateway_ipv4(routes: &str) -> Option<Ipv4Addr> {
 
 /// 函数 `resolve_web_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -265,7 +255,6 @@ fn resolve_web_addr() -> String {
 
 /// 函数 `resolve_web_root`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -287,7 +276,6 @@ fn resolve_web_root() -> PathBuf {
 
 /// 函数 `exe_dir`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -306,7 +294,6 @@ fn exe_dir() -> PathBuf {
 
 /// 函数 `ensure_index_file`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -321,7 +308,6 @@ fn ensure_index_file(index: &Path) -> bool {
 
 /// 函数 `is_json_content_type`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -341,7 +327,6 @@ fn is_json_content_type(headers: &HeaderMap) -> bool {
 
 /// 函数 `escape_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -374,7 +359,6 @@ async fn runtime_info() -> impl IntoResponse {
 
 /// 函数 `serve_on_listener`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -404,7 +388,6 @@ async fn serve_on_listener(
 
 /// 函数 `run_web_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -447,7 +430,6 @@ async fn run_web_server(
 
 /// 函数 `async_main`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -596,7 +578,6 @@ async fn async_main() {
 
 /// 函数 `main`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

@@ -24,7 +24,6 @@ pub(crate) struct PassthroughSseUsageReader {
 impl PassthroughSseUsageReader {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -55,7 +54,6 @@ impl PassthroughSseUsageReader {
 
     /// 函数 `update_usage_from_frame`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -114,7 +112,6 @@ impl PassthroughSseUsageReader {
 
     /// 函数 `next_chunk`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -191,7 +188,6 @@ impl PassthroughSseUsageReader {
 impl Read for PassthroughSseUsageReader {
     /// 函数 `read`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

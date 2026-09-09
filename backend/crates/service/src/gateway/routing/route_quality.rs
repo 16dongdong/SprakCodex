@@ -29,7 +29,6 @@ struct RouteQualityState {
 
 /// 函数 `with_map_mut`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -51,7 +50,6 @@ where
 
 /// 函数 `record_route_quality`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -93,7 +91,6 @@ pub(crate) fn record_route_quality(account_id: &str, status_code: u16) {
 
 /// 函数 `route_health_score`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -120,7 +117,6 @@ pub(crate) fn route_health_score(account_id: &str) -> i32 {
 
 /// 函数 `route_quality_penalty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -147,7 +143,6 @@ pub(crate) fn route_quality_penalty(account_id: &str) -> i64 {
 
 /// 函数 `clear_runtime_state`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -165,7 +160,6 @@ pub(super) fn clear_runtime_state() {
 
 /// 函数 `clear_route_quality_for_tests`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -181,7 +175,6 @@ pub(crate) fn clear_route_quality_for_tests() {
 
 /// 函数 `route_quality_tests_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -201,7 +194,6 @@ pub(crate) fn route_quality_tests_guard() -> std::sync::MutexGuard<'static, ()> 
 
 /// 函数 `maybe_cleanup_route_quality`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -225,7 +217,6 @@ fn maybe_cleanup_route_quality(state: &mut RouteQualityState, now: i64) {
 
 /// 函数 `route_quality_record_expired`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -241,7 +232,6 @@ fn route_quality_record_expired(record: &RouteQualityRecord, now: i64) -> bool {
 
 /// 函数 `route_health_delta`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

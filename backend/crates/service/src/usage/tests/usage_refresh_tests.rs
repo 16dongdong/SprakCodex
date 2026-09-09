@@ -243,7 +243,6 @@ fn refresh_usage_for_agent_identity_uses_assertion_and_skips_subscription_check(
 
 /// 函数 `enqueue_usage_refresh_for_same_account_is_deduplicated_until_finish`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -282,7 +281,6 @@ fn enqueue_usage_refresh_for_same_account_is_deduplicated_until_finish() {
 
 /// 函数 `enqueue_usage_refresh_for_different_accounts_keeps_queue_progress`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -330,7 +328,6 @@ fn enqueue_usage_refresh_for_different_accounts_keeps_queue_progress() {
 
 /// 函数 `schedule_prefers_exp_minus_ahead`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -373,7 +370,6 @@ fn schedule_prefers_refresh_token_exp_when_it_expires_first() {
 
 /// 函数 `schedule_falls_back_to_last_refresh_when_exp_missing`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -400,7 +396,6 @@ fn schedule_falls_back_to_last_refresh_when_exp_missing() {
 
 /// 函数 `schedule_skips_when_refresh_token_is_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -427,7 +422,6 @@ fn schedule_skips_when_refresh_token_is_empty() {
 
 /// 函数 `usage_refresh_retry_skips_when_refresh_token_is_empty`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-12
 ///
@@ -480,7 +474,6 @@ fn usage_refresh_retry_skips_region_blocked_errors() {
 
 /// 函数 `due_cutoff_includes_next_poll_window_and_buffer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-06
 ///
@@ -497,7 +490,6 @@ fn due_cutoff_includes_next_poll_window_and_buffer() {
 
 /// 函数 `access_exp_cutoff_includes_refresh_ahead_window`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-26
 ///
@@ -513,7 +505,6 @@ fn access_exp_cutoff_includes_refresh_ahead_window() {
 
 /// 函数 `due_cutoff_covers_boundary_when_poll_interval_matches_refresh_ahead`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-06
 ///
@@ -543,7 +534,6 @@ fn due_cutoff_covers_boundary_when_poll_interval_matches_refresh_ahead() {
 
 /// 函数 `token_refresh_issuer_uses_account_issuer`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-26
 ///
@@ -565,7 +555,6 @@ fn token_refresh_issuer_uses_account_issuer() {
 
 /// 函数 `token_refresh_issuer_falls_back_to_default`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-26
 ///
@@ -659,7 +648,6 @@ fn load_token_refresh_issuers_for_tokens_reads_only_due_token_issuers() {
 
 /// 函数 `run_token_refresh_task_skips_empty_refresh_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -689,7 +677,6 @@ fn run_token_refresh_task_skips_empty_refresh_token() {
 
 /// 函数 `usage_poll_batch_indices_rotate_from_cursor`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -707,7 +694,6 @@ fn usage_poll_batch_indices_rotate_from_cursor() {
 
 /// 函数 `usage_poll_cursor_advances_by_processed_count`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

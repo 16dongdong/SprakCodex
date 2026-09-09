@@ -7,7 +7,6 @@ use super::runtime::{normalize_version, resolve_github_token, USER_AGENT};
 
 /// 函数 `extract_tag_from_release_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -33,7 +32,6 @@ fn extract_tag_from_release_url(url: &str) -> Option<String> {
 
 /// 函数 `normalize_release_asset_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -71,7 +69,6 @@ fn normalize_release_asset_url(raw: &str, repo: &str) -> Option<String> {
 
 /// 函数 `asset_name_from_download_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -96,7 +93,6 @@ fn asset_name_from_download_url(url: &str) -> Option<String> {
 
 /// 函数 `parse_release_assets_from_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -138,7 +134,6 @@ fn parse_release_assets_from_html(html: &str, repo: &str) -> Vec<GitHubAsset> {
 
 /// 函数 `fetch_release_assets_from_expanded_fragment`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -170,7 +165,6 @@ fn fetch_release_assets_from_expanded_fragment(
 
 /// 函数 `fetch_latest_release_via_html`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -219,7 +213,6 @@ fn fetch_latest_release_via_html(client: &Client, repo: &str) -> Result<GitHubRe
 
 /// 函数 `select_release_for_channel`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -265,7 +258,6 @@ fn select_release_for_channel(
 
 /// 函数 `fetch_latest_release`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -338,7 +330,6 @@ mod tests {
 
     /// 函数 `release_selection_respects_channel`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -377,7 +368,6 @@ mod tests {
 
     /// 函数 `parse_release_assets_filters_repo_and_deduplicates`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -401,7 +391,6 @@ mod tests {
 
     /// 函数 `release_asset_url_requires_target_repo`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

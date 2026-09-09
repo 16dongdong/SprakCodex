@@ -400,7 +400,6 @@ fn explicit_aggregate_api_id_promotes_matching_active_provider_candidate_only() 
 
 /// 函数 `final_error_promotes_success_status_to_bad_gateway`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -417,7 +416,6 @@ fn final_error_promotes_success_status_to_bad_gateway() {
 
 /// 函数 `successful_bridge_keeps_success_status`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -434,7 +432,6 @@ fn successful_bridge_keeps_success_status() {
 
 /// 函数 `incomplete_bridge_without_status_defaults_to_bad_gateway`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -451,7 +448,6 @@ fn incomplete_bridge_without_status_defaults_to_bad_gateway() {
 
 /// 函数 `bridge_status_code`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

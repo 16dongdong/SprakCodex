@@ -5,7 +5,6 @@ use serde_json::{json, Value};
 
 /// 函数 `accumulate_text_len`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -36,7 +35,6 @@ fn accumulate_text_len(value: &Value) -> usize {
 
 /// 函数 `estimate_input_tokens_from_anthropic_messages`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -112,7 +110,6 @@ fn is_anthropic_count_tokens_request_path(path: &str) -> bool {
 
 /// 函数 `maybe_respond_local_count_tokens`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

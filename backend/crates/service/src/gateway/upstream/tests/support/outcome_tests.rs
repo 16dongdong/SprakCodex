@@ -32,7 +32,6 @@ fn low_quota_usage_snapshot(account_id: &str) -> UsageSnapshotRecord {
 
 /// 函数 `official_status_404_with_more_candidates_keeps_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -59,7 +58,6 @@ fn official_status_404_with_more_candidates_keeps_upstream_response() {
 
 /// 函数 `custom_status_404_with_more_candidates_triggers_failover`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +84,6 @@ fn custom_status_404_with_more_candidates_triggers_failover() {
 
 /// 函数 `official_status_429_with_more_candidates_triggers_failover`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-03
 ///
@@ -113,7 +110,6 @@ fn official_status_429_with_more_candidates_triggers_failover() {
 
 /// 函数 `status_429_on_last_candidate_keeps_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -140,7 +136,6 @@ fn status_429_on_last_candidate_keeps_upstream_response() {
 
 /// 函数 `official_status_401_with_more_candidates_keeps_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -167,7 +162,6 @@ fn official_status_401_with_more_candidates_keeps_upstream_response() {
 
 /// 函数 `challenge_with_more_candidates_triggers_failover`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -195,7 +189,6 @@ fn challenge_with_more_candidates_triggers_failover() {
 
 /// 函数 `challenge_on_last_candidate_keeps_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -223,7 +216,6 @@ fn challenge_on_last_candidate_keeps_upstream_response() {
 
 /// 函数 `official_status_500_with_more_candidates_keeps_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -292,7 +284,6 @@ fn official_compact_502_without_low_quota_snapshot_keeps_upstream_response() {
 
 /// 函数 `status_500_on_last_candidate_keeps_upstream_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -319,7 +310,6 @@ fn status_500_on_last_candidate_keeps_upstream_response() {
 
 /// 函数 `official_usage_exhausted_with_more_candidates_triggers_failover`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -349,7 +339,6 @@ fn official_usage_exhausted_with_more_candidates_triggers_failover() {
 
 /// 函数 `official_usage_exhausted_does_not_override_401`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

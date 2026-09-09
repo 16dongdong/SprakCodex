@@ -5,7 +5,6 @@ use crate::gateway::IncomingHeaderSnapshot;
 
 /// 函数 `find_incoming_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -26,7 +25,6 @@ pub(crate) fn find_incoming_header<'a>(request: &'a Request, name: &str) -> Opti
 
 /// 函数 `derive_sticky_conversation_id`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -43,7 +41,6 @@ pub(crate) fn derive_sticky_conversation_id(request: &Request) -> Option<String>
 
 /// 函数 `derive_sticky_conversation_id_from_headers`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +57,6 @@ pub(crate) fn derive_sticky_conversation_id_from_headers(
 
 /// 函数 `stable_session_id_from_material`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -87,7 +83,6 @@ fn stable_session_id_from_material(value: &str) -> String {
 
 /// 函数 `derive_sticky_id_from_material`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

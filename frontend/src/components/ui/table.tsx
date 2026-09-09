@@ -51,7 +51,6 @@ function Table({ className, children, ...props }: React.ComponentProps<"table">)
 /**
  * 函数 `TableHeader`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -74,7 +73,6 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 /**
  * 函数 `TableBody`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -97,7 +95,6 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 /**
  * 函数 `TableFooter`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -148,7 +145,6 @@ function TableRow({ className, children, ...props }: React.ComponentProps<"tr">)
 /**
  * 函数 `TableHead`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -191,7 +187,6 @@ function TableCell({ className, children, responsiveLabel, ...props }: React.Com
 /**
  * 函数 `TableCaption`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

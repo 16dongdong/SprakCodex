@@ -70,7 +70,6 @@ pub(crate) fn ensure_bind_target_available(
 
 /// 函数 `service_initialize`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -95,7 +94,6 @@ pub async fn service_initialize(
 
 /// 函数 `service_start`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -143,7 +141,6 @@ pub async fn service_start(app: tauri::AppHandle, addr: String) -> Result<(), St
 
 /// 函数 `service_stop`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -164,7 +161,6 @@ pub async fn service_stop() -> Result<(), String> {
 
 /// 函数 `service_rpc_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

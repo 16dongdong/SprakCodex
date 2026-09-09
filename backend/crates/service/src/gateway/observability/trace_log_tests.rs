@@ -6,7 +6,6 @@ use super::{
 
 /// 函数 `has_error_text_ignores_empty_and_dash`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ fn has_error_text_ignores_empty_and_dash() {
 
 /// 函数 `trace_error_state_can_mark_and_clear`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -47,7 +45,6 @@ fn trace_error_state_can_mark_and_clear() {
 
 /// 函数 `request_record_ignores_success_without_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

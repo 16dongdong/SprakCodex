@@ -54,7 +54,6 @@ pub(crate) struct RequestLogTraceContext<'a> {
 
 /// 函数 `normalize_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -120,7 +119,6 @@ fn resolve_charge_usage(usage: RequestLogUsage) -> ResolvedChargeUsage {
 
 /// 函数 `normalize_duration_ms`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -135,7 +133,6 @@ fn normalize_duration_ms(value: Option<u128>) -> Option<i64> {
 
 /// 函数 `is_inference_path`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -234,7 +231,6 @@ fn resolve_route_details(
 
 /// 函数 `response_adapter_label`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -261,7 +257,6 @@ fn response_adapter_label(value: super::ResponseAdapter) -> &'static str {
 
 /// 函数 `write_request_log`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -305,7 +300,6 @@ pub(crate) fn write_request_log(
 
 /// 函数 `write_request_log_with_attempts`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

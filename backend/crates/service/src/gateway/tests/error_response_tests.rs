@@ -4,7 +4,6 @@ use tiny_http::Response;
 
 /// 函数 `terminal_text_response_sets_error_code_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -72,7 +71,6 @@ fn terminal_text_response_sets_error_code_header() {
 
 /// 函数 `with_trace_id_header_appends_trace_header`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

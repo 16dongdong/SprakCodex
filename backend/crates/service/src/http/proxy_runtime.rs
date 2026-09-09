@@ -29,7 +29,6 @@ struct ProxyState {
 
 /// 函数 `log_proxy_error`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -52,7 +51,6 @@ fn log_proxy_error(status: StatusCode, target_url: &str, message: &str) {
 
 /// 函数 `build_backend_base_url`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -67,7 +65,6 @@ fn build_backend_base_url(backend_addr: &str) -> String {
 
 /// 函数 `build_local_backend_client`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -211,7 +208,6 @@ async fn normalize_incoming_request_body(
 
 /// 函数 `proxy_handler`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -423,7 +419,6 @@ async fn proxy_test_upload(
 
 /// 函数 `build_front_proxy_app`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -455,7 +450,6 @@ fn build_front_proxy_app(state: ProxyState) -> Router {
 
 /// 函数 `run_front_proxy`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

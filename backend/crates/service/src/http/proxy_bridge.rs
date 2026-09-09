@@ -43,7 +43,6 @@ impl axum::serve::Listener for SharedListener {
 
 /// 函数 `wait_for_shutdown_signal`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -60,7 +59,6 @@ async fn wait_for_shutdown_signal() {
 
 /// 函数 `serve_proxy_on_listener`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -86,7 +84,6 @@ async fn serve_proxy_on_listener(listener: tokio::net::TcpListener, app: Router)
 
 /// 函数 `run_proxy_server`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

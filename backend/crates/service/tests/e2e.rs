@@ -10,7 +10,6 @@ use support::{test_env_guard, EnvGuard};
 
 /// 函数 `post_rpc`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -37,7 +36,6 @@ fn post_rpc(addr: &str, body: &str) -> String {
 
 /// 函数 `e2e_initialize_writes_event`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

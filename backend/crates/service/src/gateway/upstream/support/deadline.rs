@@ -2,7 +2,6 @@ use std::time::{Duration, Instant};
 
 /// 函数 `effective_request_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ fn effective_request_timeout(
 
 /// 函数 `request_deadline`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -50,7 +48,6 @@ pub(in super::super) fn request_deadline(started_at: Instant, is_stream: bool) -
 
 /// 函数 `remaining`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -65,7 +62,6 @@ pub(in super::super) fn remaining(deadline: Option<Instant>) -> Option<Duration>
 
 /// 函数 `is_expired`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -80,7 +76,6 @@ pub(in super::super) fn is_expired(deadline: Option<Instant>) -> bool {
 
 /// 函数 `cap_wait`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -99,7 +94,6 @@ pub(in super::super) fn cap_wait(wait: Duration, deadline: Option<Instant>) -> O
 
 /// 函数 `send_timeout`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

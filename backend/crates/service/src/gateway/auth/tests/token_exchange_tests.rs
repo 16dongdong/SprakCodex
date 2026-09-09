@@ -3,7 +3,6 @@ use base64::Engine as _;
 
 /// 函数 `same_account_reuses_exchange_lock`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -23,7 +22,6 @@ fn same_account_reuses_exchange_lock() {
 
 /// 函数 `stale_unshared_exchange_lock_entry_is_reclaimed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -58,7 +56,6 @@ fn stale_unshared_exchange_lock_entry_is_reclaimed() {
 
 /// 函数 `stale_shared_exchange_lock_entry_is_not_reclaimed`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -91,7 +88,6 @@ fn stale_shared_exchange_lock_entry_is_not_reclaimed() {
 
 /// 函数 `fallback_to_access_token_uses_runtime_access_token_when_exchange_fails`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -118,7 +114,6 @@ fn fallback_to_access_token_uses_runtime_access_token_when_exchange_fails() {
 
 /// 函数 `api_key_exchange_subject_token_omits_access_token_without_id_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -143,7 +138,6 @@ fn api_key_exchange_subject_token_omits_access_token_without_id_token() {
 
 /// 函数 `api_key_exchange_subject_token_uses_id_token_only`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-08
 ///
@@ -195,7 +189,6 @@ fn api_key_exchange_client_id_prefers_id_token_claim() {
 
 /// 函数 `usable_api_key_access_token_rejects_expired_jwt`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-26
 ///
@@ -214,7 +207,6 @@ fn usable_api_key_access_token_rejects_expired_jwt() {
 
 /// 函数 `usable_api_key_access_token_keeps_future_jwt_and_opaque_token`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-26
 ///
@@ -237,7 +229,6 @@ fn usable_api_key_access_token_keeps_future_jwt_and_opaque_token() {
 
 /// 函数 `valid_access_token_skips_unavailable_mark_for_bearer_exchange_refresh_failure`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-14
 ///
@@ -262,7 +253,6 @@ fn valid_access_token_skips_unavailable_mark_for_bearer_exchange_refresh_failure
 
 /// 函数 `expired_access_token_keeps_unavailable_mark_for_bearer_exchange_refresh_failure`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-14
 ///

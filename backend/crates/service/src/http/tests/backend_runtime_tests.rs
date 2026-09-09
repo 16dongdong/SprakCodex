@@ -8,7 +8,6 @@ use std::time::{Duration, Instant};
 
 /// 函数 `worker_count_has_minimum_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -25,7 +24,6 @@ fn worker_count_has_minimum_guard() {
 
 /// 函数 `queue_size_has_minimum_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -42,7 +40,6 @@ fn queue_size_has_minimum_guard() {
 
 /// 函数 `worker_count_has_default_upper_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-05-03
 ///
@@ -59,7 +56,6 @@ fn worker_count_has_default_upper_guard() {
 
 /// 函数 `panic_payload_message_formats_common_payloads`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -79,7 +75,6 @@ fn panic_payload_message_formats_common_payloads() {
 
 /// 函数 `full_queue_times_out_quickly`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -103,7 +98,6 @@ fn full_queue_times_out_quickly() {
 
 /// 函数 `bypass_queue_covers_health_and_metrics`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

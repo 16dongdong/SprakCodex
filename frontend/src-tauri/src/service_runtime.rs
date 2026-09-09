@@ -10,7 +10,6 @@ const ENV_SERVICE_ADDR: &str = "CODEXMANAGER_SERVICE_ADDR";
 
 /// 函数 `validate_initialize_response`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -46,7 +45,6 @@ pub(super) fn validate_initialize_response(v: &serde_json::Value) -> Result<(), 
 
 /// 函数 `spawn_service_with_addr`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -98,7 +96,6 @@ static SERVICE_RUNTIME: OnceLock<Mutex<Option<ServiceRuntime>>> = OnceLock::new(
 
 /// 函数 `set_service_runtime`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -116,7 +113,6 @@ fn set_service_runtime(runtime: ServiceRuntime) {
 
 /// 函数 `take_service_runtime`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -136,7 +132,6 @@ fn take_service_runtime() -> Option<ServiceRuntime> {
 
 /// 函数 `stop_service`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -157,7 +152,6 @@ pub(super) fn stop_service() {
 
 /// 函数 `wait_for_service_ready`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

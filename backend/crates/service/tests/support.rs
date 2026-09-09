@@ -7,7 +7,6 @@ static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
 /// 函数 `test_env_guard`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
@@ -32,7 +31,6 @@ pub struct EnvGuard {
 impl EnvGuard {
     /// 函数 `set`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -65,7 +63,6 @@ impl EnvGuard {
 impl Drop for EnvGuard {
     /// 函数 `drop`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///

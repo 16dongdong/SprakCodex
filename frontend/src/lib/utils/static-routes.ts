@@ -3,7 +3,6 @@
 /**
  * 函数 `normalizeRoutePath`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -23,7 +22,6 @@ export function normalizeRoutePath(path: string): string {
 /**
  * 函数 `looksLikeAssetPath`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -41,7 +39,6 @@ function looksLikeAssetPath(pathname: string): boolean {
 /**
  * 函数 `buildStaticRouteUrl`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *
@@ -72,7 +69,6 @@ export function buildStaticRouteUrl(
 /**
  * 函数 `getCanonicalStaticRouteUrl`
  *
- * 作者: gaohongshun
  *
  * 时间: 2026-04-02
  *

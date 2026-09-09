@@ -57,7 +57,6 @@ pub(super) struct LocalValidationError {
 impl LocalValidationError {
     /// 函数 `new`
     ///
-    /// 作者: gaohongshun
     ///
     /// 时间: 2026-04-02
     ///
@@ -92,7 +91,6 @@ pub(super) fn load_active_api_key_for_id(
 
 /// 函数 `prepare_local_request`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///

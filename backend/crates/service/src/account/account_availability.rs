@@ -8,7 +8,6 @@ pub(crate) enum Availability {
 
 /// 函数 `evaluate_snapshot`
 ///
-/// 作者: gaohongshun
 ///
 /// 时间: 2026-04-02
 ///
