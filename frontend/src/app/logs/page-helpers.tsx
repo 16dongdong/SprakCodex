@@ -89,39 +89,6 @@ export function getStatusBadge(statusCode: number | null) {
   );
 }
 
-: {
-  title: string;
-  value: string;
-  description: string;
-  icon: LucideIcon;
-  toneClass: string;
-}) {
-  return (
-    <div className="group/metric relative min-h-[96px] overflow-hidden rounded-xl border border-border/50 bg-background/55 p-3 transition-colors hover:bg-background/70">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="truncate text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-            {title}
-          </div>
-          <div className="mt-2 truncate text-[2rem] leading-none font-semibold tracking-tight">
-            {value}
-          </div>
-        </div>
-        <div
-          className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-            toneClass,
-          )}
-        >
-          <Icon className="h-4 w-4" />
-        </div>
-      </div>
-      <p className="mt-2 line-clamp-2 text-[11px] leading-4 text-muted-foreground">
-        {description}
-      </p>
-    </div>
-  );
-}
 
 export function LogsPageSkeleton() {
   return (
