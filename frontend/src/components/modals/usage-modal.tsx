@@ -134,7 +134,8 @@ function UsageDetailRow({
       </div>
 
       <Progress
-        value={value}
+        quota
+        value={remainPercent}
         trackClassName={palette.track}
         indicatorClassName={palette.indicator}
       />

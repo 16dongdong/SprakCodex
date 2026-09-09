@@ -85,7 +85,7 @@ fn disabledAccountIsExcludedFromNewSessions() {
 }
 
 #[test]
-fn disabledBoundAccountDoesNotSwitchSilently() {
+fn disabledBoundAccountWaitsWhenNoReplacementExists() {
     let mut storage = storage();
     insertAccount(&storage, "account-a", 0);
     let first = storage
@@ -101,13 +101,7 @@ fn disabledBoundAccountDoesNotSwitchSilently() {
     let repeated = storage
         .resolveSessionRouting("thread-a", "thread-id", now_ts())
         .expect("读取失效绑定");
-    assert_eq!(
-        repeated,
-        SessionRoutingResolution::BoundAccountUnavailable {
-            account_id: first.account_id,
-            reason: "account_routing_disabled".to_string(),
-        }
-    );
+    assert_eq!(repeated, SessionRoutingResolution::NoAvailableAccount);
 }
 
 #[test]
@@ -128,4 +122,105 @@ fn preferenceSummaryDefaultsToEnabledAndCountsBindings() {
             active_binding_count: 1,
         }]
     );
+}
+
+// 手动换号先标记待切换，旧连接失效；新连接使用指定账号，重复请求保持绑定。
+#[test]
+fn manualSwitchAndResetInvalidateOldConnection() {
+    let mut storage = storage();
+    insertAccount(&storage, "a", 0);
+    insertAccount(&storage, "b", 1);
+    storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap();
+    assert!(storage
+        .routingConnectionCurrent("session", "a", now_ts())
+        .unwrap());
+    assert!(storage
+        .switchRoutingSession("session", "b", now_ts())
+        .unwrap());
+    assert!(!storage
+        .routingConnectionCurrent("session", "a", now_ts())
+        .unwrap());
+    let SessionRoutingResolution::Routed(route) = storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap()
+    else {
+        panic!("未完成迁移")
+    };
+    assert_eq!(route.account_id, "b");
+    assert!(storage.resetRoutingSession("session").unwrap());
+    assert!(!storage
+        .routingConnectionCurrent("session", "b", now_ts())
+        .unwrap());
+    assert_eq!(storage.listRoutingSessions(1, "").unwrap()["total"], 0);
+}
+
+// 删除账号保留会话元数据，缺少候选时等待，新增候选后自动迁移。
+#[test]
+fn deletedAccountKeepsPendingSessionAndMigrates() {
+    let mut storage = storage();
+    insertAccount(&storage, "a", 0);
+    storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap();
+    storage
+        .conn
+        .execute("DELETE FROM accounts WHERE id='a'", [])
+        .unwrap();
+    assert_eq!(
+        storage.listRoutingSessions(1, "").unwrap()["items"][0]["reason"],
+        "account_deleted"
+    );
+    assert_eq!(
+        storage
+            .resolveSessionRouting("session", "thread-id", now_ts())
+            .unwrap(),
+        SessionRoutingResolution::NoAvailableAccount
+    );
+    insertAccount(&storage, "b", 1);
+    let SessionRoutingResolution::Routed(route) = storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap()
+    else {
+        panic!("未分配候选")
+    };
+    assert_eq!(route.account_id, "b");
+}
+
+// 明确额度失败后排除原账号；旧响应不自动重放，新请求选择另一可用账号。
+#[test]
+fn exhaustedAccountMigratesOnNextRequest() {
+    let mut storage = storage();
+    insertAccount(&storage, "a", 0);
+    insertAccount(&storage, "b", 1);
+    storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap();
+    storage
+        .recordSessionQuotaFailure("workspace-a", now_ts() + 300, now_ts())
+        .unwrap();
+    assert!(!storage
+        .routingConnectionCurrent("session", "a", now_ts())
+        .unwrap());
+    let SessionRoutingResolution::Routed(route) = storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap()
+    else {
+        panic!("额度迁移失败")
+    };
+    assert_eq!(route.account_id, "b");
+}
+
+// 7 天窗口位于主槽位时仍计入周额度，缺失的 5 小时窗口不作为零或满额度参加平均。
+#[test]
+fn quotaOverviewUsesWindowDurationRatherThanSlot() {
+    let storage = storage();
+    insertAccount(&storage, "a", 0);
+    insertAccount(&storage, "b", 1);
+    storage.conn.execute("INSERT INTO usage_snapshots(account_id,used_percent,window_minutes,captured_at) VALUES('a',40,10080,1)",[]).unwrap();
+    storage.conn.execute("INSERT INTO usage_snapshots(account_id,used_percent,window_minutes,secondary_used_percent,secondary_window_minutes,captured_at) VALUES('b',3,300,0,10080,1)",[]).unwrap();
+    let summary = storage.account_quota_overview_stats().unwrap();
+    assert_eq!(summary.primary_remain_percent_avg, Some(97.0));
+    assert_eq!(summary.secondary_remain_percent_avg, Some(80.0));
 }

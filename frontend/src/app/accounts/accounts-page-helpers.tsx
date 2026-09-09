@@ -204,7 +204,8 @@ function QuotaProgress({
         </span>
       </div>
       <Progress
-        value={value}
+        quota
+        value={remainPercent}
         trackClassName={palette.track}
         indicatorClassName={palette.indicator}
       />
@@ -222,7 +223,7 @@ export function QuotaOverviewCell({ items }: { items: QuotaSummaryItem[] }) {
     <div className="account-pool-quota-grid">
       {items.slice(0, 2).map((item) => <div key={item.id} className="min-w-0 space-y-1.5" title={formatTsFromSeconds(item.resetsAt, item.emptyResetText ?? t("未知"))}>
         <div className="flex items-center justify-between gap-2 text-xs"><span className="truncate text-muted-foreground">{item.label}</span><span className="shrink-0 font-medium tabular-nums">{item.remainPercent == null ? item.emptyText ?? "—" : `${item.remainPercent}%`}</span></div>
-        <Progress value={item.remainPercent ?? 0} className="h-1.5" />
+        <Progress quota value={item.remainPercent} className="h-1.5" />
       </div>)}
     </div>
     <details className="group text-xs">

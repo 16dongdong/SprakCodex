@@ -100,6 +100,7 @@ export default function HomePage() {
             <h2 className="font-semibold">{t("账号池剩余")}</h2>
             <Button variant="ghost" size="sm" onClick={() => navigate("/accounts")}>{t("账号")}<ArrowUpRight className="ml-1 size-4" /></Button>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">{t("按提供对应窗口的可用账号取平均")}</p>
           <div className="mt-4 space-y-4">
             <DashboardQuota label={t("5小时剩余")} value={snapshot?.accountSummary.primaryRemainPercent} />
             <DashboardQuota label={t("7天剩余")} value={snapshot?.accountSummary.secondaryRemainPercent} />

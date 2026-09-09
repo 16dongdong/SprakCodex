@@ -186,7 +186,6 @@ function PoolBucket({
   bucketCount: number;
   tone: "emerald" | "blue";
 }) {
-  const normalizedValue = value == null ? 0 : Math.max(0, Math.min(100, value));
   const isEmerald = tone === "emerald";
 
   return (
@@ -203,7 +202,8 @@ function PoolBucket({
         </span>
       </div>
       <Progress
-        value={normalizedValue}
+        quota
+        value={value}
         className="gap-0"
         trackClassName={cn(
           "h-1.5 xl:h-2",

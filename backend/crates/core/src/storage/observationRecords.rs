@@ -307,7 +307,7 @@ fn loadPrevious(tx: &Transaction<'_>, trace: &str, aliases: &[String]) -> Result
         })).optional()
 }
 
-// 网络升级保留请求主键；缺失网络字段保持未知，客户端模型不冒充已观察到的上游模型。
+// 网络升级保留请求主键与路由元数据；持久化分流策略和会话 ID，避免列表把已分流请求显示成透传。
 fn writeRequest(
     tx: &Transaction<'_>,
     request: &RequestLog,
@@ -318,20 +318,20 @@ fn writeRequest(
     tx.execute(
             "INSERT INTO request_logs (id, trace_id, request_path, original_path, method,
              request_type, gateway_mode, route_source, model, upstream_model, model_source,
-             actual_source_kind, upstream_url, status_code, duration_ms, first_response_ms, error, created_at, reasoning_effort, service_tier, account_id, key_id, client_model, effective_service_tier, account_label)
+             actual_source_kind, upstream_url, status_code, duration_ms, first_response_ms, error, created_at, reasoning_effort, service_tier, account_id, key_id, client_model, effective_service_tier, account_label, route_strategy, actual_source_id)
              VALUES (?12, ?1, ?2, ?2, ?3, ?4, 'directObservation', ?13, ?5, ?15,
-             ?14, ?13, ?6, ?7, ?8, ?9, ?10, ?11, ?16, ?17, ?18, ?19, ?20, ?21, ?22)
+             ?14, ?13, ?6, ?7, ?8, ?9, ?10, ?11, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24)
              ON CONFLICT(id) DO UPDATE SET trace_id=excluded.trace_id,request_path=excluded.request_path,
              original_path=excluded.original_path,method=excluded.method,request_type=excluded.request_type,
              route_source=excluded.route_source,model=excluded.model,upstream_model=excluded.upstream_model,
              model_source=excluded.model_source,actual_source_kind=excluded.actual_source_kind,
              upstream_url=excluded.upstream_url,status_code=excluded.status_code,duration_ms=excluded.duration_ms,
-             first_response_ms=excluded.first_response_ms,error=excluded.error,created_at=excluded.created_at,reasoning_effort=COALESCE(excluded.reasoning_effort,request_logs.reasoning_effort),service_tier=COALESCE(excluded.service_tier,request_logs.service_tier),account_id=COALESCE(excluded.account_id,request_logs.account_id),key_id=COALESCE(excluded.key_id,request_logs.key_id),client_model=COALESCE(excluded.client_model,request_logs.client_model),effective_service_tier=COALESCE(excluded.effective_service_tier,request_logs.effective_service_tier),account_label=COALESCE(excluded.account_label,request_logs.account_label)",
+             first_response_ms=excluded.first_response_ms,error=excluded.error,created_at=excluded.created_at,reasoning_effort=COALESCE(excluded.reasoning_effort,request_logs.reasoning_effort),service_tier=COALESCE(excluded.service_tier,request_logs.service_tier),account_id=COALESCE(excluded.account_id,request_logs.account_id),key_id=COALESCE(excluded.key_id,request_logs.key_id),client_model=COALESCE(excluded.client_model,request_logs.client_model),effective_service_tier=COALESCE(excluded.effective_service_tier,request_logs.effective_service_tier),account_label=COALESCE(excluded.account_label,request_logs.account_label),route_strategy=COALESCE(excluded.route_strategy,request_logs.route_strategy),actual_source_id=COALESCE(excluded.actual_source_id,request_logs.actual_source_id)",
             params![request.trace_id, request.request_path, request.method, request.request_type,
                 request.model, request.upstream_url, request.status_code, request.duration_ms,
                 request.first_response_ms, request.error, request.created_at, id,
                 if client { "clientObservation" } else { "directObservation" }, modelSource,
-                if modelSource == "upstream" { request.model.as_deref() } else { None }, request.reasoning_effort, request.service_tier, request.account_id, request.key_id, request.client_model, request.effective_service_tier, request.account_label],
+                if modelSource == "upstream" { request.model.as_deref() } else { None }, request.reasoning_effort, request.service_tier, request.account_id, request.key_id, request.client_model, request.effective_service_tier, request.account_label, request.route_strategy, request.actual_source_id],
         )?;
     let requestId = id.unwrap_or_else(|| tx.last_insert_rowid());
     // 同一账号且同一凭据指纹证明身份来源一致，可补齐旧网络记录名称；不猜测纯客户端事件的账号。

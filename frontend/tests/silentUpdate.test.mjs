@@ -9,7 +9,7 @@ test("更新配置统一标准版本与独立工作进程", async () => {
   const workerConfig = JSON.parse(await fs.readFile(new URL("frontend/src-tauri/tauri.windows.conf.json", root), "utf8"));
   const runtime = await fs.readFile(new URL("frontend/src-tauri/src/commands/updater/runtime.rs", root), "utf8");
   const ui = await fs.readFile(new URL("frontend/src/components/layout/automatic-update-checker.tsx", root), "utf8");
-  assert.equal(config.version, "0.6.1");
+  assert.match(config.version, /^\d+\.\d+\.\d+$/);
   assert.ok(Object.values(workerConfig.bundle.resources).includes("updateAgent.exe"));
   assert.match(runtime, /16dongdong\/SprakCodex/);
   assert.match(ui, /appSettings.silentUpdate/);

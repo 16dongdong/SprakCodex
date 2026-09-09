@@ -38,3 +38,45 @@ pub async fn service_session_routing_set_account_enabled(
     )
     .await
 }
+
+// 分页查询会话元数据，不读取聊天正文或令牌。
+#[tauri::command]
+pub async fn service_session_routing_list(
+    addr: Option<String>,
+    page: i64,
+    search: String,
+) -> Result<serde_json::Value, String> {
+    rpc_call_in_background(
+        "sessionRouting/list",
+        addr,
+        Some(serde_json::json!({"page":page,"search":search})),
+    )
+    .await
+}
+// 重置管理记录，下次请求重新分配；由服务处理已有连接的空闲重建。
+#[tauri::command]
+pub async fn service_session_routing_reset(
+    addr: Option<String>,
+    sessionId: String,
+) -> Result<serde_json::Value, String> {
+    rpc_call_in_background(
+        "sessionRouting/reset",
+        addr,
+        Some(serde_json::json!({"sessionId":sessionId})),
+    )
+    .await
+}
+// 手动选择可用账号，服务端校验资格并记录待切换状态。
+#[tauri::command]
+pub async fn service_session_routing_switch(
+    addr: Option<String>,
+    sessionId: String,
+    accountId: String,
+) -> Result<serde_json::Value, String> {
+    rpc_call_in_background(
+        "sessionRouting/switch",
+        addr,
+        Some(serde_json::json!({"sessionId":sessionId,"accountId":accountId})),
+    )
+    .await
+}

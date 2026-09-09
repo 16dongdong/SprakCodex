@@ -162,6 +162,7 @@ fn resolveStoredRoute(
     let mut storage =
         Storage::open(databasePath).map_err(|error| format!("打开分流数据库失败：{error}"))?;
     if !readEnabled(&storage)? {
+        storage.observeRoutingSession(&sessionId,&routeSource,now_ts()).map_err(|e|e.to_string())?;
         return Ok(RouteDecision::Passthrough {
             reason: "routing_disabled",
             sessionId: Some(sessionId),
@@ -291,4 +292,50 @@ mod tests {
     fn legacyGatewayRemainsDisabled() {
         assert!(!legacyGatewayEnabled());
     }
+}
+
+// 会话页查询和写操作保留服务数据库错误；标识长度在 RPC 边界统一限制。
+pub fn listSessions(page: i64, search: &str) -> Result<serde_json::Value,String> {
+    if search.len()>512 { return Err("搜索内容过长".into()); }
+    openStorage()?.listRoutingSessions(page, search).map_err(|e| e.to_string())
+}
+// 重置不删除 Codex 内容，也不创建替代会话；下次连接由分配事务重新处理。
+pub fn resetSession(sessionId: &str) -> Result<serde_json::Value,String> {
+    validateSessionId(sessionId)?;
+    let changed = openStorage()?.resetRoutingSession(sessionId).map_err(|e|e.to_string())?;
+    Ok(serde_json::json!({"ok":changed}))
+}
+// 手动换号记录待生效状态，不改变正在发送的请求凭据。
+pub fn switchSession(sessionId: &str, accountId: &str) -> Result<serde_json::Value,String> {
+    validateSessionId(sessionId)?;
+    let changed = openStorage()?.switchRoutingSession(sessionId,accountId,now_ts()).map_err(|e|e.to_string())?;
+    Ok(serde_json::json!({"ok":changed}))
+}
+// 拒绝空标识、过长文本和控制字符，避免管理操作写入不可重现的绑定键。
+fn validateSessionId(sessionId: &str) -> Result<(),String> {
+    if sessionId.is_empty() || sessionId.len()>512 || sessionId.chars().any(char::is_control) { return Err("会话标识无效".into()); }
+    Ok(())
+}
+// WebSocket 已开始响应时不调用此检查；空闲时发现绑定变化则关闭旧连接，让客户端重新握手。
+pub(crate) async fn connectionCurrent(decision: &RouteDecision) -> Result<bool,String> {
+    let RouteDecision::Routed(credential) = decision else {
+        if matches!(decision,RouteDecision::Passthrough { reason: "routing_disabled", .. }) {
+            return tokio::task::spawn_blocking(|| { let storage=openStorage()?; Ok(!readEnabled(&storage)?) }).await.map_err(|e|e.to_string())?;
+        }
+        return Ok(true);
+    };
+    let session = credential.session_id.clone();
+    let account = credential.account_id.clone();
+    tokio::task::spawn_blocking(move || {
+        let storage = openStorage()?;
+        if !readEnabled(&storage)? { return Ok(false); }
+        storage.routingConnectionCurrent(&session,&account,now_ts()).map_err(|e|e.to_string())
+    }).await.map_err(|e|e.to_string())?
+}
+// 没有重置时间的明确额度拒绝只短暂冷却五分钟；不以普通限速响应推断账号额度。
+pub(crate) fn quotaCooldown(diagnostic: &str, now: i64) -> Option<i64> {
+    let error: serde_json::Value = serde_json::from_str(diagnostic).ok()?;
+    let code = error.get("code").or_else(|| error.get("type"))?.as_str()?;
+    if !matches!(code,"usage_limit_reached"|"insufficient_quota"|"quota_exceeded") { return None; }
+    Some(error.get("resets_at").and_then(|v|v.as_i64()).filter(|v|*v>now).unwrap_or(now+300))
 }

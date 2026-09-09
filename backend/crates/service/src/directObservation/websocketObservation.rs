@@ -32,6 +32,8 @@ pub(super) struct Observation {
 }
 
 impl Observation {
+    // 只有所有已发送请求均收到终态时才允许更换连接身份。
+    pub fn isIdle(&self) -> bool { self.queued.is_empty() && self.pending.is_empty() }
     // 转发前记录 response.create 的开始时间；非创建消息无副作用，容量超限返回显式观测错误。
     pub fn request(&mut self, message: &Message, target: (&str, &str)) -> Result<(), ()> {
         let Some(bytes) = messageBytes(message) else {

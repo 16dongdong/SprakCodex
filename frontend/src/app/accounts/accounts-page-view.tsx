@@ -1,5 +1,8 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { sessionRoutingClient } from "@/lib/api/sessionRoutingClient";
+import { useAppStore } from "@/lib/store/useAppStore";
 import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
@@ -453,6 +456,12 @@ export function AccountsPageView(props: AccountsPageViewProps) {
     toggleForceEnabled,
     toggleAccountStatus,
   } = props;
+  const serviceAddr = useAppStore((state) => state.serviceStatus.addr);
+  // 删除前展示已知活跃绑定数；不为获取提示加载聊天内容，查询失败时不编造零个会话。
+  const bindingSummary = useQuery({queryKey:["sessionRouting","status",serviceAddr],queryFn:sessionRoutingClient.status,enabled:isServiceReady && Boolean(deleteDialogState)});
+  const deletingIds = new Set(deleteDialogState?.kind === "single" ? [deleteDialogState.account.id] : effectiveSelectedIds);
+  const affectedBindings = bindingSummary.data?.accounts.filter((account) => deletingIds.has(account.accountId)).reduce((sum,account) => sum+account.activeBindingCount,0);
+  const migrationNotice = `${affectedBindings == null ? "" : t("关联活跃会话：{count}",{count:affectedBindings})} ${t("关联会话将在下次请求时重新分配账号，聊天内容保留。")}`;
 
   const forceToggleBlocked = ["disabled", "inactive", "unavailable", "banned"].includes(
     String(currentEditingAccount?.status || "").trim().toLowerCase(),
@@ -1917,9 +1926,9 @@ null
             : t("批量删除账号")
         }
         description={
-          deleteDialogState?.kind === "single"
+          (deleteDialogState?.kind === "single"
             ? `${t("确定删除账号")} ${deleteDialogState.account.name} ${t("吗？删除后不可恢复。")}`
-            : `${t("确定删除选中的")} ${deleteDialogState?.count || 0} ${t("个账号吗？删除后不可恢复。")}`
+            : `${t("确定删除选中的")} ${deleteDialogState?.count || 0} ${t("个账号吗？删除后不可恢复。")}`) + " " + migrationNotice
         }
         confirmText={t("删除")}
         confirmVariant="destructive"

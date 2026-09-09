@@ -1702,6 +1702,7 @@ fn qualified_column(table_name: &str, column: &str) -> String {
     format!("{table_name}.{column}")
 }
 
+// 主/副槽位不代表固定周期；依据实际分钟数归类，缺失窗口以 NULL 排除出平均分母。
 fn account_quota_overview_stats_sql() -> String {
     format!(
         "{latest_usage_cte}
@@ -1728,8 +1729,8 @@ fn account_quota_overview_stats_sql() -> String {
           AND lu.rn = 1",
         latest_usage_cte = latest_usage_cte_sql(),
         available_status_clause = available_account_status_clause("a"),
-        primary_remain_expr = remaining_percent_sql("lu.used_percent"),
-        secondary_remain_expr = remaining_percent_sql("lu.secondary_used_percent"),
+        primary_remain_expr = remaining_percent_sql("CASE WHEN lu.window_minutes=300 THEN lu.used_percent WHEN lu.secondary_window_minutes=300 THEN lu.secondary_used_percent END"),
+        secondary_remain_expr = remaining_percent_sql("CASE WHEN lu.window_minutes=10080 THEN lu.used_percent WHEN lu.secondary_window_minutes=10080 THEN lu.secondary_used_percent END"),
     )
 }
 

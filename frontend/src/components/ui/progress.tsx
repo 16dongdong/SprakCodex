@@ -2,9 +2,11 @@
 
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 
+import { quotaPalette } from "@/lib/utils/quotaPalette"
 import { cn } from "@/lib/utils"
 
 interface ProgressProps extends ProgressPrimitive.Root.Props {
+  quota?: boolean
   trackClassName?: string
   indicatorClassName?: string
 }
@@ -25,10 +27,13 @@ function Progress({
   className,
   children,
   value,
+  quota = false,
   trackClassName,
   indicatorClassName,
   ...props
 }: ProgressProps) {
+  // 额度条统一阈值配色；普通任务进度条不受该规则影响。
+  const palette = quota ? quotaPalette(value) : undefined
   return (
     <ProgressPrimitive.Root
       value={value}
@@ -37,8 +42,8 @@ function Progress({
       {...props}
     >
       {children}
-      <ProgressTrack className={trackClassName}>
-        <ProgressIndicator className={indicatorClassName} />
+      <ProgressTrack className={cn(trackClassName, palette?.track)}>
+        <ProgressIndicator className={cn(indicatorClassName, palette?.indicator)} />
       </ProgressTrack>
     </ProgressPrimitive.Root>
   )

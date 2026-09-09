@@ -3,6 +3,7 @@
 import Image from "next/image";
 import {
   LayoutDashboard,
+  MessagesSquare,
   Users,
   FileText,
   Settings,
@@ -33,6 +34,7 @@ import {
 const NAV_ITEM_BY_PATH = new Map<TopLevelRoutePath, { icon: LucideIcon }>([
   ["/", { icon: LayoutDashboard }],
   ["/accounts", { icon: Users }],
+  ["/sessions", { icon: MessagesSquare }],
   ["/logs", { icon: FileText }],
   ["/settings", { icon: Settings }],
 ]);

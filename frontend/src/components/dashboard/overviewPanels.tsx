@@ -1,5 +1,6 @@
 "use client";
 
+import { quotaPalette } from "@/lib/utils/quotaPalette";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,11 +19,12 @@ import { useAppStore } from "@/lib/store/useAppStore";
 export function DashboardQuota({ label, value }: { label: string; value?: number | null }) {
   const known = value != null && Number.isFinite(value);
   const percent = known ? Math.max(0, Math.min(100, value)) : 0;
+  const palette = quotaPalette(value);
   return (
     <div>
       <div className="mb-2 flex justify-between text-xs"><span className="text-muted-foreground">{label}</span><span className="font-medium tabular-nums">{known ? `${value.toFixed(0)}%` : "—"}</span></div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted" role={known ? "meter" : undefined} aria-label={label} aria-valuemin={known ? 0 : undefined} aria-valuemax={known ? 100 : undefined} aria-valuenow={known ? percent : undefined}>
-        <div className={`h-full rounded-full ${percent < 20 ? "bg-amber-500" : "bg-primary/70"}`} style={{ width: `${percent}%` }} />
+      <div className={`h-1.5 overflow-hidden rounded-full ${palette.track}`} role={known ? "meter" : undefined} aria-label={label} aria-valuemin={known ? 0 : undefined} aria-valuemax={known ? 100 : undefined} aria-valuenow={known ? percent : undefined}>
+        <div className={`h-full rounded-full ${palette.indicator}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
   );

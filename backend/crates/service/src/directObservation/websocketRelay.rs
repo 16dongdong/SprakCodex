@@ -142,10 +142,19 @@ pub(super) async fn upgrade(
         observation.headers = observationHeaders;
         observation.responseHeaders = observationResponseHeaders;
         observation.routing = Some(handshake.routingSnapshot());
+        let mut routeCheck = tokio::time::interval(Duration::from_secs(3));
+        let mut lastActivity = tokio::time::Instant::now();
         loop {
             let transfer = tokio::select! {
                 _ = taskEngine.cancel.cancelled() => break,
-                _ = tokio::time::sleep(connectionIdleTimeout) => break,
+                _ = routeCheck.tick(), if tracked && observation.isIdle() => {
+                    match crate::sessionRouting::connectionCurrent(&routeDecision).await {
+                        Ok(true) => continue,
+                        Ok(false) => { let _ = downstream.close(None).await; break; },
+                        Err(error) => { log::error!("会话绑定检查失败：{error}"); break; },
+                    }
+                },
+                _ = tokio::time::sleep_until(lastActivity + connectionIdleTimeout) => break,
                 message = upstream.next() => match message {
                     Some(Ok(message)) => {
                         if tracked {
@@ -161,6 +170,13 @@ pub(super) async fn upgrade(
                 },
                 message = downstream.next() => match message {
                     Some(Ok(message)) => {
+                        if tracked && observation.isIdle() {
+                            match crate::sessionRouting::connectionCurrent(&routeDecision).await {
+                                Ok(true) => {},
+                                Ok(false) => { let _ = downstream.close(None).await; break; },
+                                Err(error) => { log::error!("会话绑定检查失败：{error}"); break; },
+                            }
+                        }
                         if tracked && observation.request(&message, (&host, &path)).is_err() {
                             // 排空或容量拒绝后不再向上游发送未登记请求，保证更新的空闲判定真实。
                             taskEngine.sink.counters.errors.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -172,6 +188,7 @@ pub(super) async fn upgrade(
                 },
             };
             if transfer.is_err() { break; }
+            lastActivity = tokio::time::Instant::now();
         }
         for (exchange, mut parsed) in observation.unfinished() {
             parsed.problem = Some("WebSocket 在响应完成之前关闭，用量可能缺失");

@@ -49,7 +49,7 @@ test("个人版所有角色开放仪表盘、账号、请求日志和设置", ()
       routes.getAllowedTopLevelRouteSections(access).flatMap((section) =>
         section.routes.map((route) => route.path),
       ),
-      ["/", "/accounts", "/logs", "/settings"],
+      ["/", "/accounts", "/sessions", "/logs", "/settings"],
     );
     assert.equal(routes.getFirstAllowedTopLevelRoutePath(access), "/");
   }

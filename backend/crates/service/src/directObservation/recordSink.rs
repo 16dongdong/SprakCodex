@@ -175,6 +175,14 @@ impl RecordSink {
                     return;
                 }
                 while let Some(record) = receiver.blocking_recv() {
+                    if let Some(session) = record.request.actual_source_id.as_deref().filter(|_| record.request.actual_source_kind.as_deref()==Some("session")) {
+                        if let Err(error) = storage.touchRoutingSession(session,now_ts()) { log::error!("更新会话活动时间失败：{error}"); }
+                    }
+                    if let (Some(account),Some(diagnostic)) = (record.request.account_id.as_deref(),record.parsed.diagnostic.as_deref()) {
+                        if let Some(until) = crate::sessionRouting::quotaCooldown(diagnostic,now_ts()) {
+                            if let Err(error) = storage.recordSessionQuotaFailure(account,until,now_ts()) { log::error!("记录会话额度冷却失败：{error}"); }
+                        }
+                    }
                     let saved = storage.insertObservationDetails(
                         &record.request,
                         &record.parsed.usage,

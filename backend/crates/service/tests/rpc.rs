@@ -4126,3 +4126,27 @@ fn rpc_silent_update_settings_preserve_consistency() {
     let snapshot = post_rpc_method(&disable.addr, 903, "appSettings/set", Some(serde_json::json!({"updateAutoCheck":false})));
     assert_eq!(snapshot["result"]["silentUpdate"], false);
 }
+
+// 会话管理 RPC 仅返回元数据，手动目标处于待切换状态，重置后列表记录消失。
+#[test]
+fn rpc_session_management_roundtrip() {
+    let ctx = RpcTestContext::new("rpc-session-management");
+    let mut storage = Storage::open(ctx.db_path()).unwrap();
+    storage.init().unwrap();
+    for id in ["route-a","route-b"] {
+        storage.insert_account(&codexmanager_core::storage::Account { id:id.into(),label:id.into(),issuer:"fixture".into(),chatgpt_account_id:Some(id.into()),workspace_id:None,group_name:None,sort:0,status:"active".into(),created_at:1,updated_at:1 }).unwrap();
+        storage.insert_token(&codexmanager_core::storage::Token {account_id:id.into(),id_token:String::new(),access_token:"fixture-access".into(),refresh_token:String::new(),api_key_access_token:None,last_refresh:1}).unwrap();
+    }
+    storage.resolveSessionRouting("session-fixture","thread-id",now_ts()).unwrap();
+    drop(storage);
+    let server = codexmanager_service::start_one_shot_server().unwrap();
+    let list = post_rpc_method(&server.addr, 910,"sessionRouting/list",Some(serde_json::json!({"page":1,"search":"session-fixture"})));
+    assert_eq!(list["result"]["total"],1);
+    assert!(!list.to_string().contains("fixture-access"));
+    let server = codexmanager_service::start_one_shot_server().unwrap();
+    let switched = post_rpc_method(&server.addr,911,"sessionRouting/switch",Some(serde_json::json!({"sessionId":"session-fixture","accountId":"route-b"})));
+    assert_eq!(switched["result"]["ok"],true);
+    let server = codexmanager_service::start_one_shot_server().unwrap();
+    let reset = post_rpc_method(&server.addr,912,"sessionRouting/reset",Some(serde_json::json!({"sessionId":"session-fixture"})));
+    assert_eq!(reset["result"]["ok"],true);
+}

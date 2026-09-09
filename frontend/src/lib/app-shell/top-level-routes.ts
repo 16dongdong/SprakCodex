@@ -24,6 +24,12 @@ export const TOP_LEVEL_ROUTE_CONFIG = [
     roles: ["system_admin", "admin", "member"],
   },
   {
+    path: "/sessions",
+    label: "会话",
+    section: "personal",
+    roles: ["system_admin", "admin", "member"],
+  },
+  {
     path: "/logs",
     label: "请求日志",
     section: "personal",

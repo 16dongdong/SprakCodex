@@ -2333,6 +2333,7 @@ impl Storage {
             "136_sessionRouting",
             include_str!("../../migrations/136_sessionRouting.sql"),
         )?;
+        self.apply_sql_migration("137_sessionLifecycle", include_str!("../../migrations/137_sessionLifecycle.sql"))?;
         self.ensure_api_key_rotation_columns()?;
         self.ensure_api_key_account_group_filter_column()?;
         self.ensure_aggregate_apis_table()?;

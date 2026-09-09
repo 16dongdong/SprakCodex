@@ -11,6 +11,9 @@ export function createWebCommandMap(postWebRpc: WebRpcCaller): Record<string, We
     service_observation_status: { rpcMethod: "directObservation/status" },
     service_observation_start: { rpcMethod: "directObservation/start" },
     service_observation_stop: { rpcMethod: "directObservation/stop" },
+    service_session_routing_list: { rpcMethod: "sessionRouting/list" },
+    service_session_routing_reset: { rpcMethod: "sessionRouting/reset" },
+    service_session_routing_switch: { rpcMethod: "sessionRouting/switch" },
     service_session_routing_status: { rpcMethod: "sessionRouting/status" },
     service_session_routing_set_enabled: { rpcMethod: "sessionRouting/setEnabled" },
     service_session_routing_set_account_enabled: {
