@@ -2,7 +2,7 @@
 
 ## 目标
 
-`backend/crates/service/src/gateway/` 是 CodexManager 最复杂的服务端域之一，负责本地网关、上游转发、协议适配、可观测性与选路逻辑。
+`backend/crates/service/src/gateway/` 是 SprakCodex 最复杂的服务端域之一，负责本地网关、上游转发、协议适配、可观测性与选路逻辑。
 
 本文档帮助协作者快速判断改动应该落在哪个子目录，避免把不同职责继续堆进单个大文件。
 

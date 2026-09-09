@@ -101,7 +101,7 @@
   - 解析 `codex_cli_rs/...`。
   - 负责同步 `~/.codex/models_cache.json`。
 - `apps/src-tauri/src/service_runtime.rs`
-  - 用 `initialize` 返回的 `userAgent` 与 `codexHome` 识别服务是不是“正确的 CodexManager 服务”。
+  - 用 `initialize` 返回的 `userAgent` 与 `codexHome` 识别服务是不是“正确的 SprakCodex 服务”。
 
 ## 大量测试会被连带删除或失效
 

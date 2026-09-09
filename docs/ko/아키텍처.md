@@ -1,10 +1,10 @@
 # ARCHITECTURE
 
-本文档说明 CodexManager 当前仓库结构、运行关系和发布链路，目标是帮助协作者快速判断改动应该落在哪一层。
+本文档说明 SprakCodex 当前仓库结构、运行关系和发布链路，目标是帮助协作者快速判断改动应该落在哪一层。
 
 ## 1. 总体形态
 
-CodexManager 由两类运行模式组成：
+SprakCodex 由两类运行模式组成：
 
 1. 桌面模式：Tauri 桌面端 + 本地 service 进程
 2. Service 模式：独立 service + web UI，可用于服务器、Docker 或无桌面环境

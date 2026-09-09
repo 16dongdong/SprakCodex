@@ -1,10 +1,10 @@
 #ARCHITECTURE
 
-This document describes CodexManager the current repository structure, running relationships, and release links. The goal is to help collaborators quickly determine which layer the changes should fall on.
+This document describes SprakCodex the current repository structure, running relationships, and release links. The goal is to help collaborators quickly determine which layer the changes should fall on.
 
 ## 1. Overall shape
 
-CodexManager consists of two types of operating modes:
+SprakCodex consists of two types of operating modes:
 
 1. Desktop mode: Tauri Desktop + local service process
 2. Service Mode: Standalone service + web UI, can be used with server, Docker or no desktop environment

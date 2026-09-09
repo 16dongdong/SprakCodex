@@ -2,9 +2,9 @@
 
 ## 결론
 
-CodexManager 를 Docker 또는 독립 실행 Service 앞단에 두고, 그 위에 기본 설정의 Nginx 리버스 프록시를 올리면 가장 흔한 숨은 문제는 "모델 캐시가 고장났다"가 아닙니다. 실제 원인은 **Nginx 가 밑줄이 포함된 커스텀 헤더를 버리는 것**입니다.
+SprakCodex 를 Docker 또는 독립 실행 Service 앞단에 두고, 그 위에 기본 설정의 Nginx 리버스 프록시를 올리면 가장 흔한 숨은 문제는 "모델 캐시가 고장났다"가 아닙니다. 실제 원인은 **Nginx 가 밑줄이 포함된 커스텀 헤더를 버리는 것**입니다.
 
-CodexManager 는 안정적인 스레드 앵커를 유지하기 위해 다음 헤더에 의존합니다.
+SprakCodex 는 안정적인 스레드 앵커를 유지하기 위해 다음 헤더에 의존합니다.
 
 - `conversation_id`
 - `session_id`
@@ -25,7 +25,7 @@ underscores_in_headers on;
 ignore_invalid_headers off;
 ```
 
-`conversation_id`, `session_id` 같은 헤더가 무효 헤더로 취급되어 CodexManager 에 도달하기 전에 버려질 수 있습니다.
+`conversation_id`, `session_id` 같은 헤더가 무효 헤더로 취급되어 SprakCodex 에 도달하기 전에 버려질 수 있습니다.
 
 이는 다음 경로에 직접 영향을 줍니다.
 
@@ -93,7 +93,7 @@ proxy_send_timeout 3600s;
 
 ### 4. `/v1/images/` 이미지 생성 경로를 별도 보수 설정으로 처리
 
-CodexManager 는 `/v1/images/generations` 및 `/v1/images/edits` 호환 엔드포인트를 지원합니다. 이 경로는 일반 텍스트 요청과 프록시 위험이 다릅니다.
+SprakCodex 는 `/v1/images/generations` 및 `/v1/images/edits` 호환 엔드포인트를 지원합니다. 이 경로는 일반 텍스트 요청과 프록시 위험이 다릅니다.
 
 - `/v1/images/edits` 는 multipart 이미지 업로드로 request body 가 커질 수 있음
 - 이미지 생성은 일반 텍스트 첫 토큰보다 오래 걸릴 수 있음
@@ -157,7 +157,7 @@ Cloudflare 가 경로를 복잡하게 만들 수는 있지만, 가장 흔한 직
 
 ### 오진 3: 캐시 수치가 낮으니 백엔드 로직이 틀렸다
 
-반드시 그렇지는 않습니다. CodexManager 는 상류가 돌려준 usage 값을 그대로 기록합니다. 서비스에 도달하기 전 이미 스레드 앵커가 사라졌다면, 백엔드는 낮아진 캐시 적중 결과를 그대로 기록할 수밖에 없습니다.
+반드시 그렇지는 않습니다. SprakCodex 는 상류가 돌려준 usage 값을 그대로 기록합니다. 서비스에 도달하기 전 이미 스레드 앵커가 사라졌다면, 백엔드는 낮아진 캐시 적중 결과를 그대로 기록할 수밖에 없습니다.
 
 ## 점검 체크리스트
 

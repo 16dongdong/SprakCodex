@@ -1,6 +1,6 @@
 # 更新日志
 
-本文件用于记录 CodexManager 的对外可见变更，作为版本历史的唯一事实源。
+本文件用于记录 SprakCodex 的对外可见变更，作为版本历史的唯一事实源。
 格式参考 Keep a Changelog，并结合当前项目的实际维护方式做最小收敛。
 
 ## [Unreleased]

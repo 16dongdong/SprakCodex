@@ -1,6 +1,6 @@
 #TESTING
 
-This document defines CodexManager repository-level testing and validation baselines.
+This document defines SprakCodex repository-level testing and validation baselines.
 
 Target:
 

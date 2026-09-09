@@ -2,7 +2,7 @@
 
 ## Support range
 
-CodexManager We are still iterating rapidly, but we will try our best to deal with security issue reports within a reasonable range.
+SprakCodex We are still iterating rapidly, but we will try our best to deal with security issue reports within a reasonable range.
 
 Priority issues include:
 

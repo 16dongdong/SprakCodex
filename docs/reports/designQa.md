@@ -24,13 +24,13 @@
 
 No actionable P0, P1, or P2 differences remain.
 
-- Fonts and typography: both targets use a compact system sans-serif hierarchy. CodexManager keeps its existing Segoe UI/PingFang SC stack, weights, monospaced paths, truncation, and line heights; all labels remain readable without collision.
+- Fonts and typography: both targets use a compact system sans-serif hierarchy. SprakCodex keeps its existing Segoe UI/PingFang SC stack, weights, monospaced paths, truncation, and line heights; all labels remain readable without collision.
 - Spacing and layout rhythm: the final wide layout uses three catalog columns, consistent card heights, and a wider repository dialog. The filter toolbar now uses explicit `minmax(0,1fr) / 14rem / 10rem / auto` tracks, so the search field retains the available width while repository, status, and refresh controls remain separate. The 1440 × 900 run correctly falls back to the denser two-column catalog layout.
-- Colors and visual tokens: the implementation intentionally retains CodexManager's blue primary and glass-console tokens instead of copying cc-switch's green accent. Contrast, selected tabs, status badges, and destructive actions remain semantically clear.
+- Colors and visual tokens: the implementation intentionally retains SprakCodex's blue primary and glass-console tokens instead of copying cc-switch's green accent. Contrast, selected tabs, status badges, and destructive actions remain semantically clear.
 - Image and icon fidelity: the reference contains no required raster product imagery. All visible actions use the repository's Lucide icon system; no placeholder imagery, CSS drawings, emoji, or hand-authored SVG substitutes were introduced.
 - Copy and content: the menu is “Skills 与插件”, the outer tabs distinguish “Skills 安装” from “Codex 插件安装”, and repository/status filters now render localized labels rather than raw `all` values. The four built-in repositories match the source behavior.
 - Interaction and accessibility: tabs, search, repository dialog open/close, built-in delete protection, plugin scrolling, install confirmation, and long error-toast scrolling were exercised. Controls have role/name coverage in Playwright, and the final run recorded no page or console errors.
-- Intentional adaptation: repository management is a modal instead of a dedicated page, and the CodexManager shell remains visible. This follows the existing app navigation and dialog system while preserving the source workflow and information architecture.
+- Intentional adaptation: repository management is a modal instead of a dedicated page, and the SprakCodex shell remains visible. This follows the existing app navigation and dialog system while preserving the source workflow and information architecture.
 
 ## Comparison History
 
@@ -41,7 +41,7 @@ No actionable P0, P1, or P2 differences remain.
 
 ## Implementation Checklist
 
-- [x] Preserve the existing CodexManager design system and navigation shell.
+- [x] Preserve the existing SprakCodex design system and navigation shell.
 - [x] Match the repository / skills.sh discovery structure and searchable card catalog.
 - [x] Show all four built-in repositories with sync state and refresh controls.
 - [x] Separate standalone Skills installation from full Codex plugin installation.
@@ -154,7 +154,7 @@ No actionable P0, P1, or P2 differences remain.
 - Fonts and typography: the Web render uses the same Segoe UI Variable/PingFang SC stack as the desktop shell. The hierarchy, compact control labels, monospaced metrics, line heights, wrapping, and truncation remain readable at the 1280px viewport.
 - Spacing and layout rhythm: the dashboard keeps exactly two primary surfaces. Modern appearance now reduces both surfaces to a translucent 72% card mix, an approximately 8% visible neutral border, and very low-amplitude shadows. The analytics chart and four summary regions use a 34% nested surface mix, so they no longer read as heavy cards stacked inside another card. Responsive density is intentionally more compact than the source crop; no content or persistent controls are clipped.
 - Colors and visual tokens: the source composition's structural hierarchy is preserved while the active `mint` theme supplies the accent. Green remains semantic for connected/available states. Ambient gradients, panel fills, borders, header, and sidebar now blend into one continuous background instead of forming abrupt rectangular blocks.
-- Image quality and asset fidelity: the production CodexManager logo and existing Lucide/Recharts assets remain sharp. No source logo, icon, chart, or decorative asset was replaced by placeholder imagery, CSS drawings, emoji, or handcrafted SVG.
+- Image quality and asset fidelity: the production SprakCodex logo and existing Lucide/Recharts assets remain sharp. No source logo, icon, chart, or decorative asset was replaced by placeholder imagery, CSS drawings, emoji, or handcrafted SVG.
 - Copy and content: the header is “仪表盘”; gateway status, six truthful metrics, administrator date controls, granularity/metric toggles, chart, and all four interval summaries are present. Removed dashboard sections do not return in Web mode.
 - Interaction and accessibility: Dashboard → OpenAI Accounts → Dashboard was exercised in the Web gateway. `modern + mint`, the shared command-center shell, and both primary panels remained active after the route return. The accessibility snapshot contains the gateway heading, analytics controls, chart label, and summaries. Browser warnings/errors checked: none.
 
@@ -201,7 +201,7 @@ No actionable P0, P1, or P2 differences remain.
 - Fonts and typography: the Segoe UI/PingFang SC system stack, heading weights, metric monospace values, and compact control labels preserve the supplied component hierarchy. The page title now reads “仪表盘”; “路由指挥中心” no longer appears in the header.
 - Spacing and layout rhythm: the dashboard contains exactly two primary surfaces: the gateway status card and administrator usage analysis. Attention alerts, account-pool health, and recent-activity cards are removed. The two retained blocks use the reference radii, internal grid rhythm, and compact real-Tauri spacing.
 - Colors and visual tokens: violet remains the shell/action accent while green is reserved for connected state and usage-chart semantics. The same light violet shell remains visible on the Accounts route and after returning to Dashboard.
-- Image and icon fidelity: the production CodexManager logo is preserved, and standard UI symbols use the existing Lucide/Recharts libraries. No placeholder raster, emoji, CSS drawing, or handcrafted SVG was introduced.
+- Image and icon fidelity: the production SprakCodex logo is preserved, and standard UI symbols use the existing Lucide/Recharts libraries. No placeholder raster, emoji, CSS drawing, or handcrafted SVG was introduced.
 - Copy and content: gateway metrics remain truthful, with zero values shown instead of fabricated sample data. The complete administrator filters, date range, Token/request switch, granularity controls, zoom reset, chart, and summary metrics remain intact.
 - Navigation consistency: the dashboard compact shell is now global rather than conditional on `/`. The flat eight-item administrator navigation and violet active state remain stable on Accounts and after returning to Dashboard; grouped legacy navigation no longer reappears.
 - Accessibility and interaction: the retained controls preserve existing accessible names and keyboard semantics. The route-switch regression was exercised in the real Tauri accessibility tree without moving the user's pointer.

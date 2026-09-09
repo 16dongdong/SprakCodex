@@ -1,6 +1,6 @@
 # Changelog
 
-This file records externally visible changes to CodexManager and serves as the single source of truth for version history.
+This file records externally visible changes to SprakCodex and serves as the single source of truth for version history.
 It follows Keep a Changelog with a lightweight adaptation for this repository.
 
 ## [Unreleased]

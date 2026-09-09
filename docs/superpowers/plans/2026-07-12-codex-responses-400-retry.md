@@ -153,7 +153,7 @@ Replay task `019f47d4-2220-73d2-a72e-f54192d20e7b`. Confirm the request no longe
 
 - [ ] **Step 5: Commit and update the pull request**
 
-Commit only the focused gateway, tests, and documentation changes. Push the existing branch and update the open CodexManager pull request, or create a new pull request if this fix is intentionally separate.
+Commit only the focused gateway, tests, and documentation changes. Push the existing branch and update the open SprakCodex pull request, or create a new pull request if this fix is intentionally separate.
 
 ### Task 6: Prevent hosted image-tool conflicts exposed by the replay
 

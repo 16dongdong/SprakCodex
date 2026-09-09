@@ -2,9 +2,9 @@
 
 ## 结论
 
-如果 CodexManager 部署在 Docker 或独立 Service 前面，再套一层默认配置的 Nginx，最容易出现的隐藏问题不是“模型缓存坏了”，而是 **Nginx 把带下划线的请求头丢掉了**。
+如果 SprakCodex 部署在 Docker 或独立 Service 前面，再套一层默认配置的 Nginx，最容易出现的隐藏问题不是“模型缓存坏了”，而是 **Nginx 把带下划线的请求头丢掉了**。
 
-CodexManager 依赖这些请求头维持稳定的会话锚点：
+SprakCodex 依赖这些请求头维持稳定的会话锚点：
 
 - `conversation_id`
 - `session_id`
@@ -38,7 +38,7 @@ ignore_invalid_headers off;
 
 像 `conversation_id`、`session_id` 这样的头就可能在进入上游前被当成“无效头”直接丢弃。
 
-对于 CodexManager 来说，这会影响两条关键链路：
+对于 SprakCodex 来说，这会影响两条关键链路：
 
 1. `backend/crates/service/src/gateway/request/incoming_headers.rs`
    这里负责从入站请求中提取 `conversation_id`、`session_id`、`x-codex-turn-state` 等头。
@@ -138,7 +138,7 @@ send_timeout 600s;
 
 ### 5. 给 `/v1/images/` 图片生成入口单独保守配置
 
-CodexManager 已支持 `/v1/images/generations` 与 `/v1/images/edits` 兼容入口。这个链路和普通文本请求不同，常见风险是：
+SprakCodex 已支持 `/v1/images/generations` 与 `/v1/images/edits` 兼容入口。这个链路和普通文本请求不同，常见风险是：
 
 - `/v1/images/edits` 可能上传 multipart 图片，body 明显更大
 - 图片生成耗时可能长于普通文本首包
@@ -201,7 +201,7 @@ Cloudflare 会增加代理链路复杂度，但这类问题最常见的直接原
 
 ### 误判 3：日志里缓存低就是后端逻辑错了
 
-也不一定。CodexManager 日志展示的是上游返回的缓存统计结果，如果前面的线程锚点已经丢了，后端只能如实记录“低缓存命中”。
+也不一定。SprakCodex 日志展示的是上游返回的缓存统计结果，如果前面的线程锚点已经丢了，后端只能如实记录“低缓存命中”。
 
 ## 排障清单
 

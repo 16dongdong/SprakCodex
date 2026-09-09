@@ -1,4 +1,4 @@
-# CodexManager
+# SprakCodex
 
 ## 홈 탐색
 

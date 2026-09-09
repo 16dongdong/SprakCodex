@@ -1,19 +1,19 @@
 ---
 name: "cm-imagegen"
-description: "Generate or edit raster images through CodexManager's OpenAI-compatible Images API when Codex should use the current Codex provider base_url and auth.json API key instead of the official built-in image_gen tool. Use when the user asks for CodexManager image generation, API-key/provider-mode image generation, or image generation through CodexManager account pools, routing, logs, and billing."
+description: "Generate or edit raster images through SprakCodex's OpenAI-compatible Images API when Codex should use the current Codex provider base_url and auth.json API key instead of the official built-in image_gen tool. Use when the user asks for SprakCodex image generation, API-key/provider-mode image generation, or image generation through SprakCodex account pools, routing, logs, and billing."
 ---
 
 # CM Image Generation Skill
 
 Generates or edits images for the current project (for example website assets, game assets, UI mockups, product mockups, wireframes, logo design, photorealistic images, or infographics).
 
-This skill follows the same request semantics, prompt workflow, decision tree, and output expectations as the official `imagegen` skill. The only intentional difference is the execution layer: image requests are sent to CodexManager's OpenAI-compatible Images API using the current Codex provider `base_url` and `auth.json` API key.
+This skill follows the same request semantics, prompt workflow, decision tree, and output expectations as the official `imagegen` skill. The only intentional difference is the execution layer: image requests are sent to SprakCodex's OpenAI-compatible Images API using the current Codex provider `base_url` and `auth.json` API key.
 
 ## Top-level modes and rules
 
 This skill has one top-level mode:
 
-- **CodexManager CLI mode:** bundled `scripts/cm_image_gen.py` CLI. It uses the current Codex configuration and calls CodexManager's image endpoints.
+- **SprakCodex CLI mode:** bundled `scripts/cm_image_gen.py` CLI. It uses the current Codex configuration and calls SprakCodex's image endpoints.
 
 The CLI exposes two subcommands:
 
@@ -21,12 +21,12 @@ The CLI exposes two subcommands:
 - `edit`
 
 Rules:
-- Use this skill only when the user explicitly asks for CodexManager image generation or when the official built-in `image_gen` tool is unavailable in API-key/provider mode.
+- Use this skill only when the user explicitly asks for SprakCodex image generation or when the official built-in `image_gen` tool is unavailable in API-key/provider mode.
 - Do not ask the user for a separate image API key or image base URL by default.
 - Do not create one-off SDK runners.
 - Never modify the official system `imagegen` skill.
 
-CodexManager config policy:
+SprakCodex config policy:
 - If `CODEXMANAGER_IMAGE_BASE_URL` is set, use it as the image request base URL.
 - Otherwise, read the active `model_provider` from `$CODEX_HOME/config.toml`.
 - Read that provider's `base_url` from `[model_providers.<provider>]`.
@@ -36,7 +36,7 @@ CodexManager config policy:
 - Use `CODEXMANAGER_IMAGE_OUTPUT_DIR` only for the output directory override; otherwise save under the current working directory's `generated-images/` folder.
 
 Save-path policy:
-- CodexManager generated images are saved under the current working directory's `generated-images/` folder by default.
+- SprakCodex generated images are saved under the current working directory's `generated-images/` folder by default.
 - If the user names a destination, use `--out-dir` and/or `--filename`, or move/copy the selected output there.
 - Do not edit, create, or attach unrelated project files such as `AGENTS.md`.
 - If the image is meant for the current project, keep the final selected image in `generated-images/` unless the user named another destination.
@@ -97,7 +97,7 @@ Assume the user wants a new image unless they clearly ask to change an existing 
    - reference image
    - edit target
    - supporting insert/style/compositing input
-6. If the user asked for a photo, illustration, sprite, product image, banner, or other explicitly raster-style asset, use CodexManager image generation rather than substituting SVG/HTML/CSS placeholders. If the request is for an icon, logo, or UI graphic that should match existing repo-native SVG/vector/code assets, prefer editing those directly instead.
+6. If the user asked for a photo, illustration, sprite, product image, banner, or other explicitly raster-style asset, use SprakCodex image generation rather than substituting SVG/HTML/CSS placeholders. If the request is for an icon, logo, or UI graphic that should match existing repo-native SVG/vector/code assets, prefer editing those directly instead.
 7. Augment the prompt based on specificity:
    - If the user's prompt is already specific and detailed, normalize it into a clear spec without adding creative requirements.
    - If the user's prompt is generic, add tasteful augmentation only when it materially improves output quality.
@@ -272,4 +272,4 @@ Asset-type templates (website assets, game assets, wireframes, logo) are consoli
 - `references/cli.md`: CLI usage reference.
 - `references/image-api.md`: API/CLI parameter reference.
 - `references/codex-network.md`: network/sandbox troubleshooting.
-- `scripts/cm_image_gen.py`: CodexManager CLI implementation.
+- `scripts/cm_image_gen.py`: SprakCodex CLI implementation.

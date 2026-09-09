@@ -1,4 +1,4 @@
-# CodexManager v0.4.1 旧 PR 移植设计
+# SprakCodex v0.4.1 旧 PR 移植设计
 
 ## 目标
 
@@ -32,7 +32,7 @@
 | 提交 | 需要保留的行为 |
 | --- | --- |
 | `4bd2e3d` | 发往 Codex 上游的会话请求头使用 `session-id` 和 `thread-id`，不再生成下划线形式。 |
-| `9ff9240` | 当 `config.toml` 的 `experimental_bearer_token` 与 CodexManager 网关配置有效时，即使保留登录 token，也识别为网关模式；普通的非网关本地地址仍保持原判定。 |
+| `9ff9240` | 当 `config.toml` 的 `experimental_bearer_token` 与 SprakCodex 网关配置有效时，即使保留登录 token，也识别为网关模式；普通的非网关本地地址仍保持原判定。 |
 | `a305696` | macOS 包中的 `LSRequiresCarbon` 明确为 `false`，避免系统把应用判为需要旧 Carbon 环境。 |
 | `39c4c38` | 保留 Responses 400 重试的设计说明。 |
 | `3959ba5` | 官方 `/v1/responses` 返回 400 时，在同一地址重试一次，并去掉会话相关请求头。 |
@@ -138,7 +138,7 @@ cargo test --manifest-path apps/src-tauri/Cargo.toml -- --test-threads=1
 
 在不修改现有登录信息的前提下：
 
-1. 启动新构建的 CodexManager 服务。
+1. 启动新构建的 SprakCodex 服务。
 2. 调用 Codex profile 状态 RPC，确认返回 `gateway`，并显示 `http://localhost:48760/v1`。
 3. 发起一个最小 `/v1/responses` 请求，确认不再出现旧地址 404，并得到有效 Responses 结果。
 4. 发起带 `image_gen` namespace 的请求，确认没有托管图像工具冲突。
@@ -169,7 +169,7 @@ cargo test --manifest-path apps/src-tauri/Cargo.toml -- --test-threads=1
 6. 只读核实内外应用均由 Tauri 完整签名：`Identifier=com.codexmanager.desktop`、`Signature=adhoc`、`Sealed Resources version=2`，且 `codesign --verify --deep --strict` 退出码为 `0`。不得在构建后运行 `codesign --force` 手工补签。
 7. 只读挂载 DMG 完成内部检查，最后卸载并确认没有挂载残留。运行 `hdiutil verify` 检查磁盘映像结构和校验和，但不得把该结果描述为发布者身份或下载来源可信。
 8. ad hoc 签名只用于本机安装和启动检查，Gatekeeper 不接受它作为公开分发凭据。公开分发需要 Developer ID Application 签名、Apple notarization 和 staple。
-9. 退出正在运行的 CodexManager，为 `/Applications/CodexManager.app` 建立带时间的备份，再从外部 APP 路径安装新应用。
+9. 退出正在运行的 SprakCodex，为 `/Applications/CodexManager.app` 建立带时间的备份，再从外部 APP 路径安装新应用。
 10. 启动后确认版本、架构、窗口显示和本地 RPC；若启动失败，立即恢复备份。
 
 ## PR 更新
@@ -195,5 +195,5 @@ PR 正文、测试输出摘要和评论中不得出现密钥、完整 token 或�
 - profile 状态 RPC 返回网关模式。
 - 真实 `/v1/responses` 请求不再返回旧地址 404。
 - `image_gen` 请求不再产生托管工具冲突。
-- 安装后的 CodexManager 主程序为 arm64，能正常显示窗口。
+- 安装后的 SprakCodex 主程序为 arm64，能正常显示窗口。
 - PR #346 的标题和正文已经改为中文。

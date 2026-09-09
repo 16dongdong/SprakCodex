@@ -1,6 +1,6 @@
 # TESTING
 
-本文档定义 CodexManager 仓库级测试与验证基线。
+本文档定义 SprakCodex 仓库级测试与验证基线。
 
 目标：
 

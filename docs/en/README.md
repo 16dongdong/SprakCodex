@@ -1,4 +1,4 @@
-# CodexManager
+# SprakCodex
 
 ## Home Navigation
 
@@ -27,7 +27,7 @@
 - Aggregate API: manage minimal third-party upstreams, including create, edit, balance, and connectivity tests against configured V2 routes. It does not auto-discover provider models; administrators fetch and selectively link models to Catalog V2.
 - Plugin center: `/plugins/` supports built-in curated, enterprise private, and custom source marketplace modes, plus manifests, tasks, logs, and Rhai interfaces.
 - Skills and plugins: `/skills/` separates Skills Installation from Codex Plugin Installation. It supports GitHub repositories, skills.sh search, ZIP/directory import, installed-item management, and the native Marketplace plugin flow; `.system` Skills remain read-only.
-- Desktop project launcher: bookmark local directories; Windows and macOS open them in the ChatGPT Codex App, while Sessions opens the `resume` selector in a new terminal with the local CodexManager profile.
+- Desktop project launcher: bookmark local directories; Windows and macOS open them in the ChatGPT Codex App, while Sessions opens the `resume` selector in a new terminal with the local SprakCodex profile.
 - Settings: includes system-derived settings, per-account concurrency, upstream proxy, total and stream-idle timeouts, SSE keepalive, and conservative high-concurrency degradation. Disable keepalive with `CODEXMANAGER_SSE_KEEPALIVE_ENABLED=0`; enable experimental upstream WebSocket with `CODEXMANAGER_USE_WEBSOCKET_UPSTREAM=1`.
 - System internal interface inventory: all desktop/service commands, RPC methods, and built-in plugin functions.
 - Local service: automatic startup with configurable port and listen address.

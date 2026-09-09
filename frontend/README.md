@@ -1,6 +1,6 @@
 # frontend 前端与桌面端说明
 
-`frontend/` 是 CodexManager 的前端工作区，承载浏览器管理页面与 Tauri 桌面壳。
+`frontend/` 是 SprakCodex 的前端工作区，承载浏览器管理页面与 Tauri 桌面壳。
 
 业务服务与数据库位于 `../backend/`，开发代理默认指向 `http://localhost:48761`，可用 `CODEXMANAGER_DEV_WEB_ORIGIN` 修改。完整启动步骤见 [项目布局](../docs/projectLayout.md)。
 

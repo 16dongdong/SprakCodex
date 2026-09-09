@@ -13,7 +13,7 @@
 4. Refresh usage and confirm the account status.
 
 ## Connect through ccswitch
-If you want to use CodexManager through ccswitch or directly from Codex CLI, keep the platform key, `auth.json`, and `config.toml` aligned:
+If you want to use SprakCodex through ccswitch or directly from Codex CLI, keep the platform key, `auth.json`, and `config.toml` aligned:
 
 1. Open `Platform Keys` and create a general-purpose key. If ccswitch / Codex CLI should keep reusing a fixed `OPENAI_API_KEY`, fill `Custom API key`; otherwise leave it empty to generate one automatically.
 2. In ccswitch, create a provider and paste the generated or custom key into the provider API key field.

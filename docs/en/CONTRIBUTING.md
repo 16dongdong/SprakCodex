@@ -1,10 +1,10 @@
 # CONTRIBUTING
 
-This document is used to constrain the daily collaboration method of CodexManager, with the goal of allowing new collaborators to complete development, verification, submission and release with as little verbal handover as possible.
+This document is used to constrain the daily collaboration method of SprakCodex, with the goal of allowing new collaborators to complete development, verification, submission and release with as little verbal handover as possible.
 
 ## 1. Project positioning
 
-CodexManager Not a single front-end project, nor a single Rust service project.
+SprakCodex Not a single front-end project, nor a single Rust service project.
 The current repository also contains:
 
 - Desktop: `frontend/` + `frontend/src-tauri/`

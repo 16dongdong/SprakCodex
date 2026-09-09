@@ -1,10 +1,10 @@
 # CONTRIBUTING
 
-本文档用于约束 CodexManager 的日常协作方式，目标是让新协作者能在尽量少的口头交接下完成开发、验证、提交和发版。
+本文档用于约束 SprakCodex 的日常协作方式，目标是让新协作者能在尽量少的口头交接下完成开发、验证、提交和发版。
 
 ## 1. 项目定位
 
-CodexManager 不是单一前端项目，也不是单一 Rust 服务项目。
+SprakCodex 不是单一前端项目，也不是单一 Rust 服务项目。
 当前仓库同时包含：
 
 - 桌面端：`frontend/` + `frontend/src-tauri/`

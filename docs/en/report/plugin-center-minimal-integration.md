@@ -1,6 +1,6 @@
 # Minimum access instructions for plugin center
 
-This is the minimum integration guide for quickly connecting a third-party or internal plugin source. As long as your endpoint returns data using the following fields and interfaces, it can integrate with the CodexManager plugin center.
+This is the minimum integration guide for quickly connecting a third-party or internal plugin source. As long as your endpoint returns data using the following fields and interfaces, it can integrate with the SprakCodex plugin center.
 
 ## 1. What do you want to pick up?
 

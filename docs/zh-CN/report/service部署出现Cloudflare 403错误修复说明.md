@@ -2,15 +2,15 @@
 
 这个方案用于下面这种场景：
 
-- CodexManager 的 service 部署在服务器上运行
+- SprakCodex 的 service 部署在服务器上运行
 - service 访问 `https://chatgpt.com` 时出现 Cloudflare `403`、`cf-mitigated: challenge`，或者云服务器出口 IP 被风控 / 类似“被 ban”的现象
-- `curl_cffi` 直连或走 WARP 代理访问 `https://chatgpt.com` 可以通过，但 CodexManager 自身通过 `reqwest/rustls` 访问上游时仍然失败
+- `curl_cffi` 直连或走 WARP 代理访问 `https://chatgpt.com` 可以通过，但 SprakCodex 自身通过 `reqwest/rustls` 访问上游时仍然失败
 
 核心思路：
 
 1. 在本机启动一个轻量 HTTP 反向代理
 2. 这个代理内部使用 `curl_cffi` + 浏览器指纹 `impersonate`
-3. CodexManager service 不再直接访问 `chatgpt.com`，而是把上游地址改为本机代理
+3. SprakCodex service 不再直接访问 `chatgpt.com`，而是把上游地址改为本机代理
 
 ---
 
@@ -111,7 +111,7 @@ point CodexManager at: CODEXMANAGER_UPSTREAM_BASE_URL=http://127.0.0.1:8787/back
 
 ## 4. 先单独验证代理
 
-先不要改 CodexManager，直接验证这个代理本身是否能通：
+先不要改 SprakCodex，直接验证这个代理本身是否能通：
 
 ```bash
 curl -i http://127.0.0.1:8787/__proxy_health
@@ -127,7 +127,7 @@ curl -i http://127.0.0.1:8787/
 
 ---
 
-## 5. 修改 CodexManager 配置
+## 5. 修改 SprakCodex 配置
 
 把 `codexmanager.env` 改成这样：
 
@@ -153,8 +153,8 @@ CODEXMANAGER_UPSTREAM_BASE_URL=http://127.0.0.1:8787/backend-api/codex
 原因：
 
 - 现在真正访问上游的是 `curl_cffi_chatgpt_proxy.py`
-- CodexManager 只需要访问本机 `127.0.0.1:8787`
-- 如果 CodexManager 自己也再走一层 SOCKS 代理，容易把“本地代理请求”又绕回去，增加排障难度
+- SprakCodex 只需要访问本机 `127.0.0.1:8787`
+- 如果 SprakCodex 自己也再走一层 SOCKS 代理，容易把“本地代理请求”又绕回去，增加排障难度
 
 改完后重启：
 
@@ -164,7 +164,7 @@ CODEXMANAGER_UPSTREAM_BASE_URL=http://127.0.0.1:8787/backend-api/codex
 
 ---
 
-## 6. 验证 CodexManager 是否接到了本地代理
+## 6. 验证 SprakCodex 是否接到了本地代理
 
 重启后先请求模型列表：
 
@@ -187,22 +187,22 @@ curl http://127.0.0.1:5010/v1/responses \
 
 同时观察 `curl_cffi_chatgpt_proxy.py` 的终端输出。
 
-如果代理脚本有请求日志，而 CodexManager 不再报 `Cloudflare 安全验证页`，说明链路已经切换成功。
+如果代理脚本有请求日志，而 SprakCodex 不再报 `Cloudflare 安全验证页`，说明链路已经切换成功。
 
 ---
 
 ## 7. 常见问题
 
-### 7.1 `curl_cffi` 能访问 `chatgpt.com`，但 CodexManager 还是 challenge
+### 7.1 `curl_cffi` 能访问 `chatgpt.com`，但 SprakCodex 还是 challenge
 
 优先确认两件事：
 
 1. `CODEXMANAGER_UPSTREAM_BASE_URL` 是否真的改成了 `http://127.0.0.1:8787/backend-api/codex`
-2. `CODEXMANAGER_UPSTREAM_PROXY_URL` 是否已经清掉，避免 CodexManager 仍然走旧链路
+2. `CODEXMANAGER_UPSTREAM_PROXY_URL` 是否已经清掉，避免 SprakCodex 仍然走旧链路
 
 ### 7.2 代理脚本启动了，但请求没有打过来
 
-说明 CodexManager 还没切到本地代理。重点检查：
+说明 SprakCodex 还没切到本地代理。重点检查：
 
 - `codexmanager.env` 是否被当前进程读取
 - 是否完整重启了 `codexmanager-start`

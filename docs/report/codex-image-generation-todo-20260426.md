@@ -4,7 +4,7 @@
 
 ## 目标
 
-为 CodexManager 增加图片生成能力。实现顺序优先对齐官方 Codex 的 `image_generation` tool 主链路，再补 OpenAI Images API 兼容入口。
+为 SprakCodex 增加图片生成能力。实现顺序优先对齐官方 Codex 的 `image_generation` tool 主链路，再补 OpenAI Images API 兼容入口。
 
 ## 维护规则
 

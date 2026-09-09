@@ -1,4 +1,4 @@
-# CodexManager continuation notes - 2026-06-21
+# SprakCodex continuation notes - 2026-06-21
 
 ## Confirmed context
 
@@ -79,7 +79,7 @@
 - New window resumed the same active goal.
 - Re-verified runtime: Windows PowerShell Core 7.6.2 in `D:\MyComputer\own\GPTTeam\CodexManager\CodexManager`.
 - Re-read root `AGENTS.md`; local `./skills/skill-router/SKILL.md` is still absent, so routing used the global `skill-router` only.
-- Memory lookup only found prior CodexManager import/PR context; no direct dependency for this maintenance pass.
+- Memory lookup only found prior SprakCodex import/PR context; no direct dependency for this maintenance pass.
 - Worktree at resume matched the prior handoff: runtime config, model picker, conversation binding test edits, plus this document.
 
 ## Plugin HTTP client reuse
@@ -686,7 +686,7 @@
   - Selected only `skill-router`; no release, deployment, frontend, Notion, Sentry, or OpenAI docs skill was needed for this storage/client scan.
   - Multi-agent stayed off because the user did not explicitly authorize subagents in this new continuation window.
 - Re-read memory registry lines for this checkout:
-  - Prior CodexManager memory is about large account import, PR review/merge, `aggregate_api`, route/model validation, and push/review expectations.
+  - Prior SprakCodex memory is about large account import, PR review/merge, `aggregate_api`, route/model validation, and push/review expectations.
   - Treated it as historical context only; current code and tests remain source of truth.
 - Re-scanned `reqwest::Client` / `reqwest::blocking::Client` construction points:
   - `crates/web/src/service_gateway.rs` and `crates/web/src/main.rs` are startup-scoped proxy clients.
@@ -806,7 +806,7 @@
 - Re-read the global `skill-router` and skill index:
   - Selected only `skill-router`; no release, deployment, frontend, Notion, Sentry, OpenAI docs, or dedicated .NET test skill was needed for this narrow Rust/SQLite storage pass.
   - Multi-agent stayed off in this continuation window.
-- Re-read the current maintenance log and memory registry entries for the CodexManager checkout:
+- Re-read the current maintenance log and memory registry entries for the SprakCodex checkout:
   - Treated memory as historical context only; current files, diffs, and tests remained the source of truth.
 - Continued the core storage scan in `request_token_stats.rs` and `request_token_stats_tests.rs`.
 - Findings:
@@ -884,7 +884,7 @@
 - Re-read the global `skill-router` and its skill index:
   - Selected only `skill-router`; no release, deployment, frontend, Notion, Sentry, OpenAI docs, or dedicated .NET/Rust test skill was needed for this bounded Rust service refactor.
   - Multi-agent stayed off.
-- Re-read the current maintenance log and memory registry entries for the CodexManager checkout:
+- Re-read the current maintenance log and memory registry entries for the SprakCodex checkout:
   - Treated memory as historical context only; current files, diffs, and tests remained the source of truth.
 - Re-scanned `reqwest::Client` construction points:
   - `aggregate_api.rs` hits in this pass were inside tests.
@@ -923,7 +923,7 @@
   - Global `skill-router` because repo-local `skills/skill-router/SKILL.md` is still absent.
   - Global `skill-router` skill index.
   - Current maintenance log tail.
-  - Memory registry hits for the CodexManager checkout, used only as historical context.
+  - Memory registry hits for the SprakCodex checkout, used only as historical context.
 - Scope chosen:
   - Continued the narrow `gateway/observability/http_bridge` modularity pass.
   - Avoided feature removal; no unused or duplicate feature was proven safe to remove in this slice.
@@ -1997,7 +1997,7 @@
   - Runtime is Windows PowerShell Core 7.6.2 on Windows.
   - Root `AGENTS.md` was read before code work.
   - Repo-local `./skills/skill-router/SKILL.md` is still missing; global `skill-router` and its skill index were used for lightweight routing.
-  - Memory lookup only found older CodexManager import/PR context, so this pass used the current worktree, handoff, and this maintenance log as source of truth.
+  - Memory lookup only found older SprakCodex import/PR context, so this pass used the current worktree, handoff, and this maintenance log as source of truth.
 - Scope chosen:
   - Continued the SQLite/core EXPLAIN alignment track in `crates/core/src/storage/plugins.rs`.
   - Focused on the plugin task list query-plan test that still used handwritten parameter substitution for the per-plugin case.

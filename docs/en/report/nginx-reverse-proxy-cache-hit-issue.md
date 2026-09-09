@@ -2,9 +2,9 @@
 
 ## Conclusion
 
-If CodexManager is deployed behind Docker or the standalone service and then placed behind a default Nginx reverse proxy, the hidden failure is usually not "the model cache is broken". The real issue is that **Nginx drops custom headers that contain underscores**.
+If SprakCodex is deployed behind Docker or the standalone service and then placed behind a default Nginx reverse proxy, the hidden failure is usually not "the model cache is broken". The real issue is that **Nginx drops custom headers that contain underscores**.
 
-CodexManager depends on these headers to keep a stable thread anchor:
+SprakCodex depends on these headers to keep a stable thread anchor:
 
 - `conversation_id`
 - `session_id`
@@ -118,7 +118,7 @@ The repository's `backend/docker/nginx/nginx.conf` now includes this dedicated c
 
 ### 5. Give `/v1/images/` its own conservative proxy block
 
-CodexManager now supports compatible `/v1/images/generations` and `/v1/images/edits` endpoints. This path has different proxy risks from normal text requests:
+SprakCodex now supports compatible `/v1/images/generations` and `/v1/images/edits` endpoints. This path has different proxy risks from normal text requests:
 
 - `/v1/images/edits` may upload multipart images with much larger request bodies
 - image generation may take longer than a normal text first token
@@ -182,7 +182,7 @@ Cloudflare can complicate the request path, but the most common direct cause is 
 
 ### Misdiagnosis 3: Low cache numbers mean the backend logic is wrong
 
-Not necessarily. CodexManager logs what the upstream usage reports. If the thread anchor is already lost before the request reaches the service, the backend can only log the degraded cache hit result.
+Not necessarily. SprakCodex logs what the upstream usage reports. If the thread anchor is already lost before the request reaches the service, the backend can only log the degraded cache hit result.
 
 ## Troubleshooting checklist
 
