@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "SprakCodex"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "chrono",
  "codexmanager-core",
@@ -934,7 +934,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-core"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -949,7 +949,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-direct-common"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -959,7 +959,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-service"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "async-compression",
  "axum",
@@ -6888,7 +6888,7 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "update-agent"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "codexmanager-direct-common",
  "semver",

@@ -451,6 +451,8 @@ where
         // rebuilt from the pre-commit account state.
         crate::gateway::invalidate_candidate_cache();
     }
+    // 在快照提交后立即记录截止时间，避免短周期在后台扫描前被下一次快照覆盖。
+    storage.observeResetWarmup(&record).map_err(|error| error.to_string())?;
     Ok(record)
 }
 

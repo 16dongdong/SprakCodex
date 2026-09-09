@@ -235,6 +235,7 @@ pub(crate) fn read_reset_credits(account_id: &str) -> Result<ResetCreditsSnapsho
     fetch_snapshot_with_retry(&storage, &mut token)
 }
 
+// 显式兑换在账号锁内串行执行；兑换后刷新和预热入队失败只返回警告，不把已消费操作伪装成失败。
 pub(crate) fn consume_reset_credit(account_id: &str) -> Result<ResetCreditConsumeResult, String> {
     let account_id = account_id.trim();
     if account_id.is_empty() {
@@ -256,10 +257,13 @@ pub(crate) fn consume_reset_credit(account_id: &str) -> Result<ResetCreditConsum
     let redeem_request_id = random_uuid_v4();
     consume_with_retry(&storage, &mut token, &redeem_request_id)?;
 
+    // 兑换已成功，后续失败只能作为提示返回，避免前端重试导致再次消耗重置次数。
+    let warmup_error = storage.enqueueResetWarmup(account_id, codexmanager_core::storage::now_ts())
+        .err().map(|error| format!("重置成功，但预热任务保存失败: {error}"));
     let usage_refresh_error = crate::usage_refresh::refresh_usage_for_account(account_id).err();
     let snapshot_result = read_reset_credits(account_id);
     let snapshot_error = snapshot_result.as_ref().err().cloned();
-    let warning = [usage_refresh_error.clone(), snapshot_error]
+    let warning = [usage_refresh_error.clone(), snapshot_error, warmup_error]
         .into_iter()
         .flatten()
         .collect::<Vec<_>>()

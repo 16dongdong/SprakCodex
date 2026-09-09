@@ -1813,4 +1813,8 @@ export const EN_MESSAGES: MessageCatalog = {
   "公开证书：": "Public certificate:",
   "状态：运行中 · 已写入 {written} 条 · 写入异常 {errors} 次": "Running · {written} records written · {errors} write errors",
   "保留 Codex 原有登录与上游，记录请求、实际 Token 用量和模型价格费用快照，不扣除平台钱包或密钥额度。": "Keeps the original Codex login and upstream, recording requests, actual token usage and price snapshots without charging platform wallets or key quotas.",
+  "等待刷新": "Waiting for refresh",
+  "后重置": "until reset",
+  "复制会话 ID": "Copy session ID",
+  "复制项目路径": "Copy project path",
 };

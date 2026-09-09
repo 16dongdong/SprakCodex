@@ -47,6 +47,8 @@ mod sessionRouting;
 mod costBreakdown;
 pub use costBreakdown::CostBreakdown;
 mod settings;
+#[allow(non_snake_case)]
+mod resetWarmup;
 mod tokens;
 mod usage;
 
@@ -2335,6 +2337,7 @@ impl Storage {
         )?;
         self.apply_sql_migration("137_sessionLifecycle", include_str!("../../migrations/137_sessionLifecycle.sql"))?;
         self.apply_sql_migration("138_sessionTitles", include_str!("../../migrations/138_sessionTitles.sql"))?;
+        self.apply_sql_migration("139_resetWarmup", include_str!("../../migrations/139_resetWarmup.sql"))?;
         self.ensure_api_key_rotation_columns()?;
         self.ensure_api_key_account_group_filter_column()?;
         self.ensure_aggregate_apis_table()?;

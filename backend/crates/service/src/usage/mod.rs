@@ -22,3 +22,5 @@ pub(crate) mod snapshot_store;
 pub(crate) mod token_refresh;
 #[path = "usage_tray_summary.rs"]
 pub(crate) mod tray_summary;
+#[allow(non_snake_case)]
+pub(crate) mod resetWarmup;

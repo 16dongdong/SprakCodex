@@ -2,7 +2,8 @@
 
 import { useDeferredValue, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RefreshCw, RotateCcw, ArrowRightLeft, MoreHorizontal, MessagesSquare } from "lucide-react";
+import { RefreshCw, RotateCcw, ArrowRightLeft, MoreHorizontal, MessagesSquare, Copy } from "lucide-react";
+import { copyTextToClipboard } from "@/lib/utils/clipboard";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,11 @@ export default function SessionsPage() {
     onSuccess: async () => { setSwitchTarget(null); await refreshBindings(); toast.success(t("已安排切换，将在当前请求结束后生效")); },
     onError: (error) => toast.error(getAppErrorMessage(error)),
   });
+  // 复制失败通过统一错误提示暴露，不把尚未写入剪贴板的值报告为成功。
+  async function copyValue(value: string) {
+    try { await copyTextToClipboard(value); toast.success(t("已复制到剪贴板")); }
+    catch (error) { toast.error(getAppErrorMessage(error)); }
+  }
   const selected = sessions.data?.items.find((session) => session.sessionId === selectedId) ?? sessions.data?.items[0];
   const totalPages = Math.max(1,Math.ceil((sessions.data?.total ?? 0)/50));
   const reasons: Record<string,string> = {initial_assignment:t("首次分配"),manual_switch:t("手动切换"),account_deleted:t("账号已删除"),quota_exhausted:t("额度耗尽"),account_unavailable:t("账号不可用"),no_available_account:t("暂无可用账号"),routing_disabled:t("分流已关闭")};
@@ -82,14 +88,14 @@ export default function SessionsPage() {
       </section>
       <section className="min-w-0 p-4 sm:p-5">
         {selected ? <>
-          <div className="mb-5 flex items-start gap-3"><span className="rounded-lg bg-primary/10 p-2 text-primary"><MessagesSquare className="size-5" /></span><div className="min-w-0"><h2 className="line-clamp-2 break-words text-base font-semibold">{selected.title?.trim() || selected.sessionId.slice(0,8)}</h2><p className="mt-1 break-all text-xs text-muted-foreground">{selected.projectPath || "—"}</p></div></div>
+          <div className="mb-5 flex items-start gap-3"><span className="rounded-lg bg-primary/10 p-2 text-primary"><MessagesSquare className="size-5" /></span><div className="min-w-0"><h2 className="line-clamp-2 break-words text-base font-semibold">{selected.title?.trim() || selected.sessionId.slice(0,8)}</h2><div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><p className="min-w-0 truncate" title={selected.projectPath || undefined}>{selected.projectPath || "—"}</p>{selected.projectPath && <Button variant="ghost" size="icon" className="size-6 shrink-0" aria-label={t("复制项目路径")} onClick={() => void copyValue(selected.projectPath!)}><Copy className="size-3" /></Button>}</div></div></div>
           <div className="mb-5 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={() => {setSwitchTarget(selected);setAccountId("");}}><ArrowRightLeft className="size-3.5" />{t("切换账号")}</Button><Button variant="ghost" size="sm" disabled={reset.isPending} onClick={() => setResetTarget(selected)}><RotateCcw className="size-3.5" />{t("重置绑定")}</Button></div>
           <dl className="grid gap-x-6 gap-y-4 text-sm xl:grid-cols-2">{[
             ["会话 ID",selected.sessionId], ["绑定账号",selected.accountLabel ?? t("待分配")],
             ["状态",t(selected.status === "active" ? "正常" : selected.status === "unbound" ? "未分流" : "待切换")],
             ["最近活动",new Date(selected.lastUsedAt*1000).toLocaleString()], ["首次连接",new Date(selected.createdAt*1000).toLocaleString()],
             ["迁移原因",reasons[selected.reason] ?? selected.reason],
-          ].map(([label,value]) => <div key={label} className="min-w-0 space-y-1.5"><dt className="text-xs text-muted-foreground">{t(label)}</dt><dd className="break-all select-text text-xs leading-5">{value}</dd></div>)}</dl>
+          ].map(([label,value]) => <div key={label} className="min-w-0 space-y-1.5"><dt className="text-xs text-muted-foreground">{t(label)}</dt><dd className="flex items-start gap-1 text-xs leading-5"><span className="min-w-0 break-all select-text">{value}</span>{label === "会话 ID" && <Button variant="ghost" size="icon" className="size-6 shrink-0" aria-label={t("复制会话 ID")} onClick={() => void copyValue(value)}><Copy className="size-3" /></Button>}</dd></div>)}</dl>
           {selected.requestedAccountLabel && <p className="mt-4 text-sm text-primary">→ {selected.requestedAccountLabel}</p>}
         </> : <div className="flex h-full items-center justify-center text-sm text-muted-foreground">{t("暂无会话记录")}</div>}
       </section>
