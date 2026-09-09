@@ -13,6 +13,7 @@ import {
 } from "@/lib/utils/usage";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { QuotaCountdown } from "@/components/quotaCountdown";
 import {
   Tooltip,
   TooltipContent,
@@ -224,6 +225,7 @@ export function QuotaOverviewCell({ items }: { items: QuotaSummaryItem[] }) {
       {items.slice(0, 2).map((item) => <div key={item.id} className="min-w-0 space-y-1.5" title={formatTsFromSeconds(item.resetsAt, item.emptyResetText ?? t("未知"))}>
         <div className="flex items-center justify-between gap-2 text-xs"><span className="truncate text-muted-foreground">{item.label}</span><span className="shrink-0 font-medium tabular-nums">{item.remainPercent == null ? item.emptyText ?? "—" : `${item.remainPercent}%`}</span></div>
         <Progress quota value={item.remainPercent} className="h-1.5" />
+        <QuotaCountdown resetsAt={item.resetsAt} />
       </div>)}
     </div>
     <details className="group text-xs">

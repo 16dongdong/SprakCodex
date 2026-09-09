@@ -52,22 +52,22 @@ export default function SessionsPage() {
   const selected = sessions.data?.items.find((session) => session.sessionId === selectedId) ?? sessions.data?.items[0];
   const totalPages = Math.max(1,Math.ceil((sessions.data?.total ?? 0)/50));
   const reasons: Record<string,string> = {initial_assignment:t("首次分配"),manual_switch:t("手动切换"),account_deleted:t("账号已删除"),quota_exhausted:t("额度耗尽"),account_unavailable:t("账号不可用"),no_available_account:t("暂无可用账号"),routing_disabled:t("分流已关闭")};
-  return <div className="space-y-4">
-    <div className="glass-card flex flex-wrap items-center gap-3 rounded-xl border border-border/60 p-4">
-      <Input className="max-w-md" aria-label={t("搜索会话标题或 ID")} placeholder={t("搜索会话标题或 ID")} value={search} onChange={(event) => { setSearch(event.target.value);setPage(1); }} />
+  return <div className="space-y-3">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/50 bg-background/70 p-3">
+      <Input className="min-w-48 flex-1 lg:max-w-sm" aria-label={t("搜索会话标题或 ID")} placeholder={t("搜索会话标题或 ID")} value={search} onChange={(event) => { setSearch(event.target.value);setPage(1); }} />
       <select className="h-9 max-w-xs rounded-md border border-input bg-background px-3 text-sm" aria-label={t("项目筛选")} value={project} onChange={(event) => {setProject(event.target.value);setPage(1);}}><option value="">{t("所有项目")}</option>{sessions.data?.projects?.map((path) => <option key={path} value={path}>{path.split(/[\\/]/).filter(Boolean).pop() || path}</option>)}</select>
       <span className="text-xs text-muted-foreground">{t("共")} {sessions.data?.total ?? "—"}</span>
       <Button className="ml-auto" variant="outline" disabled={!service.connected || sessions.isFetching} onClick={() => void sessions.refetch()}><RefreshCw className="mr-2 size-4" />{t("刷新")}</Button>
-      <p className="w-full text-xs text-muted-foreground">{t("仅显示已接入会话；重置绑定不删除 Codex 聊天内容。")}</p>
+      <p className="w-full text-[11px] text-muted-foreground">{t("仅显示已接入会话；重置绑定不删除 Codex 聊天内容。")}</p>
     </div>
     {sessions.error && <p role="alert" className="text-sm text-destructive">{getAppErrorMessage(sessions.error)}</p>}
     {sessions.data?.metadataWarning && <p role="status" className="text-xs text-muted-foreground">{sessions.data.metadataWarning}</p>}
-    <div className="grid min-h-[420px] gap-4 lg:grid-cols-[minmax(240px,340px)_minmax(0,1fr)]">
-      <section className="glass-card min-w-0 overflow-hidden rounded-xl border border-border/60">
+    <div className="grid min-h-[360px] overflow-hidden rounded-lg border border-border/50 bg-background/70 lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)]">
+      <section className="min-w-0 overflow-hidden border-b border-border/50 lg:border-r lg:border-b-0">
         <div className="border-b border-border/50 px-4 py-3 text-xs font-medium text-muted-foreground">{t("最近会话")}</div>
-        <div className="max-h-[65vh] overflow-y-auto p-2">
-          {sessions.data?.items.map((session) => <div key={session.sessionId} className={`group flex items-center rounded-lg ${selected?.sessionId === session.sessionId ? "bg-primary/10" : "hover:bg-muted/40"}`}>
-            <button type="button" className="min-w-0 flex-1 px-3 py-2.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-pressed={selected?.sessionId === session.sessionId} title={`${session.title || ""}\n${session.sessionId}`} onClick={() => setSelectedId(session.sessionId)}>
+        <div className="max-h-[62vh] overflow-y-auto p-1.5">
+          {sessions.data?.items.map((session) => <div key={session.sessionId} className={`group flex items-center rounded-md ${selected?.sessionId === session.sessionId ? "bg-primary/10 ring-1 ring-inset ring-primary/15" : "hover:bg-muted/40"}`}>
+            <button type="button" className="min-w-0 flex-1 px-2.5 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-pressed={selected?.sessionId === session.sessionId} title={`${session.title || ""}\n${session.sessionId}`} onClick={() => setSelectedId(session.sessionId)}>
               <span className="block truncate text-sm font-medium">{session.title?.trim() || session.sessionId.slice(0,8)}</span>
               <span className="mt-1 flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground"><span className={`size-1.5 shrink-0 rounded-full ${session.status === "active" ? "bg-green-500" : "bg-amber-500"}`} /><span className="truncate">{session.accountLabel ?? t("待分配")}</span><span className="ml-auto shrink-0">{t(session.status === "active" ? "正常" : session.status === "unbound" ? "未分流" : "待切换")}</span></span>
             </button>
@@ -80,20 +80,21 @@ export default function SessionsPage() {
           {!sessions.data?.items.length && <p role="status" className="py-12 text-center text-sm text-muted-foreground">{t(sessions.isFetching ? "加载中..." : "暂无会话记录")}</p>}
         </div>
       </section>
-      <section className="glass-card min-w-0 rounded-xl border border-border/60 p-5 sm:p-6">
+      <section className="min-w-0 p-4 sm:p-5">
         {selected ? <>
-          <div className="mb-5 flex items-start gap-3"><span className="rounded-xl bg-primary/10 p-2.5 text-primary"><MessagesSquare className="size-5" /></span><div className="min-w-0"><h2 className="break-words text-lg font-semibold">{selected.title?.trim() || selected.sessionId.slice(0,8)}</h2><p className="mt-2 break-all text-xs text-muted-foreground">{selected.projectPath || "—"}</p></div></div>
-          <dl className="space-y-4 text-sm">{[
+          <div className="mb-5 flex items-start gap-3"><span className="rounded-lg bg-primary/10 p-2 text-primary"><MessagesSquare className="size-5" /></span><div className="min-w-0"><h2 className="line-clamp-2 break-words text-base font-semibold">{selected.title?.trim() || selected.sessionId.slice(0,8)}</h2><p className="mt-1 break-all text-xs text-muted-foreground">{selected.projectPath || "—"}</p></div></div>
+          <div className="mb-5 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={() => {setSwitchTarget(selected);setAccountId("");}}><ArrowRightLeft className="size-3.5" />{t("切换账号")}</Button><Button variant="ghost" size="sm" disabled={reset.isPending} onClick={() => setResetTarget(selected)}><RotateCcw className="size-3.5" />{t("重置绑定")}</Button></div>
+          <dl className="grid gap-x-6 gap-y-4 text-sm xl:grid-cols-2">{[
             ["会话 ID",selected.sessionId], ["绑定账号",selected.accountLabel ?? t("待分配")],
             ["状态",t(selected.status === "active" ? "正常" : selected.status === "unbound" ? "未分流" : "待切换")],
             ["最近活动",new Date(selected.lastUsedAt*1000).toLocaleString()], ["首次连接",new Date(selected.createdAt*1000).toLocaleString()],
             ["迁移原因",reasons[selected.reason] ?? selected.reason],
-          ].map(([label,value]) => <div key={label} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 border-b border-border/40 pb-3"><dt className="text-xs text-muted-foreground">{t(label)}</dt><dd className="break-all">{value}</dd></div>)}</dl>
+          ].map(([label,value]) => <div key={label} className="min-w-0 space-y-1.5"><dt className="text-xs text-muted-foreground">{t(label)}</dt><dd className="break-all select-text text-xs leading-5">{value}</dd></div>)}</dl>
           {selected.requestedAccountLabel && <p className="mt-4 text-sm text-primary">→ {selected.requestedAccountLabel}</p>}
         </> : <div className="flex h-full items-center justify-center text-sm text-muted-foreground">{t("暂无会话记录")}</div>}
       </section>
     </div>
-    <div className="flex items-center justify-end gap-3 text-sm"><Button variant="outline" disabled={page<=1} onClick={() => setPage(page-1)}>{t("上一页")}</Button><span>{page} / {totalPages}</span><Button variant="outline" disabled={page>=totalPages} onClick={() => setPage(page+1)}>{t("下一页")}</Button></div>
+    <div className="flex items-center justify-end gap-3 text-xs"><Button variant="outline" disabled={page<=1} onClick={() => setPage(page-1)}>{t("上一页")}</Button><span>{page} / {totalPages}</span><Button variant="outline" disabled={page>=totalPages} onClick={() => setPage(page+1)}>{t("下一页")}</Button></div>
     <ConfirmDialog open={Boolean(resetTarget)} onOpenChange={(open) => {if(!open)setResetTarget(null);}} title={t("重置绑定")} description={t("删除此分流记录，下次连接重新分配账号；不会删除聊天内容。当前请求保持原账号直到结束。")}
       onConfirm={async () => {if(resetTarget)await reset.mutateAsync(resetTarget.sessionId);}} />
     <Dialog open={Boolean(switchTarget)} onOpenChange={(open) => {if(!open && !change.isPending)setSwitchTarget(null);}}>
