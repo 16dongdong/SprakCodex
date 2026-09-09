@@ -64,3 +64,6 @@ codexmanager-server.key
 
 # 浏览器回归产生的本地快照与日志
 /.playwright-cli/
+
+# 本机安装包交付目录，二进制作为 Release 附件上传
+/input/
