@@ -1,13 +1,21 @@
 //! 每条新连接读取完整配置；仅复用解析结果和内核句柄，不用文件时间推断运行实例仍然有效。
 use cpcommon::{relayContract::RelayConfig, runtimeLease::RuntimeLease};
-use std::{io::Read, path::Path, sync::Arc};
-
-const maxConfigBytes: u64 = 64 * 1024;
+use std::sync::Arc;
 
 // 字节内容相同时复用已验证身份；配置不可读时释放缓存，避免残缺写入或删除仍沿用旧端口。
-#[derive(Default)]
 pub(super) struct RelayControl {
+    identity: &'static str,
     current: Option<ValidatedConfig>,
+}
+
+impl Default for RelayControl {
+    // 生产控制器固定读取第十一版部署映射；测试通过专用构造隔离并行宿主。
+    fn default() -> Self {
+        Self {
+            identity: cpcommon::relayContract::deploymentIdentity,
+            current: None,
+        }
+    }
 }
 
 // 配置与其线程对象绑定为同一快照，端口与公开证书位置不得跨配置版本混用。
@@ -19,8 +27,8 @@ struct ValidatedConfig {
 
 impl RelayControl {
     // 仅在 connect/ConnectEx 决策时调用，不进入逐包发送热路径；错误返回原连接行为而不是旧配置。
-    pub(super) fn read(&mut self, path: &Path) -> Option<Arc<RelayConfig>> {
-        match self.readCurrent(path) {
+    pub(super) fn read(&mut self) -> Option<Arc<RelayConfig>> {
+        match self.readCurrent() {
             Ok(settings) => Some(settings),
             Err(()) => {
                 self.current = None;
@@ -30,16 +38,8 @@ impl RelayControl {
     }
 
     // 限制实际读取字节数，并在发布快照前后核对活跃线程；文件、格式和实例错误均终止本次改连。
-    fn readCurrent(&mut self, path: &Path) -> Result<Arc<RelayConfig>, ()> {
-        let mut encoded = Vec::new();
-        std::fs::File::open(path)
-            .map_err(|_| ())?
-            .take(maxConfigBytes + 1)
-            .read_to_end(&mut encoded)
-            .map_err(|_| ())?;
-        if encoded.len() as u64 > maxConfigBytes {
-            return Err(());
-        }
+    fn readCurrent(&mut self) -> Result<Arc<RelayConfig>, ()> {
+        let encoded = cpcommon::relayMemory::read(self.identity).map_err(|_| ())?;
         if let Some(current) = &self.current {
             if current.encoded == encoded {
                 return current
@@ -71,6 +71,15 @@ impl RelayControl {
             owner,
         });
         Ok(settings)
+    }
+
+    // 单元夹具使用唯一命名对象，避免与本机正在运行的宿主共享生产映射。
+    #[cfg(test)]
+    fn forIdentity(identity: &'static str) -> Self {
+        Self {
+            identity,
+            current: None,
+        }
     }
 }
 

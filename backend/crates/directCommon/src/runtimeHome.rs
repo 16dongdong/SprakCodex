@@ -42,11 +42,11 @@ impl Drop for View {
 }
 
 // 目标初始化线程发布后保留返回句柄直至进程退出；名称已存在时不覆盖其他对象。
-pub fn publish(module: &Path, home: &Path) -> Result<OwnedHandle, &'static str> {
+pub fn publish(identity: &str, home: &Path) -> Result<OwnedHandle, &'static str> {
     let pid = std::process::id();
     let created = currentCreationTime()?;
     let encoded = encode(pid, created, home)?;
-    let name = HSTRING::from(mappingName(pid, created, module));
+    let name = HSTRING::from(mappingName(pid, created, identity));
     unsafe {
         SetLastError(ERROR_SUCCESS);
     }
@@ -87,8 +87,8 @@ pub fn publish(module: &Path, home: &Path) -> Result<OwnedHandle, &'static str> 
 }
 
 // 宿主仅在模块就绪后读取；PID、创建时间和头部长度都必须匹配本次候选，不接受陈旧实例。
-pub fn read(module: &Path, pid: u32, created: u64) -> Result<PathBuf, &'static str> {
-    let name = HSTRING::from(mappingName(pid, created, module));
+pub fn read(identity: &str, pid: u32, created: u64) -> Result<PathBuf, &'static str> {
+    let name = HSTRING::from(mappingName(pid, created, identity));
     let mapping = unsafe { OpenFileMappingW(FILE_MAP_READ.0, false, &name) }
         .map_err(|_| "读取运行目录映射失败")?;
     let mapping = unsafe { OwnedHandle::from_raw_handle(mapping.0) };
@@ -161,10 +161,10 @@ fn decode(bytes: &[u8], pid: u32, created: u64) -> Result<PathBuf, &'static str>
 }
 
 // 创建时间也进入对象名，旧读者保留句柄时不会阻止新 PID 实例发布；名称不是鉴权机制。
-fn mappingName(pid: u32, created: u64, module: &Path) -> String {
+fn mappingName(pid: u32, created: u64, identity: &str) -> String {
     format!(
         "{}-Home-{created:016x}",
-        crate::hook_ready::event_name(pid, module)
+        crate::hook_ready::event_name(pid, identity)
     )
 }
 

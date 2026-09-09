@@ -1,31 +1,40 @@
 import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 
-// 从真实配置验证资源来源留在本仓库，安装目标是 DLL 基名，避免依赖外部预编译目录。
-test("观测 DLL 打包路径位于本仓库且不携带父目录层次", () => {
+// Windows 安装包只携带独立更新器；观测载荷由服务构建脚本链接进主程序，不再发布 DLL 资源。
+test("观测载荷只存在于宿主可执行文件", () => {
   const configDirectory = resolve(repositoryRoot, "frontend/src-tauri");
   const config = JSON.parse(readFileSync(resolve(configDirectory, "tauri.windows.conf.json"), "utf8"));
-  const [[source, target]] = Object.entries(config.bundle.resources);
-  assert.equal(resolve(configDirectory, source), resolve(repositoryRoot, "backend/target/observationBuild/release/cphook.dll"));
-  assert.equal(target, "observationHook9.dll");
-  for (const crate of ["directHook", "directCommon"]) {
-    assert.ok(existsSync(resolve(repositoryRoot, `backend/crates/${crate}/src/lib.rs`)));
-  }
+  assert.deepEqual(config.bundle.resources, {
+    "../updateAgent/target/release/updateAgent.exe": "updateAgent.exe",
+  });
+  assert.equal(config.bundle.windows.nsis.installerHooks, "windowsInstallerHooks.nsh");
+
+  const runtimePaths = readFileSync(
+    resolve(repositoryRoot, "backend/crates/service/src/directObservation/runtimePaths.rs"),
+    "utf8",
+  );
+  const buildScript = readFileSync(resolve(repositoryRoot, "backend/crates/service/build.rs"), "utf8");
+  const installerHooks = readFileSync(
+    resolve(configDirectory, config.bundle.windows.nsis.installerHooks),
+    "utf8",
+  );
+  assert.match(runtimePaths, /include_bytes!/);
+  assert.match(buildScript, /codexmanager-direct-hook/);
+  assert.doesNotMatch(JSON.stringify(config), /observationHook\d*\.dll|cphook\.dll/);
+  assert.match(installerHooks, /Delete \/REBOOTOK/);
 });
 
-// 前端缓存复用不得绕过 DLL 编译；Windows 资源只进入对应平台配置。
-test("桌面预构建在复用前端产物前编译本地 DLL", () => {
-  const scripts = resolve(repositoryRoot, "frontend/src-tauri/scripts");
-  const beforeBuild = readFileSync(resolve(scripts, "before-build.mjs"), "utf8");
-  assert.ok(beforeBuild.indexOf('buildObservationHook(resolve(frontendDir, ".."))') < beforeBuild.indexOf('if (task === "build:desktop" && hasBuiltFrontendDist'));
-  const buildHook = readFileSync(resolve(scripts, "buildObservationHook.mjs"), "utf8");
-  assert.ok(buildHook.includes('"--locked"'));
-  assert.ok(buildHook.includes('"codexmanager-direct-hook"'));
-  assert.ok(buildHook.includes('resolve(backendRoot, "target/observationBuild")'));
-  const commonConfig = JSON.parse(readFileSync(resolve(scripts, "../tauri.conf.json"), "utf8"));
-  assert.equal(commonConfig.bundle.resources, undefined);
+// 前端缓存复用只影响静态页面；Rust 构建脚本始终负责生成与链接载荷。
+test("桌面预构建不再生成独立观测 DLL 资源", () => {
+  const beforeBuild = readFileSync(
+    resolve(repositoryRoot, "frontend/src-tauri/scripts/before-build.mjs"),
+    "utf8",
+  );
+  assert.doesNotMatch(beforeBuild, /buildObservationHook/);
+  assert.doesNotMatch(beforeBuild, /observationBuild/);
 });

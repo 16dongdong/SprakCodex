@@ -107,7 +107,7 @@
 
 ### Direct observation injection
 
-- `CODEXMANAGER_OBSERVATION_DLL`: absolute path to the Windows desktop observation injector DLL. When unset, the service searches for `cphook.dll` beside the host executable, then under `resources/` and `Resources/`. This only selects the local injection binary and does not change upstream or authentication settings.
+- The Windows direct-observation payload is linked into the host executable at build time. Runtime loading does not read an external DLL path or expose an environment override for the embedded payload.
 
 Notes:
 

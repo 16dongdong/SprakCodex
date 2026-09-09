@@ -3,7 +3,6 @@ use super::processInjector::{self, ProcessCandidate};
 use futures_util::{stream::FuturesUnordered, StreamExt};
 use std::{
     collections::{HashMap, HashSet},
-    path::PathBuf,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -22,21 +21,21 @@ enum Attempt {
 
 // 生产加载与目录注册共用一个事务；取消后不启动加载，也不注册已停用运行期的目录。
 pub(super) async fn run(
-    module: PathBuf,
+    image: &'static [u8],
     cancel: CancellationToken,
     select: impl Fn() -> Result<Vec<ProcessCandidate>, String> + Send + Sync + 'static,
-    onReady: impl Fn(&ProcessCandidate, &std::path::Path) -> Result<(), String> + Send + Sync + 'static,
+    onReady: impl Fn(&ProcessCandidate) -> Result<(), String> + Send + Sync + 'static,
 ) {
     let loadingCancel = cancel.clone();
     runWithLoader(cancel, select, move |candidate| {
         if loadingCancel.is_cancelled() {
             return Err("观测加载已取消".into());
         }
-        processInjector::inject(candidate, &module)?;
+        processInjector::inject(candidate, image)?;
         if loadingCancel.is_cancelled() {
             return Err("观测目录注册已取消".into());
         }
-        onReady(candidate, &module)
+        onReady(candidate)
     })
     .await;
 }

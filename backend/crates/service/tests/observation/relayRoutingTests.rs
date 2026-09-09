@@ -14,19 +14,17 @@ const waitLimit: Duration = Duration::from_secs(5);
 const probeBytes: &[u8; 5] = b"PROBE";
 const replyBytes: &[u8; 2] = b"OK";
 
-// 目录先创建后复制 DLL；结束时先关闭子进程再删除其独占文件，避免触碰已安装模块。
+// 测试目录只保存客户端公开元数据；载荷始终来自宿主 EXE 的内嵌字节。
 struct RoutingFixture {
     directory: PathBuf,
     child: Option<Child>,
     output: Option<mpsc::Receiver<String>>,
     reader: Option<std::thread::JoinHandle<()>>,
+    relayPublisher: runtimePaths::RelayPublisher,
 }
 impl RoutingFixture {
     // 显式接收新构建的生产 DLL，不从用户进程推断路径，也不启动生产自动扫描。
     fn start(proxyAddress: SocketAddr) -> Self {
-        let source =
-            PathBuf::from(std::env::var_os("OBSERVATION_TEST_NETWORK_DLL").expect("指定生产 DLL"));
-        assert!(source.is_absolute() && source.is_file());
         let directory =
             std::env::temp_dir().join(format!("relayRouting{:032x}", rand::random::<u128>()));
         std::fs::create_dir(&directory).unwrap();
@@ -35,8 +33,8 @@ impl RoutingFixture {
             child: None,
             output: None,
             reader: None,
+            relayPublisher: runtimePaths::createRelayPublisher().unwrap().unwrap(),
         };
-        std::fs::copy(source, fixture.directory.join("cphook.dll")).unwrap();
         let child = Command::new(std::env::current_exe().unwrap())
             .args([
                 "--exact",
@@ -65,10 +63,10 @@ impl RoutingFixture {
         }));
         fixture.expect("CLIENT_READY");
         let identity = nativeInjection::candidate(fixture.child.as_ref().unwrap().id()).unwrap();
-        nativeInjection::inject(&identity, &fixture.directory.join("cphook.dll")).unwrap();
+        nativeInjection::inject(&identity, runtimePaths::moduleImage().unwrap()).unwrap();
         assert_eq!(
             cpcommon::runtimeHome::read(
-                &fixture.directory.join("cphook.dll"),
+                cpcommon::relayContract::deploymentIdentity,
                 identity.pid,
                 identity.createdAt
             )
@@ -97,11 +95,7 @@ impl RoutingFixture {
 
     // 只原子发布无秘密网络配置；零端口停用通过正式宿主函数执行。
     fn publish(&self, settings: &RelayConfig) {
-        runtimePaths::writeAtomically(
-            &self.directory.join(cpcommon::relayContract::configName),
-            &serde_json::to_vec(settings).unwrap(),
-        )
-        .unwrap();
+        runtimePaths::writeRelaySnapshot(&self.relayPublisher, settings).unwrap();
     }
 
     // 同步 connect 和 Tokio ConnectEx 都发往同一个原始地址；从实际 accept 的 listener 判定路由。
@@ -172,7 +166,7 @@ impl Drop for RoutingFixture {
 
 // 两个真实 listener 区分原路径与 Relay；缺失、开启、runtime 退出、重启、停用和损坏逐项验证。
 #[test]
-#[ignore = "需要显式指定 OBSERVATION_TEST_NETWORK_DLL，仅注入本测试创建的客户端"]
+#[ignore = "仅把宿主内嵌载荷部署到本测试创建的客户端"]
 fn productionModuleHonorsRuntimeLifetime() {
     for address in [
         std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
@@ -202,6 +196,8 @@ fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
         forceProxyTcp: true,
         owner: Some(identityReceiver.recv().unwrap()),
         caCertificatePath: None,
+        completionEnabled: false,
+        completionDirectory: None,
     };
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
@@ -212,23 +208,10 @@ fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
     settings.owner = Some(currentIdentity().unwrap());
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    runtimePaths::writeRelayConfig(
-        &fixture.directory.join(cpcommon::relayContract::configName),
-        0,
-        None,
-    )
-    .unwrap();
+    runtimePaths::writeRelayConfig(&fixture.relayPublisher, 0, None, None).unwrap();
     fixture.probe(destination, &original);
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    std::fs::write(
-        fixture.directory.join(cpcommon::relayContract::configName),
-        b"{",
-    )
-    .unwrap();
-    fixture.probe(destination, &original);
-    std::fs::remove_file(fixture.directory.join(cpcommon::relayContract::configName)).unwrap();
-    fixture.probe(destination, &original);
     assert_eq!(
         original.accept().unwrap_err().kind(),
         std::io::ErrorKind::WouldBlock

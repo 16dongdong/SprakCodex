@@ -3,7 +3,7 @@ use cpcommon::completionSpool::{self, Completion};
 use retour::RawDetour;
 use std::{
     ffi::c_void,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::OnceLock,
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -39,10 +39,9 @@ type UsageFn = unsafe extern "system-unwind" fn(
     *const u8,
 ) -> *mut c_void;
 static detour: OnceLock<RawDetour> = OnceLock::new();
-static modulePath: OnceLock<PathBuf> = OnceLock::new();
 
 // 安装在线程初始化阶段、loader lock 外执行；未知 PDB 或入口返回未支持，绝不对其他构建猜偏移。
-pub(super) fn install(module: &Path) -> Result<bool, &'static str> {
+pub(super) fn install() -> Result<bool, &'static str> {
     let base = unsafe { GetModuleHandleW(None) }
         .map_err(|_| "读取主模块失败")?
         .0 as usize;
@@ -60,9 +59,6 @@ pub(super) fn install(module: &Path) -> Result<bool, &'static str> {
     if read(address, entryBytes.len()).as_deref() != Some(entryBytes.as_slice()) {
         return Ok(false);
     }
-    modulePath
-        .set(module.to_owned())
-        .map_err(|_| "完成入口重复初始化")?;
     let hook = unsafe { RawDetour::new(address as *const (), observed as *const ()) }
         .map_err(|_| "创建完成入口失败")?;
     detour.set(hook).map_err(|_| "完成入口状态重复")?;
@@ -175,17 +171,13 @@ fn capture(arguments: Arguments) -> Option<Completion> {
     Some(completion)
 }
 
-// 控制文件缺失/停用不读取会话字段；元数据写入错误只记录静态诊断，不改变原生成结果或重新发起请求。
+// 完成目录来自同一内存配置快照；运行期失效或停用时不读取会话字段，也不沿用旧目录。
 fn prepare(arguments: Arguments) -> Option<(PathBuf, Completion)> {
-    let module = modulePath.get()?;
-    match completionSpool::activeDirectory(module) {
-        Ok(Some(directory)) => Some((directory, capture(arguments)?)),
-        Ok(None) => None,
-        Err(error) => {
-            super::imp::log(error);
-            None
-        }
+    let settings = super::imp::relaySnapshot()?;
+    if !settings.completionEnabled {
+        return None;
     }
+    Some((settings.completionDirectory.clone()?, capture(arguments)?))
 }
 
 // 唯一 ABI 入口保持九个实际参数及可展开约定；一次生成只同步发布一个至多 4 KiB 的元数据事务，不在逐包热路径写盘。

@@ -3,7 +3,6 @@ use std::{
     mem::ManuallyDrop,
     net::{Shutdown, SocketAddr, TcpStream},
     os::windows::io::FromRawSocket,
-    time::Duration,
 };
 use windows::Win32::{
     Foundation::ERROR_NO_MORE_ITEMS,
@@ -47,35 +46,19 @@ fn snapshot() -> Result<Snapshot, u32> {
     }
 }
 
-// 每个宿主线程实例只检查一次。失去宿主时不触碰连接，新的端口和活跃租约发布后才允许重连。
-pub(super) fn start() {
-    if std::thread::Builder::new()
-        .name("connectionRecovery".into())
-        .spawn(|| {
-            let mut previous = None;
-            loop {
-                if let Some(config) = super::imp::proxyRuntimeConfig() {
-                    let identity = (config.owner, config.relayPort);
-                    if previous != Some(identity) {
-                        previous = Some(identity);
-                        match reconnectWhere(|peer| {
-                            peer.port() != config.relayPort
-                                && super::proxyDiscovery::isPlainHttpProxy(peer)
-                        }) {
-                            Ok(count) if count != 0 => {
-                                super::imp::log(&format!("已请求 {count} 条旧代理连接重新接入观测"))
-                            }
-                            Ok(_) => {}
-                            Err(code) => super::imp::log(&format!("枚举本进程旧连接失败：{code}")),
-                        }
-                    }
-                }
-                std::thread::sleep(Duration::from_millis(500));
-            }
-        })
-        .is_err()
-    {
-        super::imp::log("启动旧连接接入线程失败");
+// 宿主先发布 Relay 快照再部署映像，因此初始化线程可同步处理一次旧连接；不创建缺少静态 TLS 的游离线程。
+pub(super) fn reconnectOriginalProxy() {
+    let Some(config) = super::imp::proxyRuntimeConfig() else {
+        return;
+    };
+    match reconnectWhere(|peer| {
+        peer.port() != config.relayPort && super::proxyDiscovery::isPlainHttpProxy(peer)
+    }) {
+        Ok(count) if count != 0 => {
+            super::imp::log(&format!("已请求 {count} 条旧代理连接重新接入观测"))
+        }
+        Ok(_) => {}
+        Err(code) => super::imp::log(&format!("枚举本进程旧连接失败：{code}")),
     }
 }
 

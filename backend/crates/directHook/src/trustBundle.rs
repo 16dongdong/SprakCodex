@@ -2,7 +2,7 @@
 use base64::{engine::general_purpose::STANDARD, Engine};
 use rustls_pki_types::{pem::PemObject, CertificateDer};
 use std::{
-    collections::{hash_map::Entry, HashMap},
+    collections::{btree_map::Entry, BTreeMap},
     fs::{File, OpenOptions},
     io::{Read, Write},
     os::windows::{ffi::OsStrExt, fs::OpenOptionsExt},
@@ -15,10 +15,10 @@ use windows::Win32::{
 };
 
 const maxCertificateBytes: u64 = 1024 * 1024;
-// 已返回路径在进程寿命内保持有效；内容寻址复用相同证书，不因固定版本数限制破坏多次 Manager 重启。
+// 有序内容索引不依赖线程随机种子；已返回路径在进程寿命内保持有效，多次宿主重启仍复用相同证书。
 #[derive(Default)]
 pub(super) struct TrustBundles {
-    versions: HashMap<Vec<u8>, TrustBundle>,
+    versions: BTreeMap<Vec<u8>, TrustBundle>,
 }
 
 // FILE_FLAG_DELETE_ON_CLOSE 在硬退出时也由内核清理；句柄不可继承，不把公开文件寿命绑到 Manager。

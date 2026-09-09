@@ -88,10 +88,6 @@ fn startHost(directory: &Path, config: &Value) -> (OwnedChild, Value) {
         ])
         .env("OBSERVATION_HOST_FIXTURE", &configPath)
         .env("CODEXMANAGER_DB_PATH", directory.join("observation.db"))
-        .env(
-            "CODEXMANAGER_OBSERVATION_DLL",
-            directory.join("module/cphook.dll"),
-        )
         .env("CODEX_HOME", directory.join("observerHome"))
         .stdin(Stdio::piped())
         .stdout(std::fs::File::create(directory.join(format!("host{phase}.log"))).unwrap())
@@ -233,12 +229,6 @@ fn existingSessionSurvivesHostRestart() {
     let directory = PathBuf::from(std::env::var_os("OBSERVATION_TEST_DIRECTORY").unwrap());
     assert!(directory.is_absolute());
     std::fs::create_dir(&directory).unwrap();
-    std::fs::create_dir(directory.join("module")).unwrap();
-    std::fs::copy(
-        std::env::var_os("OBSERVATION_TEST_NETWORK_DLL").unwrap(),
-        directory.join("module/cphook.dll"),
-    )
-    .unwrap();
     let cli = PathBuf::from(std::env::var_os("OBSERVATION_TEST_CLI").unwrap());
     let model = std::env::var("OBSERVATION_TEST_MODEL").unwrap();
     let ephemeral = std::env::var("OBSERVATION_TEST_EPHEMERAL").as_deref() == Ok("true");
@@ -288,7 +278,7 @@ fn existingSessionSurvivesHostRestart() {
             }
             signingIdentity = Some(fingerprint);
             if !clientClosed {
-                warmSessionProbe::waitReady(identity.pid, &directory.join("module/cphook.dll"));
+                warmSessionProbe::waitReady(identity.pid);
                 expected.extend(peer.turn(thread));
             }
             verifyRows(&directory, &expected, &model);

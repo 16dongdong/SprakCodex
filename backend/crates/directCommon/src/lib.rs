@@ -16,3 +16,7 @@ pub mod runtimeLease;
 #[cfg(windows)]
 #[allow(non_snake_case, non_upper_case_globals)]
 pub mod runtimeHome;
+
+#[cfg(windows)]
+#[allow(non_snake_case, non_upper_case_globals)]
+pub mod relayMemory;

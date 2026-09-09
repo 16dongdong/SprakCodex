@@ -56,15 +56,15 @@ impl Default for RuntimeScope {
 // 初始化时固定文件边界，与观测范围分开传递，避免重启时混用旧模块或配置路径。
 struct RuntimeFiles {
     certificate: PathBuf,
-    injectionDll: Option<PathBuf>,
-    relayConfig: Option<PathBuf>,
+    injectionImage: Option<&'static [u8]>,
+    relayPublisher: Option<Arc<runtimePaths::RelayPublisher>>,
 }
 
 struct Running {
     address: String,
     certificate: PathBuf,
     retainCertificate: bool,
-    relayConfig: Option<PathBuf>,
+    relayPublisher: Option<Arc<runtimePaths::RelayPublisher>>,
     cancel: CancellationToken,
     thread: std::thread::JoinHandle<()>,
     counters: Arc<Counters>,
@@ -118,12 +118,9 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
         }
         return Ok(statusOf(Some(current)));
     }
-    // 缺少 DLL 必须在发布监听前报错，避免 UI 的 running 掩盖完全没有接管目标进程的状态。
-    let injectionDll = runtimePaths::resolve()?;
-    let relayConfig = injectionDll
-        .as_deref()
-        .map(runtimePaths::configPath)
-        .transpose()?;
+    // 载荷字节由链接器固定进宿主 EXE；配置另用命名映射发布，安装目录不参与运行协议。
+    let injectionImage = runtimePaths::moduleImage();
+    let relayPublisher = runtimePaths::createRelayPublisher()?.map(Arc::new);
     crate::storage_helpers::initialize_storage()?;
     let folder = crate::process_env::db_dir();
     let authority = certificateAuthority::Authority::forRuntime(observationHosts, &folder)?;
@@ -133,8 +130,8 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
         authority,
         RuntimeFiles {
             certificate: certificate.clone(),
-            injectionDll,
-            relayConfig,
+            injectionImage,
+            relayPublisher,
         },
         scope,
     );
@@ -163,12 +160,6 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
                 }
                 return Err("保存直连观测开关失败".into());
             }
-            if let Err(error) = setCompletionCapture(&current, true) {
-                if let Err(cleanup) = cleanupRunning(current, true) {
-                    log::error!("完成事件启动回滚失败：{cleanup}");
-                }
-                return Err(error);
-            }
             *guard = Some(current);
             Ok(statusOf(guard.as_ref()))
         }
@@ -187,8 +178,8 @@ fn startRuntime(
 ) -> Result<Running, String> {
     let RuntimeFiles {
         certificate,
-        injectionDll,
-        relayConfig,
+        injectionImage,
+        relayPublisher,
     } = files;
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
@@ -223,7 +214,7 @@ fn startRuntime(
     )?;
     let counters = sink.counters.clone();
     let (ready, started) = std::sync::mpsc::sync_channel(1);
-    let workerConfig = relayConfig.clone();
+    let workerPublisher = relayPublisher.clone();
     let workerCertificate = certificate.clone();
     let thread = std::thread::Builder::new()
         .name("directObservation".into())
@@ -246,10 +237,16 @@ fn startRuntime(
                 };
                 let port = listener.port();
                 let address = format!("http://127.0.0.1:{port}");
-                if let Some(configPath) = workerConfig.as_deref() {
-                    if let Err(error) =
-                        runtimePaths::writeRelayConfig(configPath, port, Some(&workerCertificate))
-                    {
+                let completionDirectory = workerCertificate
+                    .parent()
+                    .map(|directory| directory.join(cpcommon::completionSpool::directoryName));
+                if let Some(publisher) = workerPublisher.as_deref() {
+                    if let Err(error) = runtimePaths::writeRelayConfig(
+                        publisher,
+                        port,
+                        Some(&workerCertificate),
+                        completionDirectory.as_deref(),
+                    ) {
                         let _ = ready.send(Err(error));
                         return;
                     }
@@ -259,17 +256,15 @@ fn startRuntime(
                 }
                 let monitorEngine = engine.cancel.clone();
                 let monitor = tokio::spawn(async move {
-                    let Some(dll) = injectionDll else {
-                        log::error!("无法确定观测注入 DLL 路径");
+                    let Some(image) = injectionImage else {
+                        log::error!("当前平台没有观测内存载荷");
                         return;
                     };
                     processMonitor::run(
-                        dll,
+                        image,
                         monitorEngine,
                         move || (scope.select)(),
-                        move |candidate, module| {
-                            homes.register(processInjector::runtimeHome(candidate, module)?)
-                        },
+                        move |candidate| homes.register(processInjector::runtimeHome(candidate)?),
                     )
                     .await;
                 });
@@ -298,8 +293,8 @@ fn startRuntime(
             cancel.cancel();
             // 接收启动失败后仍 join，让失败实例的数据库线程先退出，避免重试遗留工作线程。
             thread.join().map_err(|_| "观测启动失败且线程异常退出")?;
-            if let Some(path) = relayConfig.as_deref() {
-                runtimePaths::writeRelayConfig(path, 0, None)?;
+            if let Some(publisher) = relayPublisher.as_deref() {
+                runtimePaths::writeRelayConfig(publisher, 0, None, None)?;
             }
             return Err(error);
         }
@@ -308,7 +303,7 @@ fn startRuntime(
         address,
         certificate,
         retainCertificate: cfg!(windows),
-        relayConfig,
+        relayPublisher,
         cancel,
         thread,
         counters,
@@ -326,18 +321,12 @@ pub fn shutdownRuntime() -> Result<ObservationStatus, String> {
 }
 
 // 统一释放线程、证书和 Relay 配置；启动持久化失败时复用该路径，避免留下半启动状态。
-fn cleanupRunning(current: Running, disableCapture: bool) -> Result<(), String> {
-    // 正常宿主退出保留捕获选择和受管元数据目录；只有主动停用或失败回滚才撤销后续完成事件。
-    let captureResult = if disableCapture {
-        setCompletionCapture(&current, false)
-    } else {
-        Ok(())
-    };
+fn cleanupRunning(current: Running, _disableCapture: bool) -> Result<(), String> {
     // 先撤销新连接路由再取消 listener；即使文件发布失败也继续回收，运行线程退出会使缓存身份失效。
     let relayResult = current
-        .relayConfig
+        .relayPublisher
         .as_deref()
-        .map(|path| runtimePaths::writeRelayConfig(path, 0, None))
+        .map(|publisher| runtimePaths::writeRelayConfig(publisher, 0, None, None))
         .transpose();
     current.cancel.cancel();
     let joined = current.thread.join();
@@ -348,45 +337,7 @@ fn cleanupRunning(current: Running, disableCapture: bool) -> Result<(), String> 
     };
     joined.map_err(|_| "观测线程异常退出".to_string())?;
     certificateResult?;
-    captureResult?;
     relayResult.map(|_| ())
-}
-
-// 开关在受管数据目录统一发布，模块旁仅保存定位；正常宿主退出不调用此函数，显式停用影响所有版本的已加载模块。
-fn setCompletionCapture(current: &Running, enabled: bool) -> Result<(), String> {
-    use cpcommon::completionSpool::{self, Location};
-    let Some(relay) = &current.relayConfig else {
-        return Ok(());
-    };
-    let directory = current
-        .certificate
-        .parent()
-        .ok_or("完成事件数据目录缺失")?
-        .join(completionSpool::directoryName);
-    writeCompletionControl(&directory, enabled)?;
-    if enabled {
-        let location =
-            serde_json::to_vec(&Location { directory }).map_err(|_| "编码完成事件定位失败")?;
-        runtimePaths::writeAtomically(
-            &relay.with_file_name(completionSpool::settingsName),
-            &location,
-        )?;
-    }
-    Ok(())
-}
-
-// 数据目录是开关的唯一所有者；没有运行实例时也能撤销已有模块的捕获选择，不依赖已失效的监听状态。
-fn writeCompletionControl(directory: &std::path::Path, enabled: bool) -> Result<(), String> {
-    use cpcommon::completionSpool::{self, Settings};
-    if !enabled && !directory.join(completionSpool::controlName).exists() {
-        return Ok(());
-    }
-    let encoded = serde_json::to_vec(&Settings {
-        enabled,
-        directory: directory.to_owned(),
-    })
-    .map_err(|_| "编码完成事件开关失败")?;
-    runtimePaths::writeAtomically(&directory.join(completionSpool::controlName), &encoded)
 }
 
 // 同一锁内串行化开关写入和资源释放；disable 为 false 时绝不写入持久化设置。
@@ -402,10 +353,6 @@ fn stopInternal(disable: bool) -> Result<ObservationStatus, String> {
     };
     let cleanupResult = match guard.take() {
         Some(current) => cleanupRunning(current, disable),
-        None if disable => writeCompletionControl(
-            &crate::process_env::db_dir().join(cpcommon::completionSpool::directoryName),
-            false,
-        ),
         None => Ok(()),
     };
     let persistResult = match storage {

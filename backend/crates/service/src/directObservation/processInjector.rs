@@ -1,5 +1,5 @@
-//! Windows 进程发现与 DLL 注入基础层。
-//! 注入前必须由观测协议层提供对应 DLL 和配置；本模块不修改目标进程环境变量。
+//! Windows 进程发现与内存载荷部署基础层。
+//! 部署前必须由观测协议层提供已嵌入的 PE 字节；本模块不修改目标进程环境变量。
 
 use std::path::{Path, PathBuf};
 
@@ -71,25 +71,30 @@ fn isTargetExecutable(executable: &Path) -> bool {
 
 // 进程发现与加载事务分离：仅实际 DLL 就绪返回成功，失败语义由 Windows 生命周期模块统一负责。
 #[cfg(windows)]
-pub(super) fn inject(candidate: &ProcessCandidate, dll: &Path) -> Result<(), String> {
-    super::nativeInjection::inject(candidate, dll)
+pub(super) fn inject(candidate: &ProcessCandidate, image: &[u8]) -> Result<(), String> {
+    super::nativeInjection::inject(candidate, image)
 }
 
 // 模块就绪后只读运行目录映射；创建时间来自最新候选，旧 PID 实例的目录不可复用。
 #[cfg(windows)]
-pub(super) fn runtimeHome(candidate: &ProcessCandidate, dll: &Path) -> Result<PathBuf, String> {
-    cpcommon::runtimeHome::read(dll, candidate.pid, candidate.createdAt).map_err(str::to_owned)
+pub(super) fn runtimeHome(candidate: &ProcessCandidate) -> Result<PathBuf, String> {
+    cpcommon::runtimeHome::read(
+        cpcommon::relayContract::deploymentIdentity,
+        candidate.pid,
+        candidate.createdAt,
+    )
+    .map_err(str::to_owned)
 }
 
 // 非 Windows 不查询 Windows 映射；当前原生加载会先明确报告该平台不支持。
 #[cfg(not(windows))]
-pub(super) fn runtimeHome(_candidate: &ProcessCandidate, _dll: &Path) -> Result<PathBuf, String> {
+pub(super) fn runtimeHome(_candidate: &ProcessCandidate) -> Result<PathBuf, String> {
     Err("当前平台没有运行目录映射".into())
 }
 
 // 非 Windows 宿主只有显式代理入口，不将缺失的原生能力伪装为成功。
 #[cfg(not(windows))]
-pub(super) fn inject(_candidate: &ProcessCandidate, _dll: &Path) -> Result<(), String> {
+pub(super) fn inject(_candidate: &ProcessCandidate, _image: &[u8]) -> Result<(), String> {
     Err("当前平台没有 Windows 进程注入实现".into())
 }
 #[cfg(test)]

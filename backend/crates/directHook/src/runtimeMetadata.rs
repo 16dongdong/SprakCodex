@@ -1,9 +1,6 @@
 //! 仅发布当前进程选择的 CLI 数据目录；不读取 auth.json，不修改环境变量、身份或配置。
 use std::{
-    ffi::OsString,
-    os::windows::ffi::OsStringExt,
-    os::windows::io::OwnedHandle,
-    path::{Path, PathBuf},
+    ffi::OsString, os::windows::ffi::OsStringExt, os::windows::io::OwnedHandle, path::PathBuf,
     sync::OnceLock,
 };
 use windows::Win32::Foundation::{
@@ -18,14 +15,17 @@ static mapping: OnceLock<OwnedHandle> = OnceLock::new();
 const maxEnvironmentUnits: usize = 32768;
 
 // loader lock 外先发布元数据再置位模块就绪；句柄保留到目标进程结束，宿主重启可重新读取。
-pub(super) fn publish(module: &Path) -> Result<(), &'static str> {
+pub(super) fn publish() -> Result<(), &'static str> {
     let home = match variable(w!("CODEX_HOME"))? {
         Some(home) => PathBuf::from(home),
         None => PathBuf::from(variable(w!("USERPROFILE"))?.ok_or("目标进程缺少 CLI home")?)
             .join(".codex"),
     };
     mapping
-        .set(cpcommon::runtimeHome::publish(module, &home)?)
+        .set(cpcommon::runtimeHome::publish(
+            cpcommon::relayContract::deploymentIdentity,
+            &home,
+        )?)
         .map_err(|_| "运行目录已发布")
 }
 

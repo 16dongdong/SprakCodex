@@ -1,6 +1,6 @@
 //! 只识别实际配置的本地明文 HTTP 代理端点；不改变代理选择，不读取 PAC 内容，不缓存含凭据的 URL。
 use std::{
-    collections::HashSet,
+    collections::BTreeSet,
     net::{IpAddr, SocketAddr},
 };
 use url::{Host, Url};
@@ -9,7 +9,7 @@ use windows::{core::w, Win32::System::Environment::GetEnvironmentVariableW};
 const maxEnvironmentChars: usize = 32768;
 
 // localhost 允许系统解析为 IPv4 或 IPv6；字面地址只匹配该地址，不能仅按端口捕获其他本地服务。
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum ProxyHost {
     Localhost,
     Address(IpAddr),
@@ -18,8 +18,8 @@ enum ProxyHost {
 // 持久状态只保留非秘密端点和协议判断；同一端点出现不兼容配置时保持原连接，避免错误的明文接入。
 #[derive(Default)]
 pub(super) struct ProxyEndpoints {
-    plain: HashSet<(ProxyHost, u16)>,
-    incompatible: HashSet<(ProxyHost, u16)>,
+    plain: BTreeSet<(ProxyHost, u16)>,
+    incompatible: BTreeSet<(ProxyHost, u16)>,
 }
 
 // 只在本地新连接决策时读取，发送热路径不查询设置；每次重新读取以支持代理切换而不复用过期端口。
@@ -120,10 +120,10 @@ impl ProxyEndpoints {
 
     // 先排除同端点的认证或协议冲突；此处不选择代理，只有应用已经连接该端点时才可能返回 true。
     fn matches(&self, destination: SocketAddr) -> bool {
-        // 输入列表去重和连接匹配都使用哈希集合，避免大量静态代理项导致每次连接二次复杂度扫描。
+        // 有序集合不依赖 Rust 的线程随机种子，适合未注册静态 TLS 的内存映像；查询仍保持对数复杂度。
         let exact = (ProxyHost::Address(destination.ip()), destination.port());
         let localhost = (ProxyHost::Localhost, destination.port());
-        let matches = |endpoints: &HashSet<_>| {
+        let matches = |endpoints: &BTreeSet<_>| {
             endpoints.contains(&exact)
                 || (destination.ip().is_loopback() && endpoints.contains(&localhost))
         };

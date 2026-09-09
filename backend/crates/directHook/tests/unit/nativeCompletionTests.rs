@@ -95,6 +95,6 @@ fn rejectsInvalidFieldsWithoutDereferencingThem() {
 // 当前测试程序不匹配官方 PDB，安装必须返回未支持，且不发布 trampoline 或模块状态。
 #[test]
 fn unknownBuildDoesNotInstallAnEntry() {
-    assert!(!install(Path::new("unused.dll")).unwrap());
-    assert!(detour.get().is_none() && modulePath.get().is_none());
+    assert!(!install().unwrap());
+    assert!(detour.get().is_none());
 }

@@ -1,6 +1,10 @@
 //! 已运行 app-server 会话验收：首次生成在观测前完成，随后保持进程和 thread 不变启用生产扫描。
 use super::super::{clientEventMonitor, recordSink::RecordSink};
-use super::{super::nativeInjection, injectedClientProbe, sessionRpcPeer::SessionPeer};
+use super::{
+    super::{nativeInjection, runtimePaths},
+    injectedClientProbe,
+    sessionRpcPeer::SessionPeer,
+};
 use codexmanager_core::storage::Storage;
 use serde_json::{json, Value};
 use std::{
@@ -97,11 +101,11 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
     .unwrap();
     let identity = nativeInjection::candidate(target.child.as_ref().unwrap().id()).unwrap();
     target.monitor = Some(injectedClientProbe::startMonitor(
-        target.moduleDirectory.join("cphook.dll"),
+        runtimePaths::moduleImage().unwrap(),
         Arc::new(Mutex::new(vec![identity.clone()])),
         Some(eventMonitor.registration()),
     ));
-    waitReady(identity.pid, &target.moduleDirectory.join("cphook.dll"));
+    waitReady(identity.pid);
     let after = peer.turn(&thread);
     let persisted = Instant::now();
     while sink
@@ -134,8 +138,11 @@ pub(super) fn run(command: &mut Command, options: Options<'_>) -> bool {
 }
 
 // 只等待已加载模块的事件，不调用注入；原生加载动作必须来自正在运行的生产扫描器。
-pub(super) fn waitReady(pid: u32, module: &Path) {
-    let name = HSTRING::from(cpcommon::hook_ready::event_name(pid, module));
+pub(super) fn waitReady(pid: u32) {
+    let name = HSTRING::from(cpcommon::hook_ready::event_name(
+        pid,
+        cpcommon::relayContract::deploymentIdentity,
+    ));
     let started = Instant::now();
     loop {
         if let Ok(event) = unsafe { OpenEventW(SYNCHRONIZATION_SYNCHRONIZE, false, &name) } {

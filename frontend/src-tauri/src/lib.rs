@@ -27,6 +27,8 @@ const AYATANA_DEPRECATED_MESSAGE: &str =
     "libayatana-appindicator is deprecated. Please use libayatana-appindicator-glib in newly written code.";
 #[cfg(target_os = "linux")]
 static AYATANA_LOG_HANDLER_ID: OnceLock<glib::LogHandlerId> = OnceLock::new();
+#[cfg(windows)]
+const LEGACY_OBSERVATION_MODULE: &str = "observationHook9.dll";
 
 #[derive(Clone, Serialize)]
 struct UsageRefreshCompletedPayload {
@@ -43,8 +45,7 @@ fn desktop_window_state_flags() -> tauri_plugin_window_state::StateFlags {
 
 #[cfg(target_os = "linux")]
 fn is_known_ayatana_deprecation_notice(domain: Option<&str>, message: &str) -> bool {
-    domain == Some(AYATANA_APPINDICATOR_LOG_DOMAIN)
-        && message.trim() == AYATANA_DEPRECATED_MESSAGE
+    domain == Some(AYATANA_APPINDICATOR_LOG_DOMAIN) && message.trim() == AYATANA_DEPRECATED_MESSAGE
 }
 
 #[cfg(target_os = "linux")]
@@ -67,6 +68,31 @@ fn install_ayatana_deprecation_notice_filter() {
 
 #[cfg(not(target_os = "linux"))]
 fn install_ayatana_deprecation_notice_filter() {}
+
+// 新版载荷已链接进主程序；启动时清理旧安装遗留 DLL，文件被历史客户端占用时返回错误供日志诊断。
+#[cfg(windows)]
+#[allow(non_snake_case)]
+fn cleanupLegacyObservationModule() -> Result<(), String> {
+    let executable =
+        std::env::current_exe().map_err(|error| format!("读取主程序路径失败：{error}"))?;
+    let directory = executable.parent().ok_or("主程序路径缺少安装目录")?;
+    let legacy = directory.join(LEGACY_OBSERVATION_MODULE);
+    match std::fs::remove_file(&legacy) {
+        Ok(()) => {
+            log::info!("已清理旧观测模块：{}", legacy.display());
+            Ok(())
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(format!("清理旧观测模块失败：{}：{error}", legacy.display())),
+    }
+}
+
+// 其他平台从未分发 Windows 观测 DLL，不执行安装目录清理。
+#[cfg(not(windows))]
+#[allow(non_snake_case)]
+fn cleanupLegacyObservationModule() -> Result<(), String> {
+    Ok(())
+}
 
 /// 函数 `run`
 ///
@@ -144,6 +170,9 @@ pub fn run() {
                 diagnostics_settings.debug_mode,
                 diagnostics_settings.file_logging_enabled
             );
+            if let Err(error) = cleanupLegacyObservationModule() {
+                log::warn!("{error}");
+            }
 
             let database_path = match app_storage::apply_runtime_storage_env_checked(app.handle()) {
                 Ok(path) => path,
@@ -181,9 +210,7 @@ pub fn run() {
                 log::info!("pre-migration database backup: {}", path.display());
             }
             if let Err(err) = codexmanager_service::initialize_storage_if_needed() {
-                let message = format!(
-                    "database migration failed; refusing desktop startup: {err}"
-                );
+                let message = format!("database migration failed; refusing desktop startup: {err}");
                 log::error!("{message}");
                 desktop_diagnostics::report_startup_failure(
                     app.handle(),

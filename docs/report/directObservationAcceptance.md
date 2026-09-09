@@ -1,5 +1,19 @@
 # 官方直连观测验收记录
 
+## EXE 内嵌载荷与内存部署（2026-09-09）
+
+- `codexmanager-service/build.rs` 构建 `codexmanager-direct-hook`，将 PE 字节复制到当前 `OUT_DIR`；`runtimePaths.rs` 使用 `include_bytes!` 链接到宿主 EXE。
+- Windows 运行期直接解析内嵌 PE，完成区段映射、DIR64 重定位、系统依赖加载、IAT 地址解析、x64 异常函数表注册、最小页面权限设置与显式初始化入口调用。
+- 安装资源清单已移除 `observationHook9.dll`，Relay 控制由版本化命名页映射发布，不再生成安装目录 JSON 控制文件。
+- 回调状态容器改用 `BTreeMap`／`BTreeSet`，避免手工映像依赖 Windows loader 分配静态 TLS；生产 Winsock 夹具覆盖同步 `connect`、Tokio `ConnectEx`、启停、宿主租约失效和再次启用。
+
+```powershell
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service directObservation::relayRoutingTests::productionModuleHonorsRuntimeLifetime -- --ignored --exact --nocapture
+cargo test --manifest-path backend/Cargo.toml -p codexmanager-service directObservation::nativeInjection::tests::readyModuleAndRepeatedLoad -- --ignored --exact --nocapture
+```
+
+后续章节保留各历史阶段的原始验收命令和版本信息，用于回溯迁移前行为；当前发布边界以上述第十一版内存部署结果为准。
+
 ## 总目标与边界
 
 任务来源：会话 `01a07967-7b18-7382-9a43-77a85db5fc4a`。目标保持进行中，本文不是完整交付声明。

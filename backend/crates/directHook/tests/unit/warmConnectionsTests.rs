@@ -2,6 +2,7 @@ use super::*;
 use std::{
     io::{Read, Write},
     net::TcpListener,
+    time::Duration,
 };
 
 // 只关闭选中的真实 TCP 连接；原始句柄仍由客户端回收，其余 IPC 连接可以继续传输。

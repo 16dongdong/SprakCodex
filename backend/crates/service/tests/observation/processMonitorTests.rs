@@ -1,4 +1,5 @@
 use super::*;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{mpsc, Mutex};
 
@@ -28,10 +29,10 @@ async fn cancelledMonitorDoesNotEnumerate() {
     let cancelled = CancellationToken::new();
     cancelled.cancel();
     run(
-        PathBuf::from("unused.dll"),
+        b"unused",
         cancelled,
         || panic!("停用后不应枚举进程"),
-        |_, _| Ok(()),
+        |_| Ok(()),
     )
     .await;
 }
@@ -46,14 +47,14 @@ async fn firstScanIsImmediateAndShutdownIsPrompt() {
     tokio::time::timeout(
         Duration::from_secs(1),
         run(
-            PathBuf::from("unused.dll"),
+            b"unused",
             cancelled,
             move || {
                 observedScans.fetch_add(1, Ordering::Relaxed);
                 stopAfterScan.cancel();
                 Ok(Vec::new())
             },
-            |_, _| Ok(()),
+            |_| Ok(()),
         ),
     )
     .await

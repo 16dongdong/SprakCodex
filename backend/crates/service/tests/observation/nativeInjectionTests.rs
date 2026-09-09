@@ -67,6 +67,11 @@ fn fixtureDll() -> PathBuf {
     )
 }
 
+// 原生测试显式读取本轮构建产物并泄漏到测试进程结束，匹配生产常驻静态载荷生命周期。
+fn fixtureImage() -> &'static [u8] {
+    Box::leak(std::fs::read(fixtureDll()).unwrap().into_boxed_slice())
+}
+
 // 子进程只保持存活；标记必须由 Target::start 提供，防止直接误运行时长时间等待。
 #[test]
 #[ignore = "由原生加载测试在独立子进程调用"]
@@ -85,10 +90,10 @@ fn fixtureTarget() {
 fn readyModuleAndRepeatedLoad() {
     let target = Target::start(true, 0);
     let identity = target.identity();
-    let dll = fixtureDll();
-    inject(&identity, &dll).unwrap();
+    let image = fixtureImage();
+    inject(&identity, image).unwrap();
     let started = Instant::now();
-    inject(&identity, &dll).unwrap();
+    inject(&identity, image).unwrap();
     assert!(started.elapsed() < Duration::from_secs(2));
     assert!(target.child.id() > 0);
 }
@@ -114,10 +119,10 @@ fn concurrentMonitorDoesNotSerializeNativeLoads() {
         tokio::time::timeout(
             Duration::from_secs(20),
             super::super::processMonitor::run(
-                fixtureDll(),
+                fixtureImage(),
                 cancel,
                 move || Ok(selected.clone()),
-                move |candidate, _| {
+                move |candidate| {
                     let mut completed = observed.lock().unwrap();
                     completed.push(candidate.pid);
                     if completed.len() == 2 {
@@ -147,8 +152,8 @@ fn concurrentMonitorDoesNotSerializeNativeLoads() {
 #[ignore = "需要 OBSERVATION_TEST_READY_DLL"]
 fn loadedModuleWithoutReadyIsFailure() {
     let target = Target::start(false, 0);
-    let failure = inject(&target.identity(), &fixtureDll()).unwrap_err();
-    assert_eq!(failure, "观测 DLL 已加载但未就绪");
+    let failure = inject(&target.identity(), fixtureImage()).unwrap_err();
+    assert_eq!(failure, "观测内存模块已加载但未就绪");
 }
 
 // PID 相同但创建时间不同，必须在远程分配或加载前拒绝。
@@ -159,7 +164,7 @@ fn staleIdentityIsRejectedBeforeLoad() {
     let mut identity = target.identity();
     identity.createdAt += 1;
     assert_eq!(
-        inject(&identity, &fixtureDll()).unwrap_err(),
+        inject(&identity, fixtureImage()).unwrap_err(),
         "目标进程实例已变化，请重新扫描"
     );
 }
@@ -170,17 +175,17 @@ fn staleIdentityIsRejectedBeforeLoad() {
 fn timedOutLoadIsNotDuplicatedAndEventuallyReaped() {
     let target = Target::start(true, loadTimeoutMs + 1000);
     let identity = target.identity();
-    let dll = fixtureDll();
+    let image = fixtureImage();
     assert_eq!(
-        inject(&identity, &dll).unwrap_err(),
-        "观测 DLL 加载超时，仍在等待安全回收"
+        inject(&identity, image).unwrap_err(),
+        "观测内存部署超时，仍在等待安全回收"
     );
     assert_eq!(
-        inject(&identity, &dll).unwrap_err(),
-        "目标加载尚未完成或等待队列已满"
+        inject(&identity, image).unwrap_err(),
+        "目标部署尚未完成或等待队列已满"
     );
     std::thread::sleep(Duration::from_secs(3));
-    inject(&identity, &dll).unwrap();
+    inject(&identity, image).unwrap();
     let guard = pendingLoads.lock().unwrap();
     assert!(!guard
         .as_ref()

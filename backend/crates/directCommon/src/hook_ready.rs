@@ -1,21 +1,16 @@
-//! 模块就绪事件同时绑定 PID 与 DLL 路径，避免另一目录的模块或旧协议事件被误认为本次初始化成功。
-use std::path::Path;
+//! 模块事件同时绑定 PID 与部署标识，内存映像不依赖不存在的磁盘路径。
 
-/// 宿主与 DLL 按实际加载路径生成相同的版本化名称；事件名用于区分模块实例，不代替鉴权。
-pub fn event_name(pid: u32, module: &Path) -> String {
-    // FNV-1a 只用于压缩路径标识，不用于密码学；先消除 Windows 扩展路径和大小写差异。
-    let normalized = module
-        .to_string_lossy()
-        .trim_start_matches("\\\\?\\")
-        .replace('/', "\\")
-        .to_lowercase();
-    let hash = normalized
-        .bytes()
-        .fold(0xcbf29ce484222325_u64, |hash, byte| {
-            (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
-        });
-    // 第九版增加旧连接自动接入，旧版就绪事件不代表已具备该生命周期能力。
-    format!("Local\\ObservationHookReady9-{pid}-{hash:016x}")
+/// 宿主与内存模块按稳定部署标识生成相同名称；哈希只压缩对象名，不承担鉴权。
+pub fn event_name(pid: u32, identity: &str) -> String {
+    let hash = identity.bytes().fold(0xcbf29ce484222325_u64, |hash, byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3)
+    });
+    format!("Local\\ObservationHookReady11-{pid}-{hash:016x}")
+}
+
+/// 加载事件早于运行期就绪事件，用于阻止初始化失败的内存映像被重复映射。
+pub fn loaded_event_name(pid: u32, identity: &str) -> String {
+    event_name(pid, identity).replace("Ready11", "Loaded11")
 }
 
 #[cfg(test)]

@@ -15,17 +15,17 @@ fn codecPreservesUnicodeAndRejectsStaleIdentity() {
 // 真实分页文件映射没有磁盘副本；最后一个持有者退出后命名对象消失，重复发布不覆盖已有内容。
 #[test]
 fn mappingLifetimeIsBoundToPublisher() {
-    let module = PathBuf::from(format!(
-        "C:/fixture/{}/{}.dll",
+    let identity = format!(
+        "fixture-{}-{}",
         std::process::id(),
         currentCreationTime().unwrap()
-    ));
+    );
     let home = Path::new(r"C:\夹具\目录甲");
     let created = currentCreationTime().unwrap();
-    let publisher = publish(&module, home).unwrap();
-    assert_eq!(read(&module, std::process::id(), created).unwrap(), home);
-    assert!(publish(&module, Path::new(r"C:\夹具\目录乙")).is_err());
-    assert_eq!(read(&module, std::process::id(), created).unwrap(), home);
+    let publisher = publish(&identity, home).unwrap();
+    assert_eq!(read(&identity, std::process::id(), created).unwrap(), home);
+    assert!(publish(&identity, Path::new(r"C:\夹具\目录乙")).is_err());
+    assert_eq!(read(&identity, std::process::id(), created).unwrap(), home);
     drop(publisher);
-    assert!(read(&module, std::process::id(), created).is_err());
+    assert!(read(&identity, std::process::id(), created).is_err());
 }

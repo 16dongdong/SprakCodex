@@ -1,59 +1,49 @@
-//! 注入路径在一次运行开始时固定，配置与 DLL 同目录；停止复用同一路径而不重新读取环境。
-use std::path::{Path, PathBuf};
+//! 观测载荷与配置都驻留内存；磁盘只保留公开证书和业务侧完成事件记录。
+use std::path::Path;
 
-// 安装资源按就绪协议分名，旧 DLL 可以留在既有客户端中，不通过覆盖已映射文件或卸载旧回调升级。
-const moduleFileName: &str = "observationHook9.dll";
-const configFileName: &str = cpcommon::relayContract::configName;
+#[cfg(windows)]
+static embeddedModule: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/observationHook.dll"));
 
-// 启动时解析显式 DLL 或安装资源；Windows 资源缺失直接失败，非 Windows 仅使用显式代理入口。
-pub(super) fn resolve() -> Result<Option<PathBuf>, String> {
-    if !cfg!(windows) {
-        return Ok(None);
+// Windows 返回链接进宿主映像的只读 PE 字节；其他平台没有原生进程载荷。
+pub(super) fn moduleImage() -> Option<&'static [u8]> {
+    #[cfg(windows)]
+    {
+        Some(embeddedModule)
     }
-    let executable = std::env::current_exe().map_err(|_| "读取宿主路径失败")?;
-    let explicit = std::env::var_os("CODEXMANAGER_OBSERVATION_DLL").map(PathBuf::from);
-    resolveModule(&executable, explicit.as_deref()).map(Some)
+    #[cfg(not(windows))]
+    {
+        None
+    }
 }
 
-// 显式路径必须为绝对路径且指向文件；只按已约定的 Tauri 安装布局查找，不回退到外部源码目录。
-fn resolveModule(executable: &Path, explicit: Option<&Path>) -> Result<PathBuf, String> {
-    if let Some(module) = explicit {
-        if !module.is_absolute() {
-            return Err("观测 DLL 必须使用绝对路径".into());
-        }
-        return validateModule(module);
-    }
-    let directory = executable.parent().ok_or("宿主路径缺少父目录")?;
-    for folder in ["", "resources", "Resources"] {
-        let candidate = directory.join(folder).join(moduleFileName);
-        if candidate.is_file() {
-            return validateModule(&candidate);
-        }
-    }
-    Err("安装目录缺少观测 DLL，请先构建并安装完整资源".into())
+// 发布句柄固定拥有当前运行期的命名页文件映射；Drop 后配置对象随即失效。
+#[cfg(windows)]
+pub(super) struct RelayPublisher(cpcommon::relayMemory::Publisher);
+
+// 启动时创建唯一控制映射；已有映射表示另一个宿主运行期仍然活跃。
+#[cfg(windows)]
+pub(super) fn createRelayPublisher() -> Result<Option<RelayPublisher>, String> {
+    cpcommon::relayMemory::Publisher::create(cpcommon::relayContract::deploymentIdentity)
+        .map(RelayPublisher)
+        .map(Some)
+        .map_err(str::to_owned)
 }
 
-// 解析后的路径用于远程 LoadLibraryW；目录和缺失文件不得被当成已安装模块。
-fn validateModule(module: &Path) -> Result<PathBuf, String> {
-    if !module.is_file() {
-        return Err("指定观测 DLL 不是有效文件".into());
-    }
-    std::fs::canonicalize(module).map_err(|_| "解析观测 DLL 绝对路径失败".into())
-}
+// 非 Windows 通过子进程代理环境接入，不创建 Windows 命名对象。
+#[cfg(not(windows))]
+pub(super) struct RelayPublisher;
 
-// DLL 从自身目录读取配置，宿主不得用 current_exe 目录代替；输入来自启动时已验证的模块路径。
-pub(super) fn configPath(module: &Path) -> Result<PathBuf, String> {
-    Ok(module
-        .parent()
-        .ok_or("观测 DLL 路径缺少父目录")?
-        .join(configFileName))
+#[cfg(not(windows))]
+pub(super) fn createRelayPublisher() -> Result<Option<RelayPublisher>, String> {
+    Ok(None)
 }
 
 // 在 DLL 所在目录发布配置；端口为零明确关闭 TCP 改连，序列化和文件错误均向宿主返回。
 pub(super) fn writeRelayConfig(
-    path: &Path,
+    publisher: &RelayPublisher,
     port: u16,
     certificate: Option<&Path>,
+    completionDirectory: Option<&Path>,
 ) -> Result<(), String> {
     // 配置会在另一个进程读取；相对路径会错误依赖目标工作目录，缺失证书也不应发布为可用状态。
     if certificate.is_some_and(|path| !path.is_absolute() || !path.is_file()) {
@@ -73,9 +63,27 @@ pub(super) fn writeRelayConfig(
         forceProxyTcp: port != 0,
         owner,
         caCertificatePath: certificate.map(Path::to_owned),
+        completionEnabled: port != 0 && completionDirectory.is_some(),
+        completionDirectory: completionDirectory.map(Path::to_owned),
     };
-    let encoded = serde_json::to_vec(&configuration).map_err(|_| "生成注入配置失败")?;
-    writeAtomically(path, &encoded)
+    writeRelaySnapshot(publisher, &configuration)
+}
+
+// 已构造配置统一经同一序列化与映射写入路径发布，测试可替换 owner 验证生命周期失效。
+pub(super) fn writeRelaySnapshot(
+    publisher: &RelayPublisher,
+    configuration: &cpcommon::relayContract::RelayConfig,
+) -> Result<(), String> {
+    let encoded = serde_json::to_vec(configuration).map_err(|_| "生成注入配置失败")?;
+    #[cfg(windows)]
+    {
+        publisher.0.write(&encoded).map_err(str::to_owned)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (publisher, encoded);
+        Ok(())
+    }
 }
 
 // 配置与公开证书都可能被其他进程读取；同目录写完再替换，失败只清理本次临时文件。

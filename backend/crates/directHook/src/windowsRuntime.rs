@@ -2,27 +2,22 @@
 use super::relayControl::RelayControl;
 use cpcommon::hook_proxy::{encodeRoute, HookProxyTarget, RouteKind};
 use cpcommon::relayContract::RelayConfig;
-use retour::GenericDetour;
-use std::collections::HashMap;
-use std::ffi::{c_void, OsString};
+use retour::RawDetour;
+use std::collections::BTreeMap;
+use std::ffi::c_void;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::os::windows::ffi::OsStringExt;
-use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 use windows::core::{s, w, PCSTR, PCWSTR, PSTR};
-use windows::Win32::Foundation::{CloseHandle, BOOL, HMODULE, TRUE};
+use windows::Win32::Foundation::{BOOL, HMODULE, TRUE};
 use windows::Win32::Networking::WinSock::{
     getsockopt, WSAGetLastError, WSASetLastError, AF_INET, AF_INET6, SOCKADDR, SOCKET, SOCK_STREAM,
     SOL_SOCKET, SO_TYPE, WSABUF,
 };
-use windows::Win32::System::LibraryLoader::{GetModuleFileNameW, GetModuleHandleW, GetProcAddress};
-use windows::Win32::System::SystemServices::DLL_PROCESS_ATTACH;
-use windows::Win32::System::Threading::{
-    CreateEventW, CreateThread, SetEvent, THREAD_CREATION_FLAGS,
-};
-static HINST: AtomicIsize = AtomicIsize::new(0);
+use windows::Win32::System::Diagnostics::Debug::OutputDebugStringW;
+use windows::Win32::System::LibraryLoader::{GetModuleHandleW, GetProcAddress};
+use windows::Win32::System::Threading::{CreateEventW, SetEvent};
 static NETWORK_READY: AtomicBool = AtomicBool::new(false);
 const SIO_GET_EXTENSION_FUNCTION_POINTER: u32 = 0xC8000006;
 const WSAID_CONNECTEX: windows::core::GUID =
@@ -53,56 +48,27 @@ pub(super) fn proxyRuntimeConfig() -> Option<Arc<RelayConfig>> {
 // TLS 读取入口与网络入口共用同一份活跃实例快照；证书初始化可先于 NETWORK_READY 完成。
 pub(super) fn relaySnapshot() -> Option<Arc<RelayConfig>> {
     static control: OnceLock<Mutex<RelayControl>> = OnceLock::new();
-    let path = dll_dir()?.join(cpcommon::relayContract::configName);
     control
         .get_or_init(|| Mutex::new(RelayControl::default()))
         .lock()
         .ok()?
-        .read(&path)
+        .read()
 }
 
-// 根据 DllMain 记录的模块句柄定位自身路径，供配置和就绪事件共用；查询失败返回 None。
-fn dll_path() -> Option<PathBuf> {
-    let h = HMODULE(HINST.load(Ordering::SeqCst) as *mut c_void);
-    let mut buf = [0u16; 1024];
-    let n = unsafe { GetModuleFileNameW(h, &mut buf) };
-    if n == 0 || n as usize >= buf.len() {
-        return None;
-    }
-    Some(PathBuf::from(OsString::from_wide(&buf[..n as usize])))
-}
-
-// 从实际 DLL 路径解析配置目录，路径缺失向调用方传递 None，不猜宿主进程的安装目录。
-fn dll_dir() -> Option<PathBuf> {
-    dll_path()?.parent().map(|d| d.to_path_buf())
-}
-
-// 在目标进程写入短生命周期诊断，调用方仅传入状态和 API 名称，不传认证数据或请求正文。
+// 内存映像没有磁盘目录；诊断只发往调试输出，不在目标或安装目录创建文件。
 pub(super) fn log(msg: &str) {
-    use std::io::Write;
-    if let Some(dir) = dll_dir() {
-        if let Ok(mut f) = std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(dir.join("cphook.log"))
-        {
-            // 先拼成一条再追加，避免多个进程的格式化分片把 PID 和诊断内容交叉写入。
-            let line = format!("[pid {}] {msg}\n", std::process::id());
-            let _ = f.write_all(line.as_bytes());
-        }
-    }
+    let line: Vec<u16> = format!("[观测模块 pid={}] {msg}\n\0", std::process::id())
+        .encode_utf16()
+        .collect();
+    unsafe { OutputDebugStringW(PCWSTR(line.as_ptr())) };
 }
 
 // 初始化完成后发布与本模块路径匹配的命名事件，句柄保留到进程退出，供宿主后续扫描打开。
 fn signal_ready() {
     static READY_EVENT: AtomicIsize = AtomicIsize::new(0);
-    let Some(module) = dll_path() else {
-        log("读取模块就绪路径失败");
-        return;
-    };
     let name = windows::core::HSTRING::from(cpcommon::hook_ready::event_name(
         std::process::id(),
-        &module,
+        cpcommon::relayContract::deploymentIdentity,
     ));
     unsafe {
         if READY_EVENT.load(Ordering::SeqCst) != 0 {
@@ -117,6 +83,23 @@ fn signal_ready() {
                 READY_EVENT.store(event.0 as isize, Ordering::SeqCst);
             }
             Err(e) => log(&format!("cphook ready 事件不存在: {e}")),
+        }
+    }
+}
+
+// 初始化线程创建成功后发布加载事件；宿主用它阻止同一版本内存映像被重复映射。
+fn signal_loaded() {
+    static LOADED_EVENT: AtomicIsize = AtomicIsize::new(0);
+    let name = windows::core::HSTRING::from(cpcommon::hook_ready::loaded_event_name(
+        std::process::id(),
+        cpcommon::relayContract::deploymentIdentity,
+    ));
+    unsafe {
+        if LOADED_EVENT.load(Ordering::SeqCst) != 0 {
+            return;
+        }
+        if let Ok(event) = CreateEventW(None, true, true, &name) {
+            LOADED_EVENT.store(event.0 as isize, Ordering::SeqCst);
         }
     }
 }
@@ -171,11 +154,11 @@ struct ProxySocketState {
 }
 
 type SharedSocketState = Arc<Mutex<ProxySocketState>>;
-static PROXY_SOCKETS: OnceLock<Mutex<HashMap<usize, SharedSocketState>>> = OnceLock::new();
+static PROXY_SOCKETS: OnceLock<Mutex<BTreeMap<usize, SharedSocketState>>> = OnceLock::new();
 
-// 全局表只用于定位连接状态，实际头部写入使用每连接锁，避免一个慢连接阻塞所有发送线程。
-fn proxy_sockets() -> &'static Mutex<HashMap<usize, SharedSocketState>> {
-    PROXY_SOCKETS.get_or_init(|| Mutex::new(HashMap::new()))
+// 有序表不触发线程随机种子，并只用于定位连接状态；实际头部写入使用每连接锁，避免慢连接阻塞全局。
+fn proxy_sockets() -> &'static Mutex<BTreeMap<usize, SharedSocketState>> {
+    PROXY_SOCKETS.get_or_init(|| Mutex::new(BTreeMap::new()))
 }
 
 // 原生 SOCKET 按当前连接生命周期作为表键，关闭后清除，不把数字句柄当跨连接身份。
@@ -262,10 +245,11 @@ pub(super) unsafe fn socket_is_tcp(socket: SOCKET) -> bool {
 
 // 用未改写的 send trampoline 发送协议字节，处理短写并限制 WouldBlock 等待；失败返回 false。
 unsafe fn send_header_bytes(socket: SOCKET, bytes: &[u8]) -> bool {
-    let Some(send) = SEND.get() else {
+    if SEND.get().is_none() {
         WSASetLastError(WSAECONNRESET);
         return false;
-    };
+    }
+    let send: SendFn = original(&SEND, "SEND");
     let mut sent = 0usize;
     // 私有头很小(32 字节)且 relay 在本机,发送缓冲几乎总能立即容纳。但非阻塞 socket
     // (Chromium/Node 常用)偶发 WSAEWOULDBLOCK 时不能当致命错误直接断连,否则会触发
@@ -274,7 +258,7 @@ unsafe fn send_header_bytes(socket: SOCKET, bytes: &[u8]) -> bool {
     while sent < bytes.len() {
         let remaining = bytes.len() - sent;
         let chunk_len = remaining.min(i32::MAX as usize) as i32;
-        let ret = send.call(socket, bytes[sent..].as_ptr().cast(), chunk_len, 0);
+        let ret = send(socket, bytes[sent..].as_ptr().cast(), chunk_len, 0);
         if ret > 0 {
             sent += ret as usize;
             continue;
@@ -457,28 +441,38 @@ type ConnectExFn = unsafe extern "system" fn(
 ) -> BOOL;
 type CloseSocketFn = unsafe extern "system" fn(SOCKET) -> i32;
 type ShutdownFn = unsafe extern "system" fn(SOCKET, i32) -> i32;
-static CONNECT: OnceLock<GenericDetour<ConnectFn>> = OnceLock::new();
-static SEND: OnceLock<GenericDetour<SendFn>> = OnceLock::new();
-static SEND_TO: OnceLock<GenericDetour<SendToFn>> = OnceLock::new();
-static WSA_SEND: OnceLock<GenericDetour<WsaSendFn>> = OnceLock::new();
-static WSA_SEND_TO: OnceLock<GenericDetour<WsaSendToFn>> = OnceLock::new();
-static WSA_CONNECT: OnceLock<GenericDetour<WsaConnectFn>> = OnceLock::new();
-static CONNECT_EX: OnceLock<GenericDetour<ConnectExFn>> = OnceLock::new();
-static CLOSE_SOCKET: OnceLock<GenericDetour<CloseSocketFn>> = OnceLock::new();
-static SHUTDOWN: OnceLock<GenericDetour<ShutdownFn>> = OnceLock::new();
+static CONNECT: OnceLock<RawDetour> = OnceLock::new();
+static SEND: OnceLock<RawDetour> = OnceLock::new();
+static SEND_TO: OnceLock<RawDetour> = OnceLock::new();
+static WSA_SEND: OnceLock<RawDetour> = OnceLock::new();
+static WSA_SEND_TO: OnceLock<RawDetour> = OnceLock::new();
+static WSA_CONNECT: OnceLock<RawDetour> = OnceLock::new();
+static CONNECT_EX: OnceLock<RawDetour> = OnceLock::new();
+static CLOSE_SOCKET: OnceLock<RawDetour> = OnceLock::new();
+static SHUTDOWN: OnceLock<RawDetour> = OnceLock::new();
+
+// RawDetour 公开的 trampoline 只在槽发布后读取；调用方类型必须与对应 Winsock ABI 完全一致。
+unsafe fn original<F: Copy>(slot: &OnceLock<RawDetour>, label: &str) -> F {
+    std::mem::transmute_copy(
+        &(slot
+            .get()
+            .unwrap_or_else(|| panic!("{label} 未初始化"))
+            .trampoline() as *const () as usize),
+    )
+}
 // connect 回调仅处理已启用的 TCP 目标；未接管连接及错误返回沿用 Winsock ABI。
 unsafe extern "system" fn hook_connect(
     socket: SOCKET,
     name: *const SOCKADDR,
     name_len: i32,
 ) -> i32 {
-    let detour = CONNECT.get().expect("CONNECT 未初始化");
+    let originalConnect: ConnectFn = original(&CONNECT, "CONNECT");
     if let Some(ret) = proxy_connect(socket, name, name_len, |relay, relay_len| {
-        detour.call(socket, relay, relay_len)
+        originalConnect(socket, relay, relay_len)
     }) {
         return ret;
     }
-    detour.call(socket, name, name_len)
+    originalConnect(socket, name, name_len)
 }
 
 // send 回调先提交一次性 Relay 头，再调用原发送函数；头失败时返回 SOCKET_ERROR。
@@ -492,9 +486,7 @@ unsafe extern "system" fn hook_send(
     if !ensure_proxy_header_sent(socket) {
         return -1;
     }
-    SEND.get()
-        .expect("SEND 未初始化")
-        .call(socket, buffer, len, flags)
+    original::<SendFn>(&SEND, "SEND")(socket, buffer, len, flags)
 }
 
 // sendto 同时服务于 UDP 与 TCP；只有已登记的连接需要私有头，其他调用参数原样转交。
@@ -510,10 +502,7 @@ unsafe extern "system" fn hook_send_to(
     if !ensure_proxy_header_sent(socket) {
         return -1;
     }
-    SEND_TO
-        .get()
-        .expect("SEND_TO 未初始化")
-        .call(socket, buffer, len, flags, to, to_len)
+    original::<SendToFn>(&SEND_TO, "SEND_TO")(socket, buffer, len, flags, to, to_len)
 }
 
 // 保留 WSASend 的缓冲区、异步回调与完成语义，只在原调用之前提交已登记连接的私有头。
@@ -533,7 +522,7 @@ unsafe extern "system" fn hook_wsa_send(
         }
         return -1;
     }
-    WSA_SEND.get().expect("WSA_SEND 未初始化").call(
+    original::<WsaSendFn>(&WSA_SEND, "WSA_SEND")(
         socket,
         buffers,
         buffer_count,
@@ -560,7 +549,7 @@ unsafe extern "system" fn hook_wsa_send_to(
     if !ensure_proxy_header_sent(socket) {
         return -1;
     }
-    WSA_SEND_TO.get().expect("WSA_SEND_TO 未初始化").call(
+    original::<WsaSendToFn>(&WSA_SEND_TO, "WSA_SEND_TO")(
         socket,
         buffers,
         buffer_count,
@@ -583,9 +572,9 @@ unsafe extern "system" fn hook_wsa_connect(
     sqos: *mut c_void,
     gqos: *mut c_void,
 ) -> i32 {
-    let detour = WSA_CONNECT.get().expect("WSA_CONNECT 未初始化");
+    let originalWsaConnect: WsaConnectFn = original(&WSA_CONNECT, "WSA_CONNECT");
     if let Some(ret) = proxy_connect(socket, name, name_len, |relay, relay_len| {
-        detour.call(
+        originalWsaConnect(
             socket,
             relay,
             relay_len,
@@ -600,7 +589,7 @@ unsafe extern "system" fn hook_wsa_connect(
         }
         return ret;
     }
-    detour.call(socket, name, name_len, caller_data, callee_data, sqos, gqos)
+    originalWsaConnect(socket, name, name_len, caller_data, callee_data, sqos, gqos)
 }
 
 // 连接同步成功后发送调用方提供的可选初始缓冲区；指针只在原 WSAConnect 调用期间借用。
@@ -609,8 +598,8 @@ unsafe fn send_wsa_connect_caller_data(socket: SOCKET, caller_data: *const c_voi
     if buffer.is_null() || (*buffer).len == 0 || (*buffer).buf.is_null() {
         return;
     }
-    let _ = SEND.get().map(|send| {
-        send.call(
+    let _ = SEND.get().map(|_| {
+        original::<SendFn>(&SEND, "SEND")(
             socket,
             (*buffer).buf.0.cast(),
             (*buffer).len.min(i32::MAX as u32) as i32,
@@ -629,11 +618,11 @@ unsafe fn call_original_connect_ex(
     bytes_sent: *mut u32,
     overlapped: *mut c_void,
 ) -> BOOL {
-    let Some(detour) = CONNECT_EX.get() else {
+    if CONNECT_EX.get().is_none() {
         WSASetLastError(WSAEOPNOTSUPP);
         return BOOL(0);
-    };
-    detour.call(
+    }
+    original::<ConnectExFn>(&CONNECT_EX, "CONNECT_EX")(
         socket,
         name,
         name_len,
@@ -739,16 +728,13 @@ unsafe extern "system" fn hook_connect_ex(
 // closesocket 前摘除表项，防止后续数字句柄复用时继承旧目标与头部状态。
 unsafe extern "system" fn hook_close_socket(socket: SOCKET) -> i32 {
     forget_proxy_socket(socket);
-    CLOSE_SOCKET
-        .get()
-        .expect("CLOSE_SOCKET 未初始化")
-        .call(socket)
+    original::<CloseSocketFn>(&CLOSE_SOCKET, "CLOSE_SOCKET")(socket)
 }
 
 // shutdown 按调用方给定方向转交，结束连接的观测登记，不修改应用退出或子进程行为。
 unsafe extern "system" fn hook_shutdown(socket: SOCKET, how: i32) -> i32 {
     forget_proxy_socket(socket);
-    SHUTDOWN.get().expect("SHUTDOWN 未初始化").call(socket, how)
+    original::<ShutdownFn>(&SHUTDOWN, "SHUTDOWN")(socket, how)
 }
 
 // Winsock 是此 DLL 的静态导入依赖；只解析已加载模块，缺失时初始化失败，不额外增加加载引用。
@@ -758,19 +744,13 @@ unsafe fn proc_addr(module: PCWSTR, name: PCSTR) -> Option<*const ()> {
 }
 
 /// 安装原生入口前先发布 trampoline，保证其他线程第一次进入回调时原调用槽已经存在；失败返回 false。
-unsafe fn install<F: retour::Function + Copy>(
-    slot: &OnceLock<GenericDetour<F>>,
-    name: PCSTR,
-    detour: F,
-    label: &str,
-) -> bool {
+unsafe fn install(slot: &OnceLock<RawDetour>, name: PCSTR, detour: *const (), label: &str) -> bool {
     let Some(addr) = proc_addr(w!("Ws2_32.dll"), name) else {
         log(&format!("找不到 {label}"));
         return false;
     };
-    let target: F = std::mem::transmute_copy(&addr);
-    match GenericDetour::new(target, detour) {
-        Ok(det) => match super::hookInstall::activateDetour(slot, det) {
+    match RawDetour::new(addr, detour) {
+        Ok(det) => match super::hookInstall::activateRawDetour(slot, det) {
             Ok(()) => {
                 log(&format!("已 hook {label}"));
                 true
@@ -794,11 +774,10 @@ unsafe fn install<F: retour::Function + Copy>(
 /// 单纯 hook 导出符或拦截后续 WSAIoctl 查询都拦不住它。但该缓存指针指向 mswsock 内部
 /// 实现,与我们现查到的是**同一地址**,因此直接 inline-hook 这个地址即可覆盖**已缓存与
 /// 后续所有** ConnectEx 调用,这是强制代理 Electron/Node 不被旁路的关键。
-unsafe fn install_connect_ex_hook() -> bool {
+unsafe fn install_connect_ex_hook(stage: *mut u32) -> bool {
     // 直接用 GetProcAddress 解析 Ws2_32 导出的显式函数指针,绕开 windows 绑定对
     // socket/WSAIoctl 的 Result 包装与 feature 门控。
     type SocketFn = unsafe extern "system" fn(i32, i32, i32) -> SOCKET;
-    type ClosesocketFn = unsafe extern "system" fn(SOCKET) -> i32;
     type WsaStartupFn = unsafe extern "system" fn(u16, *mut c_void) -> i32;
     type WsaIoctlFn = unsafe extern "system" fn(
         SOCKET,
@@ -812,10 +791,10 @@ unsafe fn install_connect_ex_hook() -> bool {
         *mut c_void,
     ) -> i32;
 
+    setInitializationStage(stage, 190);
     let ws2 = w!("Ws2_32.dll");
-    let (Some(socket_fn), Some(close_fn), Some(startup_fn), Some(ioctl_fn)) = (
+    let (Some(socket_fn), Some(startup_fn), Some(ioctl_fn)) = (
         proc_addr(ws2, s!("socket")),
-        proc_addr(ws2, s!("closesocket")),
         proc_addr(ws2, s!("WSAStartup")),
         proc_addr(ws2, s!("WSAIoctl")),
     ) else {
@@ -823,17 +802,18 @@ unsafe fn install_connect_ex_hook() -> bool {
         return false;
     };
     let socket_fn: SocketFn = std::mem::transmute(socket_fn);
-    let close_fn: ClosesocketFn = std::mem::transmute(close_fn);
     let startup_fn: WsaStartupFn = std::mem::transmute(startup_fn);
     let ioctl_fn: WsaIoctlFn = std::mem::transmute(ioctl_fn);
 
     // 引用计数式加载 Winsock(目标已加载则只 +1);wsadata 只需被写,不读。
     let mut wsadata = [0u8; 512];
+    setInitializationStage(stage, 191);
     let _ = startup_fn(0x0202, wsadata.as_mut_ptr().cast());
 
     const AF_INET_I: i32 = 2;
     const SOCK_STREAM_I: i32 = 1;
     const IPPROTO_TCP_I: i32 = 6;
+    setInitializationStage(stage, 192);
     let probe = socket_fn(AF_INET_I, SOCK_STREAM_I, IPPROTO_TCP_I);
     if probe.0 == usize::MAX {
         log("ConnectEx 接管失败:创建探测 socket 失败");
@@ -842,6 +822,7 @@ unsafe fn install_connect_ex_hook() -> bool {
     let mut guid = WSAID_CONNECTEX;
     let mut func: *mut c_void = std::ptr::null_mut();
     let mut bytes = 0u32;
+    setInitializationStage(stage, 193);
     let ret = ioctl_fn(
         probe,
         SIO_GET_EXTENSION_FUNCTION_POINTER,
@@ -853,14 +834,16 @@ unsafe fn install_connect_ex_hook() -> bool {
         std::ptr::null_mut(),
         std::ptr::null_mut(),
     );
-    let _ = close_fn(probe);
+    setInitializationStage(stage, 194);
+    // closesocket 已完成入口改写；初始化探针直接走已发布 trampoline，避免把内部资源清理误算作业务回调。
+    let _ = original::<CloseSocketFn>(&CLOSE_SOCKET, "CLOSE_SOCKET")(probe);
     if ret != 0 || func.is_null() {
         log("ConnectEx 接管失败:WSAIoctl 未返回函数指针");
         return false;
     }
-    let target: ConnectExFn = std::mem::transmute(func);
-    match GenericDetour::new(target, hook_connect_ex as ConnectExFn) {
-        Ok(det) => match super::hookInstall::activateDetour(&CONNECT_EX, det) {
+    setInitializationStage(stage, 195);
+    match RawDetour::new(func.cast_const().cast(), hook_connect_ex as *const ()) {
+        Ok(det) => match super::hookInstall::activateRawDetour(&CONNECT_EX, det) {
             Ok(()) => {
                 log("已 inline-hook ConnectEx(运行期解析指针,覆盖已缓存指针)");
                 true
@@ -877,9 +860,17 @@ unsafe fn install_connect_ex_hook() -> bool {
     }
 }
 
-// loader lock 外安装网络入口；ConnectEx 是实际客户端路径，必须成功才能发布模块就绪。
-unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
+// 初始化阶段写回部署上下文，宿主可区分入口解析、元数据和旧连接接入故障；空指针只用于单元测试。
+unsafe fn setInitializationStage(stage: *mut u32, value: u32) {
+    if !stage.is_null() {
+        stage.write_volatile(value);
+    }
+}
+
+// PE 初始化完成后由内存部署器同步调用；ConnectEx 是实际客户端路径，全部入口成功才发布模块就绪。
+unsafe fn initialize(stage: *mut u32) -> bool {
     // 入口可以先于配置就绪；缺少配置时保持原调用，后续启动 Relay 后无需重复加载 DLL。
+    setInitializationStage(stage, 10);
     let mut ready = match super::trustProvider::install() {
         Ok(()) => true,
         Err(error) => {
@@ -887,58 +878,65 @@ unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
             false
         }
     };
+    setInitializationStage(stage, 11);
     ready &= install(
         &CONNECT,
         s!("connect"),
-        hook_connect as ConnectFn,
+        hook_connect as *const (),
         "connect",
     );
-    ready &= install(&SEND, s!("send"), hook_send as SendFn, "send");
-    ready &= install(&SEND_TO, s!("sendto"), hook_send_to as SendToFn, "sendto");
+    setInitializationStage(stage, 12);
+    ready &= install(&SEND, s!("send"), hook_send as *const (), "send");
+    setInitializationStage(stage, 13);
+    ready &= install(&SEND_TO, s!("sendto"), hook_send_to as *const (), "sendto");
+    setInitializationStage(stage, 14);
     ready &= install(
         &WSA_SEND,
         s!("WSASend"),
-        hook_wsa_send as WsaSendFn,
+        hook_wsa_send as *const (),
         "WSASend",
     );
+    setInitializationStage(stage, 15);
     ready &= install(
         &WSA_SEND_TO,
         s!("WSASendTo"),
-        hook_wsa_send_to as WsaSendToFn,
+        hook_wsa_send_to as *const (),
         "WSASendTo",
     );
+    setInitializationStage(stage, 16);
     ready &= install(
         &WSA_CONNECT,
         s!("WSAConnect"),
-        hook_wsa_connect as WsaConnectFn,
+        hook_wsa_connect as *const (),
         "WSAConnect",
     );
+    setInitializationStage(stage, 17);
     ready &= install(
         &CLOSE_SOCKET,
         s!("closesocket"),
-        hook_close_socket as CloseSocketFn,
+        hook_close_socket as *const (),
         "closesocket",
     );
+    setInitializationStage(stage, 18);
     ready &= install(
         &SHUTDOWN,
         s!("shutdown"),
-        hook_shutdown as ShutdownFn,
+        hook_shutdown as *const (),
         "shutdown",
     );
-    ready &= install_connect_ex_hook();
+    setInitializationStage(stage, 19);
+    ready &= install_connect_ex_hook(stage);
     if ready {
-        ready = dll_path()
-            .ok_or("读取运行模块路径失败")
-            .and_then(|path| super::runtimeMetadata::publish(&path))
+        setInitializationStage(stage, 20);
+        ready = super::runtimeMetadata::publish()
             .map_err(|error| log(error))
             .is_ok();
     }
     if ready {
         #[cfg(target_arch = "x86_64")]
-        match dll_path()
-            .ok_or("读取完成入口模块路径失败")
-            .and_then(|path| super::nativeCompletion::install(&path))
-        {
+        setInitializationStage(stage, 21);
+        #[cfg(target_arch = "x86_64")]
+        match super::nativeCompletion::install() {
             Ok(true) => log("原生完成事件入口已安装"),
             Ok(false) => log("当前构建没有匹配的原生完成事件布局，保留网络与文件来源"),
             Err(error) => {
@@ -948,30 +946,33 @@ unsafe extern "system" fn worker(_: *mut c_void) -> u32 {
         }
     }
     if ready {
+        setInitializationStage(stage, 22);
         NETWORK_READY.store(true, Ordering::Release);
+        super::warmConnections::reconnectOriginalProxy();
+        setInitializationStage(stage, 23);
         signal_ready();
-        super::warmConnections::start();
+        setInitializationStage(stage, 24);
     } else {
         log("网络入口未全部安装，观测模块未就绪");
     }
-    0
+    ready
 }
 
-// DLL 回调只启动初始化线程；创建线程失败让加载失败，不允许宿主把未执行初始化当作成功。
+// CRT 入口只完成模块级运行库初始化；业务入口由部署器在相同 TLS 已登记线程上显式调用。
 #[no_mangle]
-pub extern "system" fn DllMain(hinst: HMODULE, reason: u32, _reserved: *mut c_void) -> BOOL {
-    if reason == DLL_PROCESS_ATTACH {
-        HINST.store(hinst.0 as isize, Ordering::SeqCst);
-        unsafe {
-            match CreateThread(None, 0, Some(worker), None, THREAD_CREATION_FLAGS(0), None) {
-                Ok(thread) => {
-                    let _ = CloseHandle(thread);
-                }
-                Err(_) => return BOOL(0),
-            }
-        }
-    }
+pub extern "system" fn DllMain(_hinst: HMODULE, _reason: u32, _reserved: *mut c_void) -> BOOL {
     TRUE
+}
+
+// 内存部署器调用的唯一业务入口；成功后再发布加载事件，失败映像由宿主回收且不会阻塞下一轮部署。
+#[no_mangle]
+pub extern "system" fn observationInitialize(stage: *mut u32) -> u32 {
+    if unsafe { initialize(stage) } {
+        signal_loaded();
+        1
+    } else {
+        0
+    }
 }
 
 #[cfg(test)]

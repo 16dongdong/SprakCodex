@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import net from "node:net";
-import { buildObservationHook } from "./buildObservationHook.mjs";
 import {
   findDesktopDevProcess,
   getDesktopDevProcessInfo,
@@ -393,8 +392,6 @@ if (!existsSync(resolve(frontendDir, "package.json"))) {
   process.exit(1);
 }
 
-// DLL 的源码依赖由 Cargo 判定增量，不能被前端 out/index.html 的复用条件跳过。
-buildObservationHook(resolve(frontendDir, ".."));
 // 独立更新器必须来自本次构建，随后作为安装资源打包；失败立即中止桌面构建。
 if (process.platform === "win32") {
   const workerBuild = spawnSync("cargo", ["build", "--release", "--manifest-path", resolve(frontendDir, "updateAgent/Cargo.toml")], { stdio: "inherit", windowsHide: true });

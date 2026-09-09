@@ -17,7 +17,7 @@ fn concurrentSendWritesRelayHeaderOnce() {
         let module = GetModuleHandleW(w!("Ws2_32.dll")).unwrap();
         let send: SendFn = std::mem::transmute(GetProcAddress(module, s!("send")).unwrap());
         // 只创建原调用 trampoline，不 enable，不影响测试程序的其他网络调用。
-        SEND.set(GenericDetour::new(send, hook_send as SendFn).unwrap())
+        SEND.set(RawDetour::new(send as *const (), hook_send as *const ()).unwrap())
             .unwrap();
     }
     let target = HookProxyTarget {

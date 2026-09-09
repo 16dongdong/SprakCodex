@@ -3,7 +3,6 @@ use super::{
     super::{nativeInjection, processInjector, processMonitor, runtimePaths},
     waitClient,
 };
-use cpcommon::{relayContract::RelayConfig, runtimeLease::currentIdentity};
 use std::{
     io::Write,
     path::{Path, PathBuf},
@@ -16,6 +15,7 @@ pub(super) struct InjectedTarget {
     pub(super) child: Option<Child>,
     concurrentChildren: Vec<Child>,
     pub(super) moduleDirectory: PathBuf,
+    relayPublisher: Option<runtimePaths::RelayPublisher>,
     pub(super) monitor: Option<(
         tokio_util::sync::CancellationToken,
         std::thread::JoinHandle<()>,
@@ -55,13 +55,13 @@ pub(super) fn run(
     relayPort: u16,
 ) -> bool {
     let mut target = prepare(directory, certificate, relayPort);
-    let module = target.moduleDirectory.join("cphook.dll");
+    let image = runtimePaths::moduleImage().expect("Windows 测试必须包含观测载荷");
     let mode = std::env::var("OBSERVATION_TEST_CAPTURE_MODE").unwrap();
     let monitored = matches!(mode.as_str(), "monitored" | "concurrent");
     // 隔离选择绑定创建时间和可执行文件，避免测试子进程退出后 PID 复用误选用户其他会话。
     let selectedProcess = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
     if monitored {
-        target.monitor = Some(startMonitor(module.clone(), selectedProcess.clone(), None));
+        target.monitor = Some(startMonitor(image, selectedProcess.clone(), None));
     }
     if mode == "concurrent" {
         return runConcurrent(command, &mut target, selectedProcess, directory);
@@ -73,7 +73,7 @@ pub(super) fn run(
     } else {
         waitForPrompt(client, &directory.join("clientDiagnostics.log"));
         let identity = nativeInjection::candidate(client.id()).unwrap();
-        nativeInjection::inject(&identity, &module).unwrap();
+        nativeInjection::inject(&identity, image).unwrap();
         client
             .stdin
             .take()
@@ -175,51 +175,29 @@ fn waitForPrompt(client: &mut Child, diagnostic: &Path) {
 
 // 共用独占模块与配置准备，不启动客户端或扫描器；返回对象负责回收它拥有的资源。
 pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> InjectedTarget {
-    let source = PathBuf::from(
-        std::env::var_os("OBSERVATION_TEST_NETWORK_DLL").expect("指定本次构建的生产 DLL"),
-    );
-    assert!(source.is_absolute() && source.is_file());
     let moduleDirectory = directory.join("module");
     std::fs::create_dir(&moduleDirectory).unwrap();
     let target = InjectedTarget {
         child: None,
         concurrentChildren: Vec::new(),
         moduleDirectory,
+        relayPublisher: runtimePaths::createRelayPublisher().unwrap(),
         monitor: None,
     };
-    let module = target.moduleDirectory.join("cphook.dll");
-    std::fs::copy(source, &module).unwrap();
-    if std::env::var("OBSERVATION_TEST_NATIVE_COMPLETIONS").as_deref() == Ok("true") {
-        // 控制仅发布在本探针独占目录；生产 DLL 写出真实完成事件，与网络观测独立核对后合并。
-        use cpcommon::completionSpool::{self, Location, Settings};
-        let events = directory.join(completionSpool::directoryName);
-        std::fs::create_dir_all(&events).unwrap();
-        runtimePaths::writeAtomically(
-            &events.join(completionSpool::controlName),
-            &serde_json::to_vec(&Settings {
-                enabled: true,
-                directory: events.clone(),
-            })
-            .unwrap(),
-        )
-        .unwrap();
-        runtimePaths::writeAtomically(
-            &target.moduleDirectory.join(completionSpool::settingsName),
-            &serde_json::to_vec(&Location { directory: events }).unwrap(),
-        )
-        .unwrap();
-    }
-    let settings = RelayConfig {
+    let completionDirectory =
+        if std::env::var("OBSERVATION_TEST_NATIVE_COMPLETIONS").as_deref() == Ok("true") {
+            use cpcommon::completionSpool;
+            let events = directory.join(completionSpool::directoryName);
+            std::fs::create_dir_all(&events).unwrap();
+            Some(events)
+        } else {
+            None
+        };
+    runtimePaths::writeRelayConfig(
+        target.relayPublisher.as_ref().unwrap(),
         relayPort,
-        forceProxyTcp: true,
-        owner: Some(currentIdentity().unwrap()),
-        caCertificatePath: Some(certificate.to_owned()),
-    };
-    runtimePaths::writeAtomically(
-        &target
-            .moduleDirectory
-            .join(cpcommon::relayContract::configName),
-        &serde_json::to_vec(&settings).unwrap(),
+        Some(certificate),
+        completionDirectory.as_deref(),
     )
     .unwrap();
     target
@@ -227,7 +205,7 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
 
 // 候选按完整进程实例限定；首轮目录扫描完成后返回，加载就绪由各场景独立等待。
 pub(super) fn startMonitor(
-    module: PathBuf,
+    image: &'static [u8],
     selectedProcess: std::sync::Arc<std::sync::Mutex<Vec<processInjector::ProcessCandidate>>>,
     homes: Option<super::super::clientEventMonitor::HomeRegistration>,
 ) -> (
@@ -245,7 +223,7 @@ pub(super) fn startMonitor(
             .build()
             .unwrap();
         runtime.block_on(processMonitor::run(
-            module,
+            image,
             workerCancel,
             move || {
                 let expected = selection.lock().unwrap().clone();
@@ -259,9 +237,9 @@ pub(super) fn startMonitor(
                 }
                 Ok(candidates)
             },
-            move |candidate, module| {
+            move |candidate| {
                 if let Some(homes) = &homes {
-                    homes.register(processInjector::runtimeHome(candidate, module)?)?;
+                    homes.register(processInjector::runtimeHome(candidate)?)?;
                 }
                 Ok(())
             },
