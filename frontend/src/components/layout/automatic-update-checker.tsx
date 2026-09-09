@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAppStore } from "@/lib/store/useAppStore";
 import { Download, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -75,7 +76,7 @@ function checkForUpdate(): Promise<UpdateCheckResult> {
 // 自动更新提示只跳转本次检查对应的仓库；缺失仓库时固定到独立发行入口，返回 URL 而不执行下载。
 function buildReleaseUrl(summary: UpdateCheckResult): string {
   if (!summary.repo) {
-    return "https://github.com/16dongdong/CodexManager/releases";
+    return "https://github.com/16dongdong/SprakCodex/releases";
   }
   const tag =
     summary.releaseTag ||
@@ -104,6 +105,17 @@ export function AutomaticUpdateChecker() {
         recordAutomaticCheckCompleted(Date.now());
         return;
       }
+      if (useAppStore.getState().appSettings.silentUpdate) {
+        await appClient.prepareUpdate();
+        // 更新器在原子空闲检查后才退出主程序；繁忙时限次等待，下轮自动检查继续。
+        for (let attempt = 0; attempt < 60 && activeRef.current; attempt += 1) {
+          if (!useAppStore.getState().appSettings.silentUpdate) return;
+          const result = await appClient.applySilentUpdate();
+          if (result.ok) { recordAutomaticCheckCompleted(Date.now()); return; }
+          await new Promise((resolve) => window.setTimeout(resolve, 30_000));
+        }
+        return;
+      }
       await appClient.showMainWindow().catch(() => undefined);
       if (!activeRef.current) return;
 
@@ -113,8 +125,9 @@ export function AutomaticUpdateChecker() {
         current?.latestVersion === summary.latestVersion ? current : null,
       );
       setDialogOpen(true);
-    } catch {
-      // Automatic checks are deliberately silent. The next scheduled check can retry.
+    } catch (error) {
+      // 自动检查不弹窗；保留可诊断错误，下一次周期检查继续尝试。
+      console.error(getAppErrorMessage(error));
     }
   }, []);
 
@@ -191,6 +204,7 @@ export function AutomaticUpdateChecker() {
       const result = preparedUpdate.isPortable
         ? await appClient.applyUpdatePortable()
         : await appClient.launchInstaller();
+      if (!result.ok) { toast.info(result.message); return; }
       setDialogOpen(false);
       toast.success(
         result.message.trim() ||

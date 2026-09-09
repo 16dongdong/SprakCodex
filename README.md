@@ -42,3 +42,7 @@ pwsh -File backend/scripts/rebuild.ps1 -Bundle nsis
 详细会话分流设计见 [`docs/sessionRouting.md`](docs/sessionRouting.md)。
 
 应用显示名称为 SprakCodex；为兼容升级，内部应用标识、数据库目录和程序文件名保持不变。
+
+## 更新
+
+正式版本使用 `v0.6.1` 这样的标准标签。Windows 设置支持静默更新，独立 `updateAgent.exe` 随安装包部署。首次升级本版后可使用新流程；协议、校验范围和回滚边界见 [桌面更新协议](docs/desktopUpdates.md)。

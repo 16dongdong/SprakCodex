@@ -107,6 +107,7 @@ export default function SettingsPage() {
                 <Label>{t("语言")}</Label>
                 <LanguageSwitcher />
               </div>
+              <SettingSwitchRow label={t("静默更新")} description={t("发现新版后后台下载，空闲时安装并自动重启，不弹出更新通知")} checked={snapshot.silentUpdate} disabled={!isDesktopRuntime} onChange={(value) => change({ silentUpdate: value, ...(value ? { updateAutoCheck: true } : {}) })} />
               <SettingSwitchRow label={t("自动检查更新")} description={t("启动完成后在后台检查更新")} checked={snapshot.updateAutoCheck} onChange={(value) => change({ updateAutoCheck: value })} />
               <SettingSwitchRow label={t("开机自动启动")} description={t("系统登录后自动启动桌面端")} checked={snapshot.autoStartEnabled} disabled={!snapshot.autoStartSupported} onChange={(value) => change({ autoStartEnabled: value })} />
               <SettingSwitchRow label={t("启动时显示主界面")} description={t("关闭后从托盘按需打开主界面")} checked={snapshot.showMainWindowOnStartup} onChange={(value) => change({ showMainWindowOnStartup: value })} />

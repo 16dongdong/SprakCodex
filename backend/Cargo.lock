@@ -440,7 +440,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-core"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "base64",
  "chrono",
@@ -455,7 +455,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-direct-common"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -465,7 +465,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-direct-hook"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "base64",
  "codexmanager-direct-common",
@@ -478,7 +478,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-service"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "async-compression",
  "axum",
@@ -534,7 +534,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-start"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "codexmanager-service",
  "ctrlc",
@@ -545,7 +545,7 @@ dependencies = [
 
 [[package]]
 name = "codexmanager-web"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "axum",
  "codexmanager-service",

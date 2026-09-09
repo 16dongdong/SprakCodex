@@ -4110,3 +4110,19 @@ fn rpc_system_proxy_jobs_flow() {
     }
     let _ = proxy_handle.join();
 }
+
+// 设置状态往返验证默认关闭、启用依赖关系与关闭检查时的同步禁用，使用隔离测试数据库。
+#[test]
+fn rpc_silent_update_settings_preserve_consistency() {
+    let _ctx = RpcTestContext::new("rpc-silent-update-settings");
+    let first = codexmanager_service::start_one_shot_server().expect("启动测试服务");
+    let snapshot = post_rpc_method(&first.addr, 901, "appSettings/get", None);
+    assert_eq!(snapshot["result"]["silentUpdate"], false);
+    let enable = codexmanager_service::start_one_shot_server().expect("启动测试服务");
+    let snapshot = post_rpc_method(&enable.addr, 902, "appSettings/set", Some(serde_json::json!({"silentUpdate":true})));
+    assert_eq!(snapshot["result"]["silentUpdate"], true);
+    assert_eq!(snapshot["result"]["updateAutoCheck"], true);
+    let disable = codexmanager_service::start_one_shot_server().expect("启动测试服务");
+    let snapshot = post_rpc_method(&disable.addr, 903, "appSettings/set", Some(serde_json::json!({"updateAutoCheck":false})));
+    assert_eq!(snapshot["result"]["silentUpdate"], false);
+}

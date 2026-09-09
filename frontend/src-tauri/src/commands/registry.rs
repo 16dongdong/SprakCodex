@@ -1,4 +1,4 @@
-﻿macro_rules! invoke_handler {
+macro_rules! invoke_handler {
     () => {
         tauri::generate_handler![
             // service
@@ -102,6 +102,7 @@
             crate::commands::system::app_window_unsaved_draft_sections_set,
             crate::commands::system::app_show_main_window,
             // updater
+            crate::commands::updater::app_update_apply_silent,
             crate::commands::updater::app_update_check,
             crate::commands::updater::app_update_prepare,
             crate::commands::updater::app_update_apply_portable,

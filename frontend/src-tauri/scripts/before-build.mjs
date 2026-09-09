@@ -395,6 +395,12 @@ if (!existsSync(resolve(frontendDir, "package.json"))) {
 
 // DLL 的源码依赖由 Cargo 判定增量，不能被前端 out/index.html 的复用条件跳过。
 buildObservationHook(resolve(frontendDir, ".."));
+// 独立更新器必须来自本次构建，随后作为安装资源打包；失败立即中止桌面构建。
+if (process.platform === "win32") {
+  const workerBuild = spawnSync("cargo", ["build", "--release", "--manifest-path", resolve(frontendDir, "updateAgent/Cargo.toml")], { stdio: "inherit", windowsHide: true });
+  if (workerBuild.error) throw workerBuild.error;
+  if (workerBuild.status !== 0) process.exit(workerBuild.status ?? 1);
+}
 
 if (task === "build:desktop" && hasBuiltFrontendDist(frontendDir)) {
   console.log(`前端产物已存在，跳过重复构建: ${resolve(frontendDir, "out", "index.html")}`);

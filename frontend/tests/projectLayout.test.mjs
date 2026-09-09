@@ -30,7 +30,7 @@ async function verifyBuildBoundaries() {
   const desktopManifest = await fs.readFile(path.join(desktopRoot, "Cargo.toml"), "utf8");
   for (const dependency of desktopManifest.matchAll(/path\s*=\s*"([^"]+)"/g)) {
     const manifestPath = path.resolve(desktopRoot, dependency[1], "Cargo.toml");
-    assert.ok(manifestPath.startsWith(path.join(repositoryRoot, "backend") + path.sep));
+    assert.ok(manifestPath.startsWith(path.join(repositoryRoot, "backend") + path.sep) || manifestPath === path.join(repositoryRoot, "frontend", "updateAgent", "Cargo.toml"));
     await fs.access(manifestPath);
   }
   const webRoot = path.join(repositoryRoot, "backend/crates/web");

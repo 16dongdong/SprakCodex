@@ -50,6 +50,7 @@ export type GatewayTransportPatch = Partial<GatewayTransportValues>;
 
 export interface AppSettings extends GatewayTransportValues {
   updateAutoCheck: boolean;
+  silentUpdate: boolean;
   autoStartEnabled: boolean;
   autoStartSupported: boolean;
   showMainWindowOnStartup: boolean;

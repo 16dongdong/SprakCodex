@@ -1754,6 +1754,7 @@ export function normalizeAppSettings(payload: unknown): AppSettings {
   );
   return {
     updateAutoCheck: asBoolean(source.updateAutoCheck, true),
+    silentUpdate: asBoolean(source.silentUpdate, false),
     autoStartEnabled: asBoolean(source.autoStartEnabled, false),
     autoStartSupported: asBoolean(source.autoStartSupported, false),
     showMainWindowOnStartup: asBoolean(source.showMainWindowOnStartup, true),

@@ -162,7 +162,9 @@ pub(super) async fn upgrade(
                 message = downstream.next() => match message {
                     Some(Ok(message)) => {
                         if tracked && observation.request(&message, (&host, &path)).is_err() {
+                            // 排空或容量拒绝后不再向上游发送未登记请求，保证更新的空闲判定真实。
                             taskEngine.sink.counters.errors.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                            break;
                         }
                         upstream.send(message).await
                     },

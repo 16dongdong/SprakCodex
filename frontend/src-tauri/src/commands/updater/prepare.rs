@@ -212,19 +212,9 @@ fn select_payload_asset(
     }
 
     if cfg!(target_os = "windows") {
-        if let Some(exe) = assets.iter().find(|asset| {
-            let name = asset.name.to_ascii_lowercase();
-            name.ends_with(".exe") && !name.contains("portable")
-        }) {
-            return Some(exe.clone());
-        }
-        return assets
-            .iter()
-            .find(|asset| {
-                let name = asset.name.to_ascii_lowercase();
-                name.ends_with(".msi") && !name.contains("portable")
-            })
-            .cloned();
+        // 安装模式只选择版本匹配的 x64 NSIS 包，避免把更新器或其他附件当作安装器。
+        let expected = format!("SprakCodex_{latest_version}_x64-setup.exe");
+        return assets.iter().find(|asset| asset.name == expected).cloned();
     }
 
     if cfg!(target_os = "macos") {

@@ -30,6 +30,7 @@ pub(super) struct RoutingSnapshot {
 }
 
 pub(super) struct Exchange {
+    pub activityLease: Option<crate::updateActivity::RequestLease>,
     pub host: String,
     pub path: String,
     pub method: String,
@@ -54,6 +55,7 @@ impl Exchange {
     // 在接收请求或 response.created 时建立时间基准；随机标识只用于没有上游响应 ID 的失败请求。
     pub fn new(host: &str, path: &str, protocol: &str) -> Self {
         Self {
+            activityLease: None,
             host: host.into(),
             path: path.into(),
             method: "POST".into(),

@@ -52,6 +52,7 @@ impl Observation {
             generationProtocol
         };
         let mut exchange = Exchange::new(target.0, target.1, protocol);
+        exchange.activityLease = Some(crate::updateActivity::begin_request()?);
         exchange.method = "GET".into();
         exchange.captureHeaders(&self.headers);
         // 每条消息继承握手时已经应用到上游的路由决策，不在记录阶段重新分配账号。

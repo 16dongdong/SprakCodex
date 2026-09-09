@@ -193,3 +193,6 @@ pub(crate) fn test_env_guard() -> std::sync::MutexGuard<'static, ()> {
 pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) -> JsonRpcMessage {
     rpc_dispatch::handle_request_with_actor(req, actor)
 }
+
+#[allow(non_snake_case)]
+pub mod updateActivity;

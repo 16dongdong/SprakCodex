@@ -311,6 +311,12 @@ async fn dispatch(
         return websocketRelay::upgrade(request, engine, target, tracked).await;
     }
     let mut exchange = Exchange::new(host, target.path(), "http");
+    if tracked {
+        exchange.activityLease = match crate::updateActivity::begin_request() {
+            Ok(lease) => Some(lease),
+            Err(()) => return reply(StatusCode::SERVICE_UNAVAILABLE, "应用正在更新，请稍后重试"),
+        };
+    }
     exchange.method = request.method().to_string();
     let routeDecision = if tracked {
         match crate::sessionRouting::resolveRequest(request.headers()).await {

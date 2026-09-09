@@ -10,7 +10,7 @@ pub(crate) use env::load_env_from_exe_dir;
 pub(crate) use lifecycle::{handle_main_window_event, handle_run_event};
 pub(crate) use startup::{schedule_startup_main_window, sync_startup_window_state};
 pub(crate) use state::{
-    prepare_for_forced_app_exit, set_unsaved_settings_draft_sections, CLOSE_TO_TRAY_ON_CLOSE,
+    has_unsaved_settings_draft_sections, prepare_for_forced_app_exit, set_unsaved_settings_draft_sections, CLOSE_TO_TRAY_ON_CLOSE,
     KEEP_ALIVE_FOR_LIGHTWEIGHT_CLOSE, KEEP_WINDOW_UI_MOUNTED,
     LIGHTWEIGHT_MODE_ON_CLOSE_TO_TRAY, TRAY_AVAILABLE,
 };

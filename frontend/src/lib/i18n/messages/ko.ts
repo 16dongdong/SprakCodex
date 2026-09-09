@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { MessageCatalog } from "./types";
 import { KO_ACCESS_CONTROL_MESSAGES } from "./sections/ko-access-control";
@@ -90,6 +90,8 @@ export const KO_MESSAGES: MessageCatalog = {
   "本日按小时汇总全部请求": "오늘의 전체 요청 · 시간별 집계",
   "本周期按天汇总全部请求": "이 기간의 전체 요청 · 일별 집계",
   "关于 SprakCodex": "SprakCodex 정보",
+  "静默更新": "자동 업데이트",
+  "发现新版后后台下载，空闲时安装并自动重启，不弹出更新通知": "백그라운드 다운로드 후 유휴 상태에서 알림 없이 설치하고 다시 시작합니다",
   仪表盘: "대시보드",
   概览: "개요",
   平台接入: "플랫폼 연결",

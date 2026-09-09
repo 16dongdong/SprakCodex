@@ -527,6 +527,7 @@ fn apply_macos_bundle_update(
 ///
 /// # 返回
 /// 返回函数执行结果
+#[cfg(not(windows))]
 fn launch_installer(installer_path: &Path) -> Result<(), String> {
     if !installer_path.is_file() {
         return Err(format!("未找到安装包：{}", installer_path.display()));
@@ -659,6 +660,7 @@ pub(super) fn apply_portable_impl(app: tauri::AppHandle) -> Result<UpdateActionR
 ///
 /// # 返回
 /// 返回函数执行结果
+#[cfg(not(windows))]
 pub(super) fn launch_installer_impl(app: tauri::AppHandle) -> Result<UpdateActionResponse, String> {
     let pending = read_pending_update(&app)?
         .ok_or_else(|| "未找到已准备更新，请先调用 app_update_prepare".to_string())?;
@@ -709,6 +711,12 @@ pub(super) fn launch_installer_impl(app: tauri::AppHandle) -> Result<UpdateActio
             installer_log_path.display()
         ),
     })
+}
+
+// Windows 手动确认与静默安装使用同一更新器，确保等待退出与摘要校验没有两套分支。
+#[cfg(windows)]
+pub(super) fn launch_installer_impl(app: tauri::AppHandle) -> Result<UpdateActionResponse, String> {
+    super::windowsWorker::apply(app)
 }
 
 #[cfg(test)]

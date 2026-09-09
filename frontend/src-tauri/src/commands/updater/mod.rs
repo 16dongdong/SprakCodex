@@ -252,3 +252,16 @@ pub fn app_update_open_logs_dir(
     }
     open_in_file_manager_blocking(&target_dir.display().to_string())
 }
+
+#[cfg(windows)]
+#[allow(non_snake_case)]
+mod windowsWorker;
+
+// 更新安装在后台线程完成准备，避免哈希与等待阶段阻塞桌面事件循环。
+#[tauri::command]
+pub async fn app_update_apply_silent(app: tauri::AppHandle) -> Result<UpdateActionResponse, String> {
+    #[cfg(windows)]
+    { tauri::async_runtime::spawn_blocking(move || windowsWorker::apply(app)).await.map_err(|e| e.to_string())? }
+    #[cfg(not(windows))]
+    { let _ = app; Err("静默安装仅支持 Windows".into()) }
+}

@@ -319,6 +319,7 @@ fn current_app_settings_value_inner(
 
     let mut result = serde_json::json!({
         "updateAutoCheck": update_auto_check,
+        "silentUpdate": update_auto_check && setting_bool(&settings, "app.silent_update", false),
         "closeToTrayOnClose": close_to_tray,
         "closeToTraySupported": close_to_tray_supported,
         "lightweightModeOnCloseToTray": lightweight_mode_on_close_to_tray,

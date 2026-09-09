@@ -123,6 +123,8 @@ export const EN_MESSAGES: MessageCatalog = {
   "本日按小时汇总全部请求": "All requests today, grouped hourly",
   "本周期按天汇总全部请求": "All requests in this period, grouped daily",
   "关于 SprakCodex": "About SprakCodex",
+  "静默更新": "Silent updates",
+  "发现新版后后台下载，空闲时安装并自动重启，不弹出更新通知": "Download updates in the background, install when idle and restart without update notifications",
   仪表盘: "Dashboard",
   概览: "Overview",
   平台接入: "Platform Access",

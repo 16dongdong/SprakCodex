@@ -197,6 +197,9 @@ function readAppSession(value: unknown): AppSessionResult {
 }
 
 export const appClient = {
+  // 返回 ok=false 表示仍有活动任务，调用方延后安装且不弹提示。
+  applySilentUpdate: (): Promise<{ok: boolean; message: string}> => invoke("app_update_apply_silent"),
+
   async getSettings(): Promise<AppSettings> {
     const result = await invoke<unknown>("app_settings_get");
     return normalizeAppSettings(result);

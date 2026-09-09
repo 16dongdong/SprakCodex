@@ -24,6 +24,7 @@ use super::{
 // RPC 设置输入只描述产品能力，推广字段不再反序列化或持久化；现有客户端的其他字段保持兼容。
 pub(super) struct AppSettingsPatch {
     update_auto_check: Option<bool>,
+    silent_update: Option<bool>,
     auto_start_enabled: Option<bool>,
     show_main_window_on_startup: Option<bool>,
     close_to_tray_on_close: Option<bool>,
@@ -83,8 +84,14 @@ pub(super) fn parse_app_settings_patch(params: Option<&Value>) -> Result<AppSett
 
 // 将已解析的设置逐项应用到存储和运行时；移除推广配置写入，任一有效配置写入失败仍返回原错误。
 pub(super) fn apply_app_settings_patch(patch: AppSettingsPatch) -> Result<(), String> {
+    // 静默更新依赖自动检查；关闭自动检查时同步关闭静默模式，避免持久化状态互相矛盾。
+    if let Some(enabled) = patch.silent_update {
+        save_persisted_app_setting("app.silent_update", Some(if enabled { "1" } else { "0" }))?;
+        if enabled { set_update_auto_check_enabled(true)?; }
+    }
     if let Some(enabled) = patch.update_auto_check {
         set_update_auto_check_enabled(enabled)?;
+        if !enabled { save_persisted_app_setting("app.silent_update", Some("0"))?; }
     }
     if let Some(enabled) = patch.auto_start_enabled {
         set_auto_start_enabled_setting(enabled)?;

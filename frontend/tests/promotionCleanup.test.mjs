@@ -47,7 +47,7 @@ async function verifyUpdateOwnership() {
   ];
   for (const relativePath of sourcePaths) {
     const source = await fs.readFile(path.join(repositoryRoot, relativePath), "utf8");
-    assert.match(source, /16dongdong\/CodexManager/);
+    assert.match(source, /16dongdong\/SprakCodex/);
     assert.doesNotMatch(source, /qxcnm\/Codex-Manager/);
   }
 }

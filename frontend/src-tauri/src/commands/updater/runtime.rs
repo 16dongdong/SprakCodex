@@ -5,7 +5,7 @@ use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // 独立发行版只检查当前仓库，避免自动更新重新引入上游的推广页面。
-pub(super) const DEFAULT_UPDATE_REPO: &str = "16dongdong/CodexManager";
+pub(super) const DEFAULT_UPDATE_REPO: &str = "16dongdong/SprakCodex";
 pub(super) const PORTABLE_MARKER_FILE: &str = ".codexmanager-portable";
 pub(super) const USER_AGENT: &str = "CodexManager-Updater";
 static UPDATE_HTTP_CLIENT: OnceLock<Mutex<Option<Client>>> = OnceLock::new();
@@ -40,12 +40,9 @@ pub(super) fn now_unix_secs() -> u64 {
 ///
 /// # 返回
 /// 返回函数执行结果
+// 发行版固定查询当前仓库，避免旧环境变量把新更新器导向其他发布源。
 pub(super) fn resolve_update_repo() -> String {
-    std::env::var("CODEXMANAGER_UPDATE_REPO")
-        .ok()
-        .map(|v| v.trim().to_string())
-        .filter(|v| !v.is_empty())
-        .unwrap_or_else(|| DEFAULT_UPDATE_REPO.to_string())
+    DEFAULT_UPDATE_REPO.to_string()
 }
 
 /// 函数 `normalize_version`
