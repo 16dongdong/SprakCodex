@@ -2,10 +2,11 @@
 
 import { useDeferredValue, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RefreshCw, RotateCcw, ArrowRightLeft, MoreHorizontal, MessagesSquare, Copy } from "lucide-react";
+import { RefreshCw, ArrowRightLeft, Trash2, MessagesSquare, Copy } from "lucide-react";
 import { copyTextToClipboard } from "@/lib/utils/clipboard";
 import { toast } from "sonner";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { ContextMenu } from "@base-ui/react/context-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -40,7 +41,12 @@ export default function SessionsPage() {
   async function refreshBindings() {
     await Promise.all([queryClient.invalidateQueries({queryKey:["routingSessions"]}),queryClient.invalidateQueries({queryKey:["sessionRouting"]})]);
   }
-  const reset = useMutation({ mutationFn: sessionRoutingClient.reset, onSuccess: refreshBindings, onError: (error) => toast.error(getAppErrorMessage(error)) });
+  // 删除与原重置共用后端原子删除接口，记录和绑定同表清除；成功后退回有效页并清空旧选中项。
+  const reset = useMutation({ mutationFn: sessionRoutingClient.reset, onSuccess: async () => {
+    setSelectedId(null);
+    if (sessions.data?.items.length === 1 && page > 1) setPage(page - 1);
+    await refreshBindings();
+  }, onError: (error) => toast.error(getAppErrorMessage(error)) });
   const change = useMutation({
     mutationFn: async () => {
       if (!switchTarget || !accountId) throw new Error(t("请选择账号"));
@@ -72,24 +78,25 @@ export default function SessionsPage() {
       <section className="min-w-0 overflow-hidden border-b border-border/50 lg:border-r lg:border-b-0">
         <div className="border-b border-border/50 px-4 py-3 text-xs font-medium text-muted-foreground">{t("最近会话")}</div>
         <div className="max-h-[62vh] overflow-y-auto p-1.5">
-          {sessions.data?.items.map((session) => <div key={session.sessionId} className={`group flex items-center rounded-md ${selected?.sessionId === session.sessionId ? "bg-primary/10 ring-1 ring-inset ring-primary/15" : "hover:bg-muted/40"}`}>
+          {sessions.data?.items.map((session) => <ContextMenu.Root key={session.sessionId}><ContextMenu.Trigger onContextMenu={() => setSelectedId(session.sessionId)} className={`group flex items-center rounded-md ${selected?.sessionId === session.sessionId ? "bg-primary/10 ring-1 ring-inset ring-primary/15" : "hover:bg-muted/40"}`}>
             <button type="button" className="min-w-0 flex-1 px-2.5 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-pressed={selected?.sessionId === session.sessionId} title={`${session.title || ""}\n${session.sessionId}`} onClick={() => setSelectedId(session.sessionId)}>
               <span className="block truncate text-sm font-medium">{session.title?.trim() || session.sessionId.slice(0,8)}</span>
               <span className="mt-1 flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground"><span className={`size-1.5 shrink-0 rounded-full ${session.status === "active" ? "bg-green-500" : "bg-amber-500"}`} /><span className="truncate">{session.accountLabel ?? t("待分配")}</span><span className="ml-auto shrink-0">{t(session.status === "active" ? "正常" : session.status === "unbound" ? "未分流" : "待切换")}</span></span>
             </button>
-            <DropdownMenu><DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="mr-1 size-8 shrink-0" aria-label={t("会话操作")} />}><MoreHorizontal className="size-4" /></DropdownMenuTrigger><DropdownMenuContent align="end">
+          </ContextMenu.Trigger>
+            <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setSelectedId(session.sessionId)}>{t("详情")}</DropdownMenuItem>
               <DropdownMenuItem onClick={() => {setSwitchTarget(session);setAccountId("");}}><ArrowRightLeft className="size-4" />{t("切换账号")}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setResetTarget(session)}><RotateCcw className="size-4" />{t("重置绑定")}</DropdownMenuItem>
-            </DropdownMenuContent></DropdownMenu>
-          </div>)}
+              <DropdownMenuItem disabled={reset.isPending} onClick={() => setResetTarget(session)}><Trash2 className="size-4" />{t("删除会话记录")}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </ContextMenu.Root>)}
           {!sessions.data?.items.length && <p role="status" className="py-12 text-center text-sm text-muted-foreground">{t(sessions.isFetching ? "加载中..." : "暂无会话记录")}</p>}
         </div>
       </section>
       <section className="min-w-0 p-4 sm:p-5">
         {selected ? <>
           <div className="mb-5 flex items-start gap-3"><span className="rounded-lg bg-primary/10 p-2 text-primary"><MessagesSquare className="size-5" /></span><div className="min-w-0"><h2 className="line-clamp-2 break-words text-base font-semibold">{selected.title?.trim() || selected.sessionId.slice(0,8)}</h2><div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><p className="min-w-0 truncate" title={selected.projectPath || undefined}>{selected.projectPath || "—"}</p>{selected.projectPath && <Button variant="ghost" size="icon" className="size-6 shrink-0" aria-label={t("复制项目路径")} onClick={() => void copyValue(selected.projectPath!)}><Copy className="size-3" /></Button>}</div></div></div>
-          <div className="mb-5 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={() => {setSwitchTarget(selected);setAccountId("");}}><ArrowRightLeft className="size-3.5" />{t("切换账号")}</Button><Button variant="ghost" size="sm" disabled={reset.isPending} onClick={() => setResetTarget(selected)}><RotateCcw className="size-3.5" />{t("重置绑定")}</Button></div>
+          <div className="mb-5 flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={() => {setSwitchTarget(selected);setAccountId("");}}><ArrowRightLeft className="size-3.5" />{t("切换账号")}</Button><Button variant="ghost" size="sm" disabled={reset.isPending} onClick={() => setResetTarget(selected)}><Trash2 className="size-3.5" />{t("删除会话记录")}</Button></div>
           <dl className="grid gap-x-6 gap-y-4 text-sm xl:grid-cols-2">{[
             ["会话 ID",selected.sessionId], ["绑定账号",selected.accountLabel ?? t("待分配")],
             ["状态",t(selected.status === "active" ? "正常" : selected.status === "unbound" ? "未分流" : "待切换")],
@@ -101,7 +108,7 @@ export default function SessionsPage() {
       </section>
     </div>
     <div className="flex items-center justify-end gap-3 text-xs"><Button variant="outline" disabled={page<=1} onClick={() => setPage(page-1)}>{t("上一页")}</Button><span>{page} / {totalPages}</span><Button variant="outline" disabled={page>=totalPages} onClick={() => setPage(page+1)}>{t("下一页")}</Button></div>
-    <ConfirmDialog open={Boolean(resetTarget)} onOpenChange={(open) => {if(!open)setResetTarget(null);}} title={t("重置绑定")} description={t("删除此分流记录，下次连接重新分配账号；不会删除聊天内容。当前请求保持原账号直到结束。")}
+    <ConfirmDialog open={Boolean(resetTarget)} onOpenChange={(open) => {if(!open)setResetTarget(null);}} title={t("删除会话记录")} confirmVariant="destructive" description={t("删除此分流记录，下次连接重新分配账号；不会删除聊天内容。当前请求保持原账号直到结束。")}
       onConfirm={async () => {if(resetTarget)await reset.mutateAsync(resetTarget.sessionId);}} />
     <Dialog open={Boolean(switchTarget)} onOpenChange={(open) => {if(!open && !change.isPending)setSwitchTarget(null);}}>
       <DialogContent><DialogHeader><DialogTitle>{t("切换账号")}</DialogTitle><DialogDescription>{t("当前请求结束后切换连接，不重放已经发送的请求。")}</DialogDescription></DialogHeader>

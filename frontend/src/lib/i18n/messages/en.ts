@@ -1817,4 +1817,5 @@ export const EN_MESSAGES: MessageCatalog = {
   "后重置": "until reset",
   "复制会话 ID": "Copy session ID",
   "复制项目路径": "Copy project path",
+  "删除会话记录": "Delete session record",
 };
