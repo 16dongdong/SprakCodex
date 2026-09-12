@@ -8,7 +8,9 @@ use std::{
     sync::{Arc, OnceLock, RwLock},
 };
 
-const targetProcessNames: &[&str] = &["codex.exe", "codex-app.exe"];
+// Windows 上 ChatGPT 与 Codex 桌面壳都可能使用 ChatGPT.exe，模型请求子进程仍使用 codex.exe；
+// 三个名称必须按完整文件名选择，避免遗漏桌面网络进程或误接管名称相似的无关程序。
+const targetProcessNames: &[&str] = &["chatgpt.exe", "codex.exe", "codex-app.exe"];
 type DeploymentHandler = Arc<dyn Fn(bool, DeploymentRecord) -> Result<(), String> + Send + Sync>;
 static deployments: OnceLock<RwLock<BTreeMap<(u32, u64), DeploymentRecord>>> = OnceLock::new();
 static deploymentHandler: OnceLock<RwLock<Option<DeploymentHandler>>> = OnceLock::new();
@@ -20,7 +22,7 @@ pub(super) struct ProcessCandidate {
     pub executable: PathBuf,
 }
 
-// 过滤 Codex 主进程和 app-server，返回本次扫描的实时 PID；调用方不得缓存 PID 跨重启使用。
+// 过滤 ChatGPT/Codex 桌面进程及 app-server，返回本次扫描的实时 PID；调用方不得缓存 PID 跨重启使用。
 #[cfg(windows)]
 pub(super) fn findCandidates() -> Result<Vec<ProcessCandidate>, String> {
     Ok(super::processCatalog::targetPids()?

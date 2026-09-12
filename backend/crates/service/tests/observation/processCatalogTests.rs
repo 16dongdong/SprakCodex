@@ -4,8 +4,8 @@ use super::*;
 fn snapshot() -> Vec<u64> {
     let mut allocation = vec![0u64; 32];
     for (offset, name, pid, next) in [
-        (0usize, "CODEX.EXE", 111usize, 128u32),
-        (128, "other.exe", 222, 0),
+        (0usize, "CHATGPT.EXE", 111usize, 128u32),
+        (128, "CODEX.EXE", 222, 0),
     ] {
         let words: Vec<_> = name.encode_utf16().collect();
         unsafe {
@@ -43,7 +43,7 @@ fn view(allocation: &[u64]) -> &[u8] {
 // 完整 ASCII 名称命中，其他条目不产生候选；不读取命令行或环境值。
 #[test]
 fn basicDirectorySelectsExactNames() {
-    assert_eq!(parseBasic(view(&snapshot())).unwrap(), vec![111]);
+    assert_eq!(parseBasic(view(&snapshot())).unwrap(), vec![111, 222]);
 }
 
 // 截断、无前进链和范围外名字都在解引用前拒绝，禁止把部分损坏目录当成成功扫描。
