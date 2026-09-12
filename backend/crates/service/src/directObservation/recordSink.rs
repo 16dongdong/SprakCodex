@@ -175,6 +175,8 @@ impl RecordSink {
                     return;
                 }
                 while let Some(record) = receiver.blocking_recv() {
+                    let mut record = record;
+                    let identity = enrichClientIdentity(&storage, &mut record.request);
                     if let Some(session) = record.request.actual_source_id.as_deref().filter(|_| record.request.actual_source_kind.as_deref()==Some("session")) {
                         if let Err(error) = storage.touchRoutingSession(session,now_ts()) { log::error!("更新会话活动时间失败：{error}"); }
                     }
@@ -183,20 +185,22 @@ impl RecordSink {
                             if let Err(error) = storage.recordSessionQuotaFailure(account,until,now_ts()) { log::error!("记录会话额度冷却失败：{error}"); }
                         }
                     }
-                    let saved = storage.insertObservationDetails(
-                        &record.request,
-                        &record.parsed.usage,
-                        codexmanager_core::storage::ObservationContext {
-                            pricingModel: record
-                                .parsed
-                                .model
-                                .as_deref()
-                                .filter(|_| record.pricingAllowed)
-                                .map(crate::models_v2::policy_catalog_slug),
-                            legacyTraces: &record.aliases,
-                            details: record.details.as_deref(),
-                        },
-                    );
+                    let saved = identity.and_then(|_| {
+                        storage.insertObservationDetails(
+                            &record.request,
+                            &record.parsed.usage,
+                            codexmanager_core::storage::ObservationContext {
+                                pricingModel: record
+                                    .parsed
+                                    .model
+                                    .as_deref()
+                                    .filter(|_| record.pricingAllowed)
+                                    .map(crate::models_v2::policy_catalog_slug),
+                                legacyTraces: &record.aliases,
+                                details: record.details.as_deref(),
+                            },
+                        )
+                    });
                     let success = saved.is_ok();
                     match saved {
                         Ok(true) => {
@@ -331,6 +335,7 @@ impl RecordSink {
     pub(super) fn clientCompleted(
         &self,
         parsed: UsageParser,
+        sessionId: String,
         timestamp: i64,
         pricingAllowed: bool,
     ) -> Result<(), String> {
@@ -343,6 +348,10 @@ impl RecordSink {
             trace_id: Some(trace),
             request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
             model: parsed.model.clone(),
+            route_strategy: Some("passthrough".into()),
+            route_source: Some("thread-id".into()),
+            actual_source_kind: Some("session".into()),
+            actual_source_id: Some(sessionId),
             created_at: timestamp,
             error: (!pricingAllowed)
                 .then(|| "客户端报告了尚未表达的缓存写入计费，用量保留而费用未知".into()),
@@ -365,6 +374,36 @@ impl RecordSink {
             Err(_) => Err("客户端事件提交确认超时，保留读取位置供重试".into()),
         }
     }
+}
+
+// 完成事件的 thread UUID 与请求 thread-id 使用同一会话身份；仅分流启用且 active 绑定能证明实际路由账号。
+// 查询失败并入原事务失败语义，使磁盘事件保留重试，不提交缺少已知身份的残缺记录。
+fn enrichClientIdentity(
+    storage: &Storage,
+    request: &mut RequestLog,
+) -> rusqlite::Result<()> {
+    if request.request_type.as_deref()
+        != Some(codexmanager_core::storage::observationClientRequestType)
+    {
+        return Ok(());
+    }
+    let Some(sessionId) = request.actual_source_id.as_deref() else {
+        return Ok(());
+    };
+    let routingEnabled = storage
+        .get_app_setting(crate::sessionRouting::enabledSettingKey)?
+        .is_some_and(|value| value.eq_ignore_ascii_case("true"));
+    if !routingEnabled {
+        return Ok(());
+    }
+    let Some(identity) = storage.sessionRoutingLogIdentity(sessionId)? else {
+        return Ok(());
+    };
+    request.account_id = Some(identity.accountHeader);
+    request.account_label = Some(identity.accountLabel);
+    request.route_strategy = Some("sessionRouting".into());
+    request.route_source = Some(identity.routeSource);
+    Ok(())
 }
 
 #[cfg(test)]

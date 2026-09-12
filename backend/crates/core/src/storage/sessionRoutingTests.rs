@@ -1,5 +1,5 @@
 use super::*;
-use crate::storage::{now_ts, Account, Token};
+use crate::storage::{now_ts, Account, SessionRoutingLogIdentity, Token};
 
 /// 创建具备真实账号、令牌和迁移结构的内存库；测试失败时直接返回数据库错误。
 fn storage() -> Storage {
@@ -121,6 +121,37 @@ fn preferenceSummaryDefaultsToEnabledAndCountsBindings() {
             enabled: true,
             active_binding_count: 1,
         }]
+    );
+}
+
+// 日志身份只来自仍生效的会话绑定；待切换状态不允许把新旧账号猜成已完成响应的实际身份。
+#[test]
+fn logIdentityRequiresActiveBinding() {
+    let mut storage = storage();
+    insertAccount(&storage, "account-a", 0);
+    insertAccount(&storage, "account-b", 1);
+    storage
+        .resolveSessionRouting("thread-a", "thread-id", now_ts())
+        .expect("创建会话绑定");
+
+    assert_eq!(
+        storage
+            .sessionRoutingLogIdentity("thread-a")
+            .expect("读取日志身份"),
+        Some(SessionRoutingLogIdentity {
+            routeSource: "thread-id".to_string(),
+            accountHeader: "workspace-account-a".to_string(),
+            accountLabel: "账号 account-a".to_string(),
+        })
+    );
+    assert!(storage
+        .switchRoutingSession("thread-a", "account-b", now_ts())
+        .expect("标记账号切换"));
+    assert_eq!(
+        storage
+            .sessionRoutingLogIdentity("thread-a")
+            .expect("读取待切换日志身份"),
+        None
     );
 }
 

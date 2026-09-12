@@ -237,6 +237,13 @@ fn clientCompletionFillsMissingNetworkUsage() {
         request_type: Some("http".into()),
         status_code: Some(200),
         model: Some("gpt-5.4-mini".into()),
+        account_id: Some("workspace-a".into()),
+        account_label: Some("账号 A".into()),
+        key_id: Some("direct:fingerprint".into()),
+        route_strategy: Some("sessionRouting".into()),
+        route_source: Some("thread-id".into()),
+        actual_source_kind: Some("session".into()),
+        actual_source_id: Some("thread-a".into()),
         created_at: 1,
         ..Default::default()
     };
@@ -244,9 +251,12 @@ fn clientCompletionFillsMissingNetworkUsage() {
         .insertObservation(&network, &RequestTokenStat::default(), None, &[])
         .unwrap();
     let event = RequestLog {
+        trace_id: network.trace_id.clone(),
         request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
+        model: network.model.clone(),
         status_code: None,
-        ..network.clone()
+        created_at: 2,
+        ..Default::default()
     };
     let usage = RequestTokenStat {
         input_tokens: Some(100),
@@ -262,6 +272,13 @@ fn clientCompletionFillsMissingNetworkUsage() {
     assert_eq!(records.len(), 1);
     assert_eq!(records[0].request_type.as_deref(), Some("http"));
     assert_eq!(records[0].status_code, Some(200));
+    assert_eq!(records[0].account_id.as_deref(), Some("workspace-a"));
+    assert_eq!(records[0].account_label.as_deref(), Some("账号 A"));
+    assert_eq!(records[0].key_id.as_deref(), Some("direct:fingerprint"));
+    assert_eq!(records[0].route_strategy.as_deref(), Some("sessionRouting"));
+    assert_eq!(records[0].route_source.as_deref(), Some("thread-id"));
+    assert_eq!(records[0].actual_source_kind.as_deref(), Some("session"));
+    assert_eq!(records[0].actual_source_id.as_deref(), Some("thread-a"));
     assert_eq!(records[0].input_tokens, Some(100));
     assert!(records[0].error.is_none());
     assert!(storage.get_charge_snapshot_v2(1).unwrap().is_some());

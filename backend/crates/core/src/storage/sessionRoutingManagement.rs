@@ -1,7 +1,37 @@
 use super::*;
+use crate::storage::SessionRoutingLogIdentity;
+use rusqlite::OptionalExtension;
 use serde_json::{json, Value};
 
 impl Storage {
+    // 客户端完成事件没有认证头，只在会话仍保持 active 绑定时返回当次稳定路由身份；
+    // pending、unbound 或账号已删除都保持未知，避免把切换后的账号倒填到较早响应。
+    pub fn sessionRoutingLogIdentity(
+        &self,
+        sessionId: &str,
+    ) -> Result<Option<SessionRoutingLogIdentity>> {
+        self.conn
+            .query_row(
+                "SELECT b.route_source,
+                        COALESCE(NULLIF(a.chatgpt_account_id,''), NULLIF(a.workspace_id,'')),
+                        a.label
+                 FROM session_routing_bindings b
+                 JOIN accounts a ON a.id=b.account_id
+                 WHERE b.session_id=?1
+                   AND b.status='active'
+                   AND COALESCE(NULLIF(a.chatgpt_account_id,''), NULLIF(a.workspace_id,'')) IS NOT NULL",
+                [sessionId],
+                |row| {
+                    Ok(SessionRoutingLogIdentity {
+                        routeSource: row.get(0)?,
+                        accountHeader: row.get(1)?,
+                        accountLabel: row.get(2)?,
+                    })
+                },
+            )
+            .optional()
+    }
+
     // 只返回已接入会话的标识，用于外部元数据的最小范围读取。
     pub fn routingSessionIds(&self) -> Result<Vec<String>> {
         self.conn.prepare("SELECT session_id FROM session_routing_bindings")?.query_map([],|r|r.get(0))?.collect()

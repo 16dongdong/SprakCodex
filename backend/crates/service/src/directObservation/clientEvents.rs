@@ -66,6 +66,7 @@ struct Event {
 // 只输出完成事件的必要字段，写入成功确认后才推进文件位置。
 pub(super) struct Completion {
     pub parsed: UsageParser,
+    pub sessionId: String,
     pub timestamp: i64,
     pub pricingAllowed: bool,
 }
@@ -206,6 +207,7 @@ impl Journal {
                 );
                 report(Completion {
                     parsed,
+                    sessionId: completed.thread_id,
                     timestamp: timestamp / 1000,
                     pricingAllowed: usage.cache_write_input_tokens == Some(0),
                 })?;

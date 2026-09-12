@@ -53,6 +53,7 @@ fn fragmentedEventRetainsContextWithoutReplaying() {
         .unwrap();
     assert_eq!(records.len(), 1);
     assert_eq!(records[0].parsed.model.as_deref(), Some("gpt-5.4-mini"));
+    assert_eq!(records[0].sessionId, "fixture");
     assert_eq!(records[0].parsed.usage.total_tokens, Some(13));
     assert!(records[0].pricingAllowed);
     journal

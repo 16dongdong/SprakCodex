@@ -135,6 +135,7 @@ fn consume(path: &Path, sink: &RecordSink) -> Result<(), &'static str> {
         );
         sink.clientCompleted(
             parsed,
+            completion.threadId,
             completion.timestampMillis / 1000,
             completion.cacheWriteInputTokens == 0,
         )

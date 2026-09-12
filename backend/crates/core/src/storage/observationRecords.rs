@@ -292,7 +292,8 @@ fn loadPrevious(tx: &Transaction<'_>, trace: &str, aliases: &[String]) -> Result
     tx.query_row("SELECT r.id,r.request_type,r.model,t.input_tokens,t.cached_input_tokens,t.output_tokens,t.total_tokens,t.reasoning_output_tokens,
         (SELECT m.slug FROM request_charge_snapshots s JOIN models m ON m.id=s.model_id WHERE s.request_log_id=r.id),
         (SELECT s.base_cost_microusd FROM request_charge_snapshots s WHERE s.request_log_id=r.id),
-        r.request_path,r.method,r.upstream_url,r.status_code,r.duration_ms,r.first_response_ms,r.error,r.created_at,r.model_source
+        r.request_path,r.method,r.upstream_url,r.status_code,r.duration_ms,r.first_response_ms,r.error,r.created_at,r.model_source,
+        r.route_source,r.actual_source_kind,r.actual_source_id,r.account_id,r.account_label,r.key_id,r.route_strategy
         FROM request_logs r LEFT JOIN request_token_stats t ON t.request_log_id=r.id
         WHERE r.gateway_mode='directObservation' AND r.trace_id IN (?1,?2,?3) LIMIT 1",
         params![trace, aliases.first(), aliases.get(1)], |row| Ok(Previous {
@@ -302,7 +303,10 @@ fn loadPrevious(tx: &Transaction<'_>, trace: &str, aliases: &[String]) -> Result
             }, pricingModel: row.get(8)?, cost: row.get(9)?, route: RequestLog {
                 request_type: row.get(1)?, model: row.get(2)?, request_path: row.get(10)?, method: row.get(11)?,
                 upstream_url: row.get(12)?, status_code: row.get(13)?, duration_ms: row.get(14)?, first_response_ms: row.get(15)?,
-                error: row.get(16)?, created_at: row.get(17)?, ..Default::default()
+                error: row.get(16)?, created_at: row.get(17)?, route_source: row.get(19)?,
+                actual_source_kind: row.get(20)?, actual_source_id: row.get(21)?, account_id: row.get(22)?,
+                account_label: row.get(23)?, key_id: row.get(24)?, route_strategy: row.get(25)?,
+                ..Default::default()
             }, modelSource: row.get::<_, Option<String>>(18)?.unwrap_or_else(|| "upstream".into())
         })).optional()
 }
@@ -314,13 +318,12 @@ fn writeRequest(
     id: Option<i64>,
     modelSource: &str,
 ) -> Result<i64> {
-    let client = request.request_type.as_deref() == Some(observationClientRequestType);
     tx.execute(
             "INSERT INTO request_logs (id, trace_id, request_path, original_path, method,
              request_type, gateway_mode, route_source, model, upstream_model, model_source,
              actual_source_kind, upstream_url, status_code, duration_ms, first_response_ms, error, created_at, reasoning_effort, service_tier, account_id, key_id, client_model, effective_service_tier, account_label, route_strategy, actual_source_id)
              VALUES (?12, ?1, ?2, ?2, ?3, ?4, 'directObservation', ?13, ?5, ?15,
-             ?14, ?13, ?6, ?7, ?8, ?9, ?10, ?11, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24)
+             ?14, ?25, ?6, ?7, ?8, ?9, ?10, ?11, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24)
              ON CONFLICT(id) DO UPDATE SET trace_id=excluded.trace_id,request_path=excluded.request_path,
              original_path=excluded.original_path,method=excluded.method,request_type=excluded.request_type,
              route_source=excluded.route_source,model=excluded.model,upstream_model=excluded.upstream_model,
@@ -330,8 +333,8 @@ fn writeRequest(
             params![request.trace_id, request.request_path, request.method, request.request_type,
                 request.model, request.upstream_url, request.status_code, request.duration_ms,
                 request.first_response_ms, request.error, request.created_at, id,
-                if client { "clientObservation" } else { "directObservation" }, modelSource,
-                if modelSource == "upstream" { request.model.as_deref() } else { None }, request.reasoning_effort, request.service_tier, request.account_id, request.key_id, request.client_model, request.effective_service_tier, request.account_label, request.route_strategy, request.actual_source_id],
+                request.route_source, modelSource,
+                if modelSource == "upstream" { request.model.as_deref() } else { None }, request.reasoning_effort, request.service_tier, request.account_id, request.key_id, request.client_model, request.effective_service_tier, request.account_label, request.route_strategy, request.actual_source_id, request.actual_source_kind],
         )?;
     let requestId = id.unwrap_or_else(|| tx.last_insert_rowid());
     // 同一账号且同一凭据指纹证明身份来源一致，可补齐旧网络记录名称；不猜测纯客户端事件的账号。

@@ -148,6 +148,7 @@ impl EventMonitor {
                             &mut |completed| {
                                 sink.clientCompleted(
                                     completed.parsed,
+                                    completed.sessionId,
                                     completed.timestamp,
                                     completed.pricingAllowed,
                                 )

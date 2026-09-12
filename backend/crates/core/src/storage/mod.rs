@@ -617,6 +617,14 @@ pub struct AccountRoutingPreference {
     pub active_binding_count: i64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[allow(non_snake_case)]
+pub struct SessionRoutingLogIdentity {
+    pub routeSource: String,
+    pub accountHeader: String,
+    pub accountLabel: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct AccountTokenPlan {
     pub account_id: String,
