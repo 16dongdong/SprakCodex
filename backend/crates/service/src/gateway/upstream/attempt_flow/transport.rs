@@ -950,11 +950,26 @@ fn send_upstream_request_with_compression_override(
     let attempt_started_at = Instant::now();
     let is_compact_request = is_compact_request_path(request_ctx.request_path);
     let chatgpt_account_header = resolve_chatgpt_account_header(account, target_url);
-    let body_for_transport = if is_compact_request {
+    let mut body_for_transport = if is_compact_request {
         strip_compact_service_tier_for_transport(body, chatgpt_account_header.is_some())
     } else {
         body.clone()
     };
+    let egress_identity = super::super::egress_identity::resolve_for_account_with_client(
+        account.id.as_str(),
+        client,
+        target_url,
+    );
+    if (request_ctx.request_path.contains("/responses") || is_compact_request)
+        && egress_identity.is_some()
+    {
+        let identity = egress_identity
+            .as_ref()
+            .expect("出口画像已在条件中确认存在");
+        // 账号候选在此处已经固定，必须使用该账号真实代理出口的画像，不能提前套用其他候选或本机地区。
+        body_for_transport =
+            super::super::egress_identity::apply_client_metadata(&body_for_transport, identity);
+    }
     let prompt_cache_key = extract_prompt_cache_key(body_for_transport.as_ref());
     let request_affinity = super::super::super::session_affinity::derive_outgoing_session_affinity(
         incoming_headers.session_id(),
@@ -1096,6 +1111,9 @@ fn send_upstream_request_with_compression_override(
         incoming_headers.originator(),
         drop_session_headers,
     );
+    if let Some(identity) = egress_identity.as_ref() {
+        super::super::egress_identity::apply_headers(&mut upstream_headers, identity);
+    }
     super::super::header_profile::apply_codex_target_accept_header(
         &mut upstream_headers,
         target_url,

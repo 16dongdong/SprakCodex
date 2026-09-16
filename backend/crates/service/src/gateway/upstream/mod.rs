@@ -1,5 +1,6 @@
 pub(super) mod attempt_flow;
 pub(super) mod config;
+pub(super) mod egress_identity;
 pub(super) mod executor;
 pub(super) mod header_profile;
 pub(super) mod protocol;

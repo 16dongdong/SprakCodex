@@ -1132,6 +1132,7 @@ fn upstream_websocket_request_filters_local_image_marker_and_forwards_oai_attest
         &authorization,
         &context,
         false,
+        None,
     )
     .unwrap_or_else(|err| panic!("build upstream websocket request failed: {}", err.message));
 
@@ -1199,6 +1200,7 @@ fn upstream_websocket_request_preserves_real_actor_authorization() {
         &authorization,
         &context,
         false,
+        None,
     )
     .unwrap_or_else(|err| panic!("build upstream websocket request failed: {}", err.message));
 
@@ -1237,6 +1239,7 @@ fn upstream_websocket_request_preserves_agent_assertion_and_fedramp() {
         &authorization,
         &context,
         false,
+        None,
     )
     .unwrap_or_else(|err| panic!("build upstream websocket request failed: {}", err.message));
 
@@ -1887,6 +1890,7 @@ fn upstream_websocket_account_rebase_strips_session_affinity_headers() {
         &websocket_bearer_authorization("bearer-ws"),
         &context,
         true,
+        None,
     )
     .unwrap_or_else(|err| panic!("build rebased websocket request failed: {}", err.message));
 

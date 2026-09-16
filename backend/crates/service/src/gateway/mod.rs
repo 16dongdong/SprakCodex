@@ -305,6 +305,11 @@ use failover::{
 use http_bridge::respond_with_upstream;
 pub(crate) use http_bridge::summarize_upstream_error_hint_from_body;
 pub(crate) use http_bridge::PassthroughSseProtocol;
+pub(crate) use upstream::egress_identity::{
+    apply_client_metadata_text as apply_egress_client_metadata_text,
+    resolve_for_account as resolve_egress_identity,
+    resolve_for_account_with_client as resolve_egress_identity_with_client, EgressIdentity,
+};
 /// 函数 `extract_identity_error_code_from_headers`
 ///
 ///

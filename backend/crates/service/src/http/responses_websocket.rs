@@ -560,6 +560,7 @@ async fn run_responses_websocket_session(mut socket: WebSocket, context: WsReque
         attempted_account_ids: first_attempted_account_ids,
         retried_missing_tool_call_context: false,
     };
+    apply_ws_egress_identity(&mut first_pending.prepared, upstream.account_id.as_str());
 
     let mut completed_responses = CompletedWsResponseCache::default();
     if let Err(err) = upstream
@@ -859,49 +860,59 @@ async fn run_responses_websocket_session(mut socket: WebSocket, context: WsReque
                                             break;
                                         }
                                     }
-                                } else if let Err(send_err) = upstream.stream.send(
-                                    UpstreamMessage::Text(current_pending.prepared.text.clone().into()),
-                                ).await {
-                                    let previous_account_id = upstream.account_id.clone();
-                                    log::warn!(
-                                        "event=responses_ws_upstream_stale_send account_id={} err={send_err}",
-                                        previous_account_id,
+                                } else {
+                                    apply_ws_egress_identity(
+                                        &mut current_pending.prepared,
+                                        upstream.account_id.as_str(),
                                     );
-                                    let _ = upstream.stream.close(None).await;
-                                    match reconnect_upstream_for_pending_request(
-                                        &context,
-                                        &mut current_pending,
-                                        Some(previous_account_id.as_str()),
-                                        &completed_responses,
-                                        &completed_tool_calls,
-                                    )
-                                    .await
-                                    {
-                                        Ok(replacement) => {
-                                            log::info!(
-                                                "event=responses_ws_upstream_reconnected previous_account_id={} account_id={} reason=stale_send",
-                                                previous_account_id,
-                                                replacement.account_id,
-                                            );
-                                            upstream = replacement;
-                                        }
-                                        Err(err) => {
-                                            finalize_ws_request_log(
-                                                &context,
-                                                &current_pending.log,
-                                                None,
-                                                None,
-                                                err.status,
-                                                crate::gateway::RequestLogUsage::default(),
-                                                Some(err.message.clone()),
-                                            );
-                                            send_ws_error_and_close(
-                                                &mut socket,
-                                                err,
-                                                context.prefer_raw_errors,
-                                            )
-                                            .await;
-                                            break;
+                                    let send_result = upstream
+                                        .stream
+                                        .send(UpstreamMessage::Text(
+                                            current_pending.prepared.text.clone().into(),
+                                        ))
+                                        .await;
+                                    if let Err(send_err) = send_result {
+                                        let previous_account_id = upstream.account_id.clone();
+                                        log::warn!(
+                                            "event=responses_ws_upstream_stale_send account_id={} err={send_err}",
+                                            previous_account_id,
+                                        );
+                                        let _ = upstream.stream.close(None).await;
+                                        match reconnect_upstream_for_pending_request(
+                                            &context,
+                                            &mut current_pending,
+                                            Some(previous_account_id.as_str()),
+                                            &completed_responses,
+                                            &completed_tool_calls,
+                                        )
+                                        .await
+                                        {
+                                            Ok(replacement) => {
+                                                log::info!(
+                                                    "event=responses_ws_upstream_reconnected previous_account_id={} account_id={} reason=stale_send",
+                                                    previous_account_id,
+                                                    replacement.account_id,
+                                                );
+                                                upstream = replacement;
+                                            }
+                                            Err(err) => {
+                                                finalize_ws_request_log(
+                                                    &context,
+                                                    &current_pending.log,
+                                                    None,
+                                                    None,
+                                                    err.status,
+                                                    crate::gateway::RequestLogUsage::default(),
+                                                    Some(err.message.clone()),
+                                                );
+                                                send_ws_error_and_close(
+                                                    &mut socket,
+                                                    err,
+                                                    context.prefer_raw_errors,
+                                                )
+                                                .await;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -2366,6 +2377,7 @@ async fn reconnect_upstream_for_pending_request(
             let _ = replacement.stream.close(None).await;
             return Err(err);
         }
+        apply_ws_egress_identity(&mut pending.prepared, replacement.account_id.as_str());
 
         pending.attempted_account_ids.clear();
         pending
@@ -2531,12 +2543,27 @@ async fn connect_account_upstream_websocket(
 ) -> Result<UpstreamWebsocketStream, String> {
     let (authorization, token) =
         resolve_upstream_authorization_for_websocket(account.clone(), token).await?;
+    let identity_account_id = account.id.clone();
+    let identity_target_url = ws_url.to_string();
+    let egress_identity = tokio::task::spawn_blocking(move || {
+        let client =
+            crate::gateway::upstream_client_for_account(identity_account_id.as_str()).ok()?;
+        crate::gateway::resolve_egress_identity_with_client(
+            identity_account_id.as_str(),
+            &client,
+            identity_target_url.as_str(),
+        )
+    })
+    .await
+    .ok()
+    .flatten();
     let request = build_upstream_websocket_request(
         ws_url,
         account,
         &authorization,
         context,
         strip_session_affinity,
+        egress_identity.as_ref(),
     )
     .map_err(|err| err.message)?;
     let proxy_url =
@@ -2559,6 +2586,7 @@ async fn connect_account_upstream_websocket(
             &authorization,
             context,
             strip_session_affinity,
+            egress_identity.as_ref(),
         )
         .map_err(|err| err.message)?;
         return connect_upstream_websocket_request_detailed(
@@ -2623,6 +2651,7 @@ async fn connect_account_upstream_websocket(
         &retry_authorization,
         context,
         strip_session_affinity,
+        egress_identity.as_ref(),
     )
     .map_err(|err| err.message)?;
     connect_upstream_websocket_request_detailed(retry_request, ws_url, proxy_url.as_deref())
@@ -3183,6 +3212,7 @@ fn build_upstream_websocket_request(
     authorization: &WsUpstreamAuthorization,
     context: &WsRequestContext,
     strip_session_affinity: bool,
+    egress_identity: Option<&crate::gateway::EgressIdentity>,
 ) -> Result<tokio_tungstenite::tungstenite::handshake::client::Request, WsSessionError> {
     let mut request = ws_url.into_client_request().map_err(|err| {
         WsSessionError::bad_gateway_bilingual(
@@ -3219,6 +3249,22 @@ fn build_upstream_websocket_request(
         "originator",
         &crate::gateway::current_wire_originator(),
     )?;
+    if let Some(identity) = egress_identity {
+        // 长连接握手绕过普通 HTTP transport，必须在这里同步写入出口画像，保证同一账号的两种传输协议一致。
+        insert_header(
+            headers,
+            "Accept-Language",
+            &format!("{},en;q=0.9", identity.locale),
+        )?;
+        insert_header(headers, "OAI-Language", identity.locale.as_str())?;
+        insert_header(
+            headers,
+            "X-OpenAI-Client-Timezone",
+            identity.timezone.as_str(),
+        )?;
+        insert_header(headers, "X-OpenAI-Client-Locale", identity.locale.as_str())?;
+        insert_header(headers, "X-OpenAI-Client-Region", identity.country.as_str())?;
+    }
     insert_header(
         headers,
         "OpenAI-Beta",
@@ -4228,6 +4274,17 @@ fn insert_header(headers: &mut HeaderMap, name: &str, value: &str) -> Result<(),
     })?;
     headers.insert(header_name, header_value);
     Ok(())
+}
+
+/// 在账号选择完成后覆盖 WebSocket `response.create` 的地区元数据。
+///
+/// 重连可能切换账号及代理出口，因此每次连接成功后都重新计算；改写只触碰 `client_metadata`，不会改变输入、工具或会话状态。
+fn apply_ws_egress_identity(prepared: &mut PreparedClientFrame, account_id: &str) {
+    let Some(identity) = crate::gateway::resolve_egress_identity(account_id) else {
+        return;
+    };
+    prepared.text =
+        crate::gateway::apply_egress_client_metadata_text(prepared.text.as_str(), &identity);
 }
 
 fn ensure_rustls_crypto_provider() {
