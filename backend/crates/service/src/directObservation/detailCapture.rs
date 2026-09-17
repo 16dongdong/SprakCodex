@@ -174,6 +174,7 @@ pub(super) fn headers(headers: &hyper::HeaderMap) -> Value {
                 let values: Vec<Value> = headers
                     .get_all(name)
                     .iter()
+                    .filter(|value| value.as_bytes().iter().any(|byte| !byte.is_ascii_whitespace()))
                     .map(|value| match value.to_str() {
                     Ok(text) => Value::String(text.to_owned()),
                     Err(_) => { use base64::Engine; json!({"encoding":"base64","content":base64::engine::general_purpose::STANDARD.encode(value.as_bytes())}) },
