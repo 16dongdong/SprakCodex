@@ -55,7 +55,8 @@ impl Engine {
         // 工作区同时编译 ring 与 aws-lc；显式选择 provider，避免 WebSocket 首次连接时全局选择歧义导致 panic。
         // 根证书仍使用公共可信根，绝不把下游临时 CA 加入真实上游的信任集合。
         let websocketTls = buildWebsocketTls("初始化上游 TLS 版本失败")?;
-        let proxy = proxy.ok_or("未配置 OpenAI 上游代理出口，拒绝使用本机地区画像")?;
+        let proxy = proxy.or_else(observationProxyFromEnvironment);
+        let proxy = proxy.ok_or("未发现 OpenAI 目标进程使用的代理出口")?;
         let (client, proxy) = buildClient(Some(proxy), None)?;
         let environmentProfile = super::environmentIdentity::resolve(&client).await?;
         Ok(Self {
@@ -143,6 +144,22 @@ impl Engine {
             pinned,
         }))
     }
+}
+
+// 观测画像必须经过目标进程实际可用的代理出口；没有显式上游设置时复用系统代理环境，不允许直连本机网络。
+fn observationProxyFromEnvironment() -> Option<String> {
+    [
+        "HTTPS_PROXY",
+        "https_proxy",
+        "ALL_PROXY",
+        "all_proxy",
+        "HTTP_PROXY",
+        "http_proxy",
+    ]
+    .into_iter()
+    .filter_map(|name| std::env::var(name).ok())
+    .map(|value| value.trim().to_string())
+    .find(|value| !value.is_empty())
 }
 
 // HTTP 与 WebSocket 必须使用相同公共根和 TLS provider；调用方只提供符合当前运行上下文的错误文本。
