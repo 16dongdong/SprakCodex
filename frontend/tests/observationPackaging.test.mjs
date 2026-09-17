@@ -11,6 +11,9 @@ test("观测载荷只存在于宿主可执行文件", () => {
   const config = JSON.parse(readFileSync(resolve(configDirectory, "tauri.windows.conf.json"), "utf8"));
   assert.deepEqual(config.bundle.resources, {
     "../../backend/target/release/SprakCodex-service.exe": "SprakCodex-service.exe",
+    "../../third_party/mihomo/mihomo.exe": "mihomo.exe",
+    "../../third_party/mihomo/LICENSE": "licenses/mihomo-GPL-3.0.txt",
+    "../../third_party/mihomo/README.md": "licenses/mihomo-README.md",
     "../updateAgent/target/release/updateAgent.exe": "updateAgent.exe",
   });
   const runtimePaths = readFileSync(

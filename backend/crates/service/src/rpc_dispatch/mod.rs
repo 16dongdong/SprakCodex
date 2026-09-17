@@ -13,6 +13,8 @@ mod account;
 mod app_settings;
 #[allow(non_snake_case)]
 mod directObservation;
+#[allow(non_snake_case)]
+mod embeddedProxy;
 mod requestlog;
 #[allow(non_snake_case)]
 mod sessionRouting;
@@ -208,6 +210,15 @@ const MEMBER_METHOD_ALLOWLIST: &[&str] = &[
     "apikey/updateModel",
     "apikey/usageStats",
     "appSettings/get",
+    "proxyRuntime/config",
+    "proxyRuntime/status",
+    "proxyRuntime/save",
+    "proxyRuntime/parse",
+    "proxyRuntime/fetch",
+    "proxyRuntime/select",
+    "proxyRuntime/selectGroup",
+    "proxyRuntime/test",
+    "proxyRuntime/egress",
     "dashboard/memberSummary",
     "requestlog/list",
     "requestlog/list_with_summary",
@@ -244,6 +255,9 @@ fn ensure_method_allowed(actor: &RpcActor, method: &str) -> Result<(), String> {
 pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) -> JsonRpcMessage {
     if req.method == "initialize" {
         let _ = storage_helpers::initialize_storage();
+        if let Err(error) = crate::embeddedProxy::restore() {
+            log::error!("恢复内置代理内核失败：{error}");
+        }
         crate::directObservation::restoreIfEnabled();
         if let Some(storage) = storage_helpers::open_storage() {
             let _ = storage.insert_event(&Event {
@@ -274,6 +288,9 @@ pub(crate) fn handle_request_with_actor(req: JsonRpcRequest, actor: RpcActor) ->
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = directObservation::dispatch(&req) {
+        return JsonRpcMessage::Response(resp);
+    }
+    if let Some(resp) = embeddedProxy::dispatch(&req) {
         return JsonRpcMessage::Response(resp);
     }
     if let Some(resp) = sessionRouting::dispatch(&req) {
