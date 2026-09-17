@@ -51,6 +51,18 @@ pub(super) async fn upgrade(
         log::warn!("会话分流 WebSocket 身份字段无效：{error}");
         return reply(StatusCode::SERVICE_UNAVAILABLE, "会话分流身份无效");
     }
+    if tracked {
+        if let Err(error) = super::environmentIdentity::applyHeaders(
+            request.headers_mut(),
+            &engine.environmentProfile,
+        ) {
+            log::error!("同步 WebSocket 出口画像失败：{error}");
+            return reply(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "同步 WebSocket 出口画像失败",
+            );
+        }
+    }
     let mut handshake = Exchange::new(&host, &path, handshakeProtocol);
     handshake.method = "GET".into();
     handshake.captureHeaders(request.headers());
