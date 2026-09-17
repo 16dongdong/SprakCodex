@@ -225,6 +225,8 @@ export const KO_ACCOUNTS_MESSAGES: MessageCatalog = {
   "取消强制开启": "강제 활성화 해제",
   "仅 Luna Reserve": "Luna Reserve만",
   "Luna Reserve 额度": "Luna Reserve 한도",
+  标准额度: "기본 한도",
+  备用额度: "예비 한도",
   "额度耗尽后仍使用账号": "한도 소진 후에도 계정 사용",
   "开启后忽略 5h/7d 耗尽状态，继续把该账号加入网关候选；默认关闭。":
     "활성화하면 5시간/7일 한도 소진 상태를 무시하고 이 계정을 게이트웨이 후보에 계속 포함합니다. 기본값은 꺼짐입니다.",

@@ -125,3 +125,13 @@ test("dense management tables keep readable content and reachable row actions", 
   assert.match(resetCreditSource, /h-8 gap-1\.5 rounded-full/);
   assert.doesNotMatch(logCellsSource, /text-\[9px\]/);
 });
+
+test("account quota cell shows standard and reserve rings without duplicate disclosure", async () => {
+  const accountHelpersSource = await readSource("src/app/accounts/accounts-page-helpers.tsx");
+
+  assert.match(accountHelpersSource, /label: t\("标准额度"\)/);
+  assert.match(accountHelpersSource, /label: t\("备用额度"\)/);
+  assert.match(accountHelpersSource, /strokeDasharray=\{`\$\{percent\} 100`\}/);
+  assert.doesNotMatch(accountHelpersSource, /<details/);
+  assert.doesNotMatch(accountHelpersSource, /<summary/);
+});

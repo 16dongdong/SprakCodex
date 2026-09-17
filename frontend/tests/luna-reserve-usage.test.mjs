@@ -68,6 +68,7 @@ test("Luna Reserve 的 camelCase 用量会显示且保持可用", () => {
   assert.equal(rows.length, 1);
   assert.equal(rows[0].label, "Luna Reserve");
   assert.equal(rows[0].remainPercent, 80);
+  assert.equal(rows[0].windowMinutes, 7 * 24 * 60);
 });
 
 test("强制开启状态绕过额度状态并默认关闭", () => {

@@ -238,6 +238,8 @@ export const EN_ACCOUNTS_MESSAGES: MessageCatalog = {
   "取消强制开启": "Disable force enabled",
   "仅 Luna Reserve": "Luna Reserve only",
   "Luna Reserve 额度": "Luna Reserve quota",
+  标准额度: "Standard quota",
+  备用额度: "Reserve quota",
   "额度耗尽后仍使用账号": "Keep using account after quota exhaustion",
   "开启后忽略 5h/7d 耗尽状态，继续把该账号加入网关候选；默认关闭。":
     "When enabled, ignore exhausted 5h/7d windows and keep this account in the gateway pool; off by default.",

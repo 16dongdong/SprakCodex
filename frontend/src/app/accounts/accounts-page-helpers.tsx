@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Power, PowerOff, RefreshCw, Zap } from "lucide-react";
+import { Power, PowerOff } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
 import {
@@ -12,8 +12,6 @@ import {
   isSecondaryWindowOnlyUsage,
 } from "@/lib/utils/usage";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { QuotaCountdown } from "@/components/quotaCountdown";
 import {
   Tooltip,
   TooltipContent,
@@ -114,20 +112,14 @@ export function formatStatusFilterLabel(value: string, t: TranslateFn) {
   }
 }
 
-export interface QuotaProgressProps {
+export interface QuotaSummaryItem {
+  id: string;
   label: string;
   remainPercent: number | null;
   resetsAt: number | null;
-  icon: LucideIcon;
-  tone: "green" | "blue" | "amber";
-  caption?: string;
+  group: "standard" | "reserve";
   emptyText?: string;
   emptyResetText?: string;
-}
-
-export interface QuotaSummaryItem extends QuotaProgressProps {
-  id: string;
-  resetDurationMode?: "hours" | "days";
 }
 
 export interface AccountEditorState {
@@ -148,93 +140,89 @@ export type DeleteDialogState =
   | { kind: "selected"; ids: string[]; count: number }
   | null;
 
-function QuotaProgress({
-  label,
-  remainPercent,
-  resetsAt,
-  icon: Icon,
-  tone,
-  caption,
-  emptyText = "--",
-  emptyResetText = "未知",
-}: QuotaProgressProps) {
+// 环形额度只表达剩余百分比；完整重置时间放在标题提示中，避免四个窗口再次撑高账号行。
+function QuotaRing({ item }: { item: QuotaSummaryItem }) {
   const { t } = useI18n();
-  const value = remainPercent ?? 0;
-  const toneClasses = {
-    blue: {
-      track: "bg-blue-500/20",
-      indicator: "bg-blue-500",
-      icon: "text-blue-500",
-    },
-    green: {
-      track: "bg-green-500/20",
-      indicator: "bg-green-500",
-      icon: "text-green-500",
-    },
-    amber: {
-      track: "bg-amber-500/20",
-      indicator: "bg-amber-500",
-      icon: "text-amber-500",
-    },
-  } as const;
-  const palette = toneClasses[tone];
+  const percent = item.remainPercent == null
+    ? 0
+    : Math.max(0, Math.min(100, item.remainPercent));
+  const ringColor = item.remainPercent == null
+    ? "stroke-zinc-400"
+    : percent > 60
+      ? "stroke-green-500"
+      : percent >= 30
+        ? "stroke-yellow-500"
+        : "stroke-red-500";
+  const displayValue = item.remainPercent == null
+    ? item.emptyText ?? "—"
+    : `${percent}%`;
+  const resetText = formatTsFromSeconds(
+    item.resetsAt,
+    item.emptyResetText ?? t("未知"),
+  );
 
   return (
-    <div className="flex min-w-[180px] flex-col gap-1.5">
-      <div className="flex items-center justify-between text-[11px]">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Icon className={cn("h-3.5 w-3.5", palette.icon)} />
-            <span>{label}</span>
-          </div>
-          {caption ? (
-            <div
-              className={fitLongTextClassName(
-                caption,
-                "max-w-full break-all text-muted-foreground/80 [overflow-wrap:anywhere]",
-                "text-[10px]",
-              )}
-              title={caption}
-            >
-              {caption}
-            </div>
-          ) : null}
-        </div>
-        <span className="font-medium">
-          {remainPercent == null ? emptyText : `${value}%`}
+    <div
+      className="flex min-w-0 items-center justify-center gap-2"
+      title={`${item.label} · ${t("重置")}: ${resetText}`}
+      aria-label={`${item.label} ${displayValue}`}
+    >
+      <span className="shrink-0 text-[11px] text-muted-foreground">
+        {item.label}
+      </span>
+      <div className="relative size-11 shrink-0">
+        <svg className="size-11 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
+          <circle
+            className="fill-none stroke-border/60"
+            cx="22"
+            cy="22"
+            r="18"
+            pathLength="100"
+            strokeWidth="4"
+          />
+          <circle
+            className={cn("fill-none transition-[stroke-dasharray]", ringColor)}
+            cx="22"
+            cy="22"
+            r="18"
+            pathLength="100"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray={`${percent} 100`}
+          />
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold tabular-nums">
+          {displayValue}
         </span>
-      </div>
-      <Progress
-        quota
-        value={remainPercent}
-        trackClassName={palette.track}
-        indicatorClassName={palette.indicator}
-      />
-      <div className="text-[11px] leading-4 text-muted-foreground">
-        {t("重置")}: {formatTsFromSeconds(resetsAt, emptyResetText)}
       </div>
     </div>
   );
 }
 
-// 账号列表首屏只显示两个主额度；额外额度按需展开，避免多层卡片把每个账号撑成数百像素。
+// 账号列表固定为标准与备用两行，每行直接展示 5 小时和 7 天环形额度，不再提供重复的展开明细。
 export function QuotaOverviewCell({ items }: { items: QuotaSummaryItem[] }) {
   const { t } = useI18n();
-  return <div className="min-w-0 space-y-2">
-    <div className="account-pool-quota-grid">
-      {items.slice(0, 2).map((item) => <div key={item.id} className="min-w-0 space-y-1.5" title={formatTsFromSeconds(item.resetsAt, item.emptyResetText ?? t("未知"))}>
-        <div className="flex items-center justify-between gap-2 text-xs"><span className="truncate text-muted-foreground">{item.label}</span><span className="shrink-0 font-medium tabular-nums">{item.remainPercent == null ? item.emptyText ?? "—" : `${item.remainPercent}%`}</span></div>
-        <Progress quota value={item.remainPercent} className="h-1.5" />
-        <QuotaCountdown resetsAt={item.resetsAt} />
-      </div>)}
+  const groups = [
+    { id: "standard", label: t("标准额度") },
+    { id: "reserve", label: t("备用额度") },
+  ] as const;
+
+  return (
+    <div className="min-w-0 space-y-2">
+      {groups.map((group) => (
+        <div key={group.id} className="flex min-w-0 items-center gap-3">
+          <span className="w-14 shrink-0 text-xs font-medium text-muted-foreground">
+            {group.label}:
+          </span>
+          <div className="account-pool-quota-grid flex-1">
+            {items
+              .filter((item) => item.group === group.id)
+              .map((item) => <QuotaRing key={item.id} item={item} />)}
+          </div>
+        </div>
+      ))}
     </div>
-    <details className="group text-xs">
-      <summary className="w-fit cursor-pointer select-none py-1 text-muted-foreground hover:text-primary">{t("额度详情")}</summary>
-      <div className="mt-2 space-y-3 border-l-2 border-border pl-3">
-        {items.map((item) => <QuotaProgress key={item.id} label={item.label} remainPercent={item.remainPercent} resetsAt={item.resetsAt} icon={item.icon} tone={item.tone} caption={item.caption} emptyText={item.emptyText} emptyResetText={item.emptyResetText} />)}
-      </div>
-    </details>
-  </div>;
+  );
 }
 
 export function getAccountStatusActionType(account: Account): AccountStatusAction {
@@ -604,6 +592,7 @@ export function formatAccountExportModeLabel(value: string, t: TranslateFn) {
   return value === "single" ? t("单 JSON") : t("多 JSON");
 }
 
+// 将上游标准窗口与 Luna Reserve（兼容旧 Spark 命名）归一为固定四个槽位；缺失窗口保留空值，不借用其他专属额度。
 export function buildQuotaSummaryItems(
   account: Account,
   t: TranslateFn,
@@ -612,45 +601,54 @@ export function buildQuotaSummaryItems(
   const secondaryWindowOnly = isSecondaryWindowOnlyUsage(account.usage);
   const usageBuckets = getUsageDisplayBuckets(account.usage);
   const extraUsageRows = getExtraUsageDisplayRows(account.usage);
+  const reserveRows = extraUsageRows.filter(
+    (item) => item.label === "Luna Reserve" || item.label === "Spark 额度",
+  );
+  const reservePrimary =
+    reserveRows.find((item) => item.windowMinutes === 5 * 60) ??
+    reserveRows.find((item) => item.windowMinutes == null && !item.labelSuffix);
+  const reserveSecondary =
+    reserveRows.find((item) => item.windowMinutes === 7 * 24 * 60) ??
+    reserveRows.find(
+      (item) => item.windowMinutes == null && Boolean(item.labelSuffix),
+    );
   return [
     {
       id: `${account.id}-primary`,
       label: t("5小时"),
       remainPercent: account.primaryRemainPercent,
       resetsAt: usageBuckets.primaryResetsAt,
-      icon: RefreshCw,
-      tone: "green",
-      caption: t("标准模型窗口"),
+      group: "standard",
       emptyText: secondaryWindowOnly ? t("未提供") : "--",
       emptyResetText: secondaryWindowOnly ? t("未提供") : t("未知"),
-      resetDurationMode: "hours",
     },
     {
       id: `${account.id}-secondary`,
       label: t("7天"),
       remainPercent: account.secondaryRemainPercent,
       resetsAt: usageBuckets.secondaryResetsAt,
-      icon: RefreshCw,
-      tone: "blue",
-      caption: t("长周期窗口"),
+      group: "standard",
       emptyText: primaryWindowOnly ? t("未提供") : "--",
       emptyResetText: primaryWindowOnly ? t("未提供") : t("未知"),
-      resetDurationMode: "days",
     },
-    ...extraUsageRows.map((item) => ({
-      id: item.id,
-      label: `${t(item.label, item.labelValues)}${item.labelSuffix ? t(item.labelSuffix) : ""}`,
-      remainPercent: item.remainPercent,
-      resetsAt: item.resetsAt,
-      icon: Zap,
-      tone: "amber" as const,
-      caption: t(item.windowLabel, item.windowLabelValues),
+    {
+      id: `${account.id}-reserve-primary`,
+      label: t("5小时"),
+      remainPercent: reservePrimary?.remainPercent ?? null,
+      resetsAt: reservePrimary?.resetsAt ?? null,
+      group: "reserve",
       emptyText: "--",
       emptyResetText: t("未知"),
-      resetDurationMode: item.windowLabel.includes("天")
-        ? ("days" as const)
-        : ("hours" as const),
-    })),
+    },
+    {
+      id: `${account.id}-reserve-secondary`,
+      label: t("7天"),
+      remainPercent: reserveSecondary?.remainPercent ?? null,
+      resetsAt: reserveSecondary?.resetsAt ?? null,
+      group: "reserve",
+      emptyText: "--",
+      emptyResetText: t("未知"),
+    },
   ];
 }
 

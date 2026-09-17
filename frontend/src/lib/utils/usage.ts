@@ -25,6 +25,7 @@ export interface ExtraUsageDisplayRow {
   labelSuffix?: string;
   remainPercent: number | null;
   resetsAt: number | null;
+  windowMinutes: number | null;
   windowLabel: string;
   windowLabelValues?: TranslationValues;
 }
@@ -638,6 +639,7 @@ function extractExtraRateLimitWindows(raw: string | null | undefined): ExtraUsag
         labelSuffix: suffix,
         remainPercent,
         resetsAt,
+        windowMinutes: minutes,
         windowLabel: windowLabel.label,
         windowLabelValues: windowLabel.values,
       });
