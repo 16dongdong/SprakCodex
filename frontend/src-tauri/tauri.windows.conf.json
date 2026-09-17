@@ -1,7 +1,8 @@
 {
   "bundle": {
     "resources": {
-      "../../backend/target/release/SprakCodex-service.exe": "SprakCodex-service.exe"
+      "../../backend/target/release/SprakCodex-service.exe": "SprakCodex-service.exe",
+      "../updateAgent/target/release/updateAgent.exe": "updateAgent.exe"
     }
   }
 }
