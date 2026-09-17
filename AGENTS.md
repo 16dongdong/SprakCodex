@@ -164,7 +164,7 @@ Tauri rules.
 ## 本机默认更新
 
 - 用户要求：后续桌面应用改动完成测试与安装包验证后，默认使用本次安装包更新现有本机安装，无需再次询问。用户明确要求跳过时除外。
-- 当前安装目录为 `D:\CodexManager`；更新前重新核实安装路径及运行进程，保留账号数据与用户配置，只停止对应应用进程。
+- 当前安装目录为 `D:\SprakCodex`；更新前重新核实安装路径及运行进程，保留账号数据与用户配置，只停止对应应用进程。
 - 安装成功后重启应用，核验安装退出码、程序生成时间、进程路径和本机服务监听；失败时记录实际结果，不宣称更新成功。
 
 ## 安装包位置与构建清理
@@ -174,4 +174,4 @@ Tauri rules.
 - 验证、打包及安装完成且交付副本已确认后，执行 `cargo clean --manifest-path backend/Cargo.toml` 和 `cargo clean --manifest-path frontend/src-tauri/Cargo.toml`，及时释放构建空间。
 - 清理限于本项目构建产物，不删除账号数据库、认证配置、安装目录、源码或 node_modules；下次构建须重新生成 DLL 和前端资源。
 
-- 自 0.6.3 起本机程序路径为 `D:\CodexManager\SprakCodex.exe`，更新核验按该进程名执行；公开安装包使用 `SprakCodex-版本-windows-x64-setup.exe`。
+- 自 0.6.3 起本机程序路径为 `D:\SprakCodex\SprakCodex.exe`，独立服务为 `D:\SprakCodex\SprakCodex-service.exe`；更新核验按这些进程名执行，公开安装包使用 `SprakCodex-版本-windows-x64-setup.exe`。

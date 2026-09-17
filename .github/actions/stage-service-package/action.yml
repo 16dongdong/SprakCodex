@@ -41,7 +41,7 @@ runs:
         Remove-Item -Recurse -Force $pkgDir -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Force $pkgDir | Out-Null
 
-        foreach ($name in @('codexmanager-service', 'codexmanager-web', 'codexmanager-start')) {
+        foreach ($name in @('SprakCodex-service', 'codexmanager-web', 'codexmanager-start')) {
           $source = Join-Path $releaseDir ($name + $ext)
           if (-not (Test-Path $source -PathType Leaf)) {
             throw "binary not found: $source"
@@ -70,7 +70,7 @@ runs:
         rm -rf "$pkg_dir"
         mkdir -p "$pkg_dir"
 
-        for name in codexmanager-service codexmanager-web codexmanager-start; do
+        for name in SprakCodex-service codexmanager-web codexmanager-start; do
           source="${release_dir}/${name}${ext}"
           test -f "$source" || { echo "binary not found: $source"; exit 1; }
           cp -f "$source" "${pkg_dir}/${name}${ext}"

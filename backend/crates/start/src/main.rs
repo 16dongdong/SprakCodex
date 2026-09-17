@@ -589,7 +589,7 @@ fn main() {
     let web_addr = resolve_web_addr();
     let web_open_addr = browser_open_addr(&web_addr);
 
-    let service_bin = bin_path(&dir, "codexmanager-service");
+    let service_bin = bin_path(&dir, "SprakCodex-service");
     let web_bin = bin_path(&dir, "codexmanager-web");
     #[cfg(target_os = "windows")]
     let child_job = match windows_job::ChildJob::new() {

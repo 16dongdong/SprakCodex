@@ -1,12 +1,7 @@
 {
   "bundle": {
     "resources": {
-      "../updateAgent/target/release/updateAgent.exe": "updateAgent.exe"
-    },
-    "windows": {
-      "nsis": {
-        "installerHooks": "windowsInstallerHooks.nsh"
-      }
+      "../../backend/target/release/SprakCodex-service.exe": "SprakCodex-service.exe"
     }
   }
 }

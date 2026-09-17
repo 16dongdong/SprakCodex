@@ -12,7 +12,7 @@ cp backend/docker/Dockerfile.service.release "$docker_stage/Dockerfile.service"
 cp backend/docker/Dockerfile.web.release "$docker_stage/Dockerfile.web"
 cp backend/docker/docker-compose.release.yml "$docker_stage/docker-compose.yml"
 
-for binary in codexmanager-service codexmanager-web codexmanager-start; do
+for binary in SprakCodex-service codexmanager-web codexmanager-start; do
   source="${release_dir}/${binary}"
   test -f "$source" || {
     echo "binary not found: $source"

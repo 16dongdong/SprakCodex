@@ -9,8 +9,8 @@
 以下命令仅查询，不关闭防护、不添加排除项：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath 'D:\CodexManager\SprakCodex.exe'
-Get-AuthenticodeSignature -LiteralPath 'D:\CodexManager\SprakCodex.exe'
+Get-FileHash -Algorithm SHA256 -LiteralPath 'D:\SprakCodex\SprakCodex.exe'
+Get-AuthenticodeSignature -LiteralPath 'D:\SprakCodex\SprakCodex.exe'
 Get-MpThreatDetection
 ```
 

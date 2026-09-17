@@ -37,7 +37,7 @@ RUN --mount=type=cache,id=codexmanager-cargo-registry,target=/usr/local/cargo/re
     && cargo build --locked -p codexmanager-web --release --features embedded-ui \
     && cargo build --locked -p codexmanager-start --release \
     && mkdir -p /out \
-    && cp /src/backend/target/release/codexmanager-service /out/codexmanager-service \
+    && cp /src/backend/target/release/SprakCodex-service /out/SprakCodex-service \
     && cp /src/backend/target/release/codexmanager-web /out/codexmanager-web \
     && cp /src/backend/target/release/codexmanager-start /out/codexmanager-start
 
@@ -58,7 +58,7 @@ RUN apt-get update \
     && mkdir -p /data \
     && chown -R ${APP_UID}:${APP_UID} /app /data
 
-COPY --from=builder /out/codexmanager-service /usr/local/bin/codexmanager-service
+COPY --from=builder /out/SprakCodex-service /usr/local/bin/SprakCodex-service
 COPY --from=builder /out/codexmanager-web /usr/local/bin/codexmanager-web
 COPY --from=builder /out/codexmanager-start /usr/local/bin/codexmanager-start
 

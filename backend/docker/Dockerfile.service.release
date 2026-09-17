@@ -15,7 +15,7 @@ RUN apt-get update \
     && mkdir -p /data \
     && chown -R ${APP_UID}:${APP_UID} /app /data
 
-COPY codexmanager-service /usr/local/bin/codexmanager-service
+COPY SprakCodex-service /usr/local/bin/SprakCodex-service
 
 ENV CODEXMANAGER_SERVICE_ADDR=0.0.0.0:48760
 ENV CODEXMANAGER_DB_PATH=/data/codexmanager.db
@@ -31,4 +31,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 USER ${APP_USER}
 
-CMD ["codexmanager-service"]
+CMD ["SprakCodex-service"]

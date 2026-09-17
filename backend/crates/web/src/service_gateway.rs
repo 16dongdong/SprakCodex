@@ -162,11 +162,11 @@ pub(super) async fn tcp_probe(addr: &str) -> bool {
 fn service_bin_path(dir: &Path) -> PathBuf {
     #[cfg(target_os = "windows")]
     {
-        return dir.join("codexmanager-service.exe");
+        return dir.join("SprakCodex-service.exe");
     }
     #[cfg(not(target_os = "windows"))]
     {
-        return dir.join("codexmanager-service");
+        return dir.join("SprakCodex-service");
     }
 }
 
