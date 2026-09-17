@@ -60,16 +60,6 @@ const KIND_LABEL: Record<string, string> = {
 
 // WebView2 的 dataTransfer 在跨嵌套按钮拖动时可能丢失文本，进程内变量保留同一次拖动的节点身份。
 let draggedNodeName = "";
-let pointerDragId: number | null = null;
-let pointerStart = { x: 0, y: 0 };
-let pointerDragMoved = false;
-let suppressNodeClick = false;
-
-function clearPointerDropHighlight() {
-  document.querySelectorAll("[data-proxy-group].drag-over").forEach((element) => {
-    element.classList.remove("drag-over");
-  });
-}
 
 // 按节点名关键词推断地区国家码(小写 ISO);仅作兜底,测速后用真实出口国家码覆盖。
 const CC_RULES: [RegExp, string][] = [
@@ -734,7 +724,6 @@ function NodesTab({
             onSetActive={onSetActive}
             onRemoveNode={onRemoveNode}
             onTestNode={onTestNode}
-            onDropNode={onAddMember}
           />
         );
       })}
@@ -749,7 +738,6 @@ function NodesTab({
           onSetActive={onSetActive}
           onRemoveNode={onRemoveNode}
           onTestNode={onTestNode}
-          onDropNode={onAddMember}
         />
       )}
     </section>
@@ -851,7 +839,6 @@ function GroupCard({
   const auto = group.kind === "url-test";
   return (
     <div
-      data-proxy-group={group.name}
       className={`group-card${on ? " on" : ""}${over ? " drag-over" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
@@ -974,7 +961,6 @@ function NodeGroup({
   onSetActive,
   onRemoveNode,
   onTestNode,
-  onDropNode,
 }: {
   title: string;
   nodes: ProxyNode[];
@@ -985,7 +971,6 @@ function NodeGroup({
   onSetActive: (name: string) => void;
   onRemoveNode: (name: string) => void;
   onTestNode: (name: string) => void;
-  onDropNode: (group: string, node: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   return (
@@ -1005,47 +990,17 @@ function NodeGroup({
             <div
               key={node.name}
               className={`node-card${on ? " on" : ""}`}
-              onPointerDown={(event) => {
-                if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
-                pointerDragId = event.pointerId;
-                pointerStart = { x: event.clientX, y: event.clientY };
-                pointerDragMoved = false;
+              draggable
+              onDragStart={(e) => {
                 draggedNodeName = node.name;
-                event.currentTarget.setPointerCapture(event.pointerId);
+                e.dataTransfer.setData("application/x-sprak-proxy-node", node.name);
+                e.dataTransfer.setData("text/plain", node.name);
+                e.dataTransfer.effectAllowed = "copy";
               }}
-              onPointerMove={(event) => {
-                if (pointerDragId !== event.pointerId || draggedNodeName !== node.name) return;
-                if (Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) < 6) return;
-                pointerDragMoved = true;
-                clearPointerDropHighlight();
-                document
-                  .elementFromPoint(event.clientX, event.clientY)
-                  ?.closest("[data-proxy-group]")
-                  ?.classList.add("drag-over");
-              }}
-              onPointerUp={(event) => {
-                if (pointerDragId !== event.pointerId || draggedNodeName !== node.name) return;
-                const group = document
-                  .elementFromPoint(event.clientX, event.clientY)
-                  ?.closest<HTMLElement>("[data-proxy-group]")
-                  ?.dataset.proxyGroup;
-                if (pointerDragMoved && group) onDropNode(group, node.name);
-                suppressNodeClick = pointerDragMoved;
-                pointerDragId = null;
+              onDragEnd={() => {
                 draggedNodeName = "";
-                clearPointerDropHighlight();
-                window.setTimeout(() => {
-                  suppressNodeClick = false;
-                }, 0);
               }}
-              onPointerCancel={() => {
-                pointerDragId = null;
-                draggedNodeName = "";
-                clearPointerDropHighlight();
-              }}
-              onClick={() => {
-                if (!suppressNodeClick) onSetActive(node.name);
-              }}
+              onClick={() => onSetActive(node.name)}
               title="拖到上方代理组可加入该组"
             >
               <button

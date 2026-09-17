@@ -108,14 +108,9 @@ fn applyRuntime(config: &ProxyConfig) -> Result<(), String> {
         runtime.take();
         return Ok(());
     }
-    let restart = match runtime.as_mut() {
-        Some(kernel) => !kernel.is_running()?,
-        None => true,
-    };
-    if restart {
-        *runtime = Some(Kernel::start(config)?);
-    } else if let Some(kernel) = runtime.as_ref() {
-        kernel.apply(config)?;
+    match runtime.as_ref() {
+        Some(kernel) => kernel.apply(config)?,
+        None => *runtime = Some(Kernel::start(config)?),
     }
     let port = runtime.as_ref().ok_or("代理内核未就绪")?.mixed_port();
     crate::gateway::set_upstream_proxy_url(Some(&format!("http://127.0.0.1:{port}")))?;
@@ -179,11 +174,7 @@ pub fn testNodes() -> Result<Vec<NodeDelay>, String> {
         return Ok(Vec::new());
     }
     let mut runtime = runtime().lock().map_err(|_| "代理内核状态锁损坏")?;
-    let restart = match runtime.as_mut() {
-        Some(kernel) => !kernel.is_running()?,
-        None => true,
-    };
-    if restart {
+    if runtime.is_none() {
         *runtime = Some(Kernel::start(&config)?);
     } else if let Some(kernel) = runtime.as_ref() {
         kernel.apply(&config)?;
@@ -201,11 +192,7 @@ pub fn testNode(name: &str) -> Result<NodeDelay, String> {
         return Err(format!("代理节点不存在：{name}"));
     }
     let mut runtime = runtime().lock().map_err(|_| "代理内核状态锁损坏")?;
-    let restart = match runtime.as_mut() {
-        Some(kernel) => !kernel.is_running()?,
-        None => true,
-    };
-    if restart {
+    if runtime.is_none() {
         *runtime = Some(Kernel::start(&config)?);
     } else if let Some(kernel) = runtime.as_ref() {
         kernel.apply(&config)?;

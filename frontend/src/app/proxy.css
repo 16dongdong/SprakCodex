@@ -617,8 +617,6 @@
   background: var(--panel-2);
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s;
-  touch-action: none;
-  user-select: none;
 }
 .node-card:hover {
   border-color: var(--text);
