@@ -1887,7 +1887,7 @@ null
             <DialogTitle>{t("编辑账号信息")}</DialogTitle>
             <DialogDescription>
               {accountEditorState
-                ? `${t("修改")} ${accountEditorState.accountName} ${t("的名称、分组、标签、备注、排序与额度池配置。")}`
+                ? `${t("修改")} ${accountEditorState.accountName} ${t("的名称与分流权重。")}`
                 : t("修改账号的基础资料。")}
             </DialogDescription>
           </DialogHeader>
@@ -1903,42 +1903,7 @@ null
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="account-group-input">{t("账号分组")}</Label>
-                <Input
-                  id="account-group-input"
-                  value={groupNameDraft}
-                  disabled={Boolean(isUpdatingProfileAccountId)}
-                  onChange={(event) => setGroupNameDraft(event.target.value)}
-                  placeholder={t("例如：团队 A")}
-                />
-              </div>
-              <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="account-tags-input">
-                  {t("标签（逗号分隔）")}
-                </Label>
-                <Input
-                  id="account-tags-input"
-                  value={tagsDraft}
-                  disabled={Boolean(isUpdatingProfileAccountId)}
-                  onChange={(event) => setTagsDraft(event.target.value)}
-                  placeholder={t("例如：高频, 团队A")}
-                />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="account-note-input">{t("备注")}</Label>
-              <Textarea
-                id="account-note-input"
-                value={noteDraft}
-                disabled={Boolean(isUpdatingProfileAccountId)}
-                onChange={(event) => setNoteDraft(event.target.value)}
-                placeholder={t("例如：主账号 / 测试号 / 团队共享")}
-                className="min-h-[108px]"
-              />
-            </div>
-            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_120px] sm:items-end">
-              <div className="grid gap-2">
-                <Label htmlFor="account-sort-input">{t("顺序值")}</Label>
+                <Label htmlFor="account-sort-input">{t("分流权重")}</Label>
                 <Input
                   id="account-sort-input"
                   type="number"
@@ -1956,43 +1921,11 @@ null
                 />
               </div>
               <div className="grid gap-1 rounded-xl bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-                <span>{t("值越小越靠前")}</span>
+                <span>{t("数值越小，分流优先级越高")}</span>
                 <span>{t("仅修改当前账号")}</span>
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="account-quota-primary-input">
-                  {t("5h 容量覆盖（Token）")}
-                </Label>
-                <Input
-                  id="account-quota-primary-input"
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={quotaPrimaryDraft}
-                  disabled={Boolean(isUpdatingProfileAccountId)}
-                  onChange={(event) => setQuotaPrimaryDraft(event.target.value)}
-                  placeholder={t("留空使用计划模板")}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="account-quota-secondary-input">
-                  {t("7d 容量覆盖（Token）")}
-                </Label>
-                <Input
-                  id="account-quota-secondary-input"
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={quotaSecondaryDraft}
-                  disabled={Boolean(isUpdatingProfileAccountId)}
-                  onChange={(event) => setQuotaSecondaryDraft(event.target.value)}
-                  placeholder={t("留空使用计划模板")}
-                />
-              </div>
-            </div>
-            <div className="flex items-start justify-between gap-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-3">
               <div className="min-w-0 space-y-1">
                 <Label htmlFor="account-force-enabled-switch">
                   {t("额度耗尽后仍使用账号")}

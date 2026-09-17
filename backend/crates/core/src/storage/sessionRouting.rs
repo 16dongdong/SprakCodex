@@ -145,7 +145,7 @@ fn selectCandidate(
                  GROUP BY a.id, a.label, a.chatgpt_account_id, a.workspace_id,
                           t.access_token, t.access_token_exp, a.preferred, a.sort, a.updated_at,
                           u.used_percent, u.secondary_used_percent
-                 ORDER BY active_binding_count ASC,
+                 ORDER BY a.sort ASC,
                           COALESCE(u.used_percent, 0) ASC,
                           COALESCE(u.secondary_used_percent, 0) ASC,
                           a.preferred DESC,
