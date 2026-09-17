@@ -88,19 +88,6 @@ pub async fn service_proxy_runtime_test(addr: Option<String>) -> Result<serde_js
 }
 
 #[tauri::command]
-pub async fn service_proxy_runtime_test_node(
-    addr: Option<String>,
-    name: String,
-) -> Result<serde_json::Value, String> {
-    rpc_call_in_background(
-        "proxyRuntime/testNode",
-        addr,
-        Some(serde_json::json!({ "name": name })),
-    )
-    .await
-}
-
-#[tauri::command]
 pub async fn service_proxy_runtime_egress(
     addr: Option<String>,
 ) -> Result<serde_json::Value, String> {

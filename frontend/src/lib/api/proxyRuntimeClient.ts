@@ -75,8 +75,6 @@ export const proxyRuntimeClient = {
       withAddr({ group, member }),
     ),
   test: () => invoke<NodeDelay[]>("service_proxy_runtime_test", withAddr()),
-  testNode: (name: string) =>
-    invoke<NodeDelay>("service_proxy_runtime_test_node", withAddr({ name })),
   egress: () =>
     invoke<Record<string, unknown>>("service_proxy_runtime_egress", withAddr()),
 };

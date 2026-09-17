@@ -17,7 +17,6 @@ macro_rules! invoke_handler {
             crate::commands::embeddedProxy::service_proxy_runtime_select,
             crate::commands::embeddedProxy::service_proxy_runtime_select_group,
             crate::commands::embeddedProxy::service_proxy_runtime_test,
-            crate::commands::embeddedProxy::service_proxy_runtime_test_node,
             crate::commands::embeddedProxy::service_proxy_runtime_egress,
             crate::commands::sessionRouting::service_session_routing_list,
             crate::commands::sessionRouting::service_session_routing_reset,

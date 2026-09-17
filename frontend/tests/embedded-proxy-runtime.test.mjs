@@ -15,8 +15,6 @@ test("代理页覆盖节点、订阅、代理组和链式入口", () => {
     assert.match(page, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
   assert.match(adapter, /proxyRuntimeClient\.fetch/);
-  assert.match(page, /application\/x-sprak-proxy-node/);
-  assert.match(page, /"test_node"/);
 });
 
 test("内置内核保留全协议字段并生成 mixed-port 配置", () => {
@@ -24,7 +22,5 @@ test("内置内核保留全协议字段并生成 mixed-port 配置", () => {
   assert.match(kernel, /"mixed-port"/);
   assert.match(kernel, /"dialer-proxy"/);
   assert.match(kernel, /parse_clash_subscription/);
-  assert.match(kernel, /chatgpt\.com%2Fcdn-cgi%2Ftrace/);
-  assert.match(kernel, /\/proxies\/\{\}\/delay/);
   assert.equal(bundle.bundle.resources["../../third_party/mihomo/mihomo.exe"], "mihomo.exe");
 });

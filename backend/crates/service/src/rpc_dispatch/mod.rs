@@ -218,7 +218,6 @@ const MEMBER_METHOD_ALLOWLIST: &[&str] = &[
     "proxyRuntime/select",
     "proxyRuntime/selectGroup",
     "proxyRuntime/test",
-    "proxyRuntime/testNode",
     "proxyRuntime/egress",
     "dashboard/memberSummary",
     "requestlog/list",

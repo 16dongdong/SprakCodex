@@ -30,8 +30,6 @@ export async function invokeProxy<T>(command: string, args?: Record<string, unkn
     }
     case "test_nodes":
       return (await proxyRuntimeClient.test()) as T;
-    case "test_node":
-      return (await proxyRuntimeClient.testNode(String(args?.name ?? ""))) as T;
     case "select_group_member":
       return (await proxyRuntimeClient.selectGroup(String(args?.group ?? ""), String(args?.member ?? ""))) as T;
     case "fetch_subscription":
