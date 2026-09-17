@@ -60,11 +60,13 @@ impl Kernel {
         let config_path = data_dir.join("config.yaml");
         write_config(&config_path, proxy, mixed_port, api_port, &secret)?;
 
+        let error_log = std::fs::File::create(data_dir.join("kernel-error.log"))
+            .map_err(|e| format!("创建内核错误日志失败:{e}"))?;
         let mut cmd = Command::new(&mihomo);
         cmd.arg("-d")
             .arg(&data_dir)
             .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null());
+            .stderr(error_log);
         #[cfg(windows)]
         {
             use std::os::windows::process::CommandExt;
@@ -72,7 +74,7 @@ impl Kernel {
         }
         let child = cmd.spawn().map_err(|e| format!("启动 mihomo 失败:{e}"))?;
 
-        let kernel = Kernel {
+        let mut kernel = Kernel {
             mixed_port,
             api_port,
             secret,
@@ -84,14 +86,30 @@ impl Kernel {
         Ok(kernel)
     }
 
-    fn wait_ready(&self) -> Result<(), String> {
+    fn wait_ready(&mut self) -> Result<(), String> {
         for _ in 0..60 {
             if self.api_get("/version").is_ok() {
                 return Ok(());
             }
+            if self
+                .child
+                .try_wait()
+                .map_err(|error| format!("查询 mihomo 状态失败:{error}"))?
+                .is_some()
+            {
+                return Err("mihomo 启动失败，请检查 data/mihomo/kernel-error.log".to_string());
+            }
             std::thread::sleep(Duration::from_millis(100));
         }
         Err("mihomo API 未就绪(启动超时)".to_string())
+    }
+
+    /// 子进程退出后旧 mixed-port 已失效；管理器据此重建内核而不是继续连接旧控制端口。
+    pub fn is_running(&mut self) -> Result<bool, String> {
+        self.child
+            .try_wait()
+            .map(|status| status.is_none())
+            .map_err(|error| format!("查询 mihomo 状态失败:{error}"))
     }
 
     /// 节点/订阅变化后:重写配置并热重载,再重选当前节点。
@@ -315,6 +333,18 @@ fn urlencode(s: &str) -> String {
 /// 节点 → Clash node:`kind`→`type`、链式 `chain_entry`→`dialer-proxy`,并兼容历史字段名 `skip_verify`。
 fn node_to_clash(node: &ProxyNode) -> Value {
     let mut m = node.extra.clone();
+    // 部分订阅把 alpn 输出为空字符串，但 mihomo 只接受字符串数组；空值删除，非空值转数组。
+    if let Some(Value::String(alpn)) = m.remove("alpn") {
+        let values = alpn
+            .split(',')
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(|value| Value::String(value.to_string()))
+            .collect::<Vec<_>>();
+        if !values.is_empty() {
+            m.insert("alpn".to_string(), Value::Array(values));
+        }
+    }
     m.insert("name".into(), Value::String(node.name.clone()));
     m.insert("type".into(), Value::String(node.kind.clone()));
     if !node.server.is_empty() {
@@ -771,6 +801,8 @@ mod tests {
     // 固定第三方资源必须能真实启动、发布 mixed-port 和响应控制 API，避免只验证 YAML 而漏掉打包内核不兼容。
     #[test]
     fn bundled_kernel_starts_and_exposes_control_api() {
+        let mut extra = serde_json::Map::new();
+        extra.insert("alpn".to_string(), Value::String(String::new()));
         let config = ProxyConfig {
             enabled: true,
             active: Some("fixture-http".to_string()),
@@ -781,7 +813,7 @@ mod tests {
                 port: 9,
                 chain_entry: None,
                 sub: None,
-                extra: serde_json::Map::new(),
+                extra,
             }],
             ..Default::default()
         };

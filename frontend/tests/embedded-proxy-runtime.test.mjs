@@ -15,7 +15,8 @@ test("代理页覆盖节点、订阅、代理组和链式入口", () => {
     assert.match(page, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
   assert.match(adapter, /proxyRuntimeClient\.fetch/);
-  assert.match(page, /application\/x-sprak-proxy-node/);
+  assert.match(page, /data-proxy-group/);
+  assert.match(page, /onPointerMove/);
   assert.match(page, /"test_node"/);
 });
 
