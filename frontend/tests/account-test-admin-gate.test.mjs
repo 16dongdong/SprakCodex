@@ -34,11 +34,8 @@ test("account test UI is derived from the current admin session", () => {
   assert.match(pageSource, /canTestAccounts=\{canTestAccounts\}/);
 });
 
-test("account test menu and modal are both hidden from non-admin views", () => {
-  assert.match(
-    viewSource,
-    /\{props\.canTestAccounts \? \(\s*<DropdownMenuItem[\s\S]*?t\("测试账号"\)[\s\S]*?\) : null\}/,
-  );
+test("account test menu stays removed while the retained modal remains admin-only", () => {
+  assert.doesNotMatch(viewSource, /t\("测试账号"\)/);
   assert.match(
     viewSource,
     /\{props\.canTestAccounts \? \(\s*<AccountTestModal[\s\S]*?\) : null\}/,

@@ -22,7 +22,14 @@ const configuredPaths = Array.from(
 );
 
 test("每个顶级功能路由同时接入菜单图标和页面缓存", () => {
-  assert.deepEqual(configuredPaths, ["/", "/accounts", "/sessions", "/logs", "/settings"]);
+  assert.deepEqual(configuredPaths, [
+    "/",
+    "/accounts",
+    "/sessions",
+    "/logs",
+    "/device-profile",
+    "/settings",
+  ]);
   assert.equal(new Set(configuredPaths).size, configuredPaths.length);
 
   for (const routePath of configuredPaths) {

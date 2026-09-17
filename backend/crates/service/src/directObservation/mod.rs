@@ -79,8 +79,18 @@ struct Running {
     cancel: CancellationToken,
     thread: std::thread::JoinHandle<()>,
     counters: Arc<Counters>,
-    egressTimezone: String,
-    egressLocale: String,
+    profileState: Arc<environmentIdentity::ProfileState>,
+}
+
+// 自动探针拥有完整发布边界，保证网络结果、共享状态和 DLL 映射按同一事务更新。
+struct ProfileMonitorSettings {
+    client: reqwest::Client,
+    profileState: Arc<environmentIdentity::ProfileState>,
+    relayPublisher: Option<Arc<runtimePaths::RelayPublisher>>,
+    port: u16,
+    certificate: PathBuf,
+    completionDirectory: Option<PathBuf>,
+    cancel: CancellationToken,
 }
 
 #[derive(Serialize)]
@@ -91,7 +101,16 @@ pub struct ObservationStatus {
     pub writtenRequests: u64,
     pub storageErrors: u64,
     pub egressTimezone: Option<String>,
+    pub egressWindowsTimezone: Option<String>,
     pub egressLocale: Option<String>,
+    pub egressCountry: Option<String>,
+    pub egressIp: Option<String>,
+    pub edgeServer: Option<String>,
+    pub edgeLocation: Option<String>,
+    pub profileUpdatedAt: Option<i64>,
+    pub lastProbeAt: Option<i64>,
+    pub lastProbeError: Option<String>,
+    pub probeIntervalSeconds: u64,
 }
 
 // 读取当前进程的观测状态；锁损坏返回显式错误，不报告虚假的关闭或启动成功。
@@ -100,21 +119,47 @@ pub fn status() -> Result<ObservationStatus, String> {
         .get_or_init(|| Mutex::new(None))
         .lock()
         .map_err(|_| "观测状态锁损坏")?;
-    Ok(statusOf(guard.as_ref()))
+    statusOf(guard.as_ref())
 }
 
 // 状态只包含公开证书路径与计数，既不返回业务认证字段，也不暴露网络出口密码。
-fn statusOf(current: Option<&Running>) -> ObservationStatus {
-    ObservationStatus {
+fn statusOf(current: Option<&Running>) -> Result<ObservationStatus, String> {
+    let profile = current
+        .map(|engine| engine.profileState.snapshot())
+        .transpose()?;
+    Ok(ObservationStatus {
         running: current.is_some_and(|engine| !engine.thread.is_finished()),
         proxyUrl: current.map(|engine| engine.address.clone()),
         certificatePath: current.map(|engine| engine.certificate.to_string_lossy().into_owned()),
         writtenRequests: current
             .map_or(0, |engine| engine.counters.written.load(Ordering::Relaxed)),
         storageErrors: current.map_or(0, |engine| engine.counters.errors.load(Ordering::Relaxed)),
-        egressTimezone: current.map(|engine| engine.egressTimezone.clone()),
-        egressLocale: current.map(|engine| engine.egressLocale.clone()),
-    }
+        egressTimezone: profile
+            .as_ref()
+            .map(|snapshot| snapshot.observed.profile.ianaTimezone.clone()),
+        egressWindowsTimezone: profile
+            .as_ref()
+            .map(|snapshot| snapshot.observed.profile.windowsTimezone.clone()),
+        egressLocale: profile
+            .as_ref()
+            .map(|snapshot| snapshot.observed.profile.locale.clone()),
+        egressCountry: profile
+            .as_ref()
+            .map(|snapshot| snapshot.observed.profile.country.clone()),
+        egressIp: profile
+            .as_ref()
+            .and_then(|snapshot| snapshot.observed.egressIp.clone()),
+        edgeServer: profile
+            .as_ref()
+            .map(|snapshot| snapshot.observed.edgeServer.clone()),
+        edgeLocation: profile
+            .as_ref()
+            .map(|snapshot| snapshot.observed.edgeLocation.clone()),
+        profileUpdatedAt: profile.as_ref().map(|snapshot| snapshot.updatedAt),
+        lastProbeAt: profile.as_ref().map(|snapshot| snapshot.lastProbeAt),
+        lastProbeError: profile.and_then(|snapshot| snapshot.lastProbeError),
+        probeIntervalSeconds: environmentIdentity::probeInterval.as_secs(),
+    })
 }
 
 // 管理员显式启动后才签发公开证书；先确认数据库、绑定端口，再发布可用状态。
@@ -133,7 +178,7 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
         if current.thread.is_finished() {
             return Err("观测线程已退出，请先关闭后重新启用".into());
         }
-        return Ok(statusOf(Some(current)));
+        return statusOf(Some(current));
     }
     // 载荷字节由链接器固定进宿主 EXE；配置另用命名映射发布，安装目录不参与运行协议。
     let injectionImage = runtimePaths::moduleImage();
@@ -178,7 +223,7 @@ fn startScoped(scope: RuntimeScope) -> Result<ObservationStatus, String> {
                 return Err("保存直连观测开关失败".into());
             }
             *guard = Some(current);
-            Ok(statusOf(guard.as_ref()))
+            statusOf(guard.as_ref())
         }
         Err(error) => {
             // 公开证书属于已发布的信任身份；启动失败也保留它，避免旧客户端重建 TLS 时读到缺失文件。
@@ -257,22 +302,41 @@ fn startRuntime(
                 let completionDirectory = workerCertificate
                     .parent()
                     .map(|directory| directory.join(cpcommon::completionSpool::directoryName));
+                let initialProfile = match engine.profileState.profile() {
+                    Ok(profile) => profile,
+                    Err(error) => {
+                        let _ = ready.send(Err(error));
+                        return;
+                    }
+                };
                 if let Some(publisher) = workerPublisher.as_deref() {
                     if let Err(error) = runtimePaths::writeRelayConfig(
                         publisher,
                         port,
                         Some(&workerCertificate),
                         completionDirectory.as_deref(),
-                        Some(&engine.environmentProfile),
+                        Some(&initialProfile),
                     ) {
                         let _ = ready.send(Err(error));
                         return;
                     }
                 }
-                let profile = engine.environmentProfile.clone();
-                if ready.send(Ok((address, profile))).is_err() {
+                let profileState = engine.profileState.clone();
+                if ready.send(Ok((address, profileState.clone()))).is_err() {
                     return;
                 }
+                // 周期探针与 Relay 共用取消令牌；画像变化先发布 DLL 快照，再切换请求头状态。
+                engine
+                    .tasks
+                    .spawn(monitorEnvironmentProfile(ProfileMonitorSettings {
+                        client: engine.client.clone(),
+                        profileState,
+                        relayPublisher: workerPublisher.clone(),
+                        port,
+                        certificate: workerCertificate.clone(),
+                        completionDirectory: completionDirectory.clone(),
+                        cancel: engine.cancel.clone(),
+                    }));
                 let monitorEngine = engine.cancel.clone();
                 let monitor = tokio::spawn(async move {
                     let Some(image) = injectionImage else {
@@ -307,7 +371,7 @@ fn startRuntime(
         .map_err(|_| "观测线程提前退出".to_string())
         .and_then(|ready| ready)
     {
-        Ok((address, profile)) => (address, profile),
+        Ok((address, profileState)) => (address, profileState),
         Err(error) => {
             cancel.cancel();
             // 接收启动失败后仍 join，让失败实例的数据库线程先退出，避免重试遗留工作线程。
@@ -318,7 +382,7 @@ fn startRuntime(
             return Err(error);
         }
     };
-    let (address, profile) = address;
+    let (address, profileState) = address;
     Ok(Running {
         address,
         certificate,
@@ -327,9 +391,64 @@ fn startRuntime(
         cancel,
         thread,
         counters,
-        egressTimezone: profile.ianaTimezone,
-        egressLocale: profile.locale,
+        profileState,
     })
+}
+
+// 每个周期创建一次 OpenAI 边缘请求；变化时原子更新命名映射，已注入 DLL 下次 API 调用立即读取新画像。
+async fn monitorEnvironmentProfile(settings: ProfileMonitorSettings) {
+    let ProfileMonitorSettings {
+        client,
+        profileState,
+        relayPublisher,
+        port,
+        certificate,
+        completionDirectory,
+        cancel,
+    } = settings;
+    let mut interval = tokio::time::interval(environmentIdentity::probeInterval);
+    interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+    interval.tick().await;
+    loop {
+        tokio::select! {
+            _ = cancel.cancelled() => return,
+            _ = interval.tick() => {}
+        }
+        let observed = match environmentIdentity::resolve(&client).await {
+            Ok(observed) => observed,
+            Err(error) => {
+                log::warn!("OpenAI 出口画像自动探针失败：{error}");
+                let _ = profileState.reject(error);
+                continue;
+            }
+        };
+        let changed = match profileState.differs(&observed) {
+            Ok(changed) => changed,
+            Err(error) => {
+                log::error!("比较 OpenAI 出口画像失败：{error}");
+                return;
+            }
+        };
+        if changed {
+            if let Some(publisher) = relayPublisher.as_deref() {
+                if let Err(error) = runtimePaths::writeRelayConfig(
+                    publisher,
+                    port,
+                    Some(&certificate),
+                    completionDirectory.as_deref(),
+                    Some(&observed.profile),
+                ) {
+                    log::error!("发布最新出口画像到 DLL 失败：{error}");
+                    let _ = profileState.reject(error);
+                    continue;
+                }
+            }
+        }
+        if let Err(error) = profileState.accept(observed, changed) {
+            log::error!("提交最新 OpenAI 出口画像失败：{error}");
+            return;
+        }
+    }
 }
 
 // 用户主动停用会持久化关闭状态；与服务退出区别开，避免正常重启丢失自动恢复配置。
@@ -392,7 +511,7 @@ fn stopInternal(disable: bool) -> Result<ObservationStatus, String> {
     };
     cleanupResult?;
     persistResult?;
-    Ok(statusOf(None))
+    statusOf(None)
 }
 
 // 服务初始化读取持久化开关；默认关闭，旧版本不会意外改变网络路径。

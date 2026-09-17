@@ -42,14 +42,14 @@ async function loadTopLevelRoutesModule() {
 
 const routes = await loadTopLevelRoutesModule();
 
-test("个人版所有角色开放仪表盘、账号、请求日志和设置", () => {
+test("个人版所有角色开放仪表盘、账号、请求日志、设备画像和设置", () => {
   for (const role of ["system_admin", "admin", "member"]) {
     const access = { role, mode: "accounts", isDesktopRuntime: true };
     assert.deepEqual(
       routes.getAllowedTopLevelRouteSections(access).flatMap((section) =>
         section.routes.map((route) => route.path),
       ),
-      ["/", "/accounts", "/sessions", "/logs", "/settings"],
+      ["/", "/accounts", "/sessions", "/logs", "/device-profile", "/settings"],
     );
     assert.equal(routes.getFirstAllowedTopLevelRoutePath(access), "/");
   }

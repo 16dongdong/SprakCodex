@@ -7,7 +7,16 @@ export interface ObservationStatus {
   writtenRequests: number;
   storageErrors: number;
   egressTimezone: string | null;
+  egressWindowsTimezone: string | null;
   egressLocale: string | null;
+  egressCountry: string | null;
+  egressIp: string | null;
+  edgeServer: string | null;
+  edgeLocation: string | null;
+  profileUpdatedAt: number | null;
+  lastProbeAt: number | null;
+  lastProbeError: string | null;
+  probeIntervalSeconds: number;
 }
 
 export const observationQueryKey = ["directObservation", "status"] as const;

@@ -52,10 +52,19 @@ pub(super) async fn upgrade(
         return reply(StatusCode::SERVICE_UNAVAILABLE, "会话分流身份无效");
     }
     if tracked {
-        if let Err(error) = super::environmentIdentity::applyHeaders(
-            request.headers_mut(),
-            &engine.environmentProfile,
-        ) {
+        let profile = match engine.profileState.profile() {
+            Ok(profile) => profile,
+            Err(error) => {
+                log::error!("读取 WebSocket 出口画像失败：{error}");
+                return reply(
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    "读取 WebSocket 出口画像失败",
+                );
+            }
+        };
+        if let Err(error) =
+            super::environmentIdentity::applyHeaders(request.headers_mut(), &profile)
+        {
             log::error!("同步 WebSocket 出口画像失败：{error}");
             return reply(
                 StatusCode::SERVICE_UNAVAILABLE,

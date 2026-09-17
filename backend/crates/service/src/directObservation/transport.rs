@@ -40,7 +40,7 @@ pub(super) struct Engine {
     pub sink: RecordSink,
     pub cancel: CancellationToken,
     pub tasks: TaskTracker,
-    pub environmentProfile: cpcommon::relayContract::EnvironmentProfile,
+    pub profileState: Arc<super::environmentIdentity::ProfileState>,
     pinned: Option<(String, std::net::SocketAddr)>,
 }
 
@@ -58,7 +58,7 @@ impl Engine {
         let proxy = proxy.or_else(observationProxyFromEnvironment);
         let proxy = proxy.ok_or("未发现 OpenAI 目标进程使用的代理出口")?;
         let (client, proxy) = buildClient(Some(proxy), None)?;
-        let environmentProfile = super::environmentIdentity::resolve(&client).await?;
+        let observedProfile = super::environmentIdentity::resolve(&client).await?;
         Ok(Self {
             authority,
             client,
@@ -67,7 +67,9 @@ impl Engine {
             sink,
             cancel,
             tasks: TaskTracker::new(),
-            environmentProfile,
+            profileState: Arc::new(super::environmentIdentity::ProfileState::new(
+                observedProfile,
+            )),
             pinned: None,
         })
     }
@@ -89,12 +91,19 @@ impl Engine {
             sink,
             cancel,
             tasks: TaskTracker::new(),
-            environmentProfile: cpcommon::relayContract::EnvironmentProfile {
-                ianaTimezone: "Etc/UTC".into(),
-                windowsTimezone: "UTC".into(),
-                locale: "en-US".into(),
-                country: "US".into(),
-            },
+            profileState: Arc::new(super::environmentIdentity::ProfileState::new(
+                super::environmentIdentity::ObservedProfile {
+                    profile: cpcommon::relayContract::EnvironmentProfile {
+                        ianaTimezone: "Etc/UTC".into(),
+                        windowsTimezone: "UTC".into(),
+                        locale: "en-US".into(),
+                        country: "US".into(),
+                    },
+                    edgeServer: "TEST".into(),
+                    edgeLocation: "测试机房".into(),
+                    egressIp: Some("127.0.0.1".into()),
+                },
+            )),
             pinned: None,
         })
     }
@@ -140,7 +149,7 @@ impl Engine {
             sink: self.sink.clone(),
             cancel: self.cancel.clone(),
             tasks: self.tasks.clone(),
-            environmentProfile: self.environmentProfile.clone(),
+            profileState: self.profileState.clone(),
             pinned,
         }))
     }
@@ -359,10 +368,16 @@ async fn dispatch(
     let host = target.host_str().unwrap_or("");
     let tracked = engine.authority.hosts.contains_key(host) && inferencePath(target.path());
     if tracked {
-        if let Err(error) = super::environmentIdentity::applyHeaders(
-            request.headers_mut(),
-            &engine.environmentProfile,
-        ) {
+        let profile = match engine.profileState.profile() {
+            Ok(profile) => profile,
+            Err(error) => {
+                log::error!("读取观测出口画像失败：{error}");
+                return reply(StatusCode::SERVICE_UNAVAILABLE, "读取观测出口画像失败");
+            }
+        };
+        if let Err(error) =
+            super::environmentIdentity::applyHeaders(request.headers_mut(), &profile)
+        {
             log::error!("同步观测出口画像失败：{error}");
             return reply(StatusCode::SERVICE_UNAVAILABLE, "同步观测出口画像失败");
         }
