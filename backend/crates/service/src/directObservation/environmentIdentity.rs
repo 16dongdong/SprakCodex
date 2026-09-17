@@ -191,6 +191,7 @@ fn edgeIdentity(edge: &str) -> Option<(&'static str, &'static str, &'static str,
         "NRT" | "KIX" => ("JP", "Asia/Tokyo", "ja-JP", "日本"),
         "ICN" => ("KR", "Asia/Seoul", "ko-KR", "首尔"),
         "SIN" => ("SG", "Asia/Singapore", "en-SG", "新加坡"),
+        "MNL" => ("PH", "Asia/Manila", "en-PH", "马尼拉"),
         "HKG" => ("HK", "Asia/Hong_Kong", "zh-HK", "香港"),
         "TPE" => ("TW", "Asia/Taipei", "zh-TW", "台北"),
         "BOM" | "DEL" => ("IN", "Asia/Kolkata", "en-IN", "印度"),
@@ -228,7 +229,7 @@ fn windowsTimezone(iana: &str) -> Option<&'static str> {
         "Asia/Tokyo" => "Tokyo Standard Time",
         "Asia/Seoul" => "Korea Standard Time",
         "Asia/Shanghai" | "Asia/Hong_Kong" | "Asia/Macau" => "China Standard Time",
-        "Asia/Singapore" | "Asia/Kuala_Lumpur" => "Singapore Standard Time",
+        "Asia/Singapore" | "Asia/Kuala_Lumpur" | "Asia/Manila" => "Singapore Standard Time",
         "Asia/Taipei" => "Taipei Standard Time",
         "Asia/Kolkata" | "Asia/Calcutta" => "India Standard Time",
         "Asia/Dubai" => "Arabian Standard Time",
@@ -295,6 +296,22 @@ mod tests {
         let mut headers = hyper::HeaderMap::new();
         applyHeaders(&mut headers, &observed.profile).unwrap();
         assert_eq!(headers["x-openai-client-timezone"], "America/Los_Angeles");
+    }
+
+    // MNL 是 OpenAI 实际返回的马尼拉 POP；Windows 使用 CLDR 对应的 Singapore Standard Time。
+    #[test]
+    fn mapsManilaProfileToWindowsAndHeaders() {
+        let observed =
+            buildProfileFromEdge(parseOpenAiTrace("ip=203.0.113.9\nloc=VN\ncolo=MNL\n")).unwrap();
+        assert_eq!(observed.profile.country, "VN");
+        assert_eq!(observed.profile.ianaTimezone, "Asia/Manila");
+        assert_eq!(observed.profile.windowsTimezone, "Singapore Standard Time");
+        assert_eq!(observed.profile.locale, "en-PH");
+        assert_eq!(observed.edgeLocation, "马尼拉");
+        let mut headers = hyper::HeaderMap::new();
+        applyHeaders(&mut headers, &observed.profile).unwrap();
+        assert_eq!(headers["x-openai-client-timezone"], "Asia/Manila");
+        assert_eq!(headers["x-openai-client-region"], "VN");
     }
 
     // 未知机房必须显式失败，禁止用本机时区或旧固定地区伪造探针结果。

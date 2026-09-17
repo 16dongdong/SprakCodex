@@ -5,6 +5,7 @@ It follows Keep a Changelog with a lightweight adaptation for this repository.
 
 ## [Unreleased]
 
+- Added the missing country, IANA timezone, Windows timezone, and locale mapping for OpenAI's Manila edge location `MNL`, preventing repeated unmapped-profile probe failures.
 - Replaced the expandable account quota details with two fixed rows for standard and reserve quotas, using circular indicators for the 5-hour and 7-day windows.
 
 ## [0.6.0] - 2026-09-05
