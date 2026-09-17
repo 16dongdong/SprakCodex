@@ -12,13 +12,13 @@ use super::{
     current_gateway_originator, current_gateway_quota_guard, current_gateway_residency_requirement,
     current_gateway_sse_keepalive_enabled, current_gateway_sse_keepalive_interval_ms,
     current_gateway_thread_aware_account_distribution_enabled,
-    current_gateway_upstream_proxy_bypass_hosts, current_gateway_upstream_stream_timeout_ms,
-    current_gateway_upstream_total_timeout_ms, current_gateway_user_agent,
-    current_gateway_user_agent_version, current_saved_service_addr, current_service_bind_mode,
-    default_gateway_originator, default_gateway_user_agent, default_gateway_user_agent_version,
-    env_override_catalog_value, env_override_reserved_keys, env_override_unsupported_keys,
-    normalize_optional_text, normalize_ui_appearance_preset, normalize_ui_locale,
-    normalize_ui_theme, normalize_ui_zoom_factor, parse_bool_with_default,
+    current_gateway_upstream_proxy_bypass_hosts, current_gateway_upstream_proxy_enabled,
+    current_gateway_upstream_stream_timeout_ms, current_gateway_upstream_total_timeout_ms,
+    current_gateway_user_agent, current_gateway_user_agent_version, current_saved_service_addr,
+    current_service_bind_mode, default_gateway_originator, default_gateway_user_agent,
+    default_gateway_user_agent_version, env_override_catalog_value, env_override_reserved_keys,
+    env_override_unsupported_keys, normalize_optional_text, normalize_ui_appearance_preset,
+    normalize_ui_locale, normalize_ui_theme, normalize_ui_zoom_factor, parse_bool_with_default,
     residency_requirement_options, save_env_overrides_value, save_persisted_app_setting,
     save_persisted_bool_setting, sync_runtime_settings_from_storage,
     APP_SETTING_AUTO_START_ENABLED_KEY, APP_SETTING_CLOSE_TO_TRAY_ON_CLOSE_KEY,
@@ -217,7 +217,12 @@ fn current_app_settings_value_inner(
     let gateway_residency_requirement = current_gateway_residency_requirement().unwrap_or_default();
     let free_account_max_model_options =
         load_free_account_max_model_options(&free_account_max_model);
-    let upstream_proxy_url = crate::gateway::current_upstream_proxy_url();
+    let upstream_proxy_enabled = current_gateway_upstream_proxy_enabled();
+    // 界面显示持久化地址而非运行态地址；关闭开关后仍允许用户直接编辑原配置。
+    let upstream_proxy_url = settings
+        .get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY)
+        .and_then(|url| normalize_optional_text(Some(url)))
+        .or_else(crate::gateway::current_upstream_proxy_url);
     let upstream_proxy_bypass_hosts = current_gateway_upstream_proxy_bypass_hosts();
     let upstream_stream_timeout_ms = current_gateway_upstream_stream_timeout_ms();
     let upstream_total_timeout_ms = current_gateway_upstream_total_timeout_ms();
@@ -348,6 +353,7 @@ fn current_app_settings_value_inner(
         "pluginMarketMode": plugin_market_mode,
         "pluginMarketSourceUrl": plugin_market_source_url,
         "gatewayResidencyRequirementOptions": residency_requirement_options(),
+        "upstreamProxyEnabled": upstream_proxy_enabled,
         "upstreamProxyUrl": upstream_proxy_url.unwrap_or_default(),
         "upstreamStreamTimeoutMs": upstream_stream_timeout_ms,
         "upstreamTotalTimeoutMs": upstream_total_timeout_ms,

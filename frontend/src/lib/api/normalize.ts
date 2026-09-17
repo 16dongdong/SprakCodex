@@ -1827,6 +1827,7 @@ export function normalizeAppSettings(payload: unknown): AppSettings {
     ).map((item) => asString(item)),
     pluginMarketMode: asString(source.pluginMarketMode ?? source.plugin_market_mode) || "builtin",
     pluginMarketSourceUrl: asString(source.pluginMarketSourceUrl ?? source.plugin_market_source_url),
+    upstreamProxyEnabled: asBoolean(source.upstreamProxyEnabled),
     upstreamProxyUrl: asString(source.upstreamProxyUrl),
     upstreamProxyBypassHosts: asString(source.upstreamProxyBypassHosts),
     ...normalizeGatewayTransportValues(source),

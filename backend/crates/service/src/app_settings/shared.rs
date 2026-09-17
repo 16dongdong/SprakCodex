@@ -27,6 +27,7 @@ pub const APP_SETTING_GATEWAY_ORIGINATOR_KEY: &str = "gateway.originator";
 pub const APP_SETTING_GATEWAY_USER_AGENT_KEY: &str = "gateway.user_agent";
 pub const APP_SETTING_GATEWAY_USER_AGENT_VERSION_KEY: &str = "gateway.user_agent_version";
 pub const APP_SETTING_GATEWAY_RESIDENCY_REQUIREMENT_KEY: &str = "gateway.residency_requirement";
+pub const APP_SETTING_GATEWAY_UPSTREAM_PROXY_ENABLED_KEY: &str = "gateway.upstream_proxy_enabled";
 pub const APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY: &str = "gateway.upstream_proxy_url";
 pub const APP_SETTING_GATEWAY_UPSTREAM_PROXY_BYPASS_HOSTS_KEY: &str =
     "gateway.upstream_proxy_bypass_hosts";

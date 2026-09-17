@@ -16,7 +16,8 @@ use super::{
     APP_SETTING_GATEWAY_SSE_KEEPALIVE_INTERVAL_MS_KEY,
     APP_SETTING_GATEWAY_THREAD_AWARE_ACCOUNT_DISTRIBUTION_ENABLED_KEY,
     APP_SETTING_GATEWAY_UPSTREAM_PROXY_BYPASS_HOSTS_KEY,
-    APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY, APP_SETTING_GATEWAY_UPSTREAM_STREAM_TIMEOUT_MS_KEY,
+    APP_SETTING_GATEWAY_UPSTREAM_PROXY_ENABLED_KEY, APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY,
+    APP_SETTING_GATEWAY_UPSTREAM_STREAM_TIMEOUT_MS_KEY,
     APP_SETTING_GATEWAY_UPSTREAM_TOTAL_TIMEOUT_MS_KEY, APP_SETTING_GATEWAY_USER_AGENT_KEY,
     APP_SETTING_GATEWAY_USER_AGENT_VERSION_KEY, SERVICE_BIND_MODE_SETTING_KEY,
 };
@@ -222,11 +223,18 @@ pub fn sync_runtime_settings_from_storage() {
         }
     }
     if !process_env_has_value("CODEXMANAGER_UPSTREAM_PROXY_URL") {
-        if let Some(proxy_url) = settings.get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY) {
-            let normalized = normalize_optional_text(Some(proxy_url));
-            if let Err(err) = gateway::set_upstream_proxy_url(normalized.as_deref()) {
-                log::warn!("sync persisted upstream proxy failed: {err}");
-            }
+        let proxy_url = settings
+            .get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY)
+            .and_then(|proxy_url| normalize_optional_text(Some(proxy_url)));
+        // 旧配置缺少显式开关时保持原先“有地址即启用”的行为；新配置严格服从开关。
+        let enabled = settings
+            .get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_ENABLED_KEY)
+            .map(|raw| super::parse_bool_with_default(raw, false))
+            .unwrap_or(proxy_url.is_some());
+        if let Err(err) =
+            gateway::set_upstream_proxy_url(if enabled { proxy_url.as_deref() } else { None })
+        {
+            log::warn!("sync persisted upstream proxy failed: {err}");
         }
     }
     if !process_env_has_value("CODEXMANAGER_UPSTREAM_PROXY_BYPASS_HOSTS") {

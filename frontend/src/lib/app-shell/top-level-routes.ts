@@ -36,6 +36,12 @@ export const TOP_LEVEL_ROUTE_CONFIG = [
     roles: ["system_admin", "admin", "member"],
   },
   {
+    path: "/proxy",
+    label: "代理",
+    section: "personal",
+    roles: ["system_admin", "admin", "member"],
+  },
+  {
     path: "/device-profile",
     label: "设备画像",
     section: "personal",
@@ -89,7 +95,7 @@ function isTopLevelRouteAccessContext(
   return Boolean(access && typeof access === "object" && !Array.isArray(access));
 }
 
-/// 个人版四个页面对本机用户一致开放；保留角色读取只为兼容现有登录快照。
+/// 个人工具页面对本机用户一致开放；保留角色读取只为兼容现有登录快照。
 function normalizeAccessContext(
   access: TopLevelRouteAccess,
 ): NormalizedTopLevelRouteAccessContext {

@@ -25,7 +25,8 @@ struct CodexNpmLatestResponse {
 }
 
 use super::{
-    normalize_optional_text, save_persisted_app_setting, save_persisted_bool_setting,
+    list_app_settings_map, normalize_optional_text, parse_bool_with_default,
+    save_persisted_app_setting, save_persisted_bool_setting,
     APP_SETTING_GATEWAY_ACCOUNT_MAX_INFLIGHT_KEY, APP_SETTING_GATEWAY_BACKGROUND_TASKS_KEY,
     APP_SETTING_GATEWAY_COMPACT_MODEL_FORWARD_RULES_KEY,
     APP_SETTING_GATEWAY_FREE_ACCOUNT_MAX_MODEL_KEY, APP_SETTING_GATEWAY_MODEL_FORWARD_RULES_KEY,
@@ -36,7 +37,8 @@ use super::{
     APP_SETTING_GATEWAY_SSE_KEEPALIVE_INTERVAL_MS_KEY,
     APP_SETTING_GATEWAY_THREAD_AWARE_ACCOUNT_DISTRIBUTION_ENABLED_KEY,
     APP_SETTING_GATEWAY_UPSTREAM_PROXY_BYPASS_HOSTS_KEY,
-    APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY, APP_SETTING_GATEWAY_UPSTREAM_STREAM_TIMEOUT_MS_KEY,
+    APP_SETTING_GATEWAY_UPSTREAM_PROXY_ENABLED_KEY, APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY,
+    APP_SETTING_GATEWAY_UPSTREAM_STREAM_TIMEOUT_MS_KEY,
     APP_SETTING_GATEWAY_UPSTREAM_TOTAL_TIMEOUT_MS_KEY, APP_SETTING_GATEWAY_USER_AGENT_KEY,
     APP_SETTING_GATEWAY_USER_AGENT_VERSION_KEY,
 };
@@ -533,12 +535,44 @@ pub fn residency_requirement_options() -> &'static [&'static str] {
 /// 返回函数执行结果
 pub fn set_gateway_upstream_proxy_url(proxy_url: Option<&str>) -> Result<Option<String>, String> {
     let normalized = normalize_optional_text(proxy_url);
-    let applied = gateway::set_upstream_proxy_url(normalized.as_deref())?;
+    // 地址与启用状态分开持久化；关闭代理时保留用户地址，但运行链路必须立即停止使用它。
+    if current_gateway_upstream_proxy_enabled() {
+        let _ = gateway::set_upstream_proxy_url(normalized.as_deref())?;
+    } else {
+        let _ = gateway::set_upstream_proxy_url(None)?;
+    }
     save_persisted_app_setting(
         APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY,
-        applied.as_deref(),
+        normalized.as_deref(),
     )?;
-    Ok(applied)
+    Ok(normalized)
+}
+
+// 旧版本只有代理地址没有开关；迁移时保持其原有启用语义，空配置仍默认关闭。
+pub fn current_gateway_upstream_proxy_enabled() -> bool {
+    let settings = list_app_settings_map();
+    settings
+        .get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_ENABLED_KEY)
+        .map(|raw| parse_bool_with_default(raw, false))
+        .unwrap_or_else(|| {
+            settings
+                .get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY)
+                .is_some_and(|url| !url.trim().is_empty())
+        })
+}
+
+// 开启时先校验已保存地址并切换共享网关；关闭时清空运行态，不删除用户配置。
+pub fn set_gateway_upstream_proxy_enabled(enabled: bool) -> Result<bool, String> {
+    let settings = list_app_settings_map();
+    let proxy_url = settings
+        .get(APP_SETTING_GATEWAY_UPSTREAM_PROXY_URL_KEY)
+        .and_then(|url| normalize_optional_text(Some(url)));
+    if enabled && proxy_url.is_none() {
+        return Err("开启代理前请先填写代理地址".to_string());
+    }
+    let _ = gateway::set_upstream_proxy_url(if enabled { proxy_url.as_deref() } else { None })?;
+    save_persisted_bool_setting(APP_SETTING_GATEWAY_UPSTREAM_PROXY_ENABLED_KEY, enabled)?;
+    Ok(enabled)
 }
 
 pub fn current_gateway_upstream_proxy_bypass_hosts() -> String {

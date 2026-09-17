@@ -6,6 +6,7 @@ import {
   MessagesSquare,
   Users,
   FileText,
+  Network,
   Settings,
   Fingerprint,
   ChevronLeft,
@@ -37,6 +38,7 @@ const NAV_ITEM_BY_PATH = new Map<TopLevelRoutePath, { icon: LucideIcon }>([
   ["/accounts", { icon: Users }],
   ["/sessions", { icon: MessagesSquare }],
   ["/logs", { icon: FileText }],
+  ["/proxy", { icon: Network }],
   ["/device-profile", { icon: Fingerprint }],
   ["/settings", { icon: Settings }],
 ]);
