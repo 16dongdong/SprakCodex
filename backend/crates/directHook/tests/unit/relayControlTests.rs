@@ -38,6 +38,7 @@ impl Fixture {
             caCertificatePath: None,
             completionEnabled: false,
             completionDirectory: None,
+            environmentProfile: None,
         }
     }
 

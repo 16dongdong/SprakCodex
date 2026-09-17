@@ -44,6 +44,7 @@ pub(super) fn writeRelayConfig(
     port: u16,
     certificate: Option<&Path>,
     completionDirectory: Option<&Path>,
+    environmentProfile: Option<&cpcommon::relayContract::EnvironmentProfile>,
 ) -> Result<(), String> {
     // 配置会在另一个进程读取；相对路径会错误依赖目标工作目录，缺失证书也不应发布为可用状态。
     if certificate.is_some_and(|path| !path.is_absolute() || !path.is_file()) {
@@ -65,6 +66,7 @@ pub(super) fn writeRelayConfig(
         caCertificatePath: certificate.map(Path::to_owned),
         completionEnabled: port != 0 && completionDirectory.is_some(),
         completionDirectory: completionDirectory.map(Path::to_owned),
+        environmentProfile: environmentProfile.cloned(),
     };
     writeRelaySnapshot(publisher, &configuration)
 }

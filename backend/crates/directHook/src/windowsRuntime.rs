@@ -1,4 +1,4 @@
-//! Windows 网络回调与运行期配置；不修改原登录、时区、系统代理和子进程行为。
+//! Windows 网络回调与运行期配置；网络路由和出口环境画像共用同一份实时配置。
 use super::relayControl::RelayControl;
 use cpcommon::hook_proxy::{encodeRoute, HookProxyTarget, RouteKind};
 use cpcommon::relayContract::RelayConfig;
@@ -925,6 +925,11 @@ unsafe fn initialize(stage: *mut u32) -> bool {
         }
     };
     setInitializationStage(stage, 11);
+    if let Err(error) = super::environmentIdentity::install() {
+        log(&error);
+        ready = false;
+    }
+    setInitializationStage(stage, 12);
     ready &= install(
         &CONNECT,
         s!("connect"),
@@ -1033,6 +1038,7 @@ fn closePublishedEvent(event: &AtomicIsize) {
 fn disableHooks() -> Result<(), String> {
     NETWORK_READY.store(false, Ordering::Release);
     super::trustProvider::disable()?;
+    super::environmentIdentity::disable()?;
     #[cfg(target_arch = "x86_64")]
     super::nativeCompletion::disable()?;
     for slot in networkSlots() {
@@ -1046,6 +1052,7 @@ fn releaseRuntime() -> Result<(), String> {
     #[cfg(target_arch = "x86_64")]
     super::nativeCompletion::release()?;
     super::trustProvider::release()?;
+    super::environmentIdentity::release()?;
     for slot in networkSlots() {
         slot.release()?;
     }

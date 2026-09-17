@@ -52,7 +52,7 @@ async fn engine(
         sender,
         counters: Arc::new(super::super::recordSink::Counters::default()),
     };
-    let engine = Engine::new(
+    let engine = Engine::newForTest(
         Authority::create(&["chatgpt.com"]).unwrap(),
         sink,
         proxy,

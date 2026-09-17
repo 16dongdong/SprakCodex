@@ -38,7 +38,7 @@ fn publishedTrampolineIsAvailableToFirstCallback() {
     assert!(!originalSlot.isInstalled());
 }
 
-// 网络模块不应重新引入原工程的画像、系统代理重写或强制结束子进程逻辑。
+// 网络模块不得引入系统代理重写或强制结束子进程逻辑；出口画像由独立模块管理。
 #[test]
 fn runtimeContainsOnlyObservationHooks() {
     let source = include_str!("../../src/windowsRuntime.rs");
@@ -46,8 +46,6 @@ fn runtimeContainsOnlyObservationHooks() {
         "WinHttpOpen",
         "TerminateProcess",
         "NtOpenKey",
-        "GetTimeZoneInformation",
-        "GetUserDefaultLocaleName",
         "CreateProcessW",
     ] {
         assert!(!source.contains(unrelated), "观测模块不应调用 {unrelated}");

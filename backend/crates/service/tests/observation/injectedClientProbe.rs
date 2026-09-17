@@ -198,6 +198,7 @@ pub(super) fn prepare(directory: &Path, certificate: &Path, relayPort: u16) -> I
         relayPort,
         Some(certificate),
         completionDirectory.as_deref(),
+        None,
     )
     .unwrap();
     target

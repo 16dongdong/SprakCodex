@@ -9,7 +9,7 @@ pub(super) struct RelayControl {
 }
 
 impl Default for RelayControl {
-    // 生产控制器固定读取第十二版部署映射；测试通过专用构造隔离并行宿主。
+    // 生产控制器固定读取第十三版部署映射；测试通过专用构造隔离并行宿主。
     fn default() -> Self {
         Self {
             identity: cpcommon::relayContract::deploymentIdentity,

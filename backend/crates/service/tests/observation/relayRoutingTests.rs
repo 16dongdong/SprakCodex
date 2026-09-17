@@ -204,6 +204,7 @@ fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
         caCertificatePath: None,
         completionEnabled: false,
         completionDirectory: None,
+        environmentProfile: None,
     };
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
@@ -214,7 +215,7 @@ fn verifyAddressFamilyLifetime(address: std::net::IpAddr) {
     settings.owner = Some(currentIdentity().unwrap());
     fixture.publish(&settings);
     fixture.probe(destination, &relay);
-    runtimePaths::writeRelayConfig(&fixture.relayPublisher, 0, None, None).unwrap();
+    runtimePaths::writeRelayConfig(&fixture.relayPublisher, 0, None, None, None).unwrap();
     fixture.probe(destination, &original);
     fixture.publish(&settings);
     fixture.probe(destination, &relay);

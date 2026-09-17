@@ -7,6 +7,7 @@ mod clientEventMonitor;
 mod clientEvents;
 mod completionMonitor;
 mod detailCapture;
+mod environmentIdentity;
 mod loopbackListeners;
 #[cfg(windows)]
 mod nativeInjection;
@@ -256,6 +257,7 @@ fn startRuntime(
                         port,
                         Some(&workerCertificate),
                         completionDirectory.as_deref(),
+                        Some(&engine.environmentProfile),
                     ) {
                         let _ = ready.send(Err(error));
                         return;
@@ -304,7 +306,7 @@ fn startRuntime(
             // 接收启动失败后仍 join，让失败实例的数据库线程先退出，避免重试遗留工作线程。
             thread.join().map_err(|_| "观测启动失败且线程异常退出")?;
             if let Some(publisher) = relayPublisher.as_deref() {
-                runtimePaths::writeRelayConfig(publisher, 0, None, None)?;
+                runtimePaths::writeRelayConfig(publisher, 0, None, None, None)?;
             }
             return Err(error);
         }
@@ -336,7 +338,7 @@ fn cleanupRunning(current: Running, _disableCapture: bool) -> Result<(), String>
     let relayResult = current
         .relayPublisher
         .as_deref()
-        .map(|publisher| runtimePaths::writeRelayConfig(publisher, 0, None, None))
+        .map(|publisher| runtimePaths::writeRelayConfig(publisher, 0, None, None, None))
         .transpose();
     current.cancel.cancel();
     let joined = current.thread.join();

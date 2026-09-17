@@ -5,13 +5,13 @@
 `21be653e7dc91eb9a4873e1c1627ae4773739ef9`。
 
 这两个目录已成为本仓库源码，不在构建或运行时访问原仓库。
-本仓库保留 Relay 字节协议，并维护宿主与内存映像的共享就绪协议；已移除画像、注册表与子进程控制逻辑。
+本仓库保留 Relay 字节协议，并维护宿主与内存映像的共享就绪协议；第十三版重新复用 CProxy 的出口时区与区域画像思路，通过内存配置同步目标进程 API，不写注册表，也不接入子进程控制逻辑。
 网络运行期和 trampoline 安装分别位于 `windowsRuntime.rs` 与 `hookInstall.rs`，测试位于独立的 `tests/unit/`。
 `relayControl.rs` 管理配置快照，和宿主共用 `directCommon/relayContract.rs`、`runtimeLease.rs`；
 有效改连配置必须绑定存活的 Relay 运行线程。`trustProvider.rs` 与 `trustBundle.rs` 只接入额外 CA 读取，
 合并公开证书并保留原登录与环境块。`proxyDiscovery.rs` 和 `systemProxy.rs` 只读目标代理元数据，
 代替手工端口列表。`runtimeMetadata.rs` 通过共用的 `runtimeHome.rs` 发布公开运行目录，
-就绪事件第十二版同时要求运行实例、CA 读取、代理发现、目录元数据发布和可验证卸载入口完成。
+就绪事件第十三版同时要求运行实例、CA 读取、代理发现、目录元数据发布和可验证卸载入口完成。
 原始源码许可为 Apache-2.0，完整许可见 `directHookApacheLicense.txt`。
 
 ## 构建

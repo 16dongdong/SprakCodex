@@ -40,6 +40,7 @@ pub(super) struct Engine {
     pub sink: RecordSink,
     pub cancel: CancellationToken,
     pub tasks: TaskTracker,
+    pub environmentProfile: cpcommon::relayContract::EnvironmentProfile,
     pinned: Option<(String, std::net::SocketAddr)>,
 }
 
@@ -53,16 +54,9 @@ impl Engine {
     ) -> Result<Self, String> {
         // 工作区同时编译 ring 与 aws-lc；显式选择 provider，避免 WebSocket 首次连接时全局选择歧义导致 panic。
         // 根证书仍使用公共可信根，绝不把下游临时 CA 加入真实上游的信任集合。
-        let websocketTls = rustls::ClientConfig::builder_with_provider(Arc::new(
-            rustls::crypto::ring::default_provider(),
-        ))
-        .with_safe_default_protocol_versions()
-        .map_err(|_| "初始化上游 TLS 版本失败")?
-        .with_root_certificates(rustls::RootCertStore::from_iter(
-            webpki_roots::TLS_SERVER_ROOTS.iter().cloned(),
-        ))
-        .with_no_client_auth();
+        let websocketTls = buildWebsocketTls("初始化上游 TLS 版本失败")?;
         let (client, proxy) = buildClient(proxy, None)?;
+        let environmentProfile = super::environmentIdentity::resolve(&client).await?;
         Ok(Self {
             authority,
             client,
@@ -71,6 +65,34 @@ impl Engine {
             sink,
             cancel,
             tasks: TaskTracker::new(),
+            environmentProfile,
+            pinned: None,
+        })
+    }
+
+    // 测试显式提供固定画像，网络路由用例因此只验证本地 socket，不把公共地理服务变成测试依赖。
+    #[cfg(test)]
+    async fn newForTest(
+        authority: Authority,
+        sink: RecordSink,
+        proxy: Option<String>,
+        cancel: CancellationToken,
+    ) -> Result<Self, String> {
+        let (client, proxy) = buildClient(proxy, None)?;
+        Ok(Self {
+            authority,
+            client,
+            websocketTls: Arc::new(buildWebsocketTls("初始化测试 TLS 版本失败")?),
+            proxy,
+            sink,
+            cancel,
+            tasks: TaskTracker::new(),
+            environmentProfile: cpcommon::relayContract::EnvironmentProfile {
+                ianaTimezone: "Etc/UTC".into(),
+                windowsTimezone: "UTC".into(),
+                locale: "en-US".into(),
+                country: "US".into(),
+            },
             pinned: None,
         })
     }
@@ -116,9 +138,24 @@ impl Engine {
             sink: self.sink.clone(),
             cancel: self.cancel.clone(),
             tasks: self.tasks.clone(),
+            environmentProfile: self.environmentProfile.clone(),
             pinned,
         }))
     }
+}
+
+// HTTP 与 WebSocket 必须使用相同公共根和 TLS provider；调用方只提供符合当前运行上下文的错误文本。
+fn buildWebsocketTls(error: &'static str) -> Result<rustls::ClientConfig, String> {
+    rustls::ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))
+        .with_safe_default_protocol_versions()
+        .map_err(|_| error.to_string())
+        .map(|builder| {
+            builder
+                .with_root_certificates(rustls::RootCertStore::from_iter(
+                    webpki_roots::TLS_SERVER_ROOTS.iter().cloned(),
+                ))
+                .with_no_client_auth()
+        })
 }
 
 // 连接池按实际传输边界建立；原始代理/地址决定原生连接出口，显式代理入口才使用宿主配置。
@@ -303,6 +340,15 @@ async fn dispatch(
     };
     let host = target.host_str().unwrap_or("");
     let tracked = engine.authority.hosts.contains_key(host) && inferencePath(target.path());
+    if tracked {
+        if let Err(error) = super::environmentIdentity::applyHeaders(
+            request.headers_mut(),
+            &engine.environmentProfile,
+        ) {
+            log::error!("同步观测出口画像失败：{error}");
+            return reply(StatusCode::SERVICE_UNAVAILABLE, "同步观测出口画像失败");
+        }
+    }
     if request
         .headers()
         .get(header::UPGRADE)

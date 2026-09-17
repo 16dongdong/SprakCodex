@@ -1,9 +1,9 @@
 //! Relay 配置是宿主与 DLL 的共同契约；运行线程身份限制配置寿命，不包含登录或请求内容。
 use serde::{Deserialize, Serialize};
 
-// 第十二版加入看门狗卸载 ABI；稳定标识隔离旧内存映像，防止旧模块阻止重新部署。
+// 第十三版加入出口环境画像 ABI；稳定标识隔离旧内存映像，防止旧模块阻止重新部署。
 #[allow(non_upper_case_globals)]
-pub const deploymentIdentity: &str = "embedded-observation-hook-12";
+pub const deploymentIdentity: &str = "embedded-observation-hook-13";
 
 // 创建时间使用 Windows FILETIME 原始 100ns 单位，线程 ID 被复用时仍能区分运行实例。
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -11,6 +11,17 @@ pub struct RuntimeIdentity {
     pub processId: u32,
     pub threadId: u32,
     pub createdAt: u64,
+}
+
+// 出口环境画像只携带目标进程需要公开观察到的地区字段，不包含代理地址、认证信息或设备秘密。
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+pub struct EnvironmentProfile {
+    #[serde(rename = "iana_timezone")]
+    pub ianaTimezone: String,
+    #[serde(rename = "windows_timezone")]
+    pub windowsTimezone: String,
+    pub locale: String,
+    pub country: String,
 }
 
 // 保留既有网络字段的 wire name；缺少运行实例的旧配置只允许停用，不再触发改连。
@@ -29,4 +40,6 @@ pub struct RelayConfig {
     pub completionEnabled: bool,
     #[serde(rename = "completion_directory")]
     pub completionDirectory: Option<std::path::PathBuf>,
+    #[serde(rename = "environment_profile")]
+    pub environmentProfile: Option<EnvironmentProfile>,
 }
