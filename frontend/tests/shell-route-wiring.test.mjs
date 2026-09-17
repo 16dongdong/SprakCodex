@@ -27,7 +27,6 @@ test("每个顶级功能路由同时接入菜单图标和页面缓存", () => {
     "/accounts",
     "/sessions",
     "/logs",
-    "/proxy",
     "/device-profile",
     "/settings",
   ]);

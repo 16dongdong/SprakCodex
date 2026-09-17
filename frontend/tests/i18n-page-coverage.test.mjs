@@ -7,8 +7,6 @@ import ts from "../node_modules/typescript/lib/typescript.js";
 const appsRoot = path.resolve(import.meta.dirname, "..");
 
 const SOURCE_SKIP_DIRS = new Set([".next", "node_modules", "out"]);
-// 代理页按用户要求保持迁移源文件的原始中文产品文案，避免适配 IPC 时重写成熟交互结构。
-const SOURCE_SKIP_FILES = new Set([path.join("src", "app", "proxy", "page.tsx")]);
 const CJK_TEXT_PATTERN = /[\u4e00-\u9fff]/;
 
 async function readSource(relativePath) {
@@ -28,7 +26,6 @@ async function collectSourceFiles(relativeDir, files = []) {
     }
     if (
       /\.(ts|tsx)$/.test(entry.name) &&
-      !SOURCE_SKIP_FILES.has(relativePath) &&
       !relativePath.includes(path.join("src", "lib", "i18n", "messages"))
     ) {
       files.push(relativePath);

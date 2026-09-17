@@ -38,7 +38,6 @@ const LAZY_PAGE_COMPONENTS: Record<
   "/accounts": lazy(() => import("@/app/accounts/page")),
   "/sessions": lazy(() => import("@/app/sessions/page")),
   "/logs": lazy(() => import("@/app/logs/page")),
-  "/proxy": lazy(() => import("@/app/proxy/page")),
   "/device-profile": lazy(() => import("@/app/device-profile/page")),
   "/settings": lazy(() => import("@/app/settings/page")),
 };

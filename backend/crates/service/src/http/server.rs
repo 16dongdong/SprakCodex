@@ -18,9 +18,6 @@ pub fn start_http(addr: &str) -> std::io::Result<()> {
     if let Err(error) = crate::directObservation::shutdownRuntime() {
         log::error!("服务停止时清理直连观测失败：{error}");
     }
-    if let Err(error) = crate::embeddedProxy::shutdown() {
-        log::error!("服务停止时清理代理内核失败：{error}");
-    }
     wake_backend_shutdown(&backend.addr);
     let _ = backend.join.join();
     result

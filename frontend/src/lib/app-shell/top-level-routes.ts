@@ -36,12 +36,6 @@ export const TOP_LEVEL_ROUTE_CONFIG = [
     roles: ["system_admin", "admin", "member"],
   },
   {
-    path: "/proxy",
-    label: "代理",
-    section: "personal",
-    roles: ["system_admin", "admin", "member"],
-  },
-  {
     path: "/device-profile",
     label: "设备画像",
     section: "personal",

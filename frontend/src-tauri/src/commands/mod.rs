@@ -4,8 +4,6 @@ pub mod account;
 pub mod diagnostics;
 #[allow(non_snake_case)]
 pub mod directObservation;
-#[allow(non_snake_case)]
-pub mod embeddedProxy;
 pub mod login;
 mod registry;
 pub mod requestlog;
