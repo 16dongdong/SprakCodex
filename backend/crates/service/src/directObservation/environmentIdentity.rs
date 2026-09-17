@@ -1,62 +1,82 @@
 //! 直连观测出口画像：探测请求与目标请求共用同一 `reqwest::Client`，保证时区和区域来自真实出口。
 
 use cpcommon::relayContract::EnvironmentProfile;
-use serde::Deserialize;
 use std::time::Duration;
 
-const geoEndpoint: &str = "https://ipwho.is/";
+const openAiTraceEndpoint: &str = "https://chatgpt.com/cdn-cgi/trace";
 const geoTimeout: Duration = Duration::from_secs(5);
 
-// 地理服务响应只解析形成目标画像所需字段，避免把无关网络信息带入进程协议。
-#[derive(Deserialize)]
-struct GeoResponse {
-    success: bool,
-    country_code: Option<String>,
-    timezone: Option<GeoTimezone>,
+#[derive(Debug, Default)]
+struct OpenAiEdgeTrace {
+    country: Option<String>,
+    colo: Option<String>,
 }
 
-// 时区子对象使用 IANA 标识，Windows 键名由本地确定性映射产生。
-#[derive(Deserialize)]
-struct GeoTimezone {
-    id: Option<String>,
-}
-
-// 通过已经绑定当前出口的客户端读取地区画像；字段缺失或时区无法准确映射时直接报错，避免发布混合身份。
+// 通过同一代理请求 OpenAI 边缘探针；colo 是实际连接到的边缘机房，不读取本机地区。
 pub(super) async fn resolve(client: &reqwest::Client) -> Result<EnvironmentProfile, String> {
     let response = client
-        .get(geoEndpoint)
+        .get(openAiTraceEndpoint)
+        .header("accept", "text/plain")
         .timeout(geoTimeout)
         .send()
         .await
-        .map_err(|error| format!("探测观测出口地区失败：{error}"))?;
+        .map_err(|error| format!("请求 OpenAI 边缘探针失败：{error}"))?;
     if !response.status().is_success() {
-        return Err(format!("探测观测出口地区失败：HTTP {}", response.status()));
+        return Err(format!(
+            "请求 OpenAI 边缘探针失败：HTTP {}",
+            response.status()
+        ));
     }
-    let payload = response
-        .json::<GeoResponse>()
+    let body = response
+        .text()
         .await
-        .map_err(|error| format!("解析观测出口地区失败：{error}"))?;
-    buildProfile(payload)
+        .map_err(|error| format!("读取 OpenAI 边缘探针失败：{error}"))?;
+    let trace = parseOpenAiTrace(&body);
+    buildProfileFromEdge(trace)
 }
 
-// 将网络响应收敛为共享协议；Windows 时区键必须明确存在，不能把未知 IANA 时区猜成宿主时区。
-fn buildProfile(payload: GeoResponse) -> Result<EnvironmentProfile, String> {
-    if !payload.success {
-        return Err("探测观测出口地区失败：服务返回 success=false".into());
+// Cloudflare trace 只解析 loc/colo；其它字段不进入画像，避免把本机或代理环境变量混入结果。
+fn parseOpenAiTrace(body: &str) -> OpenAiEdgeTrace {
+    let mut trace = OpenAiEdgeTrace::default();
+    for line in body.lines() {
+        let Some((key, value)) = line.split_once('=') else {
+            continue;
+        };
+        match key.trim() {
+            "loc" => trace.country = normalized(Some(value.to_string())),
+            "colo" => trace.colo = normalized(Some(value.to_string())),
+            _ => {}
+        }
     }
-    let country = normalized(payload.country_code)
-        .map(|value| value.to_ascii_uppercase())
-        .filter(|value| value.len() == 2)
-        .ok_or("观测出口国家码缺失")?;
-    let ianaTimezone =
-        normalized(payload.timezone.and_then(|timezone| timezone.id)).ok_or("观测出口时区缺失")?;
-    let windowsTimezone = windowsTimezone(ianaTimezone.as_str())
-        .ok_or_else(|| format!("观测出口时区暂未映射到 Windows：{ianaTimezone}"))?;
+    trace
+}
+
+// 边缘机房到画像的确定性映射；LAX 明确代表洛杉矶，直接使用太平洋时区与英语区域。
+fn buildProfileFromEdge(trace: OpenAiEdgeTrace) -> Result<EnvironmentProfile, String> {
+    let (country, timezone, locale) = match trace.colo.as_deref().unwrap_or_default() {
+        "LAX" => ("US", "America/Los_Angeles", "en-US"),
+        "SJC" => ("US", "America/Los_Angeles", "en-US"),
+        "SEA" => ("US", "America/Los_Angeles", "en-US"),
+        "DFW" => ("US", "America/Chicago", "en-US"),
+        "ORD" => ("US", "America/Chicago", "en-US"),
+        "IAD" | "EWR" | "JFK" | "ATL" => ("US", "America/New_York", "en-US"),
+        "AMS" => ("NL", "Europe/Amsterdam", "nl-NL"),
+        "FRA" => ("DE", "Europe/Berlin", "de-DE"),
+        "LHR" => ("GB", "Europe/London", "en-GB"),
+        "NRT" => ("JP", "Asia/Tokyo", "ja-JP"),
+        "ICN" => ("KR", "Asia/Seoul", "ko-KR"),
+        "SIN" => ("SG", "Asia/Singapore", "en-SG"),
+        "HKG" => ("HK", "Asia/Hong_Kong", "zh-HK"),
+        "SYD" => ("AU", "Australia/Sydney", "en-AU"),
+        _ => return Err(format!("OpenAI 边缘机房未映射：{:?}", trace.colo)),
+    };
+    let windowsTimezone =
+        windowsTimezone(timezone).ok_or_else(|| format!("OpenAI 边缘时区未映射：{timezone}"))?;
     Ok(EnvironmentProfile {
-        locale: localeForCountry(country.as_str()).to_string(),
-        country,
-        ianaTimezone,
+        country: country.to_string(),
+        ianaTimezone: timezone.to_string(),
         windowsTimezone: windowsTimezone.to_string(),
+        locale: locale.to_string(),
     })
 }
 
@@ -95,32 +115,6 @@ fn windowsTimezone(iana: &str) -> Option<&'static str> {
         "UTC" | "Etc/UTC" | "Etc/GMT" => "UTC",
         _ => return None,
     })
-}
-
-// 国家码只决定地区语言，不改变目标进程的操作系统与硬件字段。
-fn localeForCountry(country: &str) -> &'static str {
-    match country {
-        "US" => "en-US",
-        "GB" => "en-GB",
-        "CA" => "en-CA",
-        "AU" => "en-AU",
-        "NZ" => "en-NZ",
-        "DE" => "de-DE",
-        "FR" => "fr-FR",
-        "ES" => "es-ES",
-        "IT" => "it-IT",
-        "PT" => "pt-PT",
-        "BR" => "pt-BR",
-        "JP" => "ja-JP",
-        "KR" => "ko-KR",
-        "CN" => "zh-CN",
-        "TW" => "zh-TW",
-        "HK" => "zh-HK",
-        "RU" => "ru-RU",
-        "IN" => "en-IN",
-        "SG" => "en-SG",
-        _ => "en-US",
-    }
 }
 
 // 覆盖所有地区相关头；同一请求只保留一份值，避免客户端旧值与出口画像同时出现。
@@ -164,14 +158,7 @@ mod tests {
     // 固定样本同时验证 Windows API 键与网络请求头来自同一画像。
     #[test]
     fn mapsLosAngelesProfileToWindowsAndHeaders() {
-        let profile = buildProfile(GeoResponse {
-            success: true,
-            country_code: Some("us".into()),
-            timezone: Some(GeoTimezone {
-                id: Some("America/Los_Angeles".into()),
-            }),
-        })
-        .unwrap();
+        let profile = buildProfileFromEdge(parseOpenAiTrace("loc=US\ncolo=LAX\n")).unwrap();
         assert_eq!(profile.windowsTimezone, "Pacific Standard Time");
         assert_eq!(profile.locale, "en-US");
         let mut headers = hyper::HeaderMap::new();
