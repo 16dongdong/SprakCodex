@@ -36,6 +36,12 @@ export const TOP_LEVEL_ROUTE_CONFIG = [
     roles: ["system_admin", "admin", "member"],
   },
   {
+    path: "/device-profile",
+    label: "设备画像",
+    section: "personal",
+    roles: ["system_admin", "admin", "member"],
+  },
+  {
     path: "/settings",
     label: "设置",
     section: "personal",

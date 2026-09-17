@@ -579,32 +579,7 @@ export function AccountsPageView(props: AccountsPageViewProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground/80">
-                {t("排序")}
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                className="gap-2"
-                disabled={
-                  !isServiceReady || isReorderingAccounts || isAtListTop
-                }
-                onClick={() => void handleMoveAccount(account, "top")}
-              >
-                <ArrowUpToLine className="h-4 w-4" />
-                {t("移到顶部")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2"
-                disabled={
-                  !isServiceReady || isReorderingAccounts || isAtListBottom
-                }
-                onClick={() => void handleMoveAccount(account, "bottom")}
-              >
-                <ArrowDownToLine className="h-4 w-4" />
-                {t("移到底部")}
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
               <DropdownMenuItem
                 className="gap-2"
@@ -637,50 +612,22 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                 {t("刷新 AT/RT")}
                 <DropdownMenuShortcut>RT</DropdownMenuShortcut>
               </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2" disabled={!isServiceReady || isWarmingUpAccounts} onClick={() => void props.handleWarmupAccounts()}>
+                <Zap className="h-4 w-4" />
+                {t("自动预热")}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2" disabled={!isServiceReady || isExporting} onClick={props.openExportDialog}>
+                <Download className="h-4 w-4" />
+                {t("导出账号")}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="gap-2"
-                disabled={!isServiceReady || isUpdatingPreferred}
-                onClick={() =>
-                  account.preferred
-                    ? clearPreferredAccount(account.id)
-                    : setPreferredAccount(account.id)
-                }
+                disabled={!isServiceReady || isReorderingAccounts}
+                onClick={() => openAccountEditor(account)}
               >
-                <Pin className="h-4 w-4" />
-                {account.preferred ? t("取消优先") : t("设为优先")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2"
-                disabled={!isServiceReady}
-                onClick={() => void openProxyDialog(account)}
-              >
-                <Network className="h-4 w-4" />
-                {t("账号代理")}
-              </DropdownMenuItem>
-              {props.canTestAccounts ? (
-                <DropdownMenuItem
-                  className="gap-2"
-                  disabled={!isServiceReady}
-                  onClick={() => props.openAccountTest(account)}
-                >
-                  <Zap className="h-4 w-4" />
-                  {t("测试账号")}
-                </DropdownMenuItem>
-              ) : null}
-              <DropdownMenuItem
-                className="gap-2"
-                disabled={
-                  !isServiceReady || forceToggleBlocked || isForceToggleBusy
-                }
-                onClick={() => void toggleForceEnabled(account)}
-              >
-                {isForceEnabled ? (
-                  <PowerOff className="h-4 w-4" />
-                ) : (
-                  <Power className="h-4 w-4" />
-                )}
-                {isForceEnabled ? t("取消强制开启") : t("强制开启")}
+                <ArrowUpDown className="h-4 w-4" />
+                {t("分流权重")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -704,13 +651,6 @@ export function AccountsPageView(props: AccountsPageViewProps) {
                 {statusAction.label}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="gap-2 text-red-500"
-                disabled={!isServiceReady}
-                onClick={() => handleDeleteSingle(account)}
-              >
-                <Trash2 className="h-4 w-4" /> {t("删除")}
-              </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>

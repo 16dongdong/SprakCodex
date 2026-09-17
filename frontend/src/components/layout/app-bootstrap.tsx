@@ -6,12 +6,11 @@ import { AlertCircle, Cpu, Play, RefreshCw } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { useAppStore } from "@/lib/store/useAppStore";
-import { serviceClient } from "@/lib/api/service-client";
 import { appClient } from "@/lib/api/app-client";
+import { serviceClient } from "@/lib/api/service-client";
 import { loadRuntimeCapabilities } from "@/lib/api/transport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CodexCliOnboardingDialog } from "@/components/layout/codex-cli-onboarding-dialog";
 import { AutomaticUpdateChecker } from "@/components/layout/automatic-update-checker";
 import { applyAppearancePreset } from "@/lib/appearance";
 import { useRuntimeCapabilities } from "@/hooks/useRuntimeCapabilities";
@@ -27,43 +26,11 @@ import { getCanonicalStaticRouteUrl } from "@/lib/utils/static-routes";
 import { withTimeout } from "@/lib/utils/timeout";
 
 const DEFAULT_SERVICE_ADDR = "localhost:48760";
+const UNSUPPORTED_RUNTIME_AUTO_RETRY_LIMIT = 8;
+const UNSUPPORTED_RUNTIME_AUTO_RETRY_DELAY_MS = 1500;
 const STARTUP_STEP_TIMEOUT_MS = 15_000;
 const WEB_GATEWAY_SETTINGS_TIMEOUT_MS = 60_000;
 const TRAY_PREVIEW_SERVICE_INITIALIZE_RETRIES = 40;
-const CODEX_CLI_GUIDE_SESSION_DISMISSED_KEY =
-  "codexmanager.codexCliGuide.sessionDismissed";
-const UNSUPPORTED_RUNTIME_AUTO_RETRY_LIMIT = 8;
-const UNSUPPORTED_RUNTIME_AUTO_RETRY_DELAY_MS = 1500;
-
-function readCodexCliGuideSessionDismissed() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  try {
-    return (
-      window.sessionStorage.getItem(CODEX_CLI_GUIDE_SESSION_DISMISSED_KEY) === "1"
-    );
-  } catch {
-    return false;
-  }
-}
-
-function writeCodexCliGuideSessionDismissed(dismissed: boolean) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    if (dismissed) {
-      window.sessionStorage.setItem(CODEX_CLI_GUIDE_SESSION_DISMISSED_KEY, "1");
-      return;
-    }
-    window.sessionStorage.removeItem(CODEX_CLI_GUIDE_SESSION_DISMISSED_KEY);
-  } catch {
-    // Some embedded/web runtimes can deny storage; in-memory state still handles the current render.
-  }
-}
 /**
  * 函数 `sleep`
  *
@@ -114,11 +81,9 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
   const serviceStatus = useAppStore((state) => state.serviceStatus);
   const appSettings = useAppStore((state) => state.appSettings);
   const runtimeCapabilities = useAppStore((state) => state.runtimeCapabilities);
-  const isCodexCliGuideOpen = useAppStore((state) => state.isCodexCliGuideOpen);
   const setServiceStatus = useAppStore((state) => state.setServiceStatus);
   const setAppSettings = useAppStore((state) => state.setAppSettings);
   const setRuntimeCapabilities = useAppStore((state) => state.setRuntimeCapabilities);
-  const closeCodexCliGuide = useAppStore((state) => state.closeCodexCliGuide);
   const { setTheme } = useTheme();
   const { t } = useI18n();
   const pathname = usePathname();
@@ -137,15 +102,7 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
     readPortFromServiceAddr(DEFAULT_SERVICE_ADDR),
   );
   const [isRecoveringPort, setIsRecoveringPort] = useState(false);
-  const [guideSessionDismissed, setGuideSessionDismissedState] = useState(
-    readCodexCliGuideSessionDismissed
-  );
   const supportsLocalServiceStart = canManageService;
-
-  const dismissCodexCliGuideForSession = useCallback(() => {
-    setGuideSessionDismissedState(true);
-    writeCodexCliGuideSessionDismissed(true);
-  }, []);
 
   useEffect(() => {
     serviceStatusRef.current = serviceStatus;
@@ -444,40 +401,6 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const handleGuideOpenChange = useCallback((open: boolean) => {
-    if (open) {
-      return;
-    }
-    if (isCodexCliGuideOpen) {
-      closeCodexCliGuide();
-      return;
-    }
-    dismissCodexCliGuideForSession();
-  }, [closeCodexCliGuide, dismissCodexCliGuideForSession, isCodexCliGuideOpen]);
-
-  const handleGuideAcknowledge = useCallback(
-    async (dismissPermanently: boolean) => {
-      if (dismissPermanently) {
-        try {
-          const settings = await appClient.setSettings({
-            codexCliGuideDismissed: true,
-          });
-          setAppSettings(settings);
-          toast.success(t("后续将不再显示这份引导"));
-        } catch (guideError: unknown) {
-          const message =
-            guideError instanceof Error ? guideError.message : String(guideError);
-          toast.error(t("保存引导状态失败: {message}", { message }));
-          throw guideError;
-        }
-      }
-
-      closeCodexCliGuide();
-      dismissCodexCliGuideForSession();
-    },
-    [closeCodexCliGuide, dismissCodexCliGuideForSession, setAppSettings, t]
-  );
-
   useEffect(() => {
     if (hasBootstrappedOnce.current) {
       return;
@@ -526,29 +449,13 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
     supportsLocalServiceStart &&
     !isUnsupportedWebRuntime &&
     isServicePortConflictError(error);
-  const showCodexGuide =
-    !isTrayPreview &&
-    (isCodexCliGuideOpen ||
-      (serviceStatus.connected &&
-        !showLoading &&
-        !showError &&
-        !isUnsupportedWebRuntime &&
-        !guideSessionDismissed &&
-        !appSettings.codexCliGuideDismissed));
   return (
     <>
       {/* Always keep children mounted to prevent Header/Sidebar remounting 'reload' feel */}
       {children}
 
-      <CodexCliOnboardingDialog
-        open={showCodexGuide}
-        onOpenChange={handleGuideOpenChange}
-        onAcknowledge={handleGuideAcknowledge}
-      />
-
       {!isTrayPreview &&
       !isInitializing &&
-      !showCodexGuide &&
       isDesktopRuntime &&
       desktopStartupSettled &&
       appSettings.updateAutoCheck ? (

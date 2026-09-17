@@ -90,7 +90,13 @@ impl Exchange {
     }
     // 握手与逐帧请求共用一个路由结果；复制的快照不含密钥或请求正文。
     pub fn routingSnapshot(&self) -> RoutingSnapshot {
-        RoutingSnapshot { mode: self.routingMode.clone(), sessionId: self.routingSessionId.clone(), source: self.routingSource.clone(), reason: self.routingReason.clone(), accountLabel: self.accountLabel.clone() }
+        RoutingSnapshot {
+            mode: self.routingMode.clone(),
+            sessionId: self.routingSessionId.clone(),
+            source: self.routingSource.clone(),
+            reason: self.routingReason.clone(),
+            accountLabel: self.accountLabel.clone(),
+        }
     }
 
     // WebSocket response.create 创建独立记录时继承连接身份，避免默认透传标签掩盖实际分流。
@@ -177,12 +183,27 @@ impl RecordSink {
                 while let Some(record) = receiver.blocking_recv() {
                     let mut record = record;
                     let identity = enrichClientIdentity(&storage, &mut record.request);
-                    if let Some(session) = record.request.actual_source_id.as_deref().filter(|_| record.request.actual_source_kind.as_deref()==Some("session")) {
-                        if let Err(error) = storage.touchRoutingSession(session,now_ts()) { log::error!("更新会话活动时间失败：{error}"); }
+                    if let Some(session) =
+                        record.request.actual_source_id.as_deref().filter(|_| {
+                            record.request.actual_source_kind.as_deref() == Some("session")
+                        })
+                    {
+                        if let Err(error) = storage.touchRoutingSession(session, now_ts()) {
+                            log::error!("更新会话活动时间失败：{error}");
+                        }
                     }
-                    if let (Some(account),Some(diagnostic)) = (record.request.account_id.as_deref(),record.parsed.diagnostic.as_deref()) {
-                        if let Some(until) = crate::sessionRouting::quotaCooldown(diagnostic,now_ts()) {
-                            if let Err(error) = storage.recordSessionQuotaFailure(account,until,now_ts()) { log::error!("记录会话额度冷却失败：{error}"); }
+                    if let (Some(account), Some(diagnostic)) = (
+                        record.request.account_id.as_deref(),
+                        record.parsed.diagnostic.as_deref(),
+                    ) {
+                        if let Some(until) =
+                            crate::sessionRouting::quotaCooldown(diagnostic, now_ts())
+                        {
+                            if let Err(error) =
+                                storage.recordSessionQuotaFailure(account, until, now_ts())
+                            {
+                                log::error!("记录会话额度冷却失败：{error}");
+                            }
                         }
                     }
                     let saved = identity.and_then(|_| {
@@ -346,9 +367,15 @@ impl RecordSink {
         let (trace, aliases) = super::responseIdentity::traces(response);
         let request = RequestLog {
             trace_id: Some(trace),
+            request_path: "/client/events".into(),
+            original_path: Some("/client/events".into()),
+            adapted_path: Some("/client/events".into()),
+            method: "CLIENT".into(),
             request_type: Some(codexmanager_core::storage::observationClientRequestType.into()),
+            gateway_mode: Some("direct_observation".into()),
             model: parsed.model.clone(),
             route_strategy: Some("passthrough".into()),
+            status_code: Some(200),
             route_source: Some("thread-id".into()),
             actual_source_kind: Some("session".into()),
             actual_source_id: Some(sessionId),
@@ -378,10 +405,7 @@ impl RecordSink {
 
 // 完成事件的 thread UUID 与请求 thread-id 使用同一会话身份；仅分流启用且 active 绑定能证明实际路由账号。
 // 查询失败并入原事务失败语义，使磁盘事件保留重试，不提交缺少已知身份的残缺记录。
-fn enrichClientIdentity(
-    storage: &Storage,
-    request: &mut RequestLog,
-) -> rusqlite::Result<()> {
+fn enrichClientIdentity(storage: &Storage, request: &mut RequestLog) -> rusqlite::Result<()> {
     if request.request_type.as_deref()
         != Some(codexmanager_core::storage::observationClientRequestType)
     {

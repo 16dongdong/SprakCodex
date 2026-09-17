@@ -7,6 +7,7 @@ import {
   Users,
   FileText,
   Settings,
+  Fingerprint,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -36,6 +37,7 @@ const NAV_ITEM_BY_PATH = new Map<TopLevelRoutePath, { icon: LucideIcon }>([
   ["/accounts", { icon: Users }],
   ["/sessions", { icon: MessagesSquare }],
   ["/logs", { icon: FileText }],
+  ["/device-profile", { icon: Fingerprint }],
   ["/settings", { icon: Settings }],
 ]);
 
@@ -104,12 +106,11 @@ export function Sidebar() {
   const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
   const currentShellPath = useAppStore((state) => state.currentShellPath);
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
-  const openCodexCliGuide = useAppStore((state) => state.openCodexCliGuide);
   const navigateShellPath = useAppStore((state) => state.navigateShellPath);
   const { isDesktopRuntime } = useRuntimeCapabilities();
   const { data: session, isLoading: isSessionLoading } = useAppSession();
   const role = resolveSessionRole(session, isSessionLoading, isDesktopRuntime);
-  const brandTitle = isSidebarOpen ? t("重新打开 Codex 引导") : "SprakCodex";
+  const brandTitle = "SprakCodex";
   const toggleTitle = isSidebarOpen ? t("收起侧边栏") : t("展开侧边栏");
   const routeAccess = useMemo(
     () => ({ role, mode: session?.mode ?? null, isDesktopRuntime }),
@@ -203,7 +204,7 @@ export function Sidebar() {
         <Button
           type="button"
           variant="ghost"
-          onClick={openCodexCliGuide}
+          onClick={() => navigateShellPath("/")}
           title={brandTitle}
           aria-label={brandTitle}
           className={cn(

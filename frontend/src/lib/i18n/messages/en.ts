@@ -366,6 +366,7 @@ export const EN_MESSAGES: MessageCatalog = {
   端点已复制: "Endpoint copied",
   编辑配置: "Edit configuration",
   "编辑聚合 API": "Edit aggregate API",
+  分流权重: "Routing weight",
   设为优先: "Set as priority",
   "删除聚合 API": "Delete aggregate API",
   取消: "Cancel",
