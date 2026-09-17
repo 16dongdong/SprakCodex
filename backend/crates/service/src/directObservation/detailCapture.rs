@@ -119,34 +119,38 @@ impl Capture {
     }
 }
 
-// 凭据字段递归替换；文本中常见 Bearer、JWT 与 API key 也掩码，错误正文使用同一规则。
+// 只匹配明确承载凭据的协议字段；repository_key、session_id 等普通业务标识必须完整保留。
+fn isSecretField(key: &str) -> bool {
+    let name = key.to_ascii_lowercase().replace(['_', '-'], "");
+    matches!(
+        name.as_str(),
+        "authorization"
+            | "cookie"
+            | "setcookie"
+            | "token"
+            | "accesstoken"
+            | "refreshtoken"
+            | "idtoken"
+            | "sessiontoken"
+            | "apikey"
+            | "password"
+            | "secret"
+            | "clientsecret"
+            | "privatekey"
+            | "recoverycode"
+    )
+}
+
+// 凭据字段递归替换；文本只掩码具备实际凭据长度的 Bearer、JWT、API key 与刷新令牌。
 pub(super) fn redact(value: Value) -> Value {
     match value {
         Value::Object(fields) => Value::Object(
             fields
                 .into_iter()
                 .map(|(key, value)| {
-                    let name = key.to_ascii_lowercase().replace(['_', '-'], "");
-                    let secret =
-                        matches!(name.as_str(), "token" | "key" | "credential" | "session")
-                            || [
-                                "authorization",
-                                "cookie",
-                                "setcookie",
-                                "accesstoken",
-                                "refreshtoken",
-                                "idtoken",
-                                "sessiontoken",
-                                "apikey",
-                                "password",
-                                "secret",
-                                "privatekey",
-                            ]
-                            .iter()
-                            .any(|field| name.contains(field));
                     (
-                        key,
-                        if secret {
+                        key.clone(),
+                        if isSecretField(&key) {
                             Value::String("[已脱敏]".into())
                         } else {
                             redact(value)
@@ -158,7 +162,7 @@ pub(super) fn redact(value: Value) -> Value {
         Value::Array(values) => Value::Array(values.into_iter().map(redact).collect()),
         Value::String(text) => {
             static secretPattern: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-            let pattern = secretPattern.get_or_init(|| regex::Regex::new(r"(?i)Bearer\s+[^\s\x22]+|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sk-[A-Za-z0-9_-]+|rt_[A-Za-z0-9_-]+").expect("静态凭据脱敏表达式"));
+            let pattern = secretPattern.get_or_init(|| regex::Regex::new(r"(?i)Bearer\s+[^\s\x22]+|eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}|sk-[A-Za-z0-9_-]{16,}|rt_[A-Za-z0-9_-]{16,}").expect("静态凭据脱敏表达式"));
             Value::String(pattern.replace_all(&text, "[已脱敏]").into_owned())
         }
         value => value,

@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n/provider";
 
-// 只格式化完整 JSON；SSE、普通文本和不完整流保持原文，避免改变采集到的报文语义。
+// 详情显示恢复服务文本中的空白实体；React 仍按纯文本渲染，不把其它实体解释成 HTML。
+function decodeVisibleWhitespace(value: string): string {
+  return value.replace(/&#x20;|&#32;|&nbsp;/gi, " ");
+}
+
+// 只格式化完整 JSON；SSE、普通文本和不完整流保持原文，避免改变采集到的报文结构。
 export function formatNetworkBody(value: unknown, pretty: boolean): string | undefined {
   if (value == null) return undefined;
-  if (typeof value !== "string") return JSON.stringify(value, null, pretty ? 2 : undefined);
-  if (!pretty) return value;
-  try { return JSON.stringify(JSON.parse(value), null, 2); }
-  catch { return value; }
+  if (typeof value !== "string") return decodeVisibleWhitespace(JSON.stringify(value, null, pretty ? 2 : undefined) ?? String(value));
+  if (!pretty) return decodeVisibleWhitespace(value);
+  try { return decodeVisibleWhitespace(JSON.stringify(JSON.parse(value), null, 2)); }
+  catch { return decodeVisibleWhitespace(value); }
 }
 
 // 单个标签独占可滚动正文区；搜索只过滤显示行，复制始终保留当前格式的完整脱敏正文。
@@ -46,5 +51,5 @@ export function NetworkBodyViewer({ value }: { value: unknown }) {
 // Headers 使用键值行而非 JSON 文本；浏览器不解析成 HTML，报文中的任意字符串保持纯文本。
 export function NetworkHeaders({ title, value }: { title: string; value: unknown }) {
   const { t } = useI18n();
-  return <details open className="border-b border-border/60"><summary className="cursor-pointer bg-muted/25 px-4 py-2.5 text-xs font-semibold">{title}</summary><dl className="px-5 py-3 text-xs">{value && typeof value === "object" ? Object.entries(value).map(([name, entry]) => <div key={name} className="grid grid-cols-[minmax(120px,30%)_1fr] gap-4 py-1.5"><dt className="break-all font-medium text-muted-foreground">{name}</dt><dd className="min-w-0 whitespace-pre-wrap break-all font-mono">{typeof entry === "string" ? entry : JSON.stringify(entry)}</dd></div>) : <p className="text-muted-foreground">{t("未采集到该请求的网络报文")}</p>}</dl></details>;
+  return <details open className="border-b border-border/60"><summary className="cursor-pointer bg-muted/25 px-4 py-2.5 text-xs font-semibold">{title}</summary><dl className="px-5 py-3 text-xs">{value && typeof value === "object" ? Object.entries(value).map(([name, entry]) => <div key={name} className="grid grid-cols-[minmax(120px,30%)_1fr] gap-4 py-1.5"><dt className="break-all font-medium text-muted-foreground">{name}</dt><dd className="min-w-0 whitespace-pre-wrap break-all font-mono">{decodeVisibleWhitespace(typeof entry === "string" ? entry : (JSON.stringify(entry) ?? String(entry)))}</dd></div>) : <p className="text-muted-foreground">{t("未采集到该请求的网络报文")}</p>}</dl></details>;
 }

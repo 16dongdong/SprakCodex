@@ -21,5 +21,6 @@ test("Network 详情具有独立标签、搜索、复制和纯文本渲染", asy
   for (const tab of ["headers", "payload", "response", "events"]) assert.ok(dialog.includes(`value="${tab}"`));
   assert.match(viewer, /navigator.clipboard.writeText\(text\)/);
   assert.match(viewer, /JSON.parse\(value\)/);
+  assert.match(viewer, /&#x20;\|&#32;\|&nbsp;/);
   assert.doesNotMatch(viewer, /dangerouslySetInnerHTML/);
 });

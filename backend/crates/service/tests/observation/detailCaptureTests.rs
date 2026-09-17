@@ -12,6 +12,21 @@ fn masksNestedCredentials() {
     assert_eq!(result["message"], "rate limit");
 }
 
+// 仓库名、仓库键、会话标识和短前缀文本是普通诊断数据，不得被宽泛凭据规则误伤。
+#[test]
+fn keepsRepositoryAndOrdinaryMetadataVisible() {
+    let result = redact(json!({
+        "repo_key":"repository-main",
+        "repository":"repo sk-docs rt_notes",
+        "session_id":"session-visible",
+        "api_key":"sk-1234567890abcdef"
+    }));
+    assert_eq!(result["repo_key"], "repository-main");
+    assert_eq!(result["repository"], "repo sk-docs rt_notes");
+    assert_eq!(result["session_id"], "session-visible");
+    assert_eq!(result["api_key"], "[已脱敏]");
+}
+
 // 大于旧预览上限的完整 JSON 尾部必须可读；临时文件退出后自动清理，不截断正文。
 #[test]
 fn completeBodyKeepsTailAndDuplicateHeaders() {
