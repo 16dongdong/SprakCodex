@@ -79,6 +79,8 @@ struct Running {
     cancel: CancellationToken,
     thread: std::thread::JoinHandle<()>,
     counters: Arc<Counters>,
+    egressTimezone: String,
+    egressLocale: String,
 }
 
 #[derive(Serialize)]
@@ -88,6 +90,8 @@ pub struct ObservationStatus {
     pub certificatePath: Option<String>,
     pub writtenRequests: u64,
     pub storageErrors: u64,
+    pub egressTimezone: Option<String>,
+    pub egressLocale: Option<String>,
 }
 
 // 读取当前进程的观测状态；锁损坏返回显式错误，不报告虚假的关闭或启动成功。
@@ -108,6 +112,8 @@ fn statusOf(current: Option<&Running>) -> ObservationStatus {
         writtenRequests: current
             .map_or(0, |engine| engine.counters.written.load(Ordering::Relaxed)),
         storageErrors: current.map_or(0, |engine| engine.counters.errors.load(Ordering::Relaxed)),
+        egressTimezone: current.map(|engine| engine.egressTimezone.clone()),
+        egressLocale: current.map(|engine| engine.egressLocale.clone()),
     }
 }
 
@@ -263,7 +269,8 @@ fn startRuntime(
                         return;
                     }
                 }
-                if ready.send(Ok(address)).is_err() {
+                let profile = engine.environmentProfile.clone();
+                if ready.send(Ok((address, profile))).is_err() {
                     return;
                 }
                 let monitorEngine = engine.cancel.clone();
@@ -300,7 +307,7 @@ fn startRuntime(
         .map_err(|_| "观测线程提前退出".to_string())
         .and_then(|ready| ready)
     {
-        Ok(address) => address,
+        Ok((address, profile)) => (address, profile),
         Err(error) => {
             cancel.cancel();
             // 接收启动失败后仍 join，让失败实例的数据库线程先退出，避免重试遗留工作线程。
@@ -311,6 +318,7 @@ fn startRuntime(
             return Err(error);
         }
     };
+    let (address, profile) = address;
     Ok(Running {
         address,
         certificate,
@@ -319,6 +327,8 @@ fn startRuntime(
         cancel,
         thread,
         counters,
+        egressTimezone: profile.ianaTimezone,
+        egressLocale: profile.locale,
     })
 }
 

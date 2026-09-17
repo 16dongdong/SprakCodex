@@ -6,6 +6,8 @@ export interface ObservationStatus {
   certificatePath: string | null;
   writtenRequests: number;
   storageErrors: number;
+  egressTimezone: string | null;
+  egressLocale: string | null;
 }
 
 export const observationQueryKey = ["directObservation", "status"] as const;
