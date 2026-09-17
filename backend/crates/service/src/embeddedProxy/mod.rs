@@ -185,6 +185,21 @@ pub fn testNodes() -> Result<Vec<NodeDelay>, String> {
         .test_nodes(&config.nodes))
 }
 
+// 单节点测速同样只经 mihomo；未启动时加载配置并懒启动内核，不经过系统代理客户端。
+pub fn testNode(name: &str) -> Result<NodeDelay, String> {
+    let config = loadConfig()?;
+    if !config.nodes.iter().any(|node| node.name == name) {
+        return Err(format!("代理节点不存在：{name}"));
+    }
+    let mut runtime = runtime().lock().map_err(|_| "代理内核状态锁损坏")?;
+    if runtime.is_none() {
+        *runtime = Some(Kernel::start(&config)?);
+    } else if let Some(kernel) = runtime.as_ref() {
+        kernel.apply(&config)?;
+    }
+    Ok(runtime.as_ref().ok_or("代理内核未就绪")?.test_node(name))
+}
+
 // 出口查询必须经过当前内核 mixed-port；OpenAI trace 的 loc/colo 与画像探针使用同一证据来源。
 pub fn testEgress() -> Result<EgressView, String> {
     let runtime = runtime().lock().map_err(|_| "代理内核状态锁损坏")?;

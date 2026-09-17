@@ -15,6 +15,7 @@ export function createMiscWebCommands(): Record<string, WebCommandDescriptor> {
     service_proxy_runtime_select: { rpcMethod: "proxyRuntime/select" },
     service_proxy_runtime_select_group: { rpcMethod: "proxyRuntime/selectGroup" },
     service_proxy_runtime_test: { rpcMethod: "proxyRuntime/test" },
+    service_proxy_runtime_test_node: { rpcMethod: "proxyRuntime/testNode" },
     service_proxy_runtime_egress: { rpcMethod: "proxyRuntime/egress" },
     service_requestlog_detail: { rpcMethod: "requestlog/detail" },
     service_requestlog_list: { rpcMethod: "requestlog/list" },

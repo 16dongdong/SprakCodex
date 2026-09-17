@@ -663,6 +663,20 @@
 .delay.d-bad {
   color: var(--red);
 }
+.delay-action {
+  border: 0;
+  background: transparent;
+  padding: 2px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.delay-action:hover {
+  background: var(--row-hover);
+}
+.delay-action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
 .node-del {
   position: absolute;
   top: 5px;

@@ -58,6 +58,9 @@ const KIND_LABEL: Record<string, string> = {
   https: "HTTPS",
 };
 
+// WebView2 的 dataTransfer 在跨嵌套按钮拖动时可能丢失文本，进程内变量保留同一次拖动的节点身份。
+let draggedNodeName = "";
+
 // 按节点名关键词推断地区国家码(小写 ISO);仅作兜底,测速后用真实出口国家码覆盖。
 const CC_RULES: [RegExp, string][] = [
   [/香港|hong\s?kong|\bHK\b/i, "hk"],
@@ -119,6 +122,7 @@ export default function ProxyPage() {
   const [delays, setDelays] = useState<Record<string, number | null>>({});
   const [countries, setCountries] = useState<Record<string, string>>({});
   const [testing, setTesting] = useState(false);
+  const [testingNode, setTestingNode] = useState<string | null>(null);
   const [egress, setEgress] = useState<EgressView | null>(null);
   const [egTesting, setEgTesting] = useState(false);
   const [addNodeOpen, setAddNodeOpen] = useState(false);
@@ -394,6 +398,17 @@ export default function ProxyPage() {
     setTesting(false);
   };
 
+  const testNode = async (name: string) => {
+    setTestingNode(name);
+    try {
+      const result = await invoke<{ name: string; delay: number | null }>("test_node", { name });
+      setDelays((current) => ({ ...current, [name]: result.delay }));
+    } catch (reason) {
+      setError(String(reason));
+    }
+    setTestingNode(null);
+  };
+
   const testEgress = async () => {
     setEgTesting(true);
     setEgress(null);
@@ -464,6 +479,7 @@ export default function ProxyPage() {
           delays={delays}
           countries={countries}
           testing={testing}
+          testingNode={testingNode}
           egTesting={egTesting}
           activeNode={activeNode}
           activeGroup={activeGroup}
@@ -475,6 +491,7 @@ export default function ProxyPage() {
           onStartChainPick={() => setChainPicking(true)}
           onCancelChainPick={() => setChainPicking(false)}
           onTestNodes={testNodes}
+          onTestNode={testNode}
           onTestEgress={testEgress}
           onAddNode={() => setAddNodeOpen(true)}
           onAddGroup={() => setAddGroupOpen(true)}
@@ -581,6 +598,7 @@ function NodesTab({
   delays,
   countries,
   testing,
+  testingNode,
   egTesting,
   activeNode,
   activeGroup,
@@ -592,6 +610,7 @@ function NodesTab({
   onStartChainPick,
   onCancelChainPick,
   onTestNodes,
+  onTestNode,
   onTestEgress,
   onAddNode,
   onAddGroup,
@@ -604,6 +623,7 @@ function NodesTab({
   delays: Record<string, number | null>;
   countries: Record<string, string>;
   testing: boolean;
+  testingNode: string | null;
   egTesting: boolean;
   activeNode: ProxyNode | null;
   activeGroup: ProxyGroup | null;
@@ -615,6 +635,7 @@ function NodesTab({
   onStartChainPick: () => void;
   onCancelChainPick: () => void;
   onTestNodes: () => void;
+  onTestNode: (name: string) => void;
   onTestEgress: () => void;
   onAddNode: () => void;
   onAddGroup: () => void;
@@ -678,12 +699,14 @@ function NodesTab({
         groups={proxy.groups}
         active={proxy.active}
         delays={delays}
+        testingNode={testingNode}
         onAddGroup={onAddGroup}
         onRemoveGroup={onRemoveGroup}
         onAddMember={onAddMember}
         onRemoveMember={onRemoveMember}
         onSelectMember={onSelectMember}
         onSetActive={onSetActive}
+        onTestNode={onTestNode}
       />
 
       {proxy.subscriptions.map((sub) => {
@@ -697,8 +720,10 @@ function NodesTab({
             active={proxy.active}
             delays={delays}
             countries={countries}
+            testingNode={testingNode}
             onSetActive={onSetActive}
             onRemoveNode={onRemoveNode}
+            onTestNode={onTestNode}
           />
         );
       })}
@@ -709,8 +734,10 @@ function NodesTab({
           active={proxy.active}
           delays={delays}
           countries={countries}
+          testingNode={testingNode}
           onSetActive={onSetActive}
           onRemoveNode={onRemoveNode}
+          onTestNode={onTestNode}
         />
       )}
     </section>
@@ -723,22 +750,26 @@ function GroupsSection({
   groups,
   active,
   delays,
+  testingNode,
   onAddGroup,
   onRemoveGroup,
   onAddMember,
   onRemoveMember,
   onSelectMember,
   onSetActive,
+  onTestNode,
 }: {
   groups: ProxyGroup[];
   active: string | null;
   delays: Record<string, number | null>;
+  testingNode: string | null;
   onAddGroup: () => void;
   onRemoveGroup: (name: string) => void;
   onAddMember: (group: string, node: string) => void;
   onRemoveMember: (group: string, node: string) => void;
   onSelectMember: (group: string, member: string) => void;
   onSetActive: (name: string) => void;
+  onTestNode: (name: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   return (
@@ -764,11 +795,13 @@ function GroupsSection({
               group={g}
               active={active}
               delays={delays}
+              testingNode={testingNode}
               onRemove={onRemoveGroup}
               onAddMember={onAddMember}
               onRemoveMember={onRemoveMember}
               onSelectMember={onSelectMember}
               onSetActive={onSetActive}
+              onTestNode={onTestNode}
             />
           ))}
         </div>
@@ -781,20 +814,24 @@ function GroupCard({
   group,
   active,
   delays,
+  testingNode,
   onRemove,
   onAddMember,
   onRemoveMember,
   onSelectMember,
   onSetActive,
+  onTestNode,
 }: {
   group: ProxyGroup;
   active: string | null;
   delays: Record<string, number | null>;
+  testingNode: string | null;
   onRemove: (name: string) => void;
   onAddMember: (group: string, node: string) => void;
   onRemoveMember: (group: string, node: string) => void;
   onSelectMember: (group: string, member: string) => void;
   onSetActive: (name: string) => void;
+  onTestNode: (name: string) => void;
 }) {
   const [over, setOver] = useState(false);
   const [open, setOpen] = useState(true);
@@ -812,11 +849,15 @@ function GroupCard({
       onDrop={(e) => {
         e.preventDefault();
         setOver(false);
-        const name = e.dataTransfer.getData("text/plain");
+        const name =
+          e.dataTransfer.getData("application/x-sprak-proxy-node") ||
+          e.dataTransfer.getData("text/plain") ||
+          draggedNodeName;
         if (name) {
           onAddMember(group.name, name);
           setOpen(true); // 拖进来自动展开,好让你看到刚加的节点
         }
+        draggedNodeName = "";
       }}
     >
       {/* 头部:点整行展开/收缩(Clash Verge 式);左侧圆点单独设为出口 */}
@@ -888,9 +929,17 @@ function GroupCard({
                   </div>
                   <div className="member-tile-foot">
                     <span className="member-tile-kind">{auto ? "自动" : "成员"}</span>
-                    <span className={`delay ${ms == null ? "" : delayClass(ms)}`}>
-                      {ms == null ? "—" : `${ms} ms`}
-                    </span>
+                    <button
+                      type="button"
+                      className={`delay delay-action ${ms == null ? "" : delayClass(ms)}`}
+                      disabled={testingNode === m}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onTestNode(m);
+                      }}
+                    >
+                      {testingNode === m ? "…" : ms == null ? "测速" : `${ms} ms`}
+                    </button>
                   </div>
                 </div>
               );
@@ -908,16 +957,20 @@ function NodeGroup({
   active,
   delays,
   countries,
+  testingNode,
   onSetActive,
   onRemoveNode,
+  onTestNode,
 }: {
   title: string;
   nodes: ProxyNode[];
   active: string | null;
   delays: Record<string, number | null>;
   countries: Record<string, string>;
+  testingNode: string | null;
   onSetActive: (name: string) => void;
   onRemoveNode: (name: string) => void;
+  onTestNode: (name: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   return (
@@ -939,8 +992,13 @@ function NodeGroup({
               className={`node-card${on ? " on" : ""}`}
               draggable
               onDragStart={(e) => {
+                draggedNodeName = node.name;
+                e.dataTransfer.setData("application/x-sprak-proxy-node", node.name);
                 e.dataTransfer.setData("text/plain", node.name);
                 e.dataTransfer.effectAllowed = "copy";
+              }}
+              onDragEnd={() => {
+                draggedNodeName = "";
               }}
               onClick={() => onSetActive(node.name)}
               title="拖到上方代理组可加入该组"
@@ -964,11 +1022,23 @@ function NodeGroup({
               <div className="node-card-foot">
                 <span className="node-card-kind">{KIND_LABEL[node.kind] || node.kind || "?"}</span>
                 {node.chain_entry && <span className="chain-badge mini">链</span>}
-                {node.name in delays && (
-                  <span className={`delay ${delayClass(ms)}`}>
-                    {ms == null ? "超时" : `${ms} ms`}
-                  </span>
-                )}
+                <button
+                  type="button"
+                  className={`delay delay-action ${node.name in delays ? delayClass(ms) : ""}`}
+                  disabled={testingNode === node.name}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onTestNode(node.name);
+                  }}
+                >
+                  {testingNode === node.name
+                    ? "测速中…"
+                    : node.name in delays
+                      ? ms == null
+                        ? "超时·重测"
+                        : `${ms} ms`
+                      : "点击测速"}
+                </button>
               </div>
             </div>
           );

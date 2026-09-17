@@ -36,6 +36,9 @@ pub(super) fn dispatch(req: &JsonRpcRequest) -> Option<JsonRpcResponse> {
             .and_then(|_| crate::embeddedProxy::status()),
         ),
         "proxyRuntime/test" => super::value_or_error(crate::embeddedProxy::testNodes()),
+        "proxyRuntime/testNode" => super::value_or_error(crate::embeddedProxy::testNode(
+            super::str_param(req, "name").unwrap_or_default(),
+        )),
         "proxyRuntime/egress" => super::value_or_error(crate::embeddedProxy::testEgress()),
         _ => return None,
     };

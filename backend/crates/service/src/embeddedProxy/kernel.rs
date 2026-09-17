@@ -19,6 +19,7 @@ const GROUP: &str = "GLOBAL";
 /// 内核 API 在本机 loopback 上,正常响应只有几 KB。这里仍设总量上限,避免异常内核或被本机进程误连
 /// 时把 `/proxies` 等响应一次性读到无限增长的 String。
 const MAX_KERNEL_API_RESPONSE_BYTES: usize = 2 * 1024 * 1024;
+const NODE_TEST_URL: &str = "https%3A%2F%2Fchatgpt.com%2Fcdn-cgi%2Ftrace";
 
 /// 节点测速结果(供 UI 显示):延迟、错误、出口国家码。
 #[derive(Debug, Clone, Serialize)]
@@ -147,7 +148,7 @@ impl Kernel {
     /// 出口国家码暂留 None(UI 按节点名兜底显示国旗)。
     pub fn test_nodes(&self, nodes: &[ProxyNode]) -> Vec<NodeDelay> {
         let path = format!(
-            "/group/{}/delay?url=http%3A%2F%2Fwww.gstatic.com%2Fgenerate_204&timeout=5000",
+            "/group/{}/delay?url={NODE_TEST_URL}&timeout=8000",
             urlencode(GROUP)
         );
         // 返回 { "节点名": 延迟ms, ... };测不通的节点不在 map 内。
@@ -174,6 +175,33 @@ impl Kernel {
                 }
             })
             .collect()
+    }
+
+    /// 单节点测速直接调用 mihomo 节点 API，流量由该节点发出，不读取宿主或系统代理。
+    pub fn test_node(&self, name: &str) -> NodeDelay {
+        let path = format!(
+            "/proxies/{}/delay?url={NODE_TEST_URL}&timeout=8000",
+            urlencode(name)
+        );
+        match self
+            .api_get(&path)
+            .ok()
+            .and_then(|response| serde_json::from_str::<Value>(body_of(&response)?).ok())
+            .and_then(|value| value.get("delay").and_then(Value::as_u64))
+        {
+            Some(delay) => NodeDelay {
+                name: name.to_string(),
+                delay: Some(delay as u32),
+                error: None,
+                country_code: None,
+            },
+            None => NodeDelay {
+                name: name.to_string(),
+                delay: None,
+                error: Some("超时或不可用".to_string()),
+                country_code: None,
+            },
+        }
     }
 
     fn api_get(&self, path: &str) -> Result<String, String> {
