@@ -10,13 +10,12 @@ use super::{
     set_gateway_quota_guard, set_gateway_residency_requirement, set_gateway_route_strategy,
     set_gateway_sse_keepalive_enabled, set_gateway_sse_keepalive_interval_ms,
     set_gateway_thread_aware_account_distribution_enabled, set_gateway_upstream_proxy_bypass_hosts,
-    set_gateway_upstream_proxy_enabled, set_gateway_upstream_proxy_url,
-    set_gateway_upstream_stream_timeout_ms, set_gateway_upstream_total_timeout_ms,
-    set_gateway_user_agent, set_gateway_user_agent_version, set_keep_window_ui_mounted_setting,
-    set_lightweight_mode_on_close_to_tray_setting, set_saved_service_addr, set_service_bind_mode,
-    set_show_main_window_on_startup_setting, set_ui_appearance_preset, set_ui_locale,
-    set_ui_low_transparency_enabled, set_ui_theme, set_ui_zoom_factor,
-    set_update_auto_check_enabled, BackgroundTasksInput, QuotaGuardInput,
+    set_gateway_upstream_proxy_url, set_gateway_upstream_stream_timeout_ms,
+    set_gateway_upstream_total_timeout_ms, set_gateway_user_agent, set_gateway_user_agent_version,
+    set_keep_window_ui_mounted_setting, set_lightweight_mode_on_close_to_tray_setting,
+    set_saved_service_addr, set_service_bind_mode, set_show_main_window_on_startup_setting,
+    set_ui_appearance_preset, set_ui_locale, set_ui_low_transparency_enabled, set_ui_theme,
+    set_ui_zoom_factor, set_update_auto_check_enabled, BackgroundTasksInput, QuotaGuardInput,
     APP_SETTING_PLUGIN_MARKET_MODE_KEY, APP_SETTING_PLUGIN_MARKET_SOURCE_URL_KEY,
 };
 
@@ -51,7 +50,6 @@ pub(super) struct AppSettingsPatch {
     gateway_residency_requirement: Option<String>,
     plugin_market_mode: Option<String>,
     plugin_market_source_url: Option<String>,
-    upstream_proxy_enabled: Option<bool>,
     upstream_proxy_url: Option<String>,
     upstream_proxy_bypass_hosts: Option<String>,
     upstream_stream_timeout_ms: Option<u64>,
@@ -89,15 +87,11 @@ pub(super) fn apply_app_settings_patch(patch: AppSettingsPatch) -> Result<(), St
     // 静默更新依赖自动检查；关闭自动检查时同步关闭静默模式，避免持久化状态互相矛盾。
     if let Some(enabled) = patch.silent_update {
         save_persisted_app_setting("app.silent_update", Some(if enabled { "1" } else { "0" }))?;
-        if enabled {
-            set_update_auto_check_enabled(true)?;
-        }
+        if enabled { set_update_auto_check_enabled(true)?; }
     }
     if let Some(enabled) = patch.update_auto_check {
         set_update_auto_check_enabled(enabled)?;
-        if !enabled {
-            save_persisted_app_setting("app.silent_update", Some("0"))?;
-        }
+        if !enabled { save_persisted_app_setting("app.silent_update", Some("0"))?; }
     }
     if let Some(enabled) = patch.auto_start_enabled {
         set_auto_start_enabled_setting(enabled)?;
@@ -190,9 +184,6 @@ pub(super) fn apply_app_settings_patch(patch: AppSettingsPatch) -> Result<(), St
     }
     if let Some(proxy_url) = patch.upstream_proxy_url {
         let _ = set_gateway_upstream_proxy_url(Some(&proxy_url))?;
-    }
-    if let Some(enabled) = patch.upstream_proxy_enabled {
-        let _ = set_gateway_upstream_proxy_enabled(enabled)?;
     }
     if let Some(bypass_hosts) = patch.upstream_proxy_bypass_hosts {
         let _ = set_gateway_upstream_proxy_bypass_hosts(Some(&bypass_hosts))?;

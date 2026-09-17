@@ -170,6 +170,10 @@ export default function DeviceProfilePage() {
             <span className="font-medium">{t("最近探针失败")}：</span>
             {status.lastProbeError}
           </div>
+        ) : enabled ? (
+          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
+            {t("自动探针运行正常；代理节点变化后会更新请求头和 DLL 画像。")}
+          </div>
         ) : null}
 
         <Card className="glass-card">

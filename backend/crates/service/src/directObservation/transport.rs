@@ -41,7 +41,6 @@ pub(super) struct Engine {
     pub cancel: CancellationToken,
     pub tasks: TaskTracker,
     pub profileState: Arc<super::environmentIdentity::ProfileState>,
-    pub configuredProxyEnabled: bool,
     pinned: Option<(String, std::net::SocketAddr)>,
 }
 
@@ -56,7 +55,6 @@ impl Engine {
         // 工作区同时编译 ring 与 aws-lc；显式选择 provider，避免 WebSocket 首次连接时全局选择歧义导致 panic。
         // 根证书仍使用公共可信根，绝不把下游临时 CA 加入真实上游的信任集合。
         let websocketTls = buildWebsocketTls("初始化上游 TLS 版本失败")?;
-        let configuredProxyEnabled = proxy.is_some();
         let proxy = proxy.or_else(observationProxyFromEnvironment);
         let proxy = proxy.ok_or("未发现 OpenAI 目标进程使用的代理出口")?;
         let (client, proxy) = buildClient(Some(proxy), None)?;
@@ -72,7 +70,6 @@ impl Engine {
             profileState: Arc::new(super::environmentIdentity::ProfileState::new(
                 observedProfile,
             )),
-            configuredProxyEnabled,
             pinned: None,
         })
     }
@@ -85,7 +82,6 @@ impl Engine {
         proxy: Option<String>,
         cancel: CancellationToken,
     ) -> Result<Self, String> {
-        let configuredProxyEnabled = proxy.is_some();
         let (client, proxy) = buildClient(proxy, None)?;
         Ok(Self {
             authority,
@@ -108,7 +104,6 @@ impl Engine {
                     egressIp: Some("127.0.0.1".into()),
                 },
             )),
-            configuredProxyEnabled,
             pinned: None,
         })
     }
@@ -155,7 +150,6 @@ impl Engine {
             cancel: self.cancel.clone(),
             tasks: self.tasks.clone(),
             profileState: self.profileState.clone(),
-            configuredProxyEnabled: self.configuredProxyEnabled,
             pinned,
         }))
     }
@@ -282,11 +276,6 @@ async fn serveRelay(
     let target = route.target;
     let original = std::net::SocketAddr::new(target.ip, target.port);
     if route.kind == cpcommon::hook_proxy::RouteKind::HttpProxy {
-        if engine.configuredProxyEnabled {
-            // 用户代理优先级高于目标进程原系统代理；保留客户端 CONNECT，由统一入口改走配置出口。
-            serveConnection(stream, engine, None).await;
-            return;
-        }
         match engine.forNativeRoute(Some(original), None) {
             Ok(routed) => serveConnection(stream, routed, None).await,
             Err(error) => log::error!("创建原代理传输失败：{error}"),
@@ -301,7 +290,6 @@ async fn serveRelay(
         } else {
             (None, Vec::new())
         };
-        let upstreamHost = host.clone();
         let config = host
             .as_deref()
             .and_then(|host| engine.authority.hosts.get(host))
@@ -314,24 +302,15 @@ async fn serveRelay(
             )
             .await
             .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "Relay TLS 握手超时"))??;
-            let routed = if engine.configuredProxyEnabled {
-                engine.clone()
-            } else {
-                engine
-                    .forNativeRoute(None, Some((host.clone(), original)))
-                    .map_err(io::Error::other)?
-            };
+            let routed = engine
+                .forNativeRoute(None, Some((host.clone(), original)))
+                .map_err(io::Error::other)?;
             serveConnection(accepted, routed, Some(format!("{host}:{}", target.port))).await;
         } else {
-            // 显式用户代理接管全部目标 TCP；未启用时才保持目标进程原始直连语义。
-            let mut upstream = if engine.configuredProxyEnabled {
-                let targetHost = upstreamHost.unwrap_or_else(|| target.ip.to_string());
-                engine.connect(&targetHost, target.port).await?
-            } else {
-                tokio::time::timeout(connectTimeout, TcpStream::connect(original))
-                    .await
-                    .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "原连接超时"))??
-            };
+            // 未观察的协议沿原 IP/端口直通，不能把宿主代理再叠加到客户端已经选定的传输上。
+            let mut upstream = tokio::time::timeout(connectTimeout, TcpStream::connect(original))
+                .await
+                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "原连接超时"))??;
             tokio::io::copy_bidirectional(&mut stream, &mut upstream).await?;
         }
         Ok::<_, io::Error>(())

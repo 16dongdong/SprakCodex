@@ -63,101 +63,58 @@ async fn engine(
     (Arc::new(engine), receiver)
 }
 
-// 未启用用户代理时，原生代理头必须保留目标进程原代理。
+// 宿主未配置或配置了另一出口时，原生代理头都必须选中客户端的原代理，不能靠测试手动填写宿主代理才成功。
 #[tokio::test]
-async fn nativeProxyMetadataKeepsOriginalWithoutConfiguredProxy() {
-    let original = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-    let address = original.local_addr().unwrap();
-    let (worker, received) = upstream(original).await;
-    let (engine, _records) = engine(None).await;
-    let listener = LoopbackListeners::bind().await.unwrap();
-    let relay = std::net::SocketAddr::from(([127, 0, 0, 1], listener.port()));
-    let cancel = engine.cancel.clone();
-    let serving = tokio::spawn(serve(listener, engine));
-    let mut socket = TcpStream::connect(relay).await.unwrap();
-    socket
-        .write_all(&encodeRoute(
-            &HookProxyTarget {
-                ip: address.ip(),
-                port: address.port(),
-                pid: std::process::id(),
-            },
-            RouteKind::HttpProxy,
-        ))
-        .await
-        .unwrap();
-    socket.write_all(b"GET http://fixture.invalid/probe HTTP/1.1\r\nHost: fixture.invalid\r\nConnection: close\r\n\r\n").await.unwrap();
-    let mut response = Vec::new();
-    tokio::time::timeout(Duration::from_secs(3), async {
-        while !response.ends_with(b"\r\n\r\nOK") {
-            let mut buffer = [0; 1024];
-            let count = socket.read(&mut buffer).await.unwrap();
-            assert!(count > 0);
-            response.extend_from_slice(&buffer[..count]);
-        }
-    })
-    .await
-    .expect("原代理请求未完成");
-    assert!(received
-        .await
-        .unwrap()
-        .starts_with("GET http://fixture.invalid/probe HTTP/1.1"));
-    drop(socket);
-    cancel.cancel();
-    serving.await.unwrap();
-    worker.await.unwrap();
-}
-
-// 启用用户代理后，目标进程原代理地址不得再收到连接，HTTP 请求必须进入配置出口。
-#[tokio::test]
-async fn configuredProxyOverridesNativeProxyMetadata() {
-    let original = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-    let originalAddress = original.local_addr().unwrap();
-    let configured = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-    let configuredAddress = configured.local_addr().unwrap();
-    let (worker, received) = upstream(configured).await;
-    let (engine, _records) = engine(Some(format!("http://{configuredAddress}"))).await;
-    let listener = LoopbackListeners::bind().await.unwrap();
-    let relay = std::net::SocketAddr::from(([127, 0, 0, 1], listener.port()));
-    let cancel = engine.cancel.clone();
-    let serving = tokio::spawn(serve(listener, engine));
-    let mut socket = TcpStream::connect(relay).await.unwrap();
-    socket
-        .write_all(&encodeRoute(
-            &HookProxyTarget {
-                ip: originalAddress.ip(),
-                port: originalAddress.port(),
-                pid: std::process::id(),
-            },
-            RouteKind::HttpProxy,
-        ))
-        .await
-        .unwrap();
-    socket.write_all(b"GET http://fixture.invalid/probe HTTP/1.1\r\nHost: fixture.invalid\r\nConnection: close\r\n\r\n").await.unwrap();
-    let mut response = Vec::new();
-    tokio::time::timeout(Duration::from_secs(3), async {
-        while !response.ends_with(b"\r\n\r\nOK") {
-            let mut buffer = [0; 1024];
-            let count = socket.read(&mut buffer).await.unwrap();
-            assert!(count > 0);
-            response.extend_from_slice(&buffer[..count]);
-        }
-    })
-    .await
-    .expect("配置代理请求未完成");
-    assert!(received
-        .await
-        .unwrap()
-        .starts_with("GET http://fixture.invalid/probe HTTP/1.1"));
-    assert!(
-        tokio::time::timeout(Duration::from_millis(30), original.accept())
+async fn nativeProxyMetadataOverridesHostProxyChoice() {
+    for configured in [false, true] {
+        let original = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = original.local_addr().unwrap();
+        let wrong = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let (worker, received) = upstream(original).await;
+        let (engine, _records) =
+            engine(configured.then(|| format!("http://{}", wrong.local_addr().unwrap()))).await;
+        let listener = LoopbackListeners::bind().await.unwrap();
+        let relay = std::net::SocketAddr::from(([127, 0, 0, 1], listener.port()));
+        let cancel = engine.cancel.clone();
+        let serving = tokio::spawn(serve(listener, engine));
+        let mut socket = TcpStream::connect(relay).await.unwrap();
+        socket
+            .write_all(&encodeRoute(
+                &HookProxyTarget {
+                    ip: address.ip(),
+                    port: address.port(),
+                    pid: std::process::id(),
+                },
+                RouteKind::HttpProxy,
+            ))
             .await
-            .is_err()
-    );
-    drop(socket);
-    cancel.cancel();
-    serving.await.unwrap();
-    worker.await.unwrap();
+            .unwrap();
+        socket.write_all(b"GET http://fixture.invalid/probe HTTP/1.1\r\nHost: fixture.invalid\r\nConnection: close\r\n\r\n").await.unwrap();
+        let mut response = Vec::new();
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while !response.ends_with(b"\r\n\r\nOK") {
+                let mut buffer = [0; 1024];
+                let count = socket.read(&mut buffer).await.unwrap();
+                assert!(count > 0);
+                response.extend_from_slice(&buffer[..count]);
+            }
+        })
+        .await
+        .expect("原代理请求未完成");
+        assert!(received
+            .await
+            .unwrap()
+            .starts_with("GET http://fixture.invalid/probe HTTP/1.1"));
+        assert!(
+            tokio::time::timeout(Duration::from_millis(30), wrong.accept())
+                .await
+                .is_err()
+        );
+        drop(socket);
+        cancel.cancel();
+        serving.await.unwrap();
+        worker.await.unwrap();
+    }
 }
 
 // 直连来源固定原 IP，HTTP 与 WebSocket 的 TCP 入口都不再重新选择宿主代理或解析不同地址。

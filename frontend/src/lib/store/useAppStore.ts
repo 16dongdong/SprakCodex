@@ -126,7 +126,6 @@ export const useAppStore = create<AppState>((set) => ({
     gatewayResidencyRequirementOptions: ["", "us"],
     pluginMarketMode: "builtin",
     pluginMarketSourceUrl: "",
-    upstreamProxyEnabled: false,
     upstreamProxyUrl: "",
     upstreamProxyBypassHosts: "",
     ...DEFAULT_GATEWAY_TRANSPORT_VALUES,

@@ -1,6 +1,5 @@
 use super::{
-    fetch_codex_latest_version_from_url, set_gateway_upstream_proxy_enabled,
-    set_gateway_upstream_proxy_url, sync_gateway_user_agent_version_from_codex_latest_url,
+    fetch_codex_latest_version_from_url, sync_gateway_user_agent_version_from_codex_latest_url,
 };
 use crate::APP_SETTING_GATEWAY_USER_AGENT_VERSION_KEY;
 use codexmanager_core::storage::Storage;
@@ -98,33 +97,5 @@ fn sync_gateway_user_agent_version_from_codex_latest_persists_runtime_version() 
             .expect("read persisted version"),
         Some("0.128.0".to_string())
     );
-    let _ = std::fs::remove_file(db_path);
-}
-
-// 代理开关关闭时保留地址但清空运行态；重新开启必须直接恢复同一自定义出口。
-#[test]
-fn upstream_proxy_switch_preserves_address_and_controls_runtime() {
-    let _guard = crate::test_env_guard();
-    let db_path = unique_temp_db_path();
-    let _db_env = EnvGuard::set("CODEXMANAGER_DB_PATH", Some(&db_path.to_string_lossy()));
-    let _proxy_env = EnvGuard::set("CODEXMANAGER_UPSTREAM_PROXY_URL", None);
-    crate::initialize_storage_if_needed().expect("初始化代理设置存储");
-    let _ = crate::gateway::set_upstream_proxy_url(None);
-
-    set_gateway_upstream_proxy_url(Some("http://127.0.0.1:7890")).expect("保存自定义代理地址");
-    assert_eq!(crate::gateway::current_upstream_proxy_url(), None);
-
-    set_gateway_upstream_proxy_enabled(true).expect("启用自定义代理");
-    assert_eq!(
-        crate::gateway::current_upstream_proxy_url().as_deref(),
-        Some("http://127.0.0.1:7890")
-    );
-
-    set_gateway_upstream_proxy_enabled(false).expect("关闭自定义代理");
-    assert_eq!(crate::gateway::current_upstream_proxy_url(), None);
-    let settings = crate::app_settings_get().expect("读取代理设置");
-    assert_eq!(settings["upstreamProxyEnabled"], false);
-    assert_eq!(settings["upstreamProxyUrl"], "http://127.0.0.1:7890");
-
     let _ = std::fs::remove_file(db_path);
 }

@@ -26,7 +26,6 @@ const layoutSettings = {
   gatewayResidencyRequirementOptions: ["", "us"],
   pluginMarketMode: "builtin",
   pluginMarketSourceUrl: "",
-  upstreamProxyEnabled: false,
   upstreamProxyUrl: "",
   upstreamStreamTimeoutMs: 600000,
   sseKeepaliveIntervalMs: 15000,

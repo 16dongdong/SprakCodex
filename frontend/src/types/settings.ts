@@ -92,7 +92,6 @@ export interface AppSettings extends GatewayTransportValues {
   gatewayResidencyRequirementOptions: string[];
   pluginMarketMode: string;
   pluginMarketSourceUrl: string;
-  upstreamProxyEnabled: boolean;
   upstreamProxyUrl: string;
   upstreamProxyBypassHosts: string;
   backgroundTasks: BackgroundTaskSettings;

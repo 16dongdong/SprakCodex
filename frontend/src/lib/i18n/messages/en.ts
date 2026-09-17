@@ -18,20 +18,6 @@ import { EN_RUNTIME_UI_MESSAGES } from "./sections/en-runtime-ui";
 import { EN_SKILLS_MESSAGES } from "./sections/en-skills";
 
 export const EN_MESSAGES: MessageCatalog = {
-  "代理地址": "Proxy address",
-  "代理设置已生效": "Proxy settings applied",
-  "开启代理": "Enable proxy",
-  "开启代理前请先填写代理地址": "Enter a proxy address before enabling the proxy",
-  "当前沿用目标进程或系统代理出口": "Currently using the target process or system proxy egress",
-  "影响范围": "Scope",
-  "支持 HTTP CONNECT 与 SOCKS5 地址；启用后不会再使用系统代理。": "Supports HTTP CONNECT and SOCKS5 addresses. The system proxy is not used while enabled.",
-  "显示代理地址": "Show proxy address",
-  "目标进程、OpenAI 请求与画像探针": "Target process, OpenAI requests, and profile probe",
-  "目标进程和 OpenAI 探针当前使用自定义代理出口": "The target process and OpenAI probe currently use the custom proxy egress",
-  "系统代理或原始出口": "System proxy or original egress",
-  "自定义代理": "Custom proxy",
-  "自定义代理出口": "Custom proxy egress",
-  "隐藏代理地址": "Hide proxy address",
   "OpenAI 边缘服务器": "OpenAI edge server",
   "Windows 时区": "Windows time zone",
   "仅在出口画像发生变化时更新": "Updated only when the egress profile changes",
