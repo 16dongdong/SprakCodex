@@ -344,3 +344,37 @@ pub(crate) fn quotaCooldown(diagnostic: &str, now: i64) -> Option<i64> {
     if !matches!(code,"usage_limit_reached"|"insufficient_quota"|"quota_exceeded") { return None; }
     Some(error.get("resets_at").and_then(|v|v.as_i64()).filter(|v|*v>now).unwrap_or(now+300))
 }
+
+// 额度错误尚未交付下游时，同步提交冷却与新绑定，并返回可用于原请求重放的新身份。
+pub(crate) async fn failoverQuotaRequest(
+    decision: &RouteDecision,
+    diagnostic: &str,
+) -> Result<Option<RouteDecision>, String> {
+    let RouteDecision::Routed(credential) = decision else {
+        return Ok(None);
+    };
+    let now = now_ts();
+    let Some(until) = quotaCooldown(diagnostic, now) else {
+        return Ok(None);
+    };
+    let sessionId = credential.session_id.clone();
+    let routeSource = credential.route_source.clone();
+    let accountId = credential.account_id.clone();
+    tokio::task::spawn_blocking(move || {
+        let mut storage = openStorage()?;
+        storage
+            .recordSessionQuotaFailureByAccountId(&accountId, until, now)
+            .map_err(|error| format!("记录额度冷却失败：{error}"))?;
+        match storage
+            .resolveSessionRouting(&sessionId, &routeSource, now)
+            .map_err(|error| format!("额度耗尽后重新分流失败：{error}"))?
+        {
+            SessionRoutingResolution::Routed(next) if next.account_id != accountId => {
+                Ok(Some(RouteDecision::Routed(next)))
+            }
+            _ => Ok(None),
+        }
+    })
+    .await
+    .map_err(|_| "额度耗尽重新分流任务异常退出".to_string())?
+}

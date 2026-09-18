@@ -1,4 +1,18 @@
 use super::*;
+
+#[test]
+fn detectsQuotaErrorBeforeAnyResponseIsDelivered() {
+    let response = b"data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"usage_limit_reached\"}}}\n\n";
+    assert!(quotaDiagnostic(response, 200).is_some());
+    assert!(!hasDeliverableOutput(response));
+}
+
+#[test]
+fn realOutputCommitsTheAttemptInsteadOfReplayingIt() {
+    let response = b"data: {\"type\":\"response.output_text.delta\",\"delta\":\"hello\"}\n\n";
+    assert!(quotaDiagnostic(response, 200).is_none());
+    assert!(hasDeliverableOutput(response));
+}
 use tokio::io::AsyncWriteExt;
 
 const event: &[u8] = b"event: response.completed\r\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"fixture\",\"model\":\"fixture\",\"usage\":{\"input_tokens\":20,\"output_tokens\":3,\"input_tokens_details\":{\"cached_tokens\":5}}}}\r\n\r\n";

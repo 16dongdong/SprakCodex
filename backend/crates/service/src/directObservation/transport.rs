@@ -397,7 +397,7 @@ async fn dispatch(
         };
     }
     exchange.method = request.method().to_string();
-    let routeDecision = if tracked {
+    let mut routeDecision = if tracked {
         match crate::sessionRouting::resolveRequest(request.headers()).await {
             Ok(decision) => decision,
             Err(error) => {
@@ -419,33 +419,78 @@ async fn dispatch(
     }
     exchange.captureHeaders(request.headers());
     exchange.captureRouting(&routeDecision);
-    let capture = exchange.requestBody.clone();
     let headers = request.headers_mut();
     stripHopHeaders(headers);
     let (parts, body) = request.into_parts();
-    let outgoing = engine
-        .client
-        .request(parts.method, target)
-        .headers(parts.headers)
-        .body(reqwest::Body::wrap_stream(body.into_data_stream().map(
-            move |chunk| {
-                if tracked {
-                    if let Ok(bytes) = &chunk {
-                        if let Ok(mut preview) = capture.lock() {
-                            preview.feed(bytes);
-                        }
-                    }
+    let requestBody = match body.collect().await {
+        Ok(collected) => collected.to_bytes(),
+        Err(_) => return reply(StatusCode::BAD_REQUEST, "读取请求正文失败"),
+    };
+    if tracked {
+        if let Ok(mut preview) = exchange.requestBody.lock() {
+            preview.feed(&requestBody);
+        }
+    }
+    let method = parts.method;
+    let mut requestHeaders = parts.headers;
+    let mut retriedAccounts = std::collections::HashSet::new();
+    let response = loop {
+        let outgoing = engine
+            .client
+            .request(method.clone(), target.clone())
+            .headers(requestHeaders.clone())
+            .body(requestBody.clone());
+        let response = match outgoing.send().await {
+            Ok(response) => response,
+            Err(_) => break Err(()),
+        };
+        if !tracked {
+            break Ok((response, Vec::new()));
+        }
+        match streamObserver::preflightRetry(response).await {
+            streamObserver::RetryPreflight::Ready { response, prefix } => {
+                break Ok((response, prefix));
+            }
+            streamObserver::RetryPreflight::Quota(diagnostic) => {
+                let Some(accountId) = routedAccountId(&routeDecision) else {
+                    break Err(());
+                };
+                if !retriedAccounts.insert(accountId.to_string()) {
+                    break Err(());
                 }
-                chunk
-            },
-        )));
-    match outgoing.send().await {
-        Ok(response) => {
+                let Some(nextDecision) = (match crate::sessionRouting::failoverQuotaRequest(
+                    &routeDecision,
+                    &diagnostic,
+                )
+                .await
+                {
+                    Ok(next) => next,
+                    Err(error) => {
+                        log::error!("额度耗尽请求自动重放失败：{error}");
+                        None
+                    }
+                }) else {
+                    break Err(());
+                };
+                routeDecision = nextDecision;
+                if let Err(error) =
+                    crate::sessionRouting::applyDecision(&mut requestHeaders, &routeDecision)
+                {
+                    log::error!("额度耗尽请求切换身份失败：{error}");
+                    break Err(());
+                }
+                exchange.captureRouting(&routeDecision);
+                exchange.captureHeaders(&requestHeaders);
+            }
+        }
+    };
+    match response {
+        Ok((response, prefix)) => {
             let status = response.status();
             let mut headers = response.headers().clone();
             stripHopHeaders(&mut headers);
             let responseBody = if tracked {
-                streamObserver::observe(response, engine.clone(), exchange)
+                streamObserver::observePrefetched(response, engine.clone(), exchange, prefix)
             } else {
                 http_body_util::StreamBody::new(response.bytes_stream().map(|result| {
                     result
@@ -459,13 +504,22 @@ async fn dispatch(
             *response.headers_mut() = headers;
             response
         }
-        Err(_) => {
+        Err(()) => {
             if tracked {
                 let parsed = UsageParser::failure("上游连接或请求发送失败");
                 engine.sink.finish(exchange, parsed, 502).await;
             }
             reply(StatusCode::BAD_GATEWAY, "观测上游请求失败")
         }
+    }
+}
+
+fn routedAccountId(decision: &crate::sessionRouting::RouteDecision) -> Option<&str> {
+    match decision {
+        crate::sessionRouting::RouteDecision::Routed(credential) => {
+            Some(credential.account_id.as_str())
+        }
+        crate::sessionRouting::RouteDecision::Passthrough { .. } => None,
     }
 }
 

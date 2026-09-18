@@ -8,15 +8,102 @@ use futures_util::StreamExt;
 use http_body_util::BodyExt;
 use std::{io, pin::Pin, sync::Arc};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::time::{timeout, Duration};
 
 const pipeCapacity: usize = 64 * 1024;
 const formatProbeBytes: usize = 512;
+const retryProbeBytes: usize = 64 * 1024;
+const retryProbeTimeout: Duration = Duration::from_secs(10);
+
+pub(super) enum RetryPreflight {
+    Ready {
+        response: reqwest::Response,
+        prefix: Vec<bytes::Bytes>,
+    },
+    Quota(String),
+}
+
+// 在任何字节交付给 Codex 前识别明确额度终态；出现真实输出后立即提交，禁止跨账号重复执行已开始的工作。
+pub(super) async fn preflightRetry(mut response: reqwest::Response) -> RetryPreflight {
+    let status = response.status().as_u16();
+    let mut prefix = Vec::new();
+    let mut joined = Vec::new();
+    let probe = async {
+        while joined.len() < retryProbeBytes {
+            let Ok(Some(chunk)) = response.chunk().await else { break };
+            joined.extend_from_slice(&chunk);
+            prefix.push(chunk);
+            if let Some(diagnostic) = quotaDiagnostic(&joined, status) {
+                return Some(diagnostic);
+            }
+            if hasDeliverableOutput(&joined) {
+                break;
+            }
+        }
+        None
+    };
+    if let Ok(Some(diagnostic)) = timeout(retryProbeTimeout, probe).await {
+        return RetryPreflight::Quota(diagnostic);
+    }
+    RetryPreflight::Ready { response, prefix }
+}
+
+fn quotaDiagnostic(body: &[u8], status: u16) -> Option<String> {
+    if !(status == 429 || body.windows(17).any(|part| part == b"usage_limit_reach")) {
+        return None;
+    }
+    let text = String::from_utf8_lossy(body);
+    for frame in text.replace("\r\n", "\n").split("\n\n") {
+        let json = frame
+            .lines()
+            .filter_map(|line| line.strip_prefix("data:").map(str::trim_start))
+            .collect::<String>();
+        let candidate = if json.is_empty() { frame.trim() } else { json.as_str() };
+        if let Ok(value) = serde_json::from_str::<serde_json::Value>(candidate) {
+            let error = value.pointer("/response/error").or_else(|| value.get("error"));
+            if let Some(error) = error {
+                let diagnostic = error.to_string();
+                if crate::sessionRouting::quotaCooldown(&diagnostic, codexmanager_core::storage::now_ts()).is_some() {
+                    return Some(diagnostic);
+                }
+            }
+            if value.get("type").and_then(serde_json::Value::as_str)
+                == Some("response.output_text.delta")
+            {
+                let delta = value
+                    .get("delta")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+                    .to_ascii_lowercase();
+                if delta.contains("usage limit") || delta.contains("quota exceeded") {
+                    return Some(
+                        serde_json::json!({"code":"usage_limit_reached"}).to_string(),
+                    );
+                }
+            }
+        }
+    }
+    None
+}
+
+fn hasDeliverableOutput(body: &[u8]) -> bool {
+    let text = String::from_utf8_lossy(body);
+    [
+        "response.output_text.delta",
+        "response.function_call_arguments.delta",
+        "response.reasoning_summary_text.delta",
+        "\"output\"",
+    ]
+    .iter()
+    .any(|marker| text.contains(marker))
+}
 
 // 在响应头到达时挂接旁路，管道写入使用背压而非无限队列；关闭/取消也会让解析器得到 EOF。
-pub(super) fn observe(
+pub(super) fn observePrefetched(
     response: reqwest::Response,
     engine: Arc<Engine>,
     mut exchange: Exchange,
+    prefix: Vec<bytes::Bytes>,
 ) -> ResponseBody {
     let sse = response
         .headers()
@@ -50,9 +137,12 @@ pub(super) fn observe(
         taskEngine.sink.finish(exchange, parsed, status).await;
     });
     let forwarding = futures_util::stream::unfold(
-        (Box::pin(response.bytes_stream()), Some(writer)),
-        |(mut upstream, mut writer)| async move {
-            let result = upstream.next().await?;
+        (prefix.into_iter(), Box::pin(response.bytes_stream()), Some(writer)),
+        |(mut prefix, mut upstream, mut writer)| async move {
+            let result = match prefix.next() {
+                Some(bytes) => Ok(bytes),
+                None => upstream.next().await?,
+            };
             if let Ok(bytes) = &result {
                 if let Some(pipe) = writer.as_mut() {
                     if pipe.write_all(bytes).await.is_err() {
@@ -63,7 +153,7 @@ pub(super) fn observe(
             let frame = result
                 .map(hyper::body::Frame::data)
                 .map_err(|_| io::Error::other("观测上游响应中断"));
-            Some((frame, (upstream, writer)))
+            Some((frame, (prefix, upstream, writer)))
         },
     );
     http_body_util::StreamBody::new(forwarding).boxed_unsync()

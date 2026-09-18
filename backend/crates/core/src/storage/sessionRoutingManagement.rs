@@ -120,25 +120,38 @@ impl Storage {
         until: i64,
         now: i64,
     ) -> Result<usize> {
+        let accountId = self.conn.query_row(
+            "SELECT id FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1 ORDER BY id LIMIT 1",
+            [accountHeader],
+            |row| row.get::<_, String>(0),
+        )?;
+        self.recordSessionQuotaFailureByAccountId(&accountId, until, now)
+    }
+
+    // 请求重放路径已经持有内部账号 ID，直接按主键迁移可避免共享 workspace 标识误伤其他账号。
+    pub fn recordSessionQuotaFailureByAccountId(
+        &mut self,
+        accountId: &str,
+        until: i64,
+        now: i64,
+    ) -> Result<usize> {
         let tx = self.conn.unchecked_transaction()?;
-        tx.execute("INSERT INTO session_routing_cooldowns(account_id,until_at) SELECT id,?2 FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1 ON CONFLICT(account_id) DO UPDATE SET until_at=MAX(until_at,excluded.until_at)",params![accountHeader,until])?;
+        tx.execute("INSERT INTO session_routing_cooldowns(account_id,until_at) VALUES(?1,?2) ON CONFLICT(account_id) DO UPDATE SET until_at=MAX(until_at,excluded.until_at)",params![accountId,until])?;
         let affectedSessions = {
             let mut statement = tx.prepare(
                 "SELECT b.session_id,b.route_source
                  FROM session_routing_bindings b
                  WHERE b.status='active'
-                   AND b.account_id IN (
-                     SELECT id FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1
-                   )
+                   AND b.account_id=?1
                  ORDER BY b.last_used_at DESC,b.session_id ASC",
             )?;
             statement
-                .query_map([accountHeader], |row| {
+                .query_map([accountId], |row| {
                     Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
                 })?
                 .collect::<Result<Vec<_>>>()?
         };
-        tx.execute("UPDATE session_routing_bindings SET status='pending',reason='quota_exhausted',updated_at=?2 WHERE account_id IN (SELECT id FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1)",params![accountHeader,now])?;
+        tx.execute("UPDATE session_routing_bindings SET status='pending',reason='quota_exhausted',updated_at=?2 WHERE account_id=?1",params![accountId,now])?;
         let mut reassigned = 0;
         for (sessionId, routeSource) in affectedSessions {
             let Some(candidate) = selectCandidate(&tx, None, now, (&sessionId, &routeSource))?

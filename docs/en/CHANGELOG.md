@@ -5,7 +5,7 @@ It follows Keep a Changelog with a lightweight adaptation for this repository.
 
 ## [Unreleased]
 
-- Session routing now automatically rebinds affected sessions by current load and routing weight in the same transaction that cools down an explicitly exhausted account; manual switching is no longer required and failed requests are not replayed.
+- Session routing now automatically rebinds affected sessions by current load and routing weight in the same transaction that cools down an explicitly exhausted account; the quota error is intercepted before delivery to Codex and the original request is automatically replayed with the new account.
 - Restored live reset countdowns below all four account quota rings while retaining the compact two-row standard/reserve layout.
 - Added the missing country, IANA timezone, Windows timezone, and locale mapping for OpenAI's Manila edge location `MNL`, preventing repeated unmapped-profile probe failures.
 - Replaced the expandable account quota details with two fixed rows for standard and reserve quotas, using circular indicators for the 5-hour and 7-day windows.
