@@ -12,6 +12,7 @@ import {
   isSecondaryWindowOnlyUsage,
 } from "@/lib/utils/usage";
 import { Badge } from "@/components/ui/badge";
+import { QuotaCountdown } from "@/components/quotaCountdown";
 import {
   Tooltip,
   TooltipContent,
@@ -140,7 +141,7 @@ export type DeleteDialogState =
   | { kind: "selected"; ids: string[]; count: number }
   | null;
 
-// 环形额度只表达剩余百分比；完整重置时间放在标题提示中，避免四个窗口再次撑高账号行。
+// 环形额度展示剩余百分比并在下方保留实时倒计时；所有实例共用 QuotaCountdown 的单一时钟。
 function QuotaRing({ item }: { item: QuotaSummaryItem }) {
   const { t } = useI18n();
   const percent = item.remainPercent == null
@@ -163,37 +164,42 @@ function QuotaRing({ item }: { item: QuotaSummaryItem }) {
 
   return (
     <div
-      className="flex min-w-0 items-center justify-center gap-2"
+      className="flex min-w-0 flex-col items-center gap-0.5"
       title={`${item.label} · ${t("重置")}: ${resetText}`}
       aria-label={`${item.label} ${displayValue}`}
     >
-      <span className="shrink-0 text-[11px] text-muted-foreground">
-        {item.label}
-      </span>
-      <div className="relative size-11 shrink-0">
-        <svg className="size-11 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
-          <circle
-            className="fill-none stroke-border/60"
-            cx="22"
-            cy="22"
-            r="18"
-            pathLength="100"
-            strokeWidth="4"
-          />
-          <circle
-            className={cn("fill-none transition-[stroke-dasharray]", ringColor)}
-            cx="22"
-            cy="22"
-            r="18"
-            pathLength="100"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeDasharray={`${percent} 100`}
-          />
-        </svg>
-        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold tabular-nums">
-          {displayValue}
+      <div className="flex items-center justify-center gap-2">
+        <span className="shrink-0 text-[11px] text-muted-foreground">
+          {item.label}
         </span>
+        <div className="relative size-11 shrink-0">
+          <svg className="size-11 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
+            <circle
+              className="fill-none stroke-border/60"
+              cx="22"
+              cy="22"
+              r="18"
+              pathLength="100"
+              strokeWidth="4"
+            />
+            <circle
+              className={cn("fill-none transition-[stroke-dasharray]", ringColor)}
+              cx="22"
+              cy="22"
+              r="18"
+              pathLength="100"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray={`${percent} 100`}
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold tabular-nums">
+            {displayValue}
+          </span>
+        </div>
+      </div>
+      <div className="max-w-full truncate text-center" title={resetText}>
+        <QuotaCountdown resetsAt={item.resetsAt} />
       </div>
     </div>
   );

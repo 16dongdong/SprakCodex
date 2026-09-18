@@ -132,6 +132,7 @@ test("account quota cell shows standard and reserve rings without duplicate disc
   assert.match(accountHelpersSource, /label: t\("标准额度"\)/);
   assert.match(accountHelpersSource, /label: t\("备用额度"\)/);
   assert.match(accountHelpersSource, /strokeDasharray=\{`\$\{percent\} 100`\}/);
+  assert.match(accountHelpersSource, /<QuotaCountdown resetsAt=\{item\.resetsAt\} \/>/);
   assert.doesNotMatch(accountHelpersSource, /<details/);
   assert.doesNotMatch(accountHelpersSource, /<summary/);
 });
