@@ -758,6 +758,16 @@ impl TransactionStatement<'_, '_> {
     pub fn execute<P: Params>(&self, params: P) -> Result<usize> {
         self.tx.execute(&self.sql, params)
     }
+
+    // 事务查询沿用 Statement 的预加载行语义；结果在返回前已脱离底层语句，可安全继续执行同一事务的更新。
+    pub fn query_map<P, F, T>(&mut self, params: P, f: F) -> Result<MappedRows<T>>
+    where
+        P: Params,
+        F: FnMut(&Row<'_>) -> Result<T>,
+    {
+        let mut statement = self.tx.conn.prepare(&self.sql)?;
+        statement.query_map(params, f)
+    }
 }
 
 pub mod backup {

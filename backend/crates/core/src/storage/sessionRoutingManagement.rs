@@ -112,17 +112,55 @@ impl Storage {
         Ok(valid)
     }
 
-    // 只根据上游明确额度错误设置冷却；普通 429、连接错误不会误判为额度耗尽。
+    // 明确额度失败后先冷却账号，再在同一事务内按现有负载与分流权重迁移全部活跃会话。
+    // 已失败的请求不会重放；新绑定只供下一请求或 WebSocket 重连使用，避免重复执行上游操作。
     pub fn recordSessionQuotaFailure(
-        &self,
+        &mut self,
         accountHeader: &str,
         until: i64,
         now: i64,
-    ) -> Result<()> {
+    ) -> Result<usize> {
         let tx = self.conn.unchecked_transaction()?;
         tx.execute("INSERT INTO session_routing_cooldowns(account_id,until_at) SELECT id,?2 FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1 ON CONFLICT(account_id) DO UPDATE SET until_at=MAX(until_at,excluded.until_at)",params![accountHeader,until])?;
+        let affectedSessions = {
+            let mut statement = tx.prepare(
+                "SELECT b.session_id,b.route_source
+                 FROM session_routing_bindings b
+                 WHERE b.status='active'
+                   AND b.account_id IN (
+                     SELECT id FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1
+                   )
+                 ORDER BY b.last_used_at DESC,b.session_id ASC",
+            )?;
+            statement
+                .query_map([accountHeader], |row| {
+                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+                })?
+                .collect::<Result<Vec<_>>>()?
+        };
         tx.execute("UPDATE session_routing_bindings SET status='pending',reason='quota_exhausted',updated_at=?2 WHERE account_id IN (SELECT id FROM accounts WHERE chatgpt_account_id=?1 OR workspace_id=?1)",params![accountHeader,now])?;
-        tx.commit()
+        let mut reassigned = 0;
+        for (sessionId, routeSource) in affectedSessions {
+            let Some(candidate) = selectCandidate(&tx, None, now, (&sessionId, &routeSource))?
+            else {
+                continue;
+            };
+            reassigned += tx.execute(
+                "UPDATE session_routing_bindings
+                 SET previous_account_id=COALESCE(account_id,last_account_id),
+                     last_account_id=?2,
+                     account_id=?2,
+                     requested_account_id=NULL,
+                     status='active',
+                     reason='quota_exhausted',
+                     updated_at=?3,
+                     last_used_at=MAX(last_used_at,?3)
+                 WHERE session_id=?1 AND status='pending'",
+                params![sessionId, candidate.account_id, now],
+            )?;
+        }
+        tx.commit()?;
+        Ok(reassigned)
     }
 
     // 仅更新已存在会话的活动时间，迟到响应不重新创建被用户重置的记录。

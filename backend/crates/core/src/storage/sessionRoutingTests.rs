@@ -219,26 +219,64 @@ fn deletedAccountKeepsPendingSessionAndMigrates() {
     assert_eq!(route.account_id, "b");
 }
 
-// 明确额度失败后排除原账号；旧响应不自动重放，新请求选择另一可用账号。
+// 明确额度失败后原账号进入冷却，会话在同一事务内按分流权重迁移；旧响应仍不自动重放。
 #[test]
-fn exhaustedAccountMigratesOnNextRequest() {
+fn exhaustedAccountIsReassignedImmediatelyByRoutingWeight() {
     let mut storage = storage();
     insertAccount(&storage, "a", 0);
-    insertAccount(&storage, "b", 1);
+    insertAccount(&storage, "b", 50);
+    insertAccount(&storage, "c", 5);
     storage
         .resolveSessionRouting("session", "thread-id", now_ts())
         .unwrap();
-    storage
+    let reassigned = storage
         .recordSessionQuotaFailure("workspace-a", now_ts() + 300, now_ts())
         .unwrap();
+    assert_eq!(reassigned, 1);
     assert!(!storage
         .routingConnectionCurrent("session", "a", now_ts())
         .unwrap());
+    assert_eq!(
+        storage
+            .sessionRoutingLogIdentity("session")
+            .unwrap()
+            .expect("额度失败后应已有新绑定")
+            .accountHeader,
+        "workspace-c"
+    );
     let SessionRoutingResolution::Routed(route) = storage
         .resolveSessionRouting("session", "thread-id", now_ts())
         .unwrap()
     else {
         panic!("额度迁移失败")
+    };
+    assert_eq!(route.account_id, "c");
+}
+
+// 所有候选都不可用时保留 pending，后续出现可用账号后仍能自动完成迁移。
+#[test]
+fn exhaustedAccountWaitsWithoutManualInterventionWhenNoCandidateExists() {
+    let mut storage = storage();
+    insertAccount(&storage, "a", 0);
+    storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap();
+    assert_eq!(
+        storage
+            .recordSessionQuotaFailure("workspace-a", now_ts() + 300, now_ts())
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        storage.listRoutingSessions(1, "", "").unwrap()["items"][0]["status"],
+        "pending"
+    );
+    insertAccount(&storage, "b", 1);
+    let SessionRoutingResolution::Routed(route) = storage
+        .resolveSessionRouting("session", "thread-id", now_ts())
+        .unwrap()
+    else {
+        panic!("新增候选后未自动迁移")
     };
     assert_eq!(route.account_id, "b");
 }

@@ -170,7 +170,7 @@ impl RecordSink {
         let worker = std::thread::Builder::new()
             .name("observationDatabase".into())
             .spawn(move || {
-                let storage = match Storage::open(&path) {
+                let mut storage = match Storage::open(&path) {
                     Ok(storage) => storage,
                     Err(_) => {
                         let _ = ready.send(Err("打开观测数据库失败".to_string()));
@@ -199,10 +199,15 @@ impl RecordSink {
                         if let Some(until) =
                             crate::sessionRouting::quotaCooldown(diagnostic, now_ts())
                         {
-                            if let Err(error) =
-                                storage.recordSessionQuotaFailure(account, until, now_ts())
-                            {
-                                log::error!("记录会话额度冷却失败：{error}");
+                            match storage.recordSessionQuotaFailure(account, until, now_ts()) {
+                                Ok(reassigned) => log::info!(
+                                    "额度耗尽账号已冷却，会话自动重新分流：account={} reassigned={}",
+                                    account,
+                                    reassigned
+                                ),
+                                Err(error) => {
+                                    log::error!("记录额度冷却并重新分流会话失败：{error}");
+                                }
                             }
                         }
                     }
